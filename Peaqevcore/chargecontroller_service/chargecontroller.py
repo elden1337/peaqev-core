@@ -8,7 +8,7 @@ class ChargeControllerBase:
     def __init__(
         self,
         #init types from core
-        charger_states:list[CHARGERSTATES],
+        #charger_states:list[CHARGERSTATES],
         #init types from core
         charger_state_translation:dict[CHARGERSTATES,list[str]],
         non_hours:list[int] = [],
@@ -18,7 +18,7 @@ class ChargeControllerBase:
         self._done_timeout: int = timeout
         self._latest_charger_start: float = time.time()
         self._non_hours = non_hours
-        self._charger_states = charger_states
+        #self._charger_states = charger_states
     
     @property
     def done_timeout(self):
