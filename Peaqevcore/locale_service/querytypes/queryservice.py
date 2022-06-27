@@ -9,7 +9,6 @@ class QueryService:
     def should_register_peak(self, dt: datetime) -> bool:
         main_ret = []
         main_grouping = (s for s in self._settings.groups if s.divident is not Dividents.UNSET)
-        print("hej2")
         for s in main_grouping:
             group_ret = []
             grouping = (a for a in s.dateparts if len(a.values) > 0)

@@ -1,3 +1,5 @@
+from ..locale_service.free_charge import FreeChargePattern
+from ..locale_service.querytypes.models.enums import CalendarPeriods
 from ..locale_service.querytypes.const import (
     QUERYTYPE_AVERAGEOFFIVEDAYS, 
     QUERYTYPE_AVERAGEOFFIVEDAYS_MIN, 
@@ -24,18 +26,18 @@ class SE_Sollentuna(Locale_Type):
     charged_peak = QUERYTYPE_SOLLENTUNA
     converted = True
     query_model = QUERYTYPES[QUERYTYPE_SOLLENTUNA]
-    free_charge_pattern = [
-        {
-            "M": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-            "D": [0, 1, 2, 3, 4],
-            "H": [19,20,21,22, 23, 0, 1, 2, 3, 4, 5,6]
-        },
-        {
-            "M": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-            "D": [5, 6],
-            "H": [0, 1, 2, 3, 4, 5, 6,7,8,9,10,11,12,13,14,15,16,17,18,19, 20, 21, 22, 23]
-        }
-    ]
+    free_charge_pattern = FreeChargePattern([
+    {
+        CalendarPeriods.Month: [1,2,3,4,5,6,7,8,9,10,11,12],
+        CalendarPeriods.Weekday: [0, 1, 2, 3, 4],
+        CalendarPeriods.Hour: [19,20,21,22, 23, 0, 1, 2, 3, 4, 5,6]
+    },
+    {
+        CalendarPeriods.Month: [1,2,3,4,5,6,7,8,9,10,11,12],
+        CalendarPeriods.Weekday: [5,6],
+        CalendarPeriods.Hour: [0, 1, 2, 3, 4, 5, 6,7,8,9,10,11,12,13,14,15,16,17,18,19, 20, 21, 22, 23]
+    }
+])
 
     #Rörlig avgift sommar april – oktober 61,46 kr/kW
     #Rörlig avgift vinter november – mars 122,92 kr/kW
@@ -47,18 +49,18 @@ class SE_Skovde(Locale_Type):
     charged_peak = QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22
     query_model= QUERYTYPES[QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22]
     converted= True
-    free_charge_pattern = [
+    free_charge_pattern = FreeChargePattern([
         {
-            "M": [11, 12, 1, 2, 3],
-            "D": [5, 6],
-            "H": [22, 23, 0, 1, 2, 3, 4, 5]
+            CalendarPeriods.Month: [11, 12, 1, 2, 3],
+            CalendarPeriods.Weekday: [5, 6],
+            CalendarPeriods.Hour: [22, 23, 0, 1, 2, 3, 4, 5]
         },
         {
-            "M": [4, 5, 6, 7, 8, 9, 10],
-            "D": [0, 1, 2, 3, 4, 5, 6],
-            "H": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+            CalendarPeriods.Month: [4, 5, 6, 7, 8, 9, 10],
+            CalendarPeriods.Weekday: [0, 1, 2, 3, 4, 5, 6],
+            CalendarPeriods.Hour: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
         }
-    ]
+    ])
      
     #November-Mars, vardagar (mån-fre) 06-22
     #single peak i denna period månadsvis.
@@ -70,13 +72,13 @@ class SE_SHE_AB(Locale_Type):
     charged_peak = QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19
     converted = True
     query_model = QUERYTYPES[QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19]
-    free_charge_pattern = [
+    free_charge_pattern = FreeChargePattern([
         {
-            "M": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-            "D": [5, 6],
-            "H": [19, 20, 21, 22, 23, 0, 1, 2, 3, 4, 5, 6]
+            CalendarPeriods.Month: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+            CalendarPeriods.Weekday: [5, 6],
+            CalendarPeriods.Hour: [19, 20, 21, 22, 23, 0, 1, 2, 3, 4, 5, 6]
         }
-    ]
+    ])
      
     """
     Elnätskunder med effekttaxa får vinterpris på överföringsavgift från och med 1 november – 31 mars. 
@@ -120,13 +122,13 @@ class SE_Malung_Salen(Locale_Type):
     observed_peak = QUERYTYPE_AVERAGEOFFIVEDAYS_MIN
     charged_peak = QUERYTYPE_AVERAGEOFFIVEDAYS
     converted = True
-    free_charge_pattern = [
+    free_charge_pattern = FreeChargePattern([
         {
-            "M": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-            "D": [0, 1, 2, 3, 4, 5, 6],
-            "H": [19,20,21,22, 23, 0, 1, 2, 3, 4, 5,6]
+            CalendarPeriods.Month: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+            CalendarPeriods.Weekday: [0, 1, 2, 3, 4, 5, 6],
+            CalendarPeriods.Hour: [19,20,21,22, 23, 0, 1, 2, 3, 4, 5,6]
         }
-    ]
+    ])
 
     #Rörlig avgift sommar april – oktober 35 kr/kW
     #Rörlig avgift vinter november – mars 118,75 kr/kW
@@ -185,13 +187,13 @@ class SE_Bjerke_Energi(Locale_Type):
     observed_peak = QUERYTYPE_BASICMAX
     charged_peak = QUERYTYPE_BASICMAX
     converted = True
-    free_charge_pattern = [
+    free_charge_pattern = FreeChargePattern([
         {
-            "M": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-            "D": [0, 1, 2, 3, 4, 5, 6],
-            "H": [22, 23, 0, 1, 2, 3, 4, 5]
+            CalendarPeriods.Month: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+            CalendarPeriods.Weekday: [0, 1, 2, 3, 4, 5, 6],
+            CalendarPeriods.Hour: [22, 23, 0, 1, 2, 3, 4, 5]
         }
-    ]
+    ])
 
     #docs: https://www.bjerke-energi.se/elnat/tariffer/effekttariff-fr-o-m-2022-02-01/
     #dag kl. 06-22 nov-mars                 106,25 kr/kW/mån

@@ -18,3 +18,12 @@ class TimePeriods(Enum):
     Monthly = 5
     Yearly = 6
     UnSet = 7
+
+class CalendarPeriods(Enum):
+    Minute = 1
+    Hour = 2
+    Weekday = 3
+    Month = 4
+    Quarter = 5
+
+
