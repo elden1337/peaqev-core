@@ -1,0 +1,7 @@
+DOMAIN = "domain"
+ON = "on"
+OFF = "off"
+RESUME = "resume"
+PAUSE = "pause"
+PARAMS = "params"
+UPDATECURRENT = "updatecurrent"
