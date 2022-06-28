@@ -1,6 +1,6 @@
-from ..locale_service.free_charge import FreeChargePattern
-from ..locale_service.querytypes.models.enums import CalendarPeriods
-from ..locale_service.querytypes.const import (
+from ..free_charge import FreeChargePattern
+from ..querytypes.models.enums import CalendarPeriods
+from ..querytypes.const import (
     QUERYTYPE_AVERAGEOFFIVEDAYS, 
     QUERYTYPE_AVERAGEOFFIVEDAYS_MIN, 
     QUERYTYPE_AVERAGEOFTHREEDAYS, 
@@ -15,16 +15,15 @@ from ..locale_service.querytypes.const import (
     QUERYTYPE_AVERAGEOFTHREEHOURS
 )
 
-from ..locale_service.querytypes.querytypes import QUERYTYPES
+from ..querytypes.querytypes import QUERYTYPES
 from dataclasses import dataclass
-from ..locale_service.locale_model import Locale_Type
+from ..locale_model import Locale_Type
 
 
 @dataclass(frozen=True)
 class SE_Sollentuna(Locale_Type):
     observed_peak = QUERYTYPE_SOLLENTUNA_MIN
     charged_peak = QUERYTYPE_SOLLENTUNA
-    converted = True
     query_model = QUERYTYPES[QUERYTYPE_SOLLENTUNA]
     free_charge_pattern = FreeChargePattern([
     {
@@ -48,7 +47,6 @@ class SE_Skovde(Locale_Type):
     observed_peak = QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22
     charged_peak = QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22
     query_model= QUERYTYPES[QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22]
-    converted= True
     free_charge_pattern = FreeChargePattern([
         {
             CalendarPeriods.Month: [11, 12, 1, 2, 3],
@@ -70,7 +68,6 @@ class SE_Skovde(Locale_Type):
 class SE_SHE_AB(Locale_Type):    
     observed_peak = QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19_MIN
     charged_peak = QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19
-    converted = True
     query_model = QUERYTYPES[QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19]
     free_charge_pattern = FreeChargePattern([
         {
@@ -96,14 +93,12 @@ class SE_SHE_AB(Locale_Type):
 class SE_Partille(Locale_Type):
     observed_peak = QUERYTYPE_BASICMAX
     charged_peak = QUERYTYPE_BASICMAX
-    converted = True
     query_model = QUERYTYPES[QUERYTYPE_BASICMAX]
 
 @dataclass(frozen=True)
 class SE_Nacka_normal(Locale_Type):
     observed_peak = QUERYTYPE_AVERAGEOFTHREEHOURS_MIN
     charged_peak = QUERYTYPE_AVERAGEOFTHREEHOURS
-    converted = True
     query_model = QUERYTYPES[QUERYTYPE_AVERAGEOFTHREEHOURS]
 
     #https://www.nackaenergi.se/images/downloads/natavgifter/FAQ_NYA_TARIFFER.pdf
@@ -121,7 +116,6 @@ class SE_NACKA_timediff(Locale_Type):
 class SE_Malung_Salen(Locale_Type):
     observed_peak = QUERYTYPE_AVERAGEOFFIVEDAYS_MIN
     charged_peak = QUERYTYPE_AVERAGEOFFIVEDAYS
-    converted = True
     free_charge_pattern = FreeChargePattern([
         {
             CalendarPeriods.Month: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
@@ -138,7 +132,6 @@ class SE_Malung_Salen(Locale_Type):
 class SE_Linde_Energi(Locale_Type):
     observed_peak = QUERYTYPE_BASICMAX
     charged_peak = QUERYTYPE_BASICMAX
-    converted = True
     query_model = QUERYTYPES[QUERYTYPE_BASICMAX]
     #docs: https://www.lindeenergi.se/elnat/elnatspriser/effekttariffer.4.1491a0b016e44ba6ccfe91b4.html
 
@@ -153,7 +146,6 @@ class SE_Linde_Energi(Locale_Type):
 class SE_Kristinehamn(Locale_Type):
     observed_peak = QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR
     charged_peak = QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR
-    converted = True
     query_model = QUERYTYPES[QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR]
     """
     https://kristinehamnsenergi.se/elnat/elnatsavgiften/effektavgift-villa-med-bergvarmepump/
@@ -165,7 +157,6 @@ class SE_Kristinehamn(Locale_Type):
 class SE_Karlstad(Locale_Type):
     observed_peak = QUERYTYPE_BASICMAX #todo check if correct
     charged_peak = QUERYTYPE_BASICMAX #todo check if correct
-    converted = True
     query_model = QUERYTYPES[QUERYTYPE_BASICMAX]
     #docs: https://karlstadsnat.se/elnat/kund/priser-och-tariffer/effekttariff/        
     """
@@ -178,7 +169,6 @@ class SE_Karlstad(Locale_Type):
 class SE_Gothenburg(Locale_Type):
     observed_peak = QUERYTYPE_AVERAGEOFTHREEDAYS_MIN
     charged_peak = QUERYTYPE_AVERAGEOFTHREEDAYS
-    converted = True
     query_model = QUERYTYPES[QUERYTYPE_AVERAGEOFTHREEDAYS]
 
 
@@ -186,7 +176,6 @@ class SE_Gothenburg(Locale_Type):
 class SE_Bjerke_Energi(Locale_Type):
     observed_peak = QUERYTYPE_BASICMAX
     charged_peak = QUERYTYPE_BASICMAX
-    converted = True
     free_charge_pattern = FreeChargePattern([
         {
             CalendarPeriods.Month: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
