@@ -1,7 +1,7 @@
-from ..country_service.default import Default
-from ..country_service.belgium import VregBelgium
-from ..country_service.sweden import SE_Bjerke_Energi, SE_Gothenburg, SE_Karlstad, SE_Kristinehamn, SE_Linde_Energi, SE_Malung_Salen, SE_Nacka_normal, SE_NACKA_timediff, SE_Partille, SE_SHE_AB, SE_Skovde, SE_Sollentuna
-from ..country_service.norway import NO_AgderEnergi, NO_GlitreEnergi, NO_LNett, NO_Tensio
+from countries.default import Default
+from countries.belgium import VregBelgium
+from countries.sweden import SE_Bjerke_Energi, SE_Gothenburg, SE_Karlstad, SE_Kristinehamn, SE_Linde_Energi, SE_Malung_Salen, SE_Nacka_normal, SE_NACKA_timediff, SE_Partille, SE_SHE_AB, SE_Skovde, SE_Sollentuna
+from countries.norway import NO_AgderEnergi, NO_GlitreEnergi, NO_LNett, NO_Tensio
 
 
 """LOCALETYPES"""

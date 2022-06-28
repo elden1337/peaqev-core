@@ -188,9 +188,6 @@ class ChargeControllerBase:
     def _check_charger_states(self, input:dict[CHARGERSTATES,list[str]]) -> dict[CHARGERSTATES,list[str]]:
         if len(input) == 0:
             raise AssertionError
-        for i in input:
-            if len(input[i]) == 0:
-                raise AssertionError
         return input
 
 
