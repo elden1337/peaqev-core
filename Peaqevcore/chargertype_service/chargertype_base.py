@@ -2,9 +2,9 @@ import logging
 from abc import abstractmethod
 
 from ..models.chargerstates import CHARGERSTATES
-from .calltype import CallType
+from .models.calltype import CallType
 
-from custom_components.peaqev.peaqservice.chargertypes.servicecalls import ServiceCalls
+from servicecalls import ServiceCalls
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ class ChargerBase:
         self._chargerEntity = None
         self._powermeter = None
         self._native_chargerstates = []
-        self.powermeter_factor = 1
+        self._powermeter_factor = 1
         self._powerswitch = None
         self._powerswitch_controls_charging = True
         self.ampmeter = None
@@ -31,6 +31,14 @@ class ChargerBase:
         }
         self._entityschema = ""
         self._entities = None
+
+    @property
+    def powermeter_factor(self) -> str:
+        """
+        The factor to calculate the power reading. Ie 1 means we get raw watts, 1000 means we get raw kw. 
+        Converted state is down to factor 1 later which is what is needed for peaq
+        """
+        return self._powermeter_factor
 
     @property
     def powerswitch_controls_charging(self) -> bool:
