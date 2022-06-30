@@ -112,3 +112,15 @@ def test_SE_Kristinehamn():
     assert p.query_model.charged_peak == 0.5
     p.query_model.try_update(new_val=1.2, timestamp=datetime.combine(date(2022, 2, 14), time(16, 30)))
     assert p.query_model.charged_peak == 1.2
+
+def test_peak_new_month():
+    p = SE_Gothenburg
+    p.query_model.try_update(new_val=1.2, timestamp=datetime.combine(date(2022, 6, 2), time(22, 30)))
+    p.query_model.try_update(new_val=1, timestamp=datetime.combine(date(2022, 6, 16), time(22, 30)))
+    p.query_model.try_update(new_val=1.5, timestamp=datetime.combine(date(2022, 6, 17), time(20, 30)))
+    p.query_model.try_update(new_val=1.7, timestamp=datetime.combine(date(2022, 6, 17), time(22, 30)))
+    p.query_model.try_update(new_val=1.5, timestamp=datetime.combine(date(2022, 6, 19), time(22, 30)))
+    assert p.query_model.observed_peak == 1.2
+    p.query_model.try_update(new_val=0.03, timestamp=datetime.combine(date(2022, 7, 1), time(0, 0)))
+    assert p.query_model.observed_peak == 0.03
+    
