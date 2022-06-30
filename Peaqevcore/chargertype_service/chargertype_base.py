@@ -1,5 +1,6 @@
 from abc import abstractmethod
-from peaqevcore.chargertype_service.models.servicecalls_dto import ServiceCallsDTO, ServiceCallsOptions
+from peaqevcore.chargertype_service.models.servicecalls_dto import ServiceCallsDTO
+from peaqevcore.chargertype_service.models.servicecalls_options import ServiceCallsOptions
 from ..models.chargerstates import CHARGERSTATES
 from .models.charger_options import ChargerOptions
 from .models.charger_entities_model import ChargerEntitiesModel

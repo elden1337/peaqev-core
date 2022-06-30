@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
-from .models.servicecalls_dto import ServiceCallsDTO, ServiceCallsOptions
+from .models.servicecalls_dto import ServiceCallsDTO
+from .models.servicecalls_options import ServiceCallsOptions
 
 from .models.calltype import CallType
 from .const import (

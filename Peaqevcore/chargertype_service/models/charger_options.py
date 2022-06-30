@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 @dataclass(frozen=False)
 class ChargerOptions:
     powerswitch_controls_charging: bool
