@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from calltype import CallType
+from .calltype import CallType
 
 @dataclass
 class ServiceCallsDTO:
@@ -17,6 +17,5 @@ class ServiceCallsDTO:
 
 
 
-test1 = CallType("hej", {})
-model = ServiceCallsDTO(test1, test1)
-print(model.resume)
+
+

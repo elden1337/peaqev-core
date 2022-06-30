@@ -1,6 +1,5 @@
-import logging
 from dataclasses import dataclass, field
-from .models.servicecalls_dto import ServiceCallsDTO
+from .models.servicecalls_dto import ServiceCallsDTO, ServiceCallsOptions
 
 from .models.calltype import CallType
 from .const import (
@@ -13,12 +12,12 @@ from .const import (
     UPDATECURRENT,
 )
 
-_LOGGER = logging.getLogger(__name__)
 
-@dataclass(frozen=True)
+@dataclass
 class ServiceCalls:
     domain:str
     model: ServiceCallsDTO
+    options: ServiceCallsOptions
     on: CallType = field(init=False)
     off: CallType = field(init=False)
     pause: CallType = field(init=False)
@@ -27,10 +26,10 @@ class ServiceCalls:
 
     def __post_init__(self):
         self.on = self.model.on
-        self.off = self.model.off,
-        self.pause = self.model.pause,
-        self.resume = self.model.resume,
-        self.update_current = self.model.update_current,
+        self.off = self.model.off
+        self.pause = self.model.pause
+        self.resume = self.model.resume
+        self.update_current = self.model.update_current
 
     def get_call(self, call) -> dict:
         ret = {DOMAIN: self.domain}
@@ -38,7 +37,10 @@ class ServiceCalls:
         ret[call] = calltype.call
         ret["params"] = calltype.params
         if call is UPDATECURRENT:
-            ret[PARAMS] = self.update_current.params
+            if self.options.allowupdatecurrent is True:
+                ret[PARAMS] = self.update_current.params
+            else:
+                raise AttributeError
         return ret
 
     def _get_call_type(self, call) -> CallType:

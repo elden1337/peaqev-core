@@ -1,111 +1,90 @@
-import logging
 from abc import abstractmethod
-
+from peaqevcore.chargertype_service.models.servicecalls_dto import ServiceCallsDTO, ServiceCallsOptions
 from ..models.chargerstates import CHARGERSTATES
-from .models.calltype import CallType
+from .models.charger_options import ChargerOptions
+from .models.charger_entities_model import ChargerEntitiesModel
+from .servicecalls import ServiceCalls
 
-from servicecalls import ServiceCalls
-
-_LOGGER = logging.getLogger(__name__)
+CHARGERSTATES_BASE = {
+    CHARGERSTATES.Idle: [],
+    CHARGERSTATES.Connected: [],
+    CHARGERSTATES.Charging: [],
+    CHARGERSTATES.Done: []
+}
 
 
 class ChargerBase:
-    def __init__(self, hass):
-        self._hass = hass
-        self._domainname = ""
-        self._entityendings = None
-        self._chargerEntity = None
-        self._powermeter = None
-        self._native_chargerstates = []
-        self._powermeter_factor = 1
-        self._powerswitch = None
-        self._powerswitch_controls_charging = True
-        self.ampmeter = None
-        self.ampmeter_is_attribute = None
-        self._servicecalls = None
-        self._chargerstates = {
-            CHARGERSTATES.Idle: [],
-            CHARGERSTATES.Connected: [],
-            CHARGERSTATES.Charging: [],
-            CHARGERSTATES.Done: []
-        }
-        self._entityschema = ""
-        self._entities = None
+    def __init__(self):
+        self._domainname:str = ""
+        self._native_chargerstates:list = []
+        self._servicecalls:ServiceCalls = None
+        self._chargerstates = CHARGERSTATES_BASE
+        #what can we do with these here?
+        #self._entityschema = ""
+        #self._entities = None
+        #self._entityendings = None
+        #what can we do with these here?
+        self.entities = ChargerEntitiesModel
+        self.options = ChargerOptions
 
-    @property
-    def powermeter_factor(self) -> str:
-        """
-        The factor to calculate the power reading. Ie 1 means we get raw watts, 1000 means we get raw kw. 
-        Converted state is down to factor 1 later which is what is needed for peaq
-        """
-        return self._powermeter_factor
+    # @property
+    # def powermeter_factor(self) -> str:
+    #     """
+    #     The factor to calculate the power reading. Ie 1 means we get raw watts, 1000 means we get raw kw. 
+    #     Converted state is down to factor 1 later which is what is needed for peaq
+    #     """
+    #     return self.options.powermeter_factor
 
-    @property
-    def powerswitch_controls_charging(self) -> bool:
-        return self._powerswitch_controls_charging
+    # @property
+    # def powerswitch_controls_charging(self) -> bool:
+    #     return self.options.powerswitch_controls_charging
 
     @property
     def chargerstates(self) -> dict:
         return self._chargerstates
 
-    @property
-    def powermeter(self):
-        return self._powermeter
+    # @property
+    # def powermeter(self):
+    #     return self._powermeter
 
-    @powermeter.setter
-    def powermeter(self, val):
-        assert isinstance(val, str)
-        self._powermeter = val
+    # @powermeter.setter
+    # def powermeter(self, val):
+    #     assert isinstance(val, str)
+    #     self._powermeter = val
 
-    @property
-    def powerswitch(self):
-        return self._powerswitch
+    # @property
+    # def powerswitch(self):
+    #     return self._powerswitch
 
-    @powerswitch.setter
-    def powerswitch(self, val):
-        assert isinstance(val, str)
-        self._powerswitch = val
+    # @powerswitch.setter
+    # def powerswitch(self, val):
+    #     assert isinstance(val, str)
+    #     self._powerswitch = val
 
-    @property
-    def chargerentity(self):
-        return self._chargerentity
+    # @property
+    # def chargerentity(self):
+    #     return self._chargerentity
 
-    @chargerentity.setter
-    def chargerentity(self, val):
-        assert isinstance(val, str)
-        self._chargerentity = val
+    # @chargerentity.setter
+    # def chargerentity(self, val):
+    #     assert isinstance(val, str)
+    #     self._chargerentity = val
 
     @property
     def servicecalls(self):
         return self._servicecalls
 
-    @property
+    @property #is this needed?
     def native_chargerstates(self) -> list:
         return self._native_chargerstates
 
     def _set_servicecalls(
             self,
             domain: str,
-            on_call: CallType,
-            off_call: CallType,
-            pause_call: CallType = None,
-            resume_call: CallType = None,
-            allowupdatecurrent: bool = False,
-            update_current_call: str = None,
-            update_current_params: dict = None,
-            update_current_on_termination: bool = False
+            model: ServiceCallsDTO,
+            options: ServiceCallsOptions,
     ) -> None:
-        self._servicecalls = ServiceCalls(
-            domain,
-            on_call,
-            off_call,
-            pause_call,
-            resume_call,
-            allowupdatecurrent,
-            update_current_call,
-            update_current_params,
-            update_current_on_termination
-        )
+        self._servicecalls = ServiceCalls(domain, model, options)
 
     @abstractmethod
     def validatecharger(self):
