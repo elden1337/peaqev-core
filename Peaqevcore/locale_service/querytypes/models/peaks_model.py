@@ -60,14 +60,16 @@ class PeaksModel:
 
     @property
     def max_value(self) -> any:
-        return max(self._p.values())
+        return None if len(self._p) == 0 else max(self._p.values())
 
     @property
     def min_value(self) -> any:
-        return min(self._p.values())
+        return None if len(self._p) == 0 else min(self._p.values())
 
     @property
     def value_avg(self) -> float:
+        if len(self._p) == 0:
+            return 0
         return sum(self._p.values()) / len(self._p)
 
     def remove_min(self) -> dict:
