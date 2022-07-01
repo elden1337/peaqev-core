@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from dataclasses import dataclass, field
 from peaqevcore.chargertype_service.models.servicecalls_dto import ServiceCallsDTO
 from peaqevcore.chargertype_service.models.servicecalls_options import ServiceCallsOptions
 from ..models.chargerstates import CHARGERSTATES
@@ -13,71 +14,14 @@ CHARGERSTATES_BASE = {
     CHARGERSTATES.Done: []
 }
 
-
+@dataclass
 class ChargerBase:
-    def __init__(self):
-        self._domainname:str = ""
-        self._native_chargerstates:list = []
-        self._servicecalls:ServiceCalls = None
-        self._chargerstates = CHARGERSTATES_BASE
-        #what can we do with these here?
-        #self._entityschema = ""
-        #self._entities = None
-        #self._entityendings = None
-        #what can we do with these here?
-        self.entities = ChargerEntitiesModel
-        self.options = ChargerOptions
-
-    # @property
-    # def powermeter_factor(self) -> str:
-    #     """
-    #     The factor to calculate the power reading. Ie 1 means we get raw watts, 1000 means we get raw kw. 
-    #     Converted state is down to factor 1 later which is what is needed for peaq
-    #     """
-    #     return self.options.powermeter_factor
-
-    # @property
-    # def powerswitch_controls_charging(self) -> bool:
-    #     return self.options.powerswitch_controls_charging
-
-    @property
-    def chargerstates(self) -> dict:
-        return self._chargerstates
-
-    # @property
-    # def powermeter(self):
-    #     return self._powermeter
-
-    # @powermeter.setter
-    # def powermeter(self, val):
-    #     assert isinstance(val, str)
-    #     self._powermeter = val
-
-    # @property
-    # def powerswitch(self):
-    #     return self._powerswitch
-
-    # @powerswitch.setter
-    # def powerswitch(self, val):
-    #     assert isinstance(val, str)
-    #     self._powerswitch = val
-
-    # @property
-    # def chargerentity(self):
-    #     return self._chargerentity
-
-    # @chargerentity.setter
-    # def chargerentity(self, val):
-    #     assert isinstance(val, str)
-    #     self._chargerentity = val
-
-    @property
-    def servicecalls(self):
-        return self._servicecalls
-
-    @property #is this needed?
-    def native_chargerstates(self) -> list:
-        return self._native_chargerstates
+    domainname:str = ""
+    native_chargerstates:list = field(default_factory=lambda: [])
+    servicecalls:ServiceCalls = None
+    chargerstates = CHARGERSTATES_BASE
+    entities = ChargerEntitiesModel
+    options = ChargerOptions
 
     def _set_servicecalls(
             self,
