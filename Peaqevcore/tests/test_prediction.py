@@ -93,37 +93,34 @@ def test_prediction_quarterly():
        assert ret < ret3
 
 def test_prediction_percentage_neg_poweravg():
-       with pytest.raises(PeaqValueError):
-              ret = p.predicted_energy(
-              now_min=13,
-              now_sec=37,
-              power_avg=-420,
-              total_hourly_energy=0.24
-              )
-              retperc = p.predicted_percentage_of_peak(2, ret)
+       ret = p.predicted_energy(
+       now_min=13,
+       now_sec=37,
+       power_avg=-420,
+       total_hourly_energy=0.24
+       )
+       retperc = p.predicted_percentage_of_peak(2, ret)
 
-              assert retperc >= 0
+       assert retperc >= 0
 
 def test_prediction_percentage_neg_energy():
-       with pytest.raises(PeaqValueError):
-              ret = p.predicted_energy(
-              now_min=13,
-              now_sec=37,
-              power_avg=-420,
-              total_hourly_energy=-0.24
-              )
-              retperc = p.predicted_percentage_of_peak(2, ret)
+       ret = p.predicted_energy(
+       now_min=13,
+       now_sec=37,
+       power_avg=-420,
+       total_hourly_energy=-0.24
+       )
+       retperc = p.predicted_percentage_of_peak(2, ret)
 
-              assert retperc >= 0
+       assert retperc >= 0
 
 def test_prediction_percentage_neg_energy_and_poweravg():
-       with pytest.raises(PeaqValueError):
-              ret = p.predicted_energy(
-              now_min=13,
-              now_sec=37,
-              power_avg=-420,
-              total_hourly_energy=-0.24
-              )
-              retperc = p.predicted_percentage_of_peak(2, ret)
+       ret = p.predicted_energy(
+       now_min=13,
+       now_sec=37,
+       power_avg=-420,
+       total_hourly_energy=-0.24
+       )
+       retperc = p.predicted_percentage_of_peak(2, ret)
 
-              assert retperc >= 0
+       assert retperc >= 0
