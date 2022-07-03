@@ -133,14 +133,15 @@ class LocaleQuery:
     def _sanitize_values(self):
         countX = lambda arr, x: len([a for a in arr if a[0] == x])
         if self.sum_counter.groupby == TimePeriods.Daily:
-            duplicates = dict([(k, self._peaks.get(k)) for k in self._peaks.p.keys() if countX(self._peaks.p.keys(), k[0] > 1)])
-            if duplicates:
+            duplicates = {}
+            for k in self._peaks.p.keys():
+                if countX(self._peaks.p.keys(), k[0]) > 1:
+                    duplicates[k] = self._peaks.p[k]
+            if len(duplicates) > 0:
                 minkey = min(duplicates, key=duplicates.get)
-                self._peaks.pop_key(minkey)
-                    
+                self._peaks.p.pop(minkey)
         while len(self._peaks.p) > self.sum_counter.counter:
             self._peaks.remove_min()
-            # self._peaks.p.pop(min(self._peaks.p, key=self._peaks.p.get))
         self._peaks.set_dirty(False)
         self._update_peaks()
 

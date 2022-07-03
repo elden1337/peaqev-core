@@ -9,7 +9,7 @@ class PeaksModel:
     _m: int = 0
     _is_dirty: bool = False
 
-    def set_init_dict(self, dict_data, dt=datetime.now()) -> None:
+    def set_init_dict(self, dict_data:dict, dt=datetime.now()) -> None:
         if dt.month == self.m:
             ppdict = {}
             for pp in dict_data.get("p"):
@@ -17,8 +17,10 @@ class PeaksModel:
                 ppkey = (int(tkeys[0]), int(tkeys[1]))
                 ppdict[ppkey] = dict_data.get("p").get(pp)
             if len(self._p) > 0:
-                ppdict = self._p | ppdict
-            self._p = ppdict
+                self._p = self._p | ppdict
+                print(f"new existing: {self._p}")
+            else: 
+                self._p = ppdict
             self._m = dict_data.get("m")
             self._is_dirty = True
 

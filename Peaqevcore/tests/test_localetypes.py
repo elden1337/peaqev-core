@@ -120,9 +120,11 @@ def test_peak_new_month():
     p.query_model.try_update(new_val=1.5, timestamp=datetime.combine(date(2022, 6, 17), time(20, 30)))
     p.query_model.try_update(new_val=1.7, timestamp=datetime.combine(date(2022, 6, 17), time(22, 30)))
     p.query_model.try_update(new_val=1.5, timestamp=datetime.combine(date(2022, 6, 19), time(22, 30)))
+    assert len(p.query_model.peaks._p) == 3
     assert p.query_model.observed_peak == 1.2
     p.query_model.try_update(new_val=0.03, timestamp=datetime.combine(date(2022, 7, 1), time(0, 0)))
     assert p.query_model.observed_peak == 0.03
+    
 
 def test_peak_new_hour():
     p = SE_Gothenburg
@@ -133,4 +135,13 @@ def test_peak_new_hour():
     p.query_model.try_update(new_val=1.5, timestamp=datetime.combine(date(2022, 6, 1), time(9, 30)))
     assert p.query_model.peaks.p == {(1, 9): 1.5}
     
-    
+def test_overridden_number_in_import():
+    to_state_machine = {'m': 7, 'p': {'1h15': 1.5}}
+    p1 = QUERYTYPES[QUERYTYPE_AVERAGEOFTHREEDAYS]
+    p1.reset()
+    p1.try_update(new_val=0.22, timestamp=datetime.combine(date(2022, 7, 2), time(15, 30)))
+    p1.peaks.set_init_dict(to_state_machine, datetime.combine(date(2022, 7, 2), time(15, 30)))
+    #p1.try_update(new_val=0.23, timestamp=datetime.combine(date(2022, 7, 2), time(15, 31)))
+    print(p1.peaks.p)
+    #assert p1.charged_peak == 1.43
+    assert len(p1.peaks._p) == 2

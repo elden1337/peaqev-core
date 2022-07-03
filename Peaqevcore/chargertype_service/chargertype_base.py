@@ -29,7 +29,7 @@ class ChargerBase:
             model: ServiceCallsDTO,
             options: ServiceCallsOptions,
     ) -> None:
-        self._servicecalls = ServiceCalls(domain, model, options)
+        self.servicecalls = ServiceCalls(domain, model, options)
 
     @abstractmethod
     def validatecharger(self):
