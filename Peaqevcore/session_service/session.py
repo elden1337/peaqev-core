@@ -7,14 +7,14 @@ class SessionPrice:
         self._total_price: int = 0
         self._price: int = 0
         self._current_power: int = 0
-        self._total_power: int = 0
+        self._total_energy: int = 0
         self._current_time: int = 0
         self._time_delta: int = 0
         self._readings: list = []
 
     @property
-    def total_power(self):
-        return round(self._total_power, 5)
+    def total_energy(self):
+        return round(self._total_energy, 5)
 
     def terminate(self, mock_time: float=None):
         print("called terminate")
@@ -22,14 +22,14 @@ class SessionPrice:
         self.get_status()
 
     def get_status(self) -> dict:
-        self._total_power = 0
+        self._total_energy = 0
         self._total_price = 0
         for i in self._readings:
-            self._total_power += i.reading_integral
+            self._total_energy += i.reading_integral
             self._total_price += i.reading_cost
         return {
             "energy": {
-                "value": self._total_power,
+                "value": self._total_energy,
                 "unit": "kWh"
             },
             "price": self._total_price

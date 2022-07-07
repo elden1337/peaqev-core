@@ -12,7 +12,7 @@ def test_session_fluctuate():
     s.update_power_reading(3000, timer)    
     timer += 1200    
     s.terminate(timer)
-    assert s.total_power == 3
+    assert s.total_energy == 3
     assert round(s.total_price,4) == 1.5
 
 def test_session_fluctuate_tenfold():
@@ -26,7 +26,7 @@ def test_session_fluctuate_tenfold():
     s.update_power_reading(3000, timer)    
     timer += 1200    
     s.terminate(timer)
-    assert s.total_power == 3
+    assert s.total_energy == 3
     assert round(s.total_price,4) == 15
 
 def test_session_split_price():
@@ -42,7 +42,7 @@ def test_session_split_price():
     timer += 1800
     s.terminate(timer)
 
-    assert s.total_power == 1.5
+    assert s.total_energy == 1.5
     assert s.total_price == 4
 
 
@@ -55,7 +55,7 @@ def test_session_full_hour():
     timer += 3600
     s.update_power_reading(1000, timer)
     s.terminate(timer)
-    assert s.total_power == 1
+    assert s.total_energy == 1
     assert s.total_price == 1
 
 def test_session_half_hour():
@@ -67,7 +67,7 @@ def test_session_half_hour():
     timer += 1800
     s.update_power_reading(1000, timer)
     s.terminate(timer)
-    assert s.total_power == 0.5
+    assert s.total_energy == 0.5
     assert s.total_price == 0.5
 
 def test_session_with_zero_periods():
@@ -89,7 +89,7 @@ def test_session_with_zero_periods():
      #3.5kr
     s.terminate(timer)
 
-    assert s.total_power == 1.5
+    assert s.total_energy == 1.5
     assert s.total_price == 3.5
 
 def test_session_with_zero_periods_price_update_in_between():
@@ -111,7 +111,7 @@ def test_session_with_zero_periods_price_update_in_between():
      #6.5kr
     s.terminate(timer)
 
-    assert s.total_power == 2.5
+    assert s.total_energy == 2.5
     assert s.total_price == 6.5
 
 def test_session_get_status():
@@ -139,7 +139,7 @@ def test_session_get_status():
     assert status["energy"]["value"] == 2
     s.terminate(timer)
 
-    assert s.total_power == 2.5
+    assert s.total_energy == 2.5
     assert s.total_price == 6.5
 
 

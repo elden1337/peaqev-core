@@ -70,7 +70,7 @@ class Hoursselectionbase:
         self._dynamic_caution_hours = val
 
     @property
-    def prices(self):
+    def prices(self) -> list:
         return self._prices
 
     @prices.setter
