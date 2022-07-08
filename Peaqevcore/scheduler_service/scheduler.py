@@ -1,9 +1,9 @@
-from datetime import datetime
+from datetime import datetime, date, time
 import math
-from .schedule_session import ScheduleSession
+from schedule_session import ScheduleSession
 
-# MOCKPRICES = [0.142, 0.106, 0.1, 0.133, 0.266, 0.412, 2.113, 3, 4.98, 4.374, 3.913, 3.796, 3.491, 3.241, 3.173, 2.647, 2.288, 2.254, 2.497, 2.247, 2.141, 2.2, 2.113, 0.363]
-# MOCKPRICES_TOMORROW = [0.063, 0.039, 1.032, 0.034, 0.043, 0.274, 0.539, 1.779, 2.002, 1.75, 1.388, 1.195, 1.162, 0.962, 0.383, 0.387, 0.63, 1.202, 1.554, 1.75, 1.496, 1.146, 0.424, 0.346]
+MOCKPRICES = [0.006, 0.005, 0.006, 0.01, 0.015, 0.02, 2.115, 2.241, 2.278, 2.279, 2.282, 2.276, 2.271, 2.195, 2.122, 2.029, 2.229, 2.267, 2.271, 2.25, 2.148, 0.138, 0.045, 0.035]
+MOCKPRICES_TOMORROW = [0.036, 0.031, 0.031, 0.033, 0.034, 0.032, 0.033, 0.04, 0.042, 0.044, 0.044, 0.041, 0.037, 0.032, 0.021, 0.02, 0.032, 0.037, 0.043, 0.048, 0.267, 0.161, 0.041, 0.031]
 
 
 class Scheduler:
@@ -84,17 +84,21 @@ class Scheduler:
                 chargehours[c] = 1
         return chargehours
 
-# s = Scheduler()
-# s.create(desired_charge=7, departuretime=datetime.combine(date(2022,7,8), time(7, 0)))
-# s.update(avg24=800, peak=1.8, prices=MOCKPRICES, prices_tomorrow=None)
-# print(s.model.hours_charge)
-# #print(f"nonhours with only today: {s.model.non_hours}")
-# s.update(avg24=900, peak=1.8, charged_amount=0, prices=MOCKPRICES, prices_tomorrow=MOCKPRICES_TOMORROW)
-# print(s.model.hours_charge)
-# print(f"nonhours with tomorrow: {s.model.non_hours}")
-# print(f"cautionhours with tomorrow: {s.model.caution_hours}")
+s = Scheduler()
+date_time_str = '22-07-09 10:00'
+date_time_obj = datetime.strptime(date_time_str, '%y-%m-%d %H:%M')
 
-# s.cancel()
+s.create(desired_charge=9, departuretime=date_time_obj)
+# s.create(desired_charge=7, departuretime=datetime.combine(date(2022,7,9), time(7, 0)))
+#s.update(avg24=800, peak=1.8, prices=MOCKPRICES, prices_tomorrow=None)
+#print(s.model.hours_charge)
+#print(f"nonhours with only today: {s.model.non_hours}")
+s.update(avg24=291, peak=1.49, charged_amount=0, prices=MOCKPRICES, prices_tomorrow=MOCKPRICES_TOMORROW)
+print(s.model.hours_charge)
+print(f"nonhours with tomorrow: {s.model.non_hours}")
+print(f"cautionhours with tomorrow: {s.model.caution_hours}")
+
+s.cancel()
 
 """
 what to do if i call scheduler at 11AM > 7AM? then the prices for the whole range are not available until 2PM. Should I hold, or charge as per usual (and deduct from remaining charge) if prices are low enough in regular calculation?
