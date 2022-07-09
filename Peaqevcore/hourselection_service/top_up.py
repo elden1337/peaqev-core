@@ -10,13 +10,21 @@ def top_up(model:TopUpDTO) -> HourObject:
 
     today = list(model.prices[model.hour-1:23])
     tomorrow = list(model.prices_tomorrow[0:model.hour-1])
-    
+    cheap_max = 0
+
     if max(today) < (sum(tomorrow)/len(tomorrow)):
         is_today = True
         cheap_max = max(today)
     elif max(tomorrow) < (sum(today)/len(today)):
         is_today = False
         cheap_max = max(tomorrow)
+    
+    if cheap_max == 0:
+        return HourObject(
+        nh=model.nh,
+        ch=model.ch,
+        dyn_ch=model.dyn_ch
+        )
     
     result = _remove_and_add_for_top_up(
         model=HoursDTO(
