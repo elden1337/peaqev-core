@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 from .models.enums import Dividents
 from .models.queryservice_model import queryservicemodel as model
 
@@ -21,10 +22,10 @@ class QueryService:
         return any(main_ret) if len(main_ret) > 0 else True
 
     @staticmethod
-    def datepart(logic: str, dtpart: str, args: list[int], timer: datetime) -> bool:
-        if not args:
+    def datepart(logic: str, dtpart: str, arguments: List[int], timer: datetime) -> bool:
+        if not arguments:
             return True
-        arg = args if len(args) > 1 else args[0]
+        arg = arguments if len(arguments) > 1 else arguments[0]
         _logic = QueryService.LOGIC.get(logic)(
             QueryService.DATETIMEPARTS.get(dtpart)(timer), 
             arg

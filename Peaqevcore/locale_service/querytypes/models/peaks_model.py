@@ -1,7 +1,7 @@
 from ....PeaqErrors import PeaqKeyError, PeaqValueError
 from dataclasses import dataclass
 from datetime import datetime
-
+from typing import Dict
 
 @dataclass
 class PeaksModel:
@@ -9,15 +9,15 @@ class PeaksModel:
     _m: int = 0
     _is_dirty: bool = False
 
-    def set_init_dict(self, dict_data:dict, dt=datetime.now()) -> None:
+    def set_init_dict(self, dict_data:Dict, dt=datetime.now()) -> None:
         if dt.month == self.m:
-            ppdict = {}
+            ppdict = dict()
             for pp in dict_data.get("p"):
                 tkeys = pp.split("h")
                 ppkey = (int(tkeys[0]), int(tkeys[1]))
                 ppdict[ppkey] = dict_data.get("p").get(pp)
             if len(self._p) > 0:
-                self._p = self._p | ppdict
+                self._p = dict(self._p.items() | ppdict.items())
                 print(f"new existing: {self._p}")
             else: 
                 self._p = ppdict

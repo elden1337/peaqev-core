@@ -1,5 +1,5 @@
 from .querytypes.models.enums import CalendarPeriods
-from typing import List
+from typing import Dict, List
 from dataclasses import dataclass
 from datetime import datetime, date, time
 
@@ -11,7 +11,7 @@ FREECHARGE_FUNC = {
 
 @dataclass
 class FreeChargePattern:
-    pattern: List[dict[CalendarPeriods,List[int]]]
+    pattern: List[Dict[CalendarPeriods,List[int]]]
 
     def free_charge(self, dt = datetime.now()) -> bool:
         total = []

@@ -2,7 +2,7 @@ import time
 from datetime import datetime
 from ..models.chargerstates import CHARGERSTATES
 from abc import abstractmethod
-
+from typing import List, Dict
 
 class ChargeControllerBase:  
     def __init__(
@@ -10,8 +10,8 @@ class ChargeControllerBase:
         #init types from core
         #charger_states:list[CHARGERSTATES],
         #init types from core
-        charger_state_translation:dict[CHARGERSTATES,list[str]],
-        non_hours:list[int] = [],
+        charger_state_translation:Dict[CHARGERSTATES,List[str]],
+        non_hours:List[int] = [],
         timeout:int = 180
     ):
         self._charger_state_translation = self._check_charger_states(charger_state_translation)
@@ -185,7 +185,7 @@ class ChargeControllerBase:
         """
         return (predicted_energy * 1000) > ((current_peak * 1000) * threshold_stop)
 
-    def _check_charger_states(self, input:dict[CHARGERSTATES,list[str]]) -> dict[CHARGERSTATES,list[str]]:
+    def _check_charger_states(self, input:Dict[CHARGERSTATES,List[str]]) -> Dict[CHARGERSTATES,List[str]]:
         if len(input) == 0:
             raise AssertionError
         return input
