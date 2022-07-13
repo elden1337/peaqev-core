@@ -96,6 +96,12 @@ class SE_Partille(Locale_Type):
     query_model = QUERYTYPES[QUERYTYPE_BASICMAX]
 
 @dataclass(frozen=True)
+class SE_FalbygdensEnergi(Locale_Type):
+    observed_peak = QUERYTYPE_BASICMAX
+    charged_peak = QUERYTYPE_BASICMAX
+    query_model = QUERYTYPES[QUERYTYPE_BASICMAX]
+
+@dataclass(frozen=True)
 class SE_Nacka_normal(Locale_Type):
     observed_peak = QUERYTYPE_AVERAGEOFTHREEHOURS_MIN
     charged_peak = QUERYTYPE_AVERAGEOFTHREEHOURS

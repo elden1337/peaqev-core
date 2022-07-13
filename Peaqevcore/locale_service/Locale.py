@@ -1,6 +1,6 @@
 from .countries.default import Default
 from .countries.belgium import VregBelgium
-from .countries.sweden import SE_Bjerke_Energi, SE_Gothenburg, SE_Karlstad, SE_Kristinehamn, SE_Linde_Energi, SE_Malung_Salen, SE_Nacka_normal, SE_NACKA_timediff, SE_Partille, SE_SHE_AB, SE_Skovde, SE_Sollentuna
+from .countries.sweden import SE_Bjerke_Energi, SE_FalbygdensEnergi, SE_Gothenburg, SE_Karlstad, SE_Kristinehamn, SE_Linde_Energi, SE_Malung_Salen, SE_Nacka_normal, SE_NACKA_timediff, SE_Partille, SE_SHE_AB, SE_Skovde, SE_Sollentuna
 from .countries.norway import NO_AgderEnergi, NO_GlitreEnergi, NO_LNett, NO_Tensio
 
 
@@ -23,6 +23,7 @@ LOCALE_NO_AGDER_ENERGI = "Agder Energi, Norway"
 LOCALE_NO_LNETT = "LNett, Norway"
 LOCALE_NO_TENSIO = "Tensio, Norway"
 LOCALE_SE_LINDE_ENERGI = "Linde Energi, Sweden"
+LOCALE_SE_FALBYDGENS_ENERGI = "Falbygdens Energi, Sweden"
 
 LOCALETYPEDICT = {
     LOCALE_DEFAULT: Default,
@@ -41,7 +42,8 @@ LOCALETYPEDICT = {
     LOCALE_NO_AGDER_ENERGI: NO_AgderEnergi,
     LOCALE_NO_LNETT: NO_LNett,
     LOCALE_NO_TENSIO: NO_Tensio,
-    LOCALE_SE_LINDE_ENERGI: SE_Linde_Energi
+    LOCALE_SE_LINDE_ENERGI: SE_Linde_Energi,
+    LOCALE_SE_FALBYDGENS_ENERGI: SE_FalbygdensEnergi
 }
 
 """Lookup locales for config flow"""
@@ -51,8 +53,8 @@ LOCALES = [
     LOCALE_NO_GLITRE_ENERGI,
     LOCALE_NO_LNETT,
     LOCALE_NO_TENSIO,
-    LOCALE_SE_GOTHENBURG,
-    LOCALE_SE_KARLSTAD,
+    LOCALE_SE_BJERKE_ENERGI,
+    LOCALE_SE_FALBYDGENS_ENERGI,
     LOCALE_SE_KRISTINEHAMN,
     LOCALE_SE_LINDE_ENERGI,
     LOCALE_SE_MALUNG_SALEN,
@@ -61,7 +63,6 @@ LOCALES = [
     LOCALE_SE_SALA,
     LOCALE_SE_SKOVDE,
     LOCALE_SE_SOLLENTUNA,
-    LOCALE_SE_BJERKE_ENERGI,
     LOCALE_DEFAULT
     ]
 
