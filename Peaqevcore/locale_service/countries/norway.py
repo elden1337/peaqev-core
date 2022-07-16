@@ -51,3 +51,10 @@ class NO_Lede(Locale_Type):
     observed_peak = QUERYTYPE_AVERAGEOFTHREEDAYS_MIN
     charged_peak = QUERYTYPE_AVERAGEOFTHREEDAYS
     query_model = QUERYTYPES[QUERYTYPE_AVERAGEOFTHREEDAYS]
+
+
+@dataclass(frozen=True)
+class NO_BKK(Locale_Type):
+    observed_peak = QUERYTYPE_AVERAGEOFTHREEDAYS_MIN
+    charged_peak = QUERYTYPE_AVERAGEOFTHREEDAYS
+    query_model = QUERYTYPES[QUERYTYPE_AVERAGEOFTHREEDAYS]
