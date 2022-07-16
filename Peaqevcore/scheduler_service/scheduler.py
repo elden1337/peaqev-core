@@ -1,6 +1,6 @@
 from datetime import datetime, date, time
 import math
-from schedule_session import ScheduleSession
+from .schedule_session import ScheduleSession
 
 # MOCKPRICES = [0.006, 0.005, 0.006, 0.01, 0.015, 0.02, 2.115, 2.241, 2.278, 2.279, 2.282, 2.276, 2.271, 2.195, 2.122, 2.029, 2.229, 2.267, 2.271, 2.25, 2.148, 0.138, 0.045, 0.035]
 # MOCKPRICES_TOMORROW = [0.036, 0.031, 0.031, 0.033, 0.034, 0.032, 0.033, 0.04, 0.042, 0.044, 0.044, 0.041, 0.037, 0.032, 0.021, 0.02, 0.032, 0.037, 0.043, 0.048, 0.267, 0.161, 0.041, 0.031]
