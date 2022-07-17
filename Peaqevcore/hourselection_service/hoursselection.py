@@ -125,15 +125,18 @@ class Hoursselectionbase:
         pricedict = dict
         if prices is not None and len(prices) > 1:
             pricedict = HourSelectionHelpers._create_dict(prices)
-            normalized_pricedict = HourSelectionHelpers._create_dict(HourSelectionHelpers._normalize_prices(prices))
-            """
-            Curve is too flat if stdev is <= 0.05. 
-            If so we don't do any specific non or caution-hours based on pricing.
-            """
+            normalized_pricedict = HourSelectionHelpers._create_dict(
+                HourSelectionHelpers._normalize_prices(prices)
+                )
             if stat.stdev(prices) > 0.05:
                 prices_ranked = HourSelectionHelpers._rank_prices(pricedict, normalized_pricedict)
                 ready_hours = self._determine_hours(prices_ranked, prices)
-                return HourObjectExtended(ready_hours.nh, ready_hours.ch, ready_hours.dyn_ch, pricedict)
+                return HourObjectExtended(
+                    ready_hours.nh, 
+                    ready_hours.ch, 
+                    ready_hours.dyn_ch, 
+                    pricedict
+                    )
             return HourObjectExtended([], [], dict(), pricedict)
         
     def _add_remove_limited_hours(self, hours: HourObjectExtended) -> HourObject:
@@ -183,10 +186,7 @@ class Hoursselectionbase:
             elif self.model.options.cautionhour_type == CAUTIONHOURTYPE[CAUTIONHOURTYPE_INTERMEDIATE]:
                 _permax += 0.05
 
-            if float(price_list[p]["permax"]) <= self.model.options.cautionhour_type:
-                _ch.append(p)
-                _dyn_ch[p] = round(_permax,2)
-            elif float(price_list[p]["val"]) <= (sum(prices)/len(prices)):
+            if float(price_list[p]["permax"]) <= self.model.options.cautionhour_type or float(price_list[p]["val"]) <= (sum(prices)/len(prices)):
                 _ch.append(p)
                 _dyn_ch[p] = round(_permax,2)
             else:
@@ -195,12 +195,28 @@ class Hoursselectionbase:
         return HourObject(_nh, _ch, _dyn_ch)
     
     def get_average_kwh_price(self, testhour:int = None):
-        hour = datetime.now().hour if testhour is None else testhour
+        ret = self._get_charge_or_price(testhour=testhour)
+        return round(sum(ret.values())/len(ret),2)
+        
+    def get_total_charge(self, currentpeak:float, testhour:int = None) -> float:
+        ret = self._get_charge_or_price(currentpeak, testhour)
+        return round(sum(ret.values()),1)
+
+    def _get_charge_or_price(self, currentpeak:float = None, testhour:int = None) -> dict:
+        hour = self._set_hour(testhour)
         ret = dict()
 
-        def _looper(h:int):
+        def _looper_charge(h:int):
             if h in self.dynamic_caution_hours:
-                    if self.prices_tomorrow is not None and len(self.prices_tomorrow) > 0:
+                    ret[h] = self.dynamic_caution_hours[h] * currentpeak
+            elif h in self.non_hours:
+                ret[h] = 0
+            else:
+                ret[h] = currentpeak
+
+        def _looper_price(h:int, tomorrow_active:bool):
+            if h in self.dynamic_caution_hours:
+                    if tomorrow_active:
                         if h < hour and len(self.prices_tomorrow) > 0:
                             ret[h] = self.dynamic_caution_hours[h] * self.prices_tomorrow[h]
                     if h >= hour:
@@ -213,34 +229,19 @@ class Hoursselectionbase:
 
         if self.prices_tomorrow is None:
             for h in range(hour,24):
-                _looper(h)
+                if currentpeak is not None:
+                    _looper_charge(h)
+                else:
+                    _looper_price(h, False)
         else:
             for h in range(hour,(hour+24)):
                 h = h-24 if h > 23 else h
-                _looper(h)
-        
-        return round(sum(ret.values())/len(ret),2)
-        
-    def get_total_charge(self, currentpeak:float, testhour:int = None) -> float:
-        hour = datetime.now().hour if testhour is None else testhour
-        ret = dict()
+                if currentpeak is not None:
+                    _looper_charge(h)
+                else:
+                    _looper_price(h, True)
+        return ret
 
-        def _looper(h:int):
-            if h in self.dynamic_caution_hours:
-                    ret[h] = self.dynamic_caution_hours[h] * currentpeak
-            elif h in self.non_hours:
-                ret[h] = 0
-            else:
-                ret[h] = currentpeak
-
-        if self.prices_tomorrow is None:
-            for h in range(hour,24):
-                _looper(h)
-        else:
-            for h in range(hour,(hour+24)):
-                h = h-24 if h > 23 else h
-                _looper(h)
-        
-        return round(sum(ret.values()),1)
-
+    def _set_hour(self, testhour:int = None) -> int:
+        return datetime.now().hour if testhour is None else testhour
 
