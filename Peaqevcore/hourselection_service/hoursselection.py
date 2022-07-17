@@ -11,6 +11,7 @@ from ..models.const import (
 
 from .hoursselection_helpers import HourSelectionHelpers
 from .models.hourobject import HourObject, HourObjectExtended
+from .models.hourselectionmodels import HourSelectionModel, HourSelectionOptions
 
 class Hoursselectionbase:
     def __init__(
@@ -21,15 +22,14 @@ class Hoursselectionbase:
             allow_top_up: bool = False,
             base_mock_hour: int = None
     ):
-        self._prices = None
-        self._prices_tomorrow = None
-        self._non_hours = []
-        self._caution_hours = []
-        self._dynamic_caution_hours = {}
-        self._absolute_top_price = self._set_absolute_top_price(absolute_top_price)
-        self._cautionhour_type: float = cautionhour_type
-        self._min_price: float = min_price
-        self._allow_top_up: bool = allow_top_up
+        self.model = HourSelectionModel(
+            options=HourSelectionOptions(
+                cautionhour_type=cautionhour_type, 
+                absolute_top_price=self._set_absolute_top_price(absolute_top_price), 
+                min_price=min_price, 
+                allow_top_up=allow_top_up
+                )
+            )
         self._base_mock_hour: int = base_mock_hour
         self._validate()
     
@@ -41,62 +41,42 @@ class Hoursselectionbase:
         return float(val)
 
     def _validate(self):
-            assert 0 < self._cautionhour_type <= 1
-            assert len(self._caution_hours) == 0
-            assert len(self._non_hours) == 0
+            assert 0 < self.model.options.cautionhour_type <= 1
+            # assert len(self.model.hours.caution_hours) == 0
+            # assert len(self.model.hours.non_hours) == 0
 
     @property
-    def non_hours(self):
-        return self._non_hours
-
-    @non_hours.setter
-    def non_hours(self, val):
-        self._non_hours = val
+    def non_hours(self) -> list:
+        return self.model.hours.non_hours
 
     @property
-    def caution_hours(self):
-        return self._caution_hours
-
-    @caution_hours.setter
-    def caution_hours(self, val):
-        self._caution_hours = val
+    def caution_hours(self) -> list:
+        return self.model.hours.caution_hours
 
     @property
     def dynamic_caution_hours(self) -> dict:
-        return self._dynamic_caution_hours
-
-    @dynamic_caution_hours.setter
-    def dynamic_caution_hours(self, val):
-        self._dynamic_caution_hours = val
+        return self.model.hours.dynamic_caution_hours
 
     @property
     def prices(self) -> list:
-        return self._prices
+        return self.model.prices_today
 
     @prices.setter
     def prices(self, val):
-        self._prices = val
-        if self._prices == self.prices_tomorrow:
+        self.model.prices_today = val
+        if self.prices == self.prices_tomorrow:
             self.prices_tomorrow = None
         else:
             self.update()
 
     @property
     def prices_tomorrow(self) -> list:
-        return self._prices_tomorrow
+        return self.model.prices_tomorrow
 
     @prices_tomorrow.setter
     def prices_tomorrow(self, val):
-        self._prices_tomorrow = HourSelectionHelpers._convert_none_list(val)
+        self.model.prices_tomorrow = HourSelectionHelpers._convert_none_list(val)
         self.update()
-
-    @property
-    def absolute_top_price(self) -> float:
-        return self._absolute_top_price
-
-    @property
-    def min_price(self) -> float:
-        return self._min_price
 
     def update(self, testhour:int = None):
         today_ready = self._update_per_day(self.prices)
@@ -108,41 +88,41 @@ class Hoursselectionbase:
             if tomorrow_ready is not None:
                 hours_tomorrow = self._add_remove_limited_hours(tomorrow_ready)
 
-        self.non_hours = []
-        self.caution_hours = []
-        self.dynamic_caution_hours = {}
+        self.model.hours.non_hours = []
+        self.model.hours.caution_hours = []
+        self.model.hours.dynamic_caution_hours = {}
 
         hour = testhour if testhour is not None else self._base_mock_hour if self._base_mock_hour is not None else datetime.now().hour
         
-        self.non_hours.extend(h for h in hours_today.nh if h >= hour)
-        self.caution_hours.extend(h for h in hours_today.ch if h >= hour)
+        self.model.hours.non_hours.extend(h for h in hours_today.nh if h >= hour)
+        self.model.hours.caution_hours.extend(h for h in hours_today.ch if h >= hour)
         for h in hours_today.dyn_ch:
             if h >= hour:
-                self._dynamic_caution_hours[h] = hours_today.dyn_ch[h]
+                self.model.hours.dynamic_caution_hours[h] = hours_today.dyn_ch[h]
         
         if self.prices_tomorrow is not None and len(self.prices_tomorrow) > 0:
-            self.non_hours.extend(h for h in hours_tomorrow.nh if h < hour)
-            self.caution_hours.extend(h for h in hours_tomorrow.ch if h < hour)
+            self.model.hours.non_hours.extend(h for h in hours_tomorrow.nh if h < hour)
+            self.model.hours.caution_hours.extend(h for h in hours_tomorrow.ch if h < hour)
             for h in hours_tomorrow.dyn_ch:
                 if h < hour:
-                    self._dynamic_caution_hours[h] = hours_tomorrow.dyn_ch[h]
+                    self.model.hours.dynamic_caution_hours[h] = hours_tomorrow.dyn_ch[h]
         
-        if self._allow_top_up is True and self.prices_tomorrow is not None and len(self.prices_tomorrow) > 0:
+        if self.model.options.allow_top_up is True and self.prices_tomorrow is not None and len(self.prices_tomorrow) > 0:
             ret = top_up(TopUpDTO(
                 self.non_hours, 
                 self.caution_hours, 
                 self.dynamic_caution_hours, 
-                self.absolute_top_price,
-                self.min_price,
+                self.model.options.absolute_top_price,
+                self.model.options.min_price,
                 hour, 
                 hours_today, 
                 hours_tomorrow, 
                 self.prices, 
                 self.prices_tomorrow
                 ))
-            self.non_hours = ret.nh
-            self.caution_hours = ret.ch
-            self.dynamic_caution_hours = ret.dyn_ch
+            self.model.hours.non_hours = ret.nh
+            self.model.hours.caution_hours = ret.ch
+            self.model.hours.dynamic_caution_hours = ret.dyn_ch
 
     def _update_per_day(self, prices) -> HourObjectExtended:
         pricedict = dict
@@ -161,16 +141,16 @@ class Hoursselectionbase:
         
     def _add_remove_limited_hours(self, hours: HourObjectExtended) -> HourObject:
         """Removes cheap hours and adds expensive hours set by user limitation"""
-        if self._absolute_top_price is not None:
+        if self.model.options.absolute_top_price is not None:
                 ret = self._add_expensive_non_hours(hours)
         else: 
             ret = HourObject(hours.nh, hours.ch, hours.dyn_ch)
-        if self._min_price > 0:
+        if self.model.options.min_price > 0:
             ret = self._remove_cheap_hours(hours)
         return ret
 
     def _remove_cheap_hours(self, hours: HourObjectExtended) -> HourObject:
-        lst = (h for h in hours.pricedict if hours.pricedict[h] < self._min_price)
+        lst = (h for h in hours.pricedict if hours.pricedict[h] < self.model.options.min_price)
         for h in lst:
             if h in hours.nh:
                 hours.nh.remove(h)
@@ -180,7 +160,7 @@ class Hoursselectionbase:
         return HourObject(hours.nh, hours.ch, hours.dyn_ch)
 
     def _add_expensive_non_hours(self, readyhours:HourObjectExtended) -> HourObject:
-        lst = (h for h in readyhours.pricedict if readyhours.pricedict[h] >= self._absolute_top_price)
+        lst = (h for h in readyhours.pricedict if readyhours.pricedict[h] >= self.model.options.absolute_top_price)
         for h in lst:
             if h not in readyhours.nh:
                 readyhours.nh.append(h)
@@ -198,11 +178,11 @@ class Hoursselectionbase:
         _ch = []
         for p in price_list:
             _permax = round(abs(price_list[p]["permax"] - 1), 2)
-            if self._cautionhour_type == CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE]:
+            if self.model.options.cautionhour_type == CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE]:
                 _permax += 0.15
-            elif self._cautionhour_type == CAUTIONHOURTYPE[CAUTIONHOURTYPE_INTERMEDIATE]:
+            elif self.model.options.cautionhour_type == CAUTIONHOURTYPE[CAUTIONHOURTYPE_INTERMEDIATE]:
                 _permax += 0.05
-            if float(price_list[p]["permax"]) <= self._cautionhour_type:
+            if float(price_list[p]["permax"]) <= self.model.options.cautionhour_type:
                 _ch.append(p)
                 _dyn_ch[p] = round(_permax,2)
             elif float(price_list[p]["val"]) <= (sum(prices)/len(prices)):
@@ -217,17 +197,17 @@ class Hoursselectionbase:
         ret = {}
 
         def _looper(h:int):
-            if h in self._dynamic_caution_hours:
-                    if self._prices_tomorrow is not None and len(self._prices_tomorrow) > 0:
-                        if h < hour and len(self._prices_tomorrow) > 0:
-                            ret[h] = self._dynamic_caution_hours[h] * self._prices_tomorrow[h]
+            if h in self.dynamic_caution_hours:
+                    if self.prices_tomorrow is not None and len(self.prices_tomorrow) > 0:
+                        if h < hour and len(self.prices_tomorrow) > 0:
+                            ret[h] = self.dynamic_caution_hours[h] * self.prices_tomorrow[h]
                     if h >= hour:
-                        ret[h] = self._dynamic_caution_hours[h] * self._prices[h]
-            elif h not in self._non_hours:
-                if h < hour and len(self._prices_tomorrow) > 0:
-                    ret[h] = self._prices_tomorrow[h]
+                        ret[h] = self.dynamic_caution_hours[h] * self.prices[h]
+            elif h not in self.non_hours:
+                if h < hour and len(self.prices_tomorrow) > 0:
+                    ret[h] = self.prices_tomorrow[h]
                 if h >= hour:
-                    ret[h] = self._prices[h]
+                    ret[h] = self.prices[h]
 
         if self.prices_tomorrow is None:
             for h in range(hour,24):
@@ -244,9 +224,9 @@ class Hoursselectionbase:
         ret = {}
 
         def _looper(h:int):
-            if h in self._dynamic_caution_hours:
-                    ret[h] = self._dynamic_caution_hours[h] * currentpeak
-            elif h in self._non_hours:
+            if h in self.dynamic_caution_hours:
+                    ret[h] = self.dynamic_caution_hours[h] * currentpeak
+            elif h in self.non_hours:
                 ret[h] = 0
             else:
                 ret[h] = currentpeak

@@ -128,9 +128,8 @@ def test_add_expensive_non_hours():
     pass
 
 def test_add_expensive_non_hours_flat_curve():
-    r = h()
+    r = h(absolute_top_price=0.5)
     r.prices = MOCKPRICES_FLAT
-    r._absolute_top_price = 0.5
     r.update(18)
     assert len(r.non_hours) == 6
 
@@ -153,7 +152,7 @@ def test_mockprices4_suave():
     r.update(0)
     assert r.non_hours ==[7,8,9,10]
     assert r.caution_hours ==[5,6,11,12,13,17,18,19,20,21,22]
-    assert list(r._dynamic_caution_hours.keys()) == r.caution_hours
+    assert list(r.dynamic_caution_hours.keys()) == r.caution_hours
 
 def test_mockprices4_intermediate():
     r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_INTERMEDIATE])
@@ -161,7 +160,7 @@ def test_mockprices4_intermediate():
     r.update(0)
     assert r.non_hours==[6,7,8,9,10,11,12,19,20,21]
     assert r.caution_hours ==[5,13,17,18,22] 
-    assert list(r._dynamic_caution_hours.keys()) == r.caution_hours
+    assert list(r.dynamic_caution_hours.keys()) == r.caution_hours
 
 def test_mockprices4_aggressive():
     r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_AGGRESSIVE])
@@ -169,7 +168,7 @@ def test_mockprices4_aggressive():
     r.update(0)
     assert r.non_hours == [6,7,8,9,10,11,12,18,19,20,21]
     assert r.caution_hours == [5,13,17,22]
-    assert list(r._dynamic_caution_hours.keys()) == r.caution_hours
+    assert list(r.dynamic_caution_hours.keys()) == r.caution_hours
 
 def test_mockprices5_suave():
     r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE])
@@ -177,7 +176,7 @@ def test_mockprices5_suave():
     r.update(0)
     assert r.non_hours == [7,8,9,10]
     assert r.caution_hours == [5,6,11,12,13,14,15,16,17,18,19,20,21]
-    assert list(r._dynamic_caution_hours.keys()) == r.caution_hours
+    assert list(r.dynamic_caution_hours.keys()) == r.caution_hours
 
 def test_mockprices5_intermediate():
     r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_INTERMEDIATE])
@@ -185,7 +184,7 @@ def test_mockprices5_intermediate():
     r.update(0)
     assert r.non_hours == [6,7,8,9,10,11,12]
     assert r.caution_hours == [5,13,14,15,16,17,18,19,20,21]
-    assert list(r._dynamic_caution_hours.keys()) == r.caution_hours
+    assert list(r.dynamic_caution_hours.keys()) == r.caution_hours
 
 def test_mockprices5_aggressive():
     r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_AGGRESSIVE])
@@ -193,38 +192,38 @@ def test_mockprices5_aggressive():
     r.update(0)
     assert r.non_hours == [6,7,8,9,10,11,12,13]
     assert r.caution_hours == [5,14,15,16,17,18,19,20,21]
-    assert list(r._dynamic_caution_hours.keys()) == r.caution_hours
+    assert list(r.dynamic_caution_hours.keys()) == r.caution_hours
 
 
 def test_dynamic_cautionhours_no_max_price_suave():
     r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE])
     r.prices = MOCKPRICES5
     r.update(0)
-    assert list(r._dynamic_caution_hours.keys()) == r.caution_hours
+    assert list(r.dynamic_caution_hours.keys()) == r.caution_hours
     assert r.non_hours == [7, 8, 9, 10]
-    assert r._dynamic_caution_hours == {5: 0.74, 6: 0.4, 11: 0.43, 12: 0.45, 13: 0.69, 14: 0.77, 15: 0.83, 16: 0.77, 17: 0.77, 18: 0.71, 19: 0.72, 20: 0.74, 21: 0.71}
+    assert r.dynamic_caution_hours == {5: 0.74, 6: 0.4, 11: 0.43, 12: 0.45, 13: 0.69, 14: 0.77, 15: 0.83, 16: 0.77, 17: 0.77, 18: 0.71, 19: 0.72, 20: 0.74, 21: 0.71}
 
 def test_dynamic_cautionhours_with_max_price_suave():
     r = h(absolute_top_price=2, cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE])
     r.prices = MOCKPRICES5
     r.update(0)
-    assert list(r._dynamic_caution_hours.keys()) == r.caution_hours
+    assert list(r.dynamic_caution_hours.keys()) == r.caution_hours
     assert r.non_hours == [6, 7, 8, 9, 10,11,12]
-    assert r._dynamic_caution_hours == {5: 0.74, 13: 0.69, 14: 0.77, 15: 0.83, 16: 0.77, 17: 0.77, 18: 0.71, 19: 0.72, 20: 0.74, 21: 0.71}
+    assert r.dynamic_caution_hours == {5: 0.74, 13: 0.69, 14: 0.77, 15: 0.83, 16: 0.77, 17: 0.77, 18: 0.71, 19: 0.72, 20: 0.74, 21: 0.71}
 
 
 def test_dynamic_cautionhours_no_max_price_aggressive():
     r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_AGGRESSIVE])
     r.prices = MOCKPRICES5
     r.update(0)
-    assert list(r._dynamic_caution_hours.keys()) == r.caution_hours
+    assert list(r.dynamic_caution_hours.keys()) == r.caution_hours
     assert r.non_hours == [6, 7, 8, 9, 10, 11, 12,13]
 
 def test_prices7():
     r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_AGGRESSIVE])
     r.prices = MOCKPRICES7
     r.update(0)
-    assert list(r._dynamic_caution_hours.keys()) == r.caution_hours
+    assert list(r.dynamic_caution_hours.keys()) == r.caution_hours
     assert r.non_hours == [5, 6, 7, 8, 9, 10, 11, 12,13,14,17,18,19,20,21,22]
 
 
@@ -232,8 +231,8 @@ def test_dynamic_cautionhours_very_low_peaqstdev():
     r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE])
     r.prices = MOCKPRICES6
     r.update(0)
-    assert list(r._dynamic_caution_hours.keys()) == r.caution_hours
-    assert len(r.non_hours) + len(r._dynamic_caution_hours) < 24
+    assert list(r.dynamic_caution_hours.keys()) == r.caution_hours
+    assert len(r.non_hours) + len(r.dynamic_caution_hours) < 24
     
 
 def test_total_charge_just_today():
