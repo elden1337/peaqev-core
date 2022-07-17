@@ -1,17 +1,16 @@
 from datetime import datetime
 import statistics as stat
-
 from .top_up import top_up, TopUpDTO
 from ..models.const import (
     CAUTIONHOURTYPE_SUAVE,
     CAUTIONHOURTYPE_INTERMEDIATE,
-    CAUTIONHOURTYPE_AGGRESSIVE,
     CAUTIONHOURTYPE
 )
 
 from .hoursselection_helpers import HourSelectionHelpers
 from .models.hourobject import HourObject, HourObjectExtended
 from .models.hourselectionmodels import HourSelectionModel, HourSelectionOptions
+
 
 class Hoursselectionbase:
     def __init__(
@@ -81,31 +80,16 @@ class Hoursselectionbase:
     def update(self, testhour:int = None):
         today_ready = self._update_per_day(self.prices)
         hours_today = self._add_remove_limited_hours(today_ready)
-        hours_tomorrow = HourObject([],[],{})
-
-        if self.prices_tomorrow is not None and len(self.prices_tomorrow) > 0:
-            tomorrow_ready = self._update_per_day(self.prices_tomorrow)
-            if tomorrow_ready is not None:
-                hours_tomorrow = self._add_remove_limited_hours(tomorrow_ready)
-
-        self.model.hours.non_hours = []
-        self.model.hours.caution_hours = []
-        self.model.hours.dynamic_caution_hours = {}
-
+        hours_tomorrow = HourObject([],[],dict())
+        self._clear_hour_lists()
         hour = testhour if testhour is not None else self._base_mock_hour if self._base_mock_hour is not None else datetime.now().hour
-        
-        self.model.hours.non_hours.extend(h for h in hours_today.nh if h >= hour)
-        self.model.hours.caution_hours.extend(h for h in hours_today.ch if h >= hour)
-        for h in hours_today.dyn_ch:
-            if h >= hour:
-                self.model.hours.dynamic_caution_hours[h] = hours_today.dyn_ch[h]
-        
+
         if self.prices_tomorrow is not None and len(self.prices_tomorrow) > 0:
-            self.model.hours.non_hours.extend(h for h in hours_tomorrow.nh if h < hour)
-            self.model.hours.caution_hours.extend(h for h in hours_tomorrow.ch if h < hour)
-            for h in hours_tomorrow.dyn_ch:
-                if h < hour:
-                    self.model.hours.dynamic_caution_hours[h] = hours_tomorrow.dyn_ch[h]
+            hours_tomorrow = self._add_remove_limited_hours(
+                self._update_per_day(self.prices_tomorrow)
+                )
+
+        self._update_hour_lists(hours_today, hours_tomorrow, hour)
         
         if self.model.options.allow_top_up is True and self.prices_tomorrow is not None and len(self.prices_tomorrow) > 0:
             ret = top_up(TopUpDTO(
@@ -124,6 +108,19 @@ class Hoursselectionbase:
             self.model.hours.caution_hours = ret.ch
             self.model.hours.dynamic_caution_hours = ret.dyn_ch
 
+    def _clear_hour_lists(self) -> None:
+        self.model.hours.non_hours = []
+        self.model.hours.caution_hours = []
+        self.model.hours.dynamic_caution_hours = dict()
+
+    def _update_hour_lists(self, hours_today:HourObject, hours_tomorrow:HourObject, hour:int) -> None:
+        self.model.hours.non_hours.extend(h for h in hours_today.nh if h >= hour)
+        self.model.hours.non_hours.extend(h for h in hours_tomorrow.nh if h < hour)
+        self.model.hours.caution_hours.extend(h for h in hours_today.ch if h >= hour)
+        self.model.hours.caution_hours.extend(h for h in hours_tomorrow.ch if h < hour)
+        self.model.hours.dynamic_caution_hours.update({k: v for k, v in hours_today.dyn_ch.items() if k >= hour})
+        self.model.hours.dynamic_caution_hours.update({k: v for k, v in hours_tomorrow.dyn_ch.items() if k < hour})
+
     def _update_per_day(self, prices) -> HourObjectExtended:
         pricedict = dict
         if prices is not None and len(prices) > 1:
@@ -137,10 +134,13 @@ class Hoursselectionbase:
                 prices_ranked = HourSelectionHelpers._rank_prices(pricedict, normalized_pricedict)
                 ready_hours = self._determine_hours(prices_ranked, prices)
                 return HourObjectExtended(ready_hours.nh, ready_hours.ch, ready_hours.dyn_ch, pricedict)
-            return HourObjectExtended([], [], {}, pricedict)
+            return HourObjectExtended([], [], dict(), pricedict)
         
     def _add_remove_limited_hours(self, hours: HourObjectExtended) -> HourObject:
         """Removes cheap hours and adds expensive hours set by user limitation"""
+        if hours is None:
+            return HourObject([],[],dict())
+
         if self.model.options.absolute_top_price is not None:
                 ret = self._add_expensive_non_hours(hours)
         else: 
@@ -174,7 +174,7 @@ class Hoursselectionbase:
 
     def _determine_hours(self, price_list: dict, prices: list) -> HourObject:
         _nh = []
-        _dyn_ch = {}
+        _dyn_ch = dict()
         _ch = []
         for p in price_list:
             _permax = round(abs(price_list[p]["permax"] - 1), 2)
@@ -182,6 +182,7 @@ class Hoursselectionbase:
                 _permax += 0.15
             elif self.model.options.cautionhour_type == CAUTIONHOURTYPE[CAUTIONHOURTYPE_INTERMEDIATE]:
                 _permax += 0.05
+
             if float(price_list[p]["permax"]) <= self.model.options.cautionhour_type:
                 _ch.append(p)
                 _dyn_ch[p] = round(_permax,2)
@@ -190,11 +191,12 @@ class Hoursselectionbase:
                 _dyn_ch[p] = round(_permax,2)
             else:
                 _nh.append(p)
+
         return HourObject(_nh, _ch, _dyn_ch)
     
     def get_average_kwh_price(self, testhour:int = None):
         hour = datetime.now().hour if testhour is None else testhour
-        ret = {}
+        ret = dict()
 
         def _looper(h:int):
             if h in self.dynamic_caution_hours:
@@ -221,7 +223,7 @@ class Hoursselectionbase:
         
     def get_total_charge(self, currentpeak:float, testhour:int = None) -> float:
         hour = datetime.now().hour if testhour is None else testhour
-        ret = {}
+        ret = dict()
 
         def _looper(h:int):
             if h in self.dynamic_caution_hours:

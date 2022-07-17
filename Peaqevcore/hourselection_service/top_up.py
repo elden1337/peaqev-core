@@ -68,12 +68,12 @@ def _remove_and_add_for_top_up(
     ) -> HoursDTO:
 
     removed = 0
-    remove_lists = {
-        "nh_remove": [],
-        "ch_remove": [],
-        "dyn_ch_remove": []
-    }
-
+    remove_lists = dict(
+        nh_remove= [],
+        ch_remove= [],
+        dyn_ch_remove= []
+    )
+        
     if today is True:
         removedict = today_dict
         adddict = tomorrow_dict
@@ -158,7 +158,7 @@ def _remove_dynamic_hours(checklist: list, deletedict: dict):
             deletedict.pop(i)
 
 def _create_partial_dict(input: list, hour:int, today:bool = True) -> dict:
-    ret = {}
+    ret = dict()
     if today:
         dictrange = range(hour,24)
     else:
