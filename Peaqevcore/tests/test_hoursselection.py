@@ -358,6 +358,13 @@ def test_new_test_4():
     r.update(MOCKHOUR)
     assert r.non_hours == [13,14,15,16,17,18,19,20,21,22]
     
+def test_negative_prices():
+    MOCKHOUR = 13
+    r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE], absolute_top_price=0, min_price=0.5, allow_top_up=False)
+    r.prices = [0.021,0.02,0.02,0.019,0.019,0.019,0.018,0.019,0.019,0.02,0.02,0.014,0.001,-0.001,-0.001,0,0.014,0.019,0.02,0.744,2.23,0.463,0.024,0.019]
+    r.prices_tomorrow = [0.02,0.019,0.019, 0.019, 0.019, 0.02, 0.02,0.02,0.024, 0.037, 0.047, 0.052, 0.052, 0.054, 0.058, 0.064, 0.1, 0.17, 0.212, 0.529, 0.792, 0.331, 0.394, 0.18]
+    r.update(MOCKHOUR)
+    assert r.non_hours == [20]
 
 
 # def test_new_topup():

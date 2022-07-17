@@ -4,7 +4,7 @@ import statistics as stat
 class HourSelectionHelpers:
     @staticmethod
     def _create_dict(input: list):
-        ret = {}
+        ret = dict()
         for idx, val in enumerate(input):
             ret[idx] = val
         try:
@@ -55,17 +55,23 @@ class HourSelectionHelpers:
     @staticmethod
     def _normalize_prices(prices:list) -> list:
         min_price = min(prices)
+        c = 0
+        if min_price <= 0:
+            c = abs(min_price) + 0.01
         ret = []
         for p in prices:
-            ret.append(p/min_price)
+            pp = p+c
+            divider = min_price if min_price > 0 else c
+            ret.append(pp/divider)
         return ret
 
     @staticmethod
     def _rank_prices(hourdict: dict, normalized_hourdict: dict) -> dict:
-        ret = {}
+        ret = dict()
         _maxval = max(hourdict.values())
         _max_normalized = max(normalized_hourdict.values())
         peaqstdev = _maxval/abs(_max_normalized/stat.stdev(normalized_hourdict.values()))
+        
         if peaqstdev < min(hourdict.values()):
             peaqstdev = peaqstdev + min(hourdict.values())
         for key in hourdict:
