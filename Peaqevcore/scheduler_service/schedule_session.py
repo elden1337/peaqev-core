@@ -8,8 +8,8 @@ class ScheduleSession:
     departuretime: datetime = datetime.min
     _hours_price: dict[datetime, float] = field(init=False)
     _hours_charge: dict[datetime, float] = field(init=False)
-    _nh:list = field(init=False)
-    _ch:dict = field(init=False)
+    _nh:list = field(default_factory=lambda : [])
+    _ch:dict = field(default_factory=lambda : {})
     MOCKDT:datetime = None
     _init_ok:bool = False
 
@@ -26,7 +26,7 @@ class ScheduleSession:
         if price[1] is not None:
             tomorrow_date = today_date + timedelta(days=1)
             for idx, p in enumerate(price[1]):
-                price_dict[datetime.combine(tomorrow_date, time(idx, 0))] = p
+                price_dict[datetime.combine(tomorrow_date, time(idx, 0))] = p        
         self._hours_price = self._filter_price_dict(price_dict, self.starttime, self.departuretime)
 
     @property
@@ -64,4 +64,5 @@ class ScheduleSession:
         self._ch = ch
 
     def _filter_price_dict(self, price_dict:dict, starttime:datetime, departuretime:datetime) -> dict:
-        return {key:value for (key,value) in price_dict.items() if starttime <= key <= departuretime}
+        ret = {key:value for (key,value) in price_dict.items() if starttime <= key <= departuretime}
+        return ret

@@ -38,6 +38,7 @@ class Scheduler:
         mockdt:datetime = datetime.now()
         ):
         """calculate based on the pricing of hours, current peak and the avg24hr energy consumption"""
+        self.model.MOCKDT = mockdt
         self.active = True
         charge_per_hour = peak - (avg24/1000)
         if charge_per_hour <= 0:
@@ -46,7 +47,6 @@ class Scheduler:
         self.model.remaining_charge -= charged_amount if charged_amount is not None else 0
         self.model.hours_price = [prices, prices_tomorrow]
         cheapest = self._sort_pricelist()
-
         self.model.hours_charge = self._get_charge_hours(
             cheapest_hours=cheapest, 
             charge_per_hour=charge_per_hour,
