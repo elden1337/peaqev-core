@@ -164,6 +164,7 @@ def _create_partial_dict(input: list, hour:int, today:bool = True) -> dict:
     else:
         dictrange = range(0,hour-1)
     assert len(dictrange) == len(input)
+    
     for idx, val in enumerate(input):
         ret[dictrange[idx]] = val
     return ret
