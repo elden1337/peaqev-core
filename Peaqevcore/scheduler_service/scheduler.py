@@ -42,6 +42,8 @@ class Scheduler:
         """calculate based on the pricing of hours, current peak and the avg24hr energy consumption"""
         self.model.MOCKDT = mockdt
         self.active = True
+        if self.model.remaining_charge <= 0 or self.model.departuretime <= mockdt:
+            return self.cancel()
         charge_per_hour = peak - (avg24/1000)
         if charge_per_hour <= 0:
             raise Exception
