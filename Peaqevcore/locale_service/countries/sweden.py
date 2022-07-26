@@ -198,3 +198,29 @@ class SE_Bjerke_Energi(Locale_Type):
     Note, high load extra is added from 06-22 during november - march. 
     This does not affect the peak, but should in future 
     """
+
+
+@dataclass(frozen=True)
+class SE_Telge_Energi(Locale_Type):
+    observed_peak = QUERYTYPE_BASICMAX
+    charged_peak = QUERYTYPE_BASICMAX
+    free_charge_pattern = FreeChargePattern([
+        {
+            CalendarPeriods.Month: [4,5,6,7,8,9,10],
+            CalendarPeriods.Weekday: [0, 1, 2, 3, 4, 5, 6],
+            CalendarPeriods.Hour: [21,22, 23, 0, 1, 2, 3, 4, 5,6]
+        }
+    ,
+        {
+            CalendarPeriods.Month: [11,12,1,2,3],
+            CalendarPeriods.Weekday: [5, 6],
+            CalendarPeriods.Hour: [21,22, 23, 0, 1, 2, 3, 4, 5,6]
+        }
+    ]
+    )
+
+    #docs: https://nya.telge.se/elnat/ny-prismodell-elnat/om-hog--och-laglasttid/
+    
+    """
+    Det högre priset gäller bara på helgfria vardagar 07.00-20.00 under november till mars.
+    """
