@@ -1,8 +1,10 @@
 from dataclasses import dataclass, field
 from datetime import datetime, time, timedelta
+from ..hourselection_service.models.hourselectionmodels import HourSelectionOptions
 
 @dataclass
 class ScheduleSession:
+    hourselection_options: HourSelectionOptions | None
     remaining_charge: float = 0
     starttime: datetime = datetime.min
     departuretime: datetime = datetime.min
@@ -12,6 +14,7 @@ class ScheduleSession:
     _ch:dict = field(default_factory=lambda : {})
     MOCKDT:datetime = None
     _init_ok:bool = False
+    _override_settings:bool = False
 
     @property
     def hours_price(self):
@@ -33,7 +36,7 @@ class ScheduleSession:
     def hours_charge(self) -> dict:
         if self._init_ok:
             return self._hours_charge
-        return {}
+        return dict()
 
     @hours_charge.setter
     def hours_charge(self, val):
@@ -65,4 +68,5 @@ class ScheduleSession:
 
     def _filter_price_dict(self, price_dict:dict, starttime:datetime, departuretime:datetime) -> dict:
         ret = {key:value for (key,value) in price_dict.items() if starttime <= key <= departuretime}
+        print(ret)
         return ret

@@ -1,12 +1,13 @@
 from datetime import datetime, date, time
 import math
+from ..hourselection_service.models.hourselectionmodels import HourSelectionOptions
 from .schedule_session import ScheduleSession
 
 
 class Scheduler:
     """This class obj is what constitutes a running scheduler."""
-    def __init__(self):
-        self.model = ScheduleSession()
+    def __init__(self, options:HourSelectionOptions = None):
+        self.model = ScheduleSession(hourselection_options=options)
         self.active = False
 
     @property
@@ -27,6 +28,7 @@ class Scheduler:
         self.model.departuretime = departuretime
         self.model.starttime = starttime
         self.model.remaining_charge = desired_charge
+        self.model._override_settings = override_settings
 
     def update(
         self,
@@ -60,8 +62,15 @@ class Scheduler:
         self.model.remaining_charge = 0
     
     def _sort_pricelist(self) -> dict:
+        if self.model._override_settings is False and self.model.hourselection_options is not None:
+            return self._filter_pricelist()    
         return dict(sorted(self.model.hours_price.items(), key=lambda item: item[1]))
     
+    def _filter_pricelist(self) -> dict:
+        filtered = {key:value for (key,value) in self.model.hours_price.items() if value <= self.model.hourselection_options.absolute_top_price}
+        ret= dict(sorted(filtered.items(), key=lambda item: item[1]))
+        return ret
+
     def _get_charge_hours(
         self, 
         cheapest_hours:dict, 
