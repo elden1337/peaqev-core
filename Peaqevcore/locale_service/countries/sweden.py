@@ -122,6 +122,7 @@ class SE_NACKA_timediff(Locale_Type):
 class SE_Malung_Salen(Locale_Type):
     observed_peak = QUERYTYPE_AVERAGEOFFIVEDAYS_MIN
     charged_peak = QUERYTYPE_AVERAGEOFFIVEDAYS
+    query_model = QUERYTYPES[QUERYTYPE_AVERAGEOFFIVEDAYS]
     free_charge_pattern = FreeChargePattern([
         {
             CalendarPeriods.Month: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
@@ -182,6 +183,7 @@ class SE_Gothenburg(Locale_Type):
 class SE_Bjerke_Energi(Locale_Type):
     observed_peak = QUERYTYPE_BASICMAX
     charged_peak = QUERYTYPE_BASICMAX
+    query_model = QUERYTYPES[QUERYTYPE_BASICMAX]
     free_charge_pattern = FreeChargePattern([
         {
             CalendarPeriods.Month: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
@@ -204,6 +206,7 @@ class SE_Bjerke_Energi(Locale_Type):
 class SE_Telge_Energi(Locale_Type):
     observed_peak = QUERYTYPE_BASICMAX
     charged_peak = QUERYTYPE_BASICMAX
+    query_model = QUERYTYPES[QUERYTYPE_BASICMAX]
     free_charge_pattern = FreeChargePattern([
         {
             CalendarPeriods.Month: [4,5,6,7,8,9,10],
@@ -220,6 +223,19 @@ class SE_Telge_Energi(Locale_Type):
     )
 
     #docs: https://nya.telge.se/elnat/ny-prismodell-elnat/om-hog--och-laglasttid/
+    
+    """
+    Det högre priset gäller bara på helgfria vardagar 07.00-20.00 under november till mars.
+    """
+
+
+@dataclass(frozen=True)
+class SE_Malarenergi(Locale_Type):
+    observed_peak = QUERYTYPE_AVERAGEOFTHREEHOURS_MIN
+    charged_peak = QUERYTYPE_AVERAGEOFTHREEHOURS
+    query_model = QUERYTYPES[QUERYTYPE_AVERAGEOFTHREEHOURS]
+
+    #docs: https://www.malarenergi.se/el/elnat/effekttariffer/
     
     """
     Det högre priset gäller bara på helgfria vardagar 07.00-20.00 under november till mars.
