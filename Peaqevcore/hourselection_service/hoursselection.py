@@ -51,6 +51,10 @@ class Hoursselectionbase:
             # assert len(self.model.hours.non_hours) == 0
 
     @property
+    def options(self) -> HourSelectionOptions:
+        return self.model.options
+
+    @property
     def non_hours(self) -> list:
         self._update_hour_lists(self.model.hours.hours_today, self.model.hours.hours_tomorrow, listtype=HourTypeList.NonHour)
         return self.model.hours.non_hours
