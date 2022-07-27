@@ -1,7 +1,7 @@
-from .querytypes.models.enums import CalendarPeriods
+from ...models.locale.enums import CalendarPeriods
 from typing import Dict, List
 from dataclasses import dataclass
-from datetime import datetime, date, time
+from datetime import datetime
 
 FREECHARGE_FUNC = {
     CalendarPeriods.Hour: lambda a, dtp: dtp.hour in a,

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from ..locale_service.free_charge import FreeChargePattern
+from ..locale.free_charge import FreeChargePattern
 from .querytypes.const import (
 HOURLY,
 QUARTER_HOURLY

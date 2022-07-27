@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from datetime import datetime, time, timedelta
-from ..hourselection_service.models.hourselectionmodels import HourSelectionOptions
+from ...models.hourselection.hourselectionmodels import HourSelectionOptions
+
 
 @dataclass
 class ScheduleSession:

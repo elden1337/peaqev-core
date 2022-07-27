@@ -1,5 +1,5 @@
-from ..util import _convert_quarterly_minutes
-from ..PeaqErrors import PeaqValueError
+from ...util import _convert_quarterly_minutes
+from ...PeaqErrors import PeaqValueError
 
 
 class PredictionBase:

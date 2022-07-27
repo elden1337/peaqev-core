@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List
-from .models.enums import Dividents
-from .models.queryservice_model import queryservicemodel as model
+from ....models.locale.enums import Dividents
+from ....models.locale.queryservice_model import queryservicemodel as model
 
 class QueryService:
     def __init__(self, args: model=model()):

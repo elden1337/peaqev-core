@@ -13,10 +13,10 @@ from .const import (
     QUERYTYPE_SOLLENTUNA
     )
 from .queryservice import QueryService
-from .models.peaks_model import PeaksModel
-from .models.enums import SumTypes, TimePeriods
-from .models.sumcounter import SumCounter
-from .models.queryproperties import QueryProperties
+from ....models.locale.peaks_model import PeaksModel
+from ....models.locale.enums import SumTypes, TimePeriods
+from ....models.locale.sumcounter import SumCounter
+from ....models.locale.queryproperties import QueryProperties
 
 from .querysets import QUERYSETS
 

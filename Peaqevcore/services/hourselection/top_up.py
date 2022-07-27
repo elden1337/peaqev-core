@@ -1,6 +1,6 @@
 
-from .models.hourobject import HourObject
-from .models.topupdto import HoursDTO, TopUpDTO
+from ...models.hourselection.hourobject import HourObject
+from ...models.hourselection.topupdto import HoursDTO, TopUpDTO
 import operator
 
 def top_up(model:TopUpDTO) -> HourObject:

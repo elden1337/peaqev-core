@@ -1,10 +1,10 @@
 from abc import abstractmethod
 from dataclasses import dataclass, field
-from .models.servicecalls_dto import ServiceCallsDTO
-from .models.servicecalls_options import ServiceCallsOptions
-from ..models.chargerstates import CHARGERSTATES
-from .models.charger_options import ChargerOptions
-from .models.charger_entities_model import ChargerEntitiesModel
+from ...models.chargertype.servicecalls_dto import ServiceCallsDTO
+from ...models.chargertype.servicecalls_options import ServiceCallsOptions
+from ...models.chargerstates import CHARGERSTATES
+from ...models.chargertype.charger_options import ChargerOptions
+from ...models.chargertype.charger_entities_model import ChargerEntitiesModel
 from .servicecalls import ServiceCalls
 
 CHARGERSTATES_BASE = {

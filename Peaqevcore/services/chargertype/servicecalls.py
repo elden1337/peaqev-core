@@ -1,8 +1,7 @@
 from dataclasses import dataclass, field
-from .models.servicecalls_dto import ServiceCallsDTO
-from .models.servicecalls_options import ServiceCallsOptions
-
-from .models.calltype import CallType
+from ...models.chargertype.servicecalls_dto import ServiceCallsDTO
+from ...models.chargertype.servicecalls_options import ServiceCallsOptions
+from ...models.chargertype.calltype import CallType
 from .const import (
     DOMAIN,
     ON,

@@ -1,4 +1,4 @@
-from ..session_service.session import SessionPrice
+from ..services.session.session import SessionPrice
 import pytest
 
 def test_session_fluctuate():

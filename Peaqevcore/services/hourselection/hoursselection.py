@@ -1,16 +1,15 @@
 from datetime import datetime
 import statistics as stat
 from .top_up import top_up, TopUpDTO
-from ..models.const import (
+from ...models.const import (
     CAUTIONHOURTYPE_SUAVE,
     CAUTIONHOURTYPE_INTERMEDIATE,
     CAUTIONHOURTYPE
 )
 from enum import Enum
-
 from .hoursselection_helpers import HourSelectionHelpers
-from .models.hourobject import HourObject, HourObjectExtended
-from .models.hourselectionmodels import HourSelectionModel, HourSelectionOptions
+from ...models.hourselection.hourobject import HourObject, HourObjectExtended
+from ...models.hourselection.hourselectionmodels import HourSelectionModel, HourSelectionOptions
 
 class HourTypeList(Enum):
     NonHour = 0

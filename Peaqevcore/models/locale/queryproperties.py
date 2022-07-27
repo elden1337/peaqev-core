@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from .enums import SumTypes, TimePeriods
-from ..queryservice import QueryService
+from ...services.locale.querytypes.queryservice import QueryService
 
 @dataclass(frozen=True)
 class QueryProperties:

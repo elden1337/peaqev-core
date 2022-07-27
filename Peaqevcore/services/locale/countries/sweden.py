@@ -1,5 +1,5 @@
 from ..free_charge import FreeChargePattern
-from ..querytypes.models.enums import CalendarPeriods
+from ....models.locale.enums import CalendarPeriods
 from ..querytypes.const import (
     QUERYTYPE_AVERAGEOFFIVEDAYS, 
     QUERYTYPE_AVERAGEOFFIVEDAYS_MIN, 

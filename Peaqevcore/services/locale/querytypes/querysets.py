@@ -1,4 +1,4 @@
-from .models.queryservice_model import queryservicemodel, group, datepart_model
+from ....models.locale.queryservice_model import queryservicemodel, group, datepart_model
 from .const import (
     QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19,
     QUERYTYPE_HIGHLOAD,

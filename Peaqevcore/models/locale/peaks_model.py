@@ -1,4 +1,4 @@
-from ....PeaqErrors import PeaqKeyError, PeaqValueError
+from ...PeaqErrors import PeaqKeyError, PeaqValueError
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Dict

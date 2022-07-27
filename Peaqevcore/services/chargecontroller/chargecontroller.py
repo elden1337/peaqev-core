@@ -1,6 +1,6 @@
 import time
 from datetime import datetime
-from ..models.chargerstates import CHARGERSTATES
+from ...models.chargerstates import CHARGERSTATES
 from abc import abstractmethod
 from typing import List, Dict
 

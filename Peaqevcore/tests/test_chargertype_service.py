@@ -1,8 +1,9 @@
 import pytest
-from ..chargertype_service.chargertype_base import ChargerBase
-from ..chargertype_service.servicecalls import ServiceCalls, ServiceCallsDTO, ServiceCallsOptions
-from ..chargertype_service.models.calltype import CallType
-from ..chargertype_service.const import (
+
+from ..services.chargertype.chargertype_base import ChargerBase
+from ..services.chargertype.servicecalls import ServiceCalls, ServiceCallsDTO, ServiceCallsOptions
+from ..models.chargertype.calltype import CallType
+from ..services.chargertype.const import (
     OFF, ON, PARAMS, PAUSE, RESUME, UPDATECURRENT, DOMAIN
 )
 
