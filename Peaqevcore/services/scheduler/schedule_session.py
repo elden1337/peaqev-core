@@ -23,12 +23,12 @@ class ScheduleSession:
 
     @hours_price.setter
     def hours_price(self, price:list):
-        today_date = datetime.now().date() if self.MOCKDT is None else self.MOCKDT.date()
-        price_dict = {}
+        today_date = datetime.now() if self.MOCKDT is None else self.MOCKDT
+        price_dict = dict()
         for idx, p in enumerate(price[0]):
-            price_dict[datetime.combine(today_date, time(idx, 0))] = p
+            price_dict[datetime.combine(today_date.date(), time(idx, 0))] = p
         if price[1] is not None:
-            tomorrow_date = today_date + timedelta(days=1)
+            tomorrow_date = today_date.date() + timedelta(days=1)
             for idx, p in enumerate(price[1]):
                 price_dict[datetime.combine(tomorrow_date, time(idx, 0))] = p        
         self._hours_price = self._filter_price_dict(price_dict, self.starttime, self.departuretime)
@@ -55,19 +55,20 @@ class ScheduleSession:
         return self._ch
 
     def _make_hours(self) -> None:
-        ch = {}
+        ch = dict()
         nh = []
         _timer = datetime.combine(self.starttime.date(), time(self.starttime.hour, 0))
+        today_dt = datetime.now() if self.MOCKDT is None else self.MOCKDT
         while _timer < self.departuretime:
-            if _timer not in self.hours_charge.keys():
-                nh.append(_timer.hour)
-            elif 0 < self.hours_charge[_timer] < 1:
-                ch[_timer.hour] = self.hours_charge[_timer]
+            if _timer >= today_dt:
+                if _timer not in self.hours_charge.keys():
+                    nh.append(_timer.hour)
+                elif 0 < self.hours_charge[_timer] < 1:
+                    ch[_timer.hour] = self.hours_charge[_timer]
             _timer += timedelta(hours=1)
         self._nh = nh
         self._ch = ch
 
     def _filter_price_dict(self, price_dict:dict, starttime:datetime, departuretime:datetime) -> dict:
         ret = {key:value for (key,value) in price_dict.items() if starttime <= key <= departuretime}
-        print(ret)
         return ret
