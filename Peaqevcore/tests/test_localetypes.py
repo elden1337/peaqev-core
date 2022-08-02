@@ -4,6 +4,7 @@ import pytest
 from ..services.locale.querytypes.const import QUERYTYPE_AVERAGEOFTHREEDAYS, QUERYTYPE_AVERAGEOFTHREEHOURS, QUERYTYPE_SOLLENTUNA
 from ..services.locale.querytypes.querytypes import QUERYTYPES
 from ..services.locale.countries.sweden import SE_SHE_AB, SE_Bjerke_Energi, SE_Gothenburg, SE_Kristinehamn, SE_Skovde, SE_Sollentuna
+from ..services.locale.countries.belgium import VregBelgium
 
 def test_SE_Bjerke_Energi():
     p = SE_Bjerke_Energi
@@ -125,7 +126,6 @@ def test_peak_new_month():
     p.query_model.try_update(new_val=0.03, timestamp=datetime.combine(date(2022, 7, 1), time(0, 0)))
     assert p.query_model.observed_peak == 0.03
     
-
 def test_peak_new_hour():
     p = SE_Gothenburg
     p.query_model.try_update(new_val=1.2, timestamp=datetime.combine(date(2022, 6, 1), time(1, 30)))
@@ -145,3 +145,9 @@ def test_overridden_number_in_import():
     print(p1.peaks.p)
     #assert p1.charged_peak == 1.43
     assert len(p1.peaks._p) == 2
+
+def test_quarterly():
+    p = SE_Kristinehamn
+    assert not p.is_quarterly(p)
+    p2 = VregBelgium
+    assert p2.is_quarterly(p2)
