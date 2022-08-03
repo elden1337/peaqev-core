@@ -34,6 +34,7 @@ def test_mockprices1_caution_hours():
     assert r.caution_hours == [22]
 
 def test_mockprices1_caution_hours_aggressive():
+    # this test breaks sometimes and i do not know why.
     r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_AGGRESSIVE])
     r.prices = MOCKPRICES1
     r.update(21)
