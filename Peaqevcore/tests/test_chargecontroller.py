@@ -1,7 +1,7 @@
 from unittest import mock
 import pytest
 import time
-from ..services.chargecontroller.chargecontroller import ChargeControllerBase
+from ..services.chargecontroller.chargecontrollerbase import ChargeControllerBase
 from ..models.chargerstates import CHARGERSTATES
 
 _CHARGERSTATESMOCK = {
