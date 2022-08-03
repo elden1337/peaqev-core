@@ -105,11 +105,13 @@ class LocaleQuery:
 
     def _set_update_for_groupby(self, new_val, dt):
         if self.sum_counter.groupby in [TimePeriods.Daily, TimePeriods.UnSet]:
+            #todo: check this if it breaks the updatehour
             _datekeys = [k for k in self.peaks.p.keys() if dt[0] in k]
             if len(_datekeys) > 0:
                 if new_val > self.peaks.p.get(_datekeys[0]):
                         self.peaks.pop_key(_datekeys[0])
                         self.peaks.add_kv_pair(dt, new_val)
+            #todo: check this if it breaks the updatehour
             else:
                 self.peaks.add_kv_pair(dt, new_val)
         elif self.sum_counter.groupby == TimePeriods.Hourly:
@@ -142,7 +144,7 @@ class LocaleQuery:
                 self._peaks.p.pop(minkey)
         while len(self._peaks.p) > self.sum_counter.counter:
             self._peaks.remove_min()
-        self._peaks.set_dirty(False)
+        self._peaks.is_dirty = False
         self._update_peaks()
 
 QUERYTYPES = {

@@ -134,6 +134,20 @@ def test_peak_new_hour():
     assert p.query_model.peaks.p == {(1, 1): 1.2}
     p.query_model.try_update(new_val=1.5, timestamp=datetime.combine(date(2022, 6, 1), time(9, 30)))
     assert p.query_model.peaks.p == {(1, 9): 1.5}
+
+def test_peak_new_hour_multiple():
+    p = SE_Gothenburg
+    p.query_model.try_update(new_val=1.2, timestamp=datetime.combine(date(2022, 7, 2), time(22, 30)))
+    p.query_model.try_update(new_val=1, timestamp=datetime.combine(date(2022, 7, 16), time(22, 30)))
+    p.query_model.try_update(new_val=1.5, timestamp=datetime.combine(date(2022, 7, 17), time(20, 30)))
+    p.query_model.try_update(new_val=1.7, timestamp=datetime.combine(date(2022, 7, 17), time(22, 30)))
+    p.query_model.try_update(new_val=1.5, timestamp=datetime.combine(date(2022, 7, 19), time(22, 30)))
+    assert p.query_model.peaks.export_peaks == {'m': 7, 'p': {'2h22': 1.2, '17h22': 1.7, '19h22': 1.5}}
+    assert p.query_model.peaks.p == {(2,22): 1.2, (17,22): 1.7, (19,22): 1.5}
+    assert p.query_model.peaks.m == 7
+    p.query_model.try_update(new_val=2.5, timestamp=datetime.combine(date(2022, 7, 19), time(23, 30)))
+    assert p.query_model.peaks.export_peaks == {'m': 7, 'p': {'2h22': 1.2, '17h22': 1.7, '19h23': 2.5}}
+    assert p.query_model.peaks.p == {(2,22): 1.2, (17,22): 1.7, (19,23): 2.5}
     
 def test_overridden_number_in_import():
     to_state_machine = {'m': 7, 'p': {'1h15': 1.5}}
@@ -151,3 +165,16 @@ def test_quarterly():
     assert not p.is_quarterly(p)
     p2 = VregBelgium
     assert p2.is_quarterly(p2)
+
+def test_peak_new_month_2():
+    p = SE_Gothenburg
+    p.query_model.try_update(new_val=1.2, timestamp=datetime.combine(date(2022, 7, 2), time(22, 30)))
+    p.query_model.try_update(new_val=1, timestamp=datetime.combine(date(2022, 7, 16), time(22, 30)))
+    p.query_model.try_update(new_val=1.5, timestamp=datetime.combine(date(2022, 7, 17), time(20, 30)))
+    p.query_model.try_update(new_val=1.7, timestamp=datetime.combine(date(2022, 7, 17), time(22, 30)))
+    p.query_model.try_update(new_val=1.5, timestamp=datetime.combine(date(2022, 7, 19), time(22, 30)))
+    assert len(p.query_model.peaks._p) == 3
+    assert p.query_model.observed_peak == 1.2
+    p.query_model.try_update(new_val=0.03, timestamp=datetime.combine(date(2022, 8, 1), time(22, 30)))
+    assert p.query_model.observed_peak == 0.03
+

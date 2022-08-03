@@ -22,7 +22,7 @@ class PeaksModel:
             else: 
                 self._p = ppdict
             self._m = dict_data.get("m")
-            self._is_dirty = True
+            self.is_dirty = True
 
     @property
     def p(self) -> dict:
@@ -49,7 +49,8 @@ class PeaksModel:
     def is_dirty(self) -> bool:
         return self._is_dirty
 
-    def set_dirty(self, value: bool) -> None:
+    @is_dirty.setter
+    def is_dirty(self, value: bool) -> None:
         if value:
             self._is_dirty = value
 
@@ -57,7 +58,9 @@ class PeaksModel:
     def export_peaks(self) -> dict:
         return {
             "m": self._m,
-            "p": dict([(f"{pp[0]}h{pp[1]}", self._p.get(pp)) for pp in self._p])
+            "p": dict(
+                [(f"{pp[0]}h{pp[1]}", self._p.get(pp)) for pp in self._p]
+                )
         }
 
     @property
@@ -89,7 +92,7 @@ class PeaksModel:
 
     def reset(self) -> None:
         self._m = 0
-        self._is_dirty = False
+        self.is_dirty = False
         self._p = {}
 
     def clear(self) -> None:
