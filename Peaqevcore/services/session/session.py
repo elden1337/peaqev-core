@@ -51,7 +51,7 @@ class SessionPrice:
         except:
             self._current_power = 0
 
-    def update_price(self, price: float, mock_time: float=None):
+    def update_price(self, price: any, mock_time: float=None):
         if self._current_power > 0:
             self.update_power_reading(
                 power=self._current_power,
