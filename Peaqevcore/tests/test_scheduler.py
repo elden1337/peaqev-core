@@ -47,3 +47,18 @@ def test_scheduler_overnight_2():
     s.update(avg24=710, peak=4.71, charged_amount=0, prices=MOCKPRICES_TOMORROW,mockdt=midnight_dt)
     assert s.model.non_hours == [2,5]
     #assert s.model.hours_charge == {datetime(2022, 7, 21, 1, 0): 0.7, datetime(2022, 7, 21, 3, 0): 1, datetime(2022, 7, 21, 4, 0): 1}
+
+def test_scheduler_overnight_3():
+    s = Scheduler()
+    start_dt = datetime.strptime('22-07-20 11:00', '%y-%m-%d %H:%M')
+    dep_time_dt = datetime.strptime('22-07-21 09:00', '%y-%m-%d %H:%M')
+    s.create(desired_charge=9, departuretime=dep_time_dt, starttime=start_dt)
+    s.update(avg24=410, peak=1.5, charged_amount=0, prices=MOCKPRICES,mockdt=start_dt)
+    assert s.model.non_hours == [11,18,19,20]
+    s.update(avg24=410, peak=1.5, charged_amount=1, prices=MOCKPRICES,mockdt=datetime.strptime('22-07-20 12:05', '%y-%m-%d %H:%M'))
+    s.update(avg24=610, peak=1.5, charged_amount=0.7, prices=MOCKPRICES, prices_tomorrow=MOCKPRICES_TOMORROW,mockdt=datetime.strptime('22-07-20 13:01', '%y-%m-%d %H:%M'))
+    assert s.model.non_hours == [14, 15, 16, 17, 18,19,20,21,7,8]
+    s.update(avg24=610, peak=1.5, charged_amount=0.7, prices=MOCKPRICES, prices_tomorrow=MOCKPRICES_TOMORROW,mockdt=datetime.strptime('22-07-20 22:11', '%y-%m-%d %H:%M'))
+    assert s.model.non_hours == [7,8]
+    s.update(avg24=310, peak=1.5, charged_amount=1, prices=MOCKPRICES_TOMORROW,mockdt=datetime.strptime('22-07-21 00:03', '%y-%m-%d %H:%M'))
+    assert s.model.non_hours == [6,7,8]
