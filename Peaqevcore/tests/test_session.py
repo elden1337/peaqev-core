@@ -58,6 +58,16 @@ def test_session_full_hour():
     assert s.total_energy == 1
     assert s.total_price == 1
 
+def test_session_full_hour_no_price():
+    s = SessionPrice()
+    timer = 1651607299
+    s._set_delta(timer)
+    s.update_power_reading(1000, timer)
+    timer += 3600
+    s.update_power_reading(1000, timer)
+    #s.terminate(timer)
+    assert s.total_energy == 1
+
 def test_session_half_hour():
     s = SessionPrice()
     timer = 1651607299
