@@ -1,4 +1,4 @@
-from ..services.prediction.prediction import PredictionBase as p
+from ..services.prediction.prediction import Prediction as p
 from ..PeaqErrors import PeaqValueError
 import pytest
 

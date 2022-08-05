@@ -1,54 +1,25 @@
-from ...util import _convert_quarterly_minutes
+from datetime import datetime
+from peaqevcore.models.chargerstates import CHARGERSTATES
+from .thresholdbase import ThresholdBase
 
-class ThresholdBase:
-    BASECURRENT = 6
 
-    @staticmethod
-    def stop(
-              now_min: int,
-              is_caution_hour: bool,
-              is_quarterly: bool=False
-              ) -> float:
-        minute = _convert_quarterly_minutes(now_min, is_quarterly)
-        
-        if is_caution_hour and minute < 45:
-            ret = (((minute+pow(1.075, minute)) * 0.0032) + 0.7)
-        else:
-            ret = (((minute + pow(1.071, minute)) * 0.00165) + 0.8)
-        return round(ret * 100, 2)
+class Threshold(ThresholdBase):
+    def __init__(self, hub):
+        self._hub = hub
+        super().__init__(hub)
 
-    @staticmethod
-    def start(
-               now_min: int,
-               is_caution_hour: bool,
-               is_quarterly:bool=False
-               ) -> float:
-        minute = _convert_quarterly_minutes(now_min, is_quarterly)
-        if is_caution_hour and minute < 45:
-            ret = (((minute+pow(1.081, minute)) * 0.0049) + 0.4)
-        else:
-            ret = (((minute + pow(1.066, minute)) * 0.0045) + 0.5)
-        return round(ret * 100, 2)
-    
-    @staticmethod
-    def allowed_current(
-            now_min: int,
-            moving_avg: float,
-            charger_enabled: bool,
-            charger_done: bool,
-            currents_dict: dict,
-            total_energy: float,
-            peak: float,
-            is_quarterly:bool=False
-            ) -> int:
-        minute = _convert_quarterly_minutes(now_min, is_quarterly)
-        ret = ThresholdBase.BASECURRENT
-        if not charger_enabled or charger_done or moving_avg == 0:
-            return ret
-        currents = currents_dict
-        for key, value in currents.items():
-            if ((((moving_avg + key) / 60) * (60 - minute) + total_energy * 1000) / 1000) < peak:
-                ret = value
-                return ret
-        return ret
-    
+    @property
+    def allowedcurrent(self) -> int:
+        amps = self._setcurrentdict()
+        if self._hub.chargecontroller.status is not CHARGERSTATES.Start.name:
+            return min(amps.values())
+        return ThresholdBase.allowed_current(
+            datetime.now().minute,
+            self._hub.powersensormovingaverage.value if self._hub.powersensormovingaverage.value is not None else 0,
+            self._hub.charger_enabled.value,
+            self._hub.charger_done.value,
+            amps,
+            self._hub.totalhourlyenergy.value,
+            self._hub.current_peak_dynamic,
+            self._hub.locale.data.is_quarterly(self._hub.locale.data)
+        )

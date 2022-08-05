@@ -124,6 +124,7 @@ def test_peak_new_month():
     assert len(p.query_model.peaks._p) == 3
     assert p.query_model.observed_peak == 1.2
     p.query_model.try_update(new_val=0.03, timestamp=datetime.combine(date(2022, 7, 1), time(0, 0)))
+    assert len(p.query_model.peaks._p) == 1
     assert p.query_model.observed_peak == 0.03
     
 def test_peak_new_hour():

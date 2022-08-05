@@ -1,3 +1,4 @@
+from ast import Pow
 import time
 from .power_reading import PowerReading
 
@@ -7,26 +8,32 @@ class SessionPrice:
         self._total_price: int = 0
         self._price: int = 0
         self._current_power: int = 0
-        self._total_energy: int = 0
+        self._total_energy: float = 0
         self._current_time: int = 0
         self._time_delta: int = 0
         self._readings: list = []
 
     @property
-    def total_energy(self):
-        return round(self._total_energy, 5)
+    def total_energy(self) -> float:
+        return round(self.get_status()["energy"]["value"], 3)
+
+    def reset(self):
+        self.__init__()
 
     def terminate(self, mock_time: float=None):
         print("called terminate")
         self.update_power_reading(0, mock_time)
         self.get_status()
 
-    def get_status(self) -> dict:
-        self._total_energy = 0
-        self._total_price = 0
+    def set_status(self) -> None:
         for i in self._readings:
             self._total_energy += i.reading_integral
             self._total_price += i.reading_cost
+
+    def get_status(self) -> dict:
+        self._total_energy = 0
+        self._total_price = 0
+        self.set_status()
         return {
             "energy": {
                 "value": self._total_energy,
@@ -66,7 +73,7 @@ class SessionPrice:
 
     @property
     def total_price(self) -> float:
-        return self._total_price
+        return round(self.get_status()["price"], 3)
 
     @total_price.setter
     def total_price(self, val):
