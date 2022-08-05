@@ -35,20 +35,25 @@ class SessionPrice:
             "price": self._total_price
         }
 
-    def update_power_reading(self, power: float, mock_time: float=None):
+    def update_power_reading(self, power: any, mock_time: float=None):
         self._set_delta(mock_time)
         p = PowerReading(self._price, self._current_power, self._time_delta)
-        print(p.power, p.price, p.reading_cost, p.reading_integral)
         self._readings.append(p)
-        self._current_power = power
+        try:
+            self._current_power = float(power)
+        except:
+            self._current_power = 0
 
-    def update_price(self, price: float, mock_time: float=None):
+    def update_price(self, price: any, mock_time: float=None):
         if self._current_power > 0:
             self.update_power_reading(
                 power=self._current_power,
                 mock_time=mock_time
             )
-        self._price = price
+        try:
+            self._price = float(price)
+        except:
+            self._price = 0
 
     def _set_delta(self, mock_time: float=None) -> None:
         now = mock_time or time.time()
