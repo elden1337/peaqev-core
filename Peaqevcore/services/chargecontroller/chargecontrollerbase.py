@@ -1,24 +1,24 @@
+import logging
 import time
 from datetime import datetime
 from ...models.chargerstates import CHARGERSTATES
 from abc import abstractmethod
 from typing import List, Dict
 
+_LOGGER = logging.getLogger(__name__)
+
+
 class ChargeControllerBase:  
     def __init__(
         self,
-        #init types from core
-        #charger_states:list[CHARGERSTATES],
-        #init types from core
         charger_state_translation:Dict[CHARGERSTATES,List[str]],
         non_hours:List[int] = [],
-        timeout:int = 180
+        timeout:int = 300
     ):
         self._charger_state_translation = self._check_charger_states(charger_state_translation)
         self._done_timeout: int = timeout
         self._latest_charger_start: float = time.time()
         self._non_hours = non_hours
-        #self._charger_states = charger_states
     
     @property
     def done_timeout(self):
@@ -39,25 +39,17 @@ class ChargeControllerBase:
     @property
     @abstractmethod
     def status(self) -> str:
-        """
-        
-        :return: returns string of enum CHARGERSTATES
-        """
-        pass
-        # if self._hub.is_initialized is False:
-        #     return "Hub not ready. Check logs!"
-        # if self._hub.is_initialized is True:
-        #     if self._chargecontroller_initalized is False:
-        #         self._chargecontroller_initalized = True
-        #         #_LOGGER.debug("Chargecontroller is initialized and ready to work!")
-        # if self._hub.charger_enabled.value is False:
-        #     return CHARGERSTATES.Disabled.name
-        # ret = self._get_status()
-        # if ret == CHARGERSTATES.Error:
-        #     pass
-        #     #msg = f"Chargecontroller returned faulty state. Charger reported {self._hub.chargerobject.value.lower()} as state."
-        #     #_LOGGER.error(msg)
-        # return ret.name
+        if self._hub.is_initialized is False:
+            return "Hub not ready. Check logs!"
+        if self._hub.is_initialized is True:
+            if self._chargecontroller_initalized is False:
+                self._chargecontroller_initalized = True
+                _LOGGER.debug("Chargecontroller is initialized and ready to work!")
+        ret = self._get_status()
+        if ret == CHARGERSTATES.Error:
+            msg = f"Chargecontroller returned faulty state. Charger reported {self._hub.chargerobject.value.lower()} as state."
+            _LOGGER.error(msg)
+        return ret.name
 
     @property
     @abstractmethod
@@ -124,27 +116,29 @@ class ChargeControllerBase:
     def _get_status(self):
         ret = CHARGERSTATES.Error
         update_timer = False
-        
-        if self.charger_state in self._charger_states[CHARGERSTATES.Done]:
-            self.charger_done = True
+        charger_state = self._hub.chargerobject.value.lower()
+        free_charge = self._hub.locale.data.free_charge(self._hub.locale.data)
+
+        if self._hub.charger_enabled.value is False:
+            update_timer = True
+            ret = CHARGERSTATES.Disabled
+        elif charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Done]:
+            self._hub.charger_done.value = True
             ret = CHARGERSTATES.Done
-        elif self.charger_state in self._charger_states[CHARGERSTATES.Idle]:
+        elif charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Idle]:
             update_timer = True
             ret = CHARGERSTATES.Idle
-            if self.charger_done is True:
-                self.charger_done = False
-        elif self.charger_state in self._charger_states[CHARGERSTATES.Connected] and self.charger_enabled is False:
-            update_timer = True
-            ret = CHARGERSTATES.Connected
-        elif self.charger_state not in self._charger_states[CHARGERSTATES.Idle] and self.charger_done is True:
+            if self._hub.charger_done.value is True:
+                self._hub.charger_done.value = False
+        elif charger_state not in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Idle] and self._hub.charger_done.value is True:
             ret = CHARGERSTATES.Done
-        elif datetime.now().hour in self._non_hours and self.free_charge is False:
+        elif datetime.now().hour in self._hub.non_hours and free_charge is False and self._hub.timer.is_override is False:
             update_timer = True
             ret = CHARGERSTATES.Stop
-        elif self.charger_state in self._charger_states[CHARGERSTATES.Connected]:
-            ret = self._get_status_connected()
+        elif charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Connected]:
+            ret = self._get_status_connected(charger_state)
             update_timer = (ret == CHARGERSTATES.Stop)
-        elif self.charger_state in self._charger_states[CHARGERSTATES.Charging]:
+        elif charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Charging]:
             ret = self._get_status_charging()
             update_timer = True
 
@@ -152,10 +146,15 @@ class ChargeControllerBase:
             self.update_latestchargerstart()
         return ret
 
+    def _is_done(self, charger_state) -> bool:
+        if len(self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Done]) > 0:
+            return charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Done]
+        return time.time() - self.latest_charger_start > self.done_timeout
+
     def update_latestchargerstart(self):
         self.latest_charger_start = time.time()
 
-    def below_start_threshold(
+    def _below_start_threshold(
             self,
             predicted_energy: float,
             current_peak: float,
@@ -170,7 +169,7 @@ class ChargeControllerBase:
         """
         return (predicted_energy * 1000) < ((current_peak * 1000) * threshold_start)
 
-    def above_stop_threshold(
+    def _above_stop_threshold(
             self,
             predicted_energy: float,
             current_peak: float,

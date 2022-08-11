@@ -1,5 +1,5 @@
 import pytest
-from ..services.hourselection.hoursselection import Hoursselectionbase as h
+from ..services.hourselection.hoursselection import Hoursselection as h
 from ..services.hourselection.hoursselection_helpers import HourSelectionHelpers
 from ..models.const import (CAUTIONHOURTYPE_AGGRESSIVE, CAUTIONHOURTYPE_INTERMEDIATE, CAUTIONHOURTYPE_SUAVE, CAUTIONHOURTYPE)
 

@@ -73,7 +73,7 @@ def test_start_threshold_should_start():
         non_hours=_NONHOURSMOCK
     )
 
-    ret = c.below_start_threshold(
+    ret = c._below_start_threshold(
         predicted_energy=0.2,
         current_peak=1,
         threshold_start=0.6
@@ -86,7 +86,7 @@ def test_start_threshold_should_not_start():
         non_hours=_NONHOURSMOCK
     )
     
-    ret = c.below_start_threshold(
+    ret = c._below_start_threshold(
         predicted_energy=0.8,
         current_peak=1,
         threshold_start=0.6
@@ -98,7 +98,7 @@ def test_stop_threshold_should_stop():
             charger_state_translation=_CHARGERSTATESMOCK,
             non_hours=_NONHOURSMOCK
         )
-    ret = c.above_stop_threshold(
+    ret = c._above_stop_threshold(
         predicted_energy=0.8,
         current_peak=1,
         threshold_stop=0.6
@@ -111,7 +111,7 @@ def test_stop_threshold_should_not_stop():
         non_hours=_NONHOURSMOCK
     )
     
-    ret = c.above_stop_threshold(
+    ret = c._above_stop_threshold(
         predicted_energy=0.2,
         current_peak=1,
         threshold_stop=0.6
@@ -124,7 +124,7 @@ def test_stop_threshold_should_not_stop():
         non_hours=_NONHOURSMOCK
     )
     
-    ret = c.above_stop_threshold(
+    ret = c._above_stop_threshold(
         predicted_energy=2,
         current_peak=1.98,
         threshold_stop=60

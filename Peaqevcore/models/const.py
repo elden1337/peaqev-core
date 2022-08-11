@@ -16,3 +16,4 @@ CAUTIONHOURTYPE = {
 
 HUB = "Hub"
 HUB_LITE = "Hub Lite"
+DOMAIN = "peaqev"

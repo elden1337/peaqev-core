@@ -1,16 +1,17 @@
 from ...models.chargerstates import CHARGERSTATES
-from .chargecontrollerbase import ChargeControllerBase as _core
-from custom_components.peaqev.peaqservice.chargecontroller.chargecontrollerbase import ChargeControllerBase
+from .chargecontrollerbase import ChargeControllerBase
+#from custom_components.peaqev.peaqservice.chargecontroller.chargecontrollerbase import ChargeControllerBase
 
 
 class ChargeController(ChargeControllerBase):
     def __init__(self, hub):
-        super().__init__(hub)
-        self._core = _core(charger_state_translation=self._hub.chargertype.charger.chargerstates)
+        #super().__init__(hub)
+        super().__init__(charger_state_translation=self.self._hub.chargertype.charger.chargerstates)
+        #self._core = _core(charger_state_translation=self._hub.chargertype.charger.chargerstates)
 
     @property
     def below_startthreshold(self) -> bool:
-        return self._core.below_start_threshold(
+        return self._below_start_threshold(
             predicted_energy=self._hub.prediction.predictedenergy,
             current_peak=self._hub.current_peak_dynamic,
             threshold_start=self._hub.threshold.start/100
@@ -18,7 +19,7 @@ class ChargeController(ChargeControllerBase):
 
     @property
     def above_stopthreshold(self) -> bool:
-        return self._core.above_stop_threshold(
+        return self._above_stop_threshold(
             predicted_energy=self._hub.prediction.predictedenergy,
             current_peak=self._hub.current_peak_dynamic,
             threshold_stop=self._hub.threshold.stop/100

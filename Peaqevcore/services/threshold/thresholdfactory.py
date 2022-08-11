@@ -4,7 +4,7 @@ from .threshold_lite import ThresholdLite
 
 class ThresholdFactory:
     @staticmethod
-    def create(hubbase: HubBase):
-        if hubbase.hub.peaqtype_is_lite:
-            return ThresholdLite(hubbase.hub)
-        return Threshold(hubbase.hub)
+    def create(hub: HubBase):
+        if hub.options.peaqev_lite:
+            return ThresholdLite(hub)
+        return Threshold(hub)

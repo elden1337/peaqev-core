@@ -1,4 +1,5 @@
 from .hoursbase import Hours
+from .hoursselection import Hoursselection as core_hours
 
 class PriceAwareHours(Hours):
     def __init__(

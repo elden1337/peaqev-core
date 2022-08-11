@@ -17,7 +17,7 @@ class HourTypeList(Enum):
     DynCautionHour = 2
 
 
-class Hoursselectionbase:
+class Hoursselection:
     def __init__(
             self,      
             absolute_top_price: float = 0,

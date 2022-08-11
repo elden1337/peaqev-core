@@ -1,9 +1,10 @@
 from datetime import datetime
+from ...hub.hub import HubBase
 from .thresholdbase import ThresholdBase
 
 
 class ThresholdLite(ThresholdBase):
-    def __init__(self, hub):
+    def __init__(self, hub: HubBase):
         self._hub = hub
         super().__init__(hub)
 
@@ -11,11 +12,11 @@ class ThresholdLite(ThresholdBase):
     def allowedcurrent(self) -> int:
         amps = self._setcurrentdict()
         ret = 6
-        if self._hub.charger_enabled.value is False or self._hub.charger_done.value is True:
+        if self._hub.sensors.charger_enabled.value is False or self._hub.sensors.charger_done.value is True:
             return ret
         currents = amps
         for key, value in currents.items():
-            if (((key / 60) * (60 - datetime.now().minute) + self._hub.totalhourlyenergy.value * 1000) / 1000) < self._hub.current_peak_dynamic:
+            if (((key / 60) * (60 - datetime.now().minute) + self._hub.sensors.totalhourlyenergy.value * 1000) / 1000) < self._hub.sensors.current_peak_dynamic:
                 ret = value
                 break
         return ret
