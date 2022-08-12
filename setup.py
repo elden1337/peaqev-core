@@ -23,7 +23,6 @@ setuptools.setup(
         "peaqevcore.services.locale.querytypes", 
         "peaqevcore.models.locale",
         "peaqevcore.services.scheduler",
-        "peaqevcore.services.timer",
         "peaqevcore.services.timer"
         ],
     test_requires=['pytest']
