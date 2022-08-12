@@ -1,6 +1,7 @@
 from abc import abstractmethod
 from ...util import _convert_quarterly_minutes
 from datetime import datetime
+from ...hub.hub import HubBase
 from ...models.const import (
     CURRENTS_ONEPHASE_1_16, CURRENTS_THREEPHASE_1_16
 )
@@ -8,7 +9,7 @@ from ...models.const import (
 
 class ThresholdBase:
     BASECURRENT = 6
-    def __init__(self, hub):
+    def __init__(self, hub: HubBase):
         self._hub = hub
 
     @property
@@ -34,7 +35,7 @@ class ThresholdBase:
 
     # this one must be done better. Currently cannot accommodate 1-32A single phase for instance.
     def _setcurrentdict(self):
-        if 0 < int(self._hub.carpowersensor.value) < 4000:
+        if 0 < int(self._hub.sensors.carpowersensor.value) < 4000:
             return CURRENTS_ONEPHASE_1_16
         return CURRENTS_THREEPHASE_1_16
 

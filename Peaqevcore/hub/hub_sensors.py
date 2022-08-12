@@ -1,37 +1,45 @@
 from dataclasses import dataclass, field
-from ..models.hub.hubmember import HubMember, CurrentPeak
+from abc import ABC, abstractmethod
+from ..models.hub.hubmember import CarPowerSensor, HubMember, CurrentPeak
 from ..models.hub.power import Power
 
 
 @dataclass
-class HubSensors:
-    charger_enabled: HubMember
-    charger_done: HubMember
-    
-    powersensormovingaverage: HubMember
-    powersensormovingaverage24: HubMember
-    totalhourlyenergy: HubMember
-    power: Power
-    current_peak: CurrentPeak
+class IHubSensors(ABC):
+    charger_enabled: HubMember = field(init=False)
+    charger_done: HubMember = field(init=False)
+    current_peak: CurrentPeak = field(init=False)
+    totalhourlyenergy: HubMember = field(init=False)
+    #locale: LocaleData = field(init=False)
+    #chargertype: ChargerTypeData = field(init=False)
+    #chargerobject: ChargerObject = field(init=False)
+    #chargerobject_switch: ChargerSwitch = field(init=False)
+    #hass: HomeAssistant = field(init=False)
+    #charger: Charger = field(init=False)
 
-    #locale: LocaleData
-    #chargertype: ChargerTypeData
-    #carpowersensor: CarPowerSensor
-    #chargerobject: HubMember
-    #chargerobject_switch: ChargerSwitch
-    #hass: HomeAssistant
-    #charger: Charger
+    @abstractmethod
+    def __post_init__(self):
+        pass
 
+
+@dataclass
+class HubSensorsLite(IHubSensors):
+   def __post_init__(self):
+        pass
+
+
+@dataclass
+class HubSensors(IHubSensors):
+    powersensormovingaverage: HubMember = field(init=False)
+    powersensormovingaverage24: HubMember = field(init=False)
+    carpowersensor: CarPowerSensor = field(init=False)
+    power: Power = field(init=False)
 
     def __post_init__(self):
-    #     charger_enabled = HubMember(
-    #         data_type=bool,
-    #         listenerentity=f"binary_sensor.{domain}_{ex.nametoid(CHARGERENABLED)}",
-    #         initval=config_inputs["behavior_on_default"]
-    #     )
-    # charger_done = HubMember(
-    #         data_type=bool,
-    #         listenerentity=f"binary_sensor.{domain}_{ex.nametoid(CHARGERDONE)}",
-    #         initval=False
-    #     )
         pass
+
+
+class HubSensorsFactory:
+    @staticmethod
+    def create() -> IHubSensors:
+        return HubSensors()
