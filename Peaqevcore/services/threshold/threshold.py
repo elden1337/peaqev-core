@@ -1,11 +1,11 @@
 from datetime import datetime
-from ...hub.hub import HubBase
+#from ...hub.hub import HubBase
 from ...models.chargerstates import CHARGERSTATES
 from .thresholdbase import ThresholdBase
 
 
 class Threshold(ThresholdBase):
-    def __init__(self, hub: HubBase):
+    def __init__(self, hub):
         self._hub = hub
         super().__init__(hub)
 

@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from ...util import _convert_quarterly_minutes
 from datetime import datetime
-from ...hub.hub import HubBase
+#from ...hub.hub import HubBase
 from ...models.const import (
     CURRENTS_ONEPHASE_1_16, CURRENTS_THREEPHASE_1_16
 )
@@ -9,12 +9,12 @@ from ...models.const import (
 
 class ThresholdBase:
     BASECURRENT = 6
-    def __init__(self, hub: HubBase):
+    def __init__(self, hub):
         self._hub = hub
 
     @property
     def stop(self) -> float:
-        return ThresholdBase.stop(
+        return ThresholdBase._stop(
             datetime.now().minute,
             str(datetime.now().hour) in self._hub.hours.caution_hours if self._hub.price_aware is False else False,
             self._hub.locale.data.is_quarterly(self._hub.locale.data)
@@ -22,7 +22,7 @@ class ThresholdBase:
 
     @property
     def start(self) -> float:
-        return ThresholdBase.start(
+        return ThresholdBase._start(
             datetime.now().minute,
             str(datetime.now().hour) in self._hub.hours.caution_hours if self._hub.price_aware is False else False,
             self._hub.locale.data.is_quarterly(self._hub.locale.data)
@@ -40,7 +40,7 @@ class ThresholdBase:
         return CURRENTS_THREEPHASE_1_16
 
     @staticmethod
-    def stop(
+    def _stop(
               now_min: int,
               is_caution_hour: bool,
               is_quarterly: bool=False
@@ -54,7 +54,7 @@ class ThresholdBase:
         return round(ret * 100, 2)
 
     @staticmethod
-    def start(
+    def _start(
                now_min: int,
                is_caution_hour: bool,
                is_quarterly:bool=False

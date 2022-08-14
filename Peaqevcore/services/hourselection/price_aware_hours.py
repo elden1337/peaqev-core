@@ -1,5 +1,12 @@
+import logging
 from .hoursbase import Hours
 from .hoursselection import Hoursselection as core_hours
+from ...models.hourselection.const import (CAUTIONHOURTYPE_INTERMEDIATE, CAUTIONHOURTYPE_SUAVE, CAUTIONHOURTYPE_AGGRESSIVE, CAUTIONHOURTYPE
+)
+
+NORDPOOL = "nordpool"
+_LOGGER = logging.getLogger(__name__)
+
 
 class PriceAwareHours(Hours):
     def __init__(
@@ -12,7 +19,7 @@ class PriceAwareHours(Hours):
             allow_top_up: bool = False
     ):
         self._hub = hub
-        self._cautionhour_type = CAUTIONHOURTYPE_DICT[cautionhour_type]
+        self._cautionhour_type = CAUTIONHOURTYPE[cautionhour_type]
         self._cautionhour_type_string = cautionhour_type
         self._core = core_hours(
             self._set_absolute_top_price(absolute_top_price),

@@ -1,16 +1,16 @@
 from datetime import datetime
 from ...util import _convert_quarterly_minutes
 from ...PeaqErrors import PeaqValueError
-from ...hub.hub import HubBase
+from ...hub.hub_options import HubOptions
 
 
 class Prediction:
-    def __init__(self, hub: HubBase):
+    def __init__(self, hub: HubOptions = None):
         self._hub = hub
 
     @property
     def predictedenergy(self) -> float:
-        return Prediction.predicted_energy(
+        return Prediction._predicted_energy(
             datetime.now().minute,
             datetime.now().second,
             self._hub.sensors.powersensormovingaverage.value if self._hub.sensors.powersensormovingaverage.value is not None else 0,
@@ -20,13 +20,13 @@ class Prediction:
 
     @property
     def predictedpercentageofpeak(self) -> float:
-        return Prediction.predicted_percentage_of_peak(
+        return Prediction._predicted_percentage_of_peak(
             self._hub.sensors.current_peak.value,
             self.predictedenergy
         )
 
     @staticmethod
-    def predicted_energy(
+    def _predicted_energy(
             now_min: int,
             now_sec: int,
             power_avg: float,
@@ -48,7 +48,7 @@ class Prediction:
         return round(ret, 3)
 
     @staticmethod
-    def predicted_percentage_of_peak(
+    def _predicted_percentage_of_peak(
             peak: float,
             predicted_energy: float
     ) -> float:
