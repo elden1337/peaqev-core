@@ -16,16 +16,16 @@ class ThresholdBase:
     def stop(self) -> float:
         return ThresholdBase._stop(
             datetime.now().minute,
-            str(datetime.now().hour) in self._hub.hours.caution_hours if self._hub.price_aware is False else False,
-            self._hub.locale.data.is_quarterly(self._hub.locale.data)
+            str(datetime.now().hour) in self._hub.hours.caution_hours if self._hub.options.price.price_aware is False else False,
+            self._hub.sensors.locale.data.is_quarterly(self._hub.sensors.locale.data)
         )
 
     @property
     def start(self) -> float:
         return ThresholdBase._start(
             datetime.now().minute,
-            str(datetime.now().hour) in self._hub.hours.caution_hours if self._hub.price_aware is False else False,
-            self._hub.locale.data.is_quarterly(self._hub.locale.data)
+            str(datetime.now().hour) in self._hub.hours.caution_hours if self._hub.options.price.price_aware is False else False,
+            self._hub.sensors.locale.data.is_quarterly(self._hub.sensors.locale.data)
         )
 
     @property
@@ -35,7 +35,7 @@ class ThresholdBase:
 
     # this one must be done better. Currently cannot accommodate 1-32A single phase for instance.
     def _setcurrentdict(self):
-        if 0 < int(self._hub.carpowersensor.value) < 4000:
+        if 0 < int(self._hub.sensors.carpowersensor.value) < 4000:
             return CURRENTS_ONEPHASE_1_16
         return CURRENTS_THREEPHASE_1_16
 

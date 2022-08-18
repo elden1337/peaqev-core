@@ -84,11 +84,10 @@ LOCALES = [
 
 
 class LocaleData:
-    def __init__(self, input_type, domain, hass):
+    def __init__(self, input_type:str, domain:str):
         self._data = None
         self._type = input_type
         self._domain = domain
-        self._hass = hass
 
         self._data = LOCALETYPEDICT[input_type]
 

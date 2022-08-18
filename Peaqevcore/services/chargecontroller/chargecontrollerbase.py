@@ -16,13 +16,9 @@ class ChargeControllerBase:
         timeout:int = 300
     ):
         self._charger_state_translation = self._check_charger_states(charger_state_translation)
-        self._done_timeout: int = timeout
+        self.done_timeout: int = timeout
         self._latest_charger_start: float = time.time()
         self._non_hours = non_hours
-    
-    @property
-    def done_timeout(self):
-        return self._done_timeout
 
     @property
     def _is_timeout(self) -> bool:

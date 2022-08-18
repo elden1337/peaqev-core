@@ -16,11 +16,11 @@ class Threshold(ThresholdBase):
             return min(amps.values())
         return ThresholdBase.allowed_current(
             datetime.now().minute,
-            self._hub.powersensormovingaverage.value if self._hub.powersensormovingaverage.value is not None else 0,
-            self._hub.charger_enabled.value,
-            self._hub.charger_done.value,
+            self._hub.sensors.powersensormovingaverage.value if self._hub.sensors.powersensormovingaverage.value is not None else 0,
+            self._hub.sensors.charger_enabled.value,
+            self._hub.sensors.charger_done.value,
             amps,
-            self._hub.totalhourlyenergy.value,
+            self._hub.sensors.totalhourlyenergy.value,
             self._hub.current_peak_dynamic,
-            self._hub.locale.data.is_quarterly(self._hub.locale.data)
+            self._hub.sensors.locale.data.is_quarterly(self._hub.sensors.locale.data)
         )

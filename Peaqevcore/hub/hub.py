@@ -9,29 +9,25 @@ from ..services.production.production import ProductionService
 from ..services.scheduler.scheduler import Scheduler
 from ..services.session.session import SessionPrice
 from ..services.threshold.threshold import ThresholdBase
-from .hub_sensors import HubSensors
+from ..services.locale.Locale import LocaleData
+from .hub_sensors import HubSensorsFactory
 from .hub_options import HubOptions
-from dataclasses import dataclass, field
 
+class Hub:
+    def __init__(self, options: HubOptions, domain: str, state_machine, chargerobj):
+        self.state_machine = state_machine
+        self.domain = domain
 
-@dataclass
-class HubBase:
-    options: HubOptions
-    sensors: HubSensors
-    timer: Timer()
-    #scheduler: Scheduler = field(init=False)
-    threshold: ThresholdBase = field(init=False)
-    prediction: Prediction = field(init=False)
-    #chargecontroller: ChargeControllerBase = field(init=False)
-    #locale
-    #hours: Hours = field(init=False)
-    
-    def __post_init__(self):
-        #self.hours = HourselectionFactory.create(self.hub)
-        #self.scheduler = Scheduler(self.hub, self.hours.options)
-        self.threshold = ThresholdFactory.create(self.options)
-        self.prediction = Prediction(self.options)
-        #self.chargecontroller = ChargeControllerFactory.create(self.hub)
-        #self.sensors = HubSensors(self.hub)
+        self.options: HubOptions = options
+        self.sensors = HubSensorsFactory.create(self.options)
+        self.timer: Timer = Timer()
+        self.hours: Hours = HourselectionFactory.create(self)
+        self.threshold = ThresholdFactory.create(self)
+        self.prediction = Prediction(self)
+
+        #chargecontroller: ChargeControllerBase = field(init=False)
+
+        self.sensors.setup(state_machine=state_machine, options=options, domain=domain, chargerobject=chargerobj)
+        self.sensors.init_hub_values()
 
 

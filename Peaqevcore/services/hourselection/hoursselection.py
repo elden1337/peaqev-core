@@ -45,9 +45,7 @@ class Hoursselection:
         return float(val)
 
     def _validate(self):
-            assert 0 < self.model.options.cautionhour_type <= 1
-            # assert len(self.model.hours.caution_hours) == 0
-            # assert len(self.model.hours.non_hours) == 0
+        assert 0 < self.model.options.cautionhour_type <= 1
 
     @property
     def options(self) -> HourSelectionOptions:

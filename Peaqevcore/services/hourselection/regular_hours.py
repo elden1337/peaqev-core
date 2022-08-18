@@ -1,9 +1,9 @@
 from .hoursbase import Hours
 
 class RegularHours(Hours):
-    def __init__(self, hub: any):
+    def __init__(self, hub):
         self.hub = hub
-        super().__init__(False, self.hub.non_hours, self.hub.caution_hours)
+        super().__init__(False, self.hub.options.nonhours, self.hub.options.cautionhours)
 
     @property
     def nordpool_entity(self):
