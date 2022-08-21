@@ -1,5 +1,6 @@
 from ..free_charge import FreeChargePattern
-from ....models.locale.enums import CalendarPeriods
+from ....models.locale.price import LocalePrice
+from ....models.locale.enums import CalendarPeriods, PriceType
 from ..querytypes.const import (
     QUERYTYPE_AVERAGEOFFIVEDAYS, 
     QUERYTYPE_AVERAGEOFFIVEDAYS_MIN, 
@@ -177,6 +178,11 @@ class SE_Gothenburg(Locale_Type):
     observed_peak = QUERYTYPE_AVERAGEOFTHREEDAYS_MIN
     charged_peak = QUERYTYPE_AVERAGEOFTHREEDAYS
     query_model = QUERYTYPES[QUERYTYPE_AVERAGEOFTHREEDAYS]
+    price = LocalePrice(
+        price_type=PriceType.Static, 
+        value=36.25, 
+        currency="SEK"
+        )
 
 
 @dataclass(frozen=True)

@@ -26,4 +26,8 @@ class CalendarPeriods(Enum):
     Month = 4
     Quarter = 5
 
+class PriceType(Enum):
+    Static = 0
+    Tiered = 1
+
 
