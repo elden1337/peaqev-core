@@ -27,20 +27,24 @@ class Hours:
         return self._price_aware
 
     @property
+    @abstractmethod
     def non_hours(self):
-        return self._non_hours
+        pass
 
     @non_hours.setter
+    @abstractmethod
     def non_hours(self, val):
-        self._non_hours = val
+        pass
 
     @property
+    @abstractmethod
     def caution_hours(self):
-        return self._caution_hours
+        pass
 
+    @abstractmethod
     @caution_hours.setter
     def caution_hours(self, val):
-        self._caution_hours = val
+        pass
 
     @property
     @abstractmethod
@@ -60,36 +64,3 @@ class Hours:
     @abstractmethod
     def options(self):
         pass
-
-# @dataclass
-# class Hours:
-#     price_aware: bool
-#     non_hours: list = None
-#     caution_hours: list = None
-
-#     @property
-#     def state(self) -> str:
-#         if datetime.now().hour in self.non_hours:
-#             return NON_HOUR
-#         if datetime.now().hour in self.caution_hours:
-#             return CAUTION_HOUR
-#         return CHARGING_PERMITTED
-
-#     @property
-#     @abstractmethod
-#     def nordpool_entity(self):
-#         pass
-
-#     @abstractmethod
-#     def update_nordpool(self) -> None:
-#         pass
-
-#     @property
-#     @abstractmethod
-#     def dynamic_caution_hours(self) -> dict:
-#         pass
-
-#     @property
-#     @abstractmethod
-#     def options(self):
-#         pass

@@ -17,6 +17,7 @@ class HourSelectionOptions:
     absolute_top_price: float = 0
     min_price: float = 0
     allow_top_up: bool = False
+    conserve_top_up: bool = False
 
 
 @dataclass(frozen=False)

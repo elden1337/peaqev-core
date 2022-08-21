@@ -41,17 +41,25 @@ class PriceAwareHours(Hours):
     def non_hours(self) -> list:
         return self._core.non_hours
 
+    @non_hours.setter
+    def non_hours(self, val):
+        pass
+
     @property
     def caution_hours(self) -> list:
         return self._core.caution_hours
 
+    @caution_hours.setter
+    def caution_hours(self, val):
+        pass
+
     @property
     def absolute_top_price(self):
-        return self._core.absolute_top_price
+        return self._core.options.absolute_top_price
 
     @property
     def min_price(self):
-        return self._core.min_price
+        return self._core.options.min_price
 
     @property
     def prices(self) -> list:
@@ -80,19 +88,19 @@ class PriceAwareHours(Hours):
         return False
 
     def get_average_kwh_price(self):
-        if self._is_initialized:
-            try:
-                return self._core.get_average_kwh_price()
-            except ZeroDivisionError as e:
-                _LOGGER.warning(e)
+        #if self._is_initialized:
+        try:
+            return self._core.get_average_kwh_price()
+        except ZeroDivisionError as e:
+            _LOGGER.warning(e)
         return 0
 
     def get_total_charge(self):
-        if self._is_initialized:
-            try:
-                return self._core.get_total_charge(self._hub.sensors.currentpeak.value)
-            except ZeroDivisionError as e:
-                _LOGGER.warning(e)
+        #if self._is_initialized:
+        try:
+            return self._core.get_total_charge(self._hub.sensors.current_peak.value)
+        except ZeroDivisionError as e:
+            _LOGGER.warning(e)
         return 0
 
     @staticmethod
