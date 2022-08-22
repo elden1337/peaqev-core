@@ -2,7 +2,7 @@ from datetime import datetime, date, time
 import math
 from ...models.hourselection.hourselectionmodels import HourSelectionOptions
 from .schedule_session import ScheduleSession
-
+from ...models.chargerstates import CHARGERSTATES
 
 class Scheduler:
     """This class obj is what constitutes a running scheduler."""
@@ -24,13 +24,13 @@ class Scheduler:
         override_settings = False
         ):
         if self.scheduler_active:
-            self.cancel()
+            self._cancel()
         self.model.departuretime = departuretime
         self.model.starttime = starttime
         self.model.remaining_charge = desired_charge
         self.model._override_settings = override_settings
 
-    def update(
+    def _update(
         self,
         avg24:float,
         peak:float,
@@ -43,7 +43,7 @@ class Scheduler:
         self.model.MOCKDT = mockdt
         self.active = True
         if self.model.remaining_charge <= 0 or self.model.departuretime <= mockdt:
-            return self.cancel()
+            return self._cancel()
         charge_per_hour = peak - (avg24/1000)
         if charge_per_hour <= 0:
             raise Exception
@@ -57,7 +57,7 @@ class Scheduler:
             peak=peak
             )
 
-    def cancel(self):
+    def _cancel(self):
         self.active = False
         self.model.departuretime = datetime.min
         self.model.starttime = datetime.min
@@ -92,7 +92,42 @@ class Scheduler:
         return chargehours
 
 
-"""
-what to do if i call scheduler at 11AM > 7AM? then the prices for the whole range are not available until 2PM. Should I hold, or charge as per usual (and deduct from remaining charge) if prices are low enough in regular calculation?
+class SchedulerFacade(Scheduler):
+    def __init__(self, hub, options):
+        self._hub = hub
+        super().__init__(options)
+        self.schedule_created = False
 
-"""
+    def create_schedule(self, charge_amount: float, departure_time: datetime, schedule_starttime: datetime, override_settings: bool = False):
+        if not self.scheduler_active:
+            self.create(charge_amount, departure_time, schedule_starttime, override_settings)
+        self.schedule_created = True
+
+    def update(self):
+        self._update(
+            avg24=self._hub.powersensormovingaverage24.value,
+            peak=self._hub.current_peak_dynamic,
+            charged_amount=self._hub.charger.session.session_energy,
+            prices=self._hub.hours.prices,
+            prices_tomorrow=self._hub.hours.prices_tomorrow
+        )
+        self.check_states()
+
+    def cancel(self):
+        self._cancel()
+        self.schedule_created = False
+
+    def check_states(self):
+        if not self.scheduler_active and self.schedule_created:
+            self.cancel()
+        elif self._hub.chargecontroller.status is CHARGERSTATES.Done.name:
+            self.cancel()
+
+    @property
+    def non_hours(self) -> list:
+        return self.model.non_hours
+
+    @property
+    def caution_hours(self) -> dict:
+        """dynamic caution hours"""
+        return self.model.caution_hours

@@ -41,8 +41,8 @@ class Hours:
     def caution_hours(self):
         pass
 
-    @abstractmethod
     @caution_hours.setter
+    @abstractmethod
     def caution_hours(self, val):
         pass
 
