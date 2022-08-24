@@ -24,6 +24,9 @@ class IHubSensors:
     chargerobject: ChargerObject = field(init=False)
     chargerobject_switch: ChargerSwitch = field(init=False)
     state_machine: Any = field(init=False)
+    powersensormovingaverage: HubMember = field(init=False)
+    powersensormovingaverage24: HubMember = field(init=False)
+    power: Power = field(init=False)
 
     @abstractmethod
     def setup(self):
@@ -114,10 +117,6 @@ class HubSensorsLite(IHubSensors):
 
 @dataclass
 class HubSensors(IHubSensors):
-    powersensormovingaverage: HubMember = field(init=False)
-    powersensormovingaverage24: HubMember = field(init=False)
-    power: Power = field(init=False)
-
     def setup(
         self,
         state_machine,

@@ -22,3 +22,5 @@ MOCK_STATE_MACHINE = ""
 def test_hub_init():
     h = Hub(options=OPTIONS_REGULAR,domain="test", state_machine=MOCK_STATE_MACHINE, chargerobj = MOCK_CHARGER_OBJ, is_test=True)
     assert h.domain == "test"
+    assert h.hours.price_aware is True
+    assert h.scheduler.active is False

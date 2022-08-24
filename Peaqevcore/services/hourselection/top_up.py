@@ -19,7 +19,9 @@ def top_up(model:TopUpDTO) -> HourObject:
         is_today = False
         cheap_max = max(tomorrow)
     
-    if cheap_max == 0:
+    print(len(today))
+
+    if cheap_max == 0 or len(today) < 9:
         return HourObject(
         nh=model.nh,
         ch=model.ch,

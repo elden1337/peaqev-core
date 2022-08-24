@@ -87,7 +87,10 @@ class Hoursselection:
         self.model.prices_tomorrow = HourSelectionHelpers._convert_none_list(val)
         self.update()
 
-    def update(self, testhour:int = None):
+    def update(
+        self, 
+        testhour:int = None
+        ):
         if testhour is not None:
             self._base_mock_hour = testhour
         today_ready = self._update_per_day(self.prices)
@@ -104,7 +107,10 @@ class Hoursselection:
         self.model.hours.hours_tomorrow = hours_tomorrow
         self._update_hour_lists(hours_today=hours_today, hours_tomorrow=hours_tomorrow, testhour=testhour)
         
-    def _set_top_up(self, testhour: int = None) -> None:
+    def _set_top_up(
+        self, 
+        testhour: int = None
+        ) -> None:
         if self.model.options.allow_top_up is True and self.prices_tomorrow is not None and len(self.prices_tomorrow) > 0:
             ret = top_up(TopUpDTO(
                 self.model.hours.non_hours, 
@@ -124,39 +130,68 @@ class Hoursselection:
                 self.model.hours.caution_hours = ret.ch
                 self.model.hours.dynamic_caution_hours = ret.dyn_ch
 
-    def _update_hour_lists(self, hours_today:HourObject, hours_tomorrow:HourObject, testhour:int = None, listtype:HourTypeList = None) -> None:
+    def _update_hour_lists(
+        self, 
+        hours_today:HourObject, 
+        hours_tomorrow:HourObject, 
+        testhour:int = None, 
+        listtype:HourTypeList = None,
+        ) -> None:
         hour = testhour if testhour is not None else self._base_mock_hour if self._base_mock_hour is not None else datetime.now().hour
-        if self.options.conserve_top_up is False:
-            if listtype is not None:
-                match listtype:
-                    case HourTypeList.NonHour:
-                        self._update_nonhour_list(hours_today, hours_tomorrow, hour)
-                    case HourTypeList.CautionHour:
-                        self._update_cautionhour_list(hours_today, hours_tomorrow, hour)
-                    case HourTypeList.DynCautionHour:
-                        self._update_dyn_cautionhour_dict(hours_today, hours_tomorrow, hour)
-                    case _:
-                        pass
-                self._set_top_up(hour)
-            else:
-                self._update_nonhour_list(hours_today, hours_tomorrow, hour)
-                self._update_cautionhour_list(hours_today, hours_tomorrow, hour)
-                self._update_dyn_cautionhour_dict(hours_today, hours_tomorrow, hour)
+        if listtype is not None:
+            match listtype:
+                case HourTypeList.NonHour:
+                    self._update_nonhour_list(hours_today, hours_tomorrow, hour)
+                case HourTypeList.CautionHour:
+                    self._update_cautionhour_list(hours_today, hours_tomorrow, hour)
+                case HourTypeList.DynCautionHour:
+                    self._update_dyn_cautionhour_dict(hours_today, hours_tomorrow, hour)
+                case _:
+                    pass
+        else:
+            self._update_nonhour_list(hours_today, hours_tomorrow, hour)
+            self._update_cautionhour_list(hours_today, hours_tomorrow, hour)
+            self._update_dyn_cautionhour_dict(hours_today, hours_tomorrow, hour)
+        self._set_top_up(hour)
         
-    def _update_nonhour_list(self, hours_today:HourObject, hours_tomorrow:HourObject, hour:int) -> None:
-        self.model.hours.non_hours = []
-        self.model.hours.non_hours.extend(h for h in hours_today.nh if h >= hour)
-        self.model.hours.non_hours.extend(h for h in hours_tomorrow.nh if h < hour)
+    def _update_nonhour_list(
+        self, 
+        hours_today:HourObject, 
+        hours_tomorrow:HourObject, 
+        hour:int
+        ) -> None:
+        if self.options.conserve_top_up is False:
+            self.model.hours.non_hours = []
+            self.model.hours.non_hours.extend(h for h in hours_today.nh if h >= hour)
+            self.model.hours.non_hours.extend(h for h in hours_tomorrow.nh if h < hour)
+        # else:
+        #     self.model.hours.non_hours = [h for h in self.model.hours.non_hours if h >= hour]
+            
+    def _update_cautionhour_list(
+        self, 
+        hours_today:HourObject, 
+        hours_tomorrow:HourObject, 
+        hour:int
+        ) -> None:
+        if self.options.conserve_top_up is False:
+            self.model.hours.caution_hours = []
+            self.model.hours.caution_hours.extend(h for h in hours_today.ch if h >= hour)
+            self.model.hours.caution_hours.extend(h for h in hours_tomorrow.ch if h < hour)
+        # else:
+        #     self.model.hours.caution_hours = [h for h in self.model.hours.caution_hours if h >= hour]
 
-    def _update_cautionhour_list(self, hours_today:HourObject, hours_tomorrow:HourObject, hour:int) -> None:
-        self.model.hours.caution_hours = []
-        self.model.hours.caution_hours.extend(h for h in hours_today.ch if h >= hour)
-        self.model.hours.caution_hours.extend(h for h in hours_tomorrow.ch if h < hour)
-
-    def _update_dyn_cautionhour_dict(self, hours_today:HourObject, hours_tomorrow:HourObject, hour:int) -> None:
-        self.model.hours.dynamic_caution_hours = dict()
-        self.model.hours.dynamic_caution_hours.update({k: v for k, v in hours_today.dyn_ch.items() if k >= hour})
-        self.model.hours.dynamic_caution_hours.update({k: v for k, v in hours_tomorrow.dyn_ch.items() if k < hour})
+    def _update_dyn_cautionhour_dict(
+        self, 
+        hours_today:HourObject, 
+        hours_tomorrow:HourObject, 
+        hour:int
+        ) -> None:
+        if self.options.conserve_top_up is False:
+            self.model.hours.dynamic_caution_hours = dict()
+            self.model.hours.dynamic_caution_hours.update({k: v for k, v in hours_today.dyn_ch.items() if k >= hour})
+            self.model.hours.dynamic_caution_hours.update({k: v for k, v in hours_tomorrow.dyn_ch.items() if k < hour})
+        #else:
+        #    self.model.hours.dynamic_caution_hours.pop(h for h in hours_today.nh if h < hour)
 
     def _update_per_day(self, prices) -> HourObjectExtended:
         pricedict = dict
