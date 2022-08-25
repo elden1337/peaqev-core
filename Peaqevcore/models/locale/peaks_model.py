@@ -10,8 +10,10 @@ class PeaksModel:
     _is_dirty: bool = False
 
     def set_init_dict(self, dict_data:Dict, dt=datetime.now()) -> None:
-        if dt.month == self.m:
-            ppdict = dict()
+        ppdict = dict()
+        if dt.month != self.m:
+            self.reset()
+        else:
             for pp in dict_data.get("p"):
                 tkeys = pp.split("h")
                 ppkey = (int(tkeys[0]), int(tkeys[1]))
@@ -91,7 +93,7 @@ class PeaksModel:
         raise PeaqValueError("Expected key but received none.")
 
     def reset(self) -> None:
-        self._m = 0
+        self._m = datetime.now().month
         self.is_dirty = False
         self._p = {}
 

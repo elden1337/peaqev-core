@@ -18,7 +18,7 @@ def test_generic_querytype_avg_threedays():
     pt.try_update(new_val=1.2, timestamp=datetime.combine(date(2022, 7, 14), time(20, 30)))
     pt.try_update(new_val=2, timestamp=datetime.combine(date(2022, 7, 14), time(21, 30)))
     to_state_machine = pt.peaks.export_peaks
-    pt.peaks.set_init_dict(to_state_machine)
+    pt.peaks.set_init_dict(dict_data=to_state_machine, dt=datetime.combine(date(2022, 7, 14), time(23, 30)))
     pt.try_update(new_val=0.6, timestamp=datetime.combine(date(2022, 7, 15), time(21, 30)))
     assert len(pt.peaks._p) == 2
     assert pt._charged_peak_value == 1.3
