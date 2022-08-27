@@ -1,6 +1,6 @@
 from ..services.hourselection.hourselectionfactory import HourselectionFactory
 from ..services.timer.timer import Timer
-from ..services.chargecontroller.chargecontrollerfactory import ChargeControllerFactory
+#from ..services.chargecontroller.chargecontrollerfactory import ChargeControllerFactory
 from ..services.threshold.thresholdfactory import ThresholdFactory
 from ..services.chargecontroller.chargecontrollerbase import ChargeControllerBase
 from ..services.hourselection.hoursbase import Hours

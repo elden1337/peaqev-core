@@ -10,10 +10,16 @@ class Price:
     cautionhour_type: str = ""
 
 @dataclass
+class Charger:
+    chargertype: str = ""
+    chargerid: str = ""
+    powerswitch: str = ""
+    powermeter: str = ""
+
+@dataclass
 class HubOptions:
     locale: str = field(init=False)
-    chargertype: str = field(init=False)
-    chargerid: str = field(init=False)
+    charger: Charger = Charger()
     price: Price = Price()
     peaqev_lite: bool = False
     powersensor_includes_car: bool = False

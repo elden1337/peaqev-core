@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from multiprocessing import AuthenticationError
 
 @dataclass(frozen=False)
 class ChargerOptions:
