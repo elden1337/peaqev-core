@@ -5,12 +5,12 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class ChargerObject(HubMember):
-    def __init__(self, data_type:list, listenerentity):
+    def __init__(self, data_type:list, listenerentity:str, init_override:bool = False):
         self._type = data_type
         self._listenerentity = listenerentity
         self._warned_not_initialized = False
-        self._is_initialized = False
-        super().__init__(data_type, listenerentity)
+        self._is_initialized = init_override
+        super().__init__(data_type=data_type, listenerentity=listenerentity, init_override=init_override)
 
     @property
     def is_initialized(self) -> bool:

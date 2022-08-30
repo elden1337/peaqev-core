@@ -74,7 +74,7 @@ class Hoursselection:
     def prices(self, val):
         self.model.prices_today = val
         if self.prices == self.prices_tomorrow:
-            self.prices_tomorrow = None
+            self.prices_tomorrow = []
         else:
             self.update()
 
@@ -96,7 +96,6 @@ class Hoursselection:
         today_ready = self._update_per_day(self.prices)
         hours_today = self._add_remove_limited_hours(today_ready)
         hours_tomorrow = HourObject([],[],dict())
-        
         if self.prices_tomorrow is not None and len(self.prices_tomorrow) > 0:
             self.options.conserve_top_up = False
             hours_tomorrow = self._add_remove_limited_hours(
@@ -193,7 +192,7 @@ class Hoursselection:
         #else:
         #    self.model.hours.dynamic_caution_hours.pop(h for h in hours_today.nh if h < hour)
 
-    def _update_per_day(self, prices) -> HourObjectExtended:
+    def _update_per_day(self, prices: list) -> HourObjectExtended:
         pricedict = dict
         if prices is not None and len(prices) > 1:
             pricedict = HourSelectionHelpers._create_dict(prices)
@@ -299,7 +298,7 @@ class Hoursselection:
                 if h >= hour:
                     ret[h] = self.prices[h]
 
-        if self.prices_tomorrow is None:
+        if self.prices_tomorrow is None or len(self.prices_tomorrow) < 1:
             for h in range(hour,24):
                 if currentpeak is not None:
                     _looper_charge(h)

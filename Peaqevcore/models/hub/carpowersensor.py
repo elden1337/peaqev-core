@@ -13,19 +13,20 @@ class CarPowerSensor(HubMember):
             listenerentity=None,
             initval=None,
             powermeter_factor=1,
-            hubdata=None
+            hubdata=None,
+            init_override:bool = False
     ):
         self._hubdata = hubdata
         self._powermeter_factor = powermeter_factor
         self._warned_not_initialized = False
-        self._is_initialized = False
-        super().__init__(data_type, listenerentity, initval)
+        self._is_initialized = init_override
+        super().__init__(data_type=data_type, listenerentity=listenerentity, init_override=init_override, initval=initval)
 
     @property
     def is_initialized(self) -> bool:
         if self._is_initialized is True:
             return True
-        if isinstance(self.value, (float,int)) and self._hubdata.chargerobject.is_initialized:
+        if isinstance(self.value, (float,int)) and (self._hubdata.chargerobject.is_initialized or self._hubdata.chargerobject is None):
             _LOGGER.debug(f"{CARPOWERSENSOR} has initialized")
             self._is_initialized = True
             return True

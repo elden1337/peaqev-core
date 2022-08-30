@@ -41,7 +41,10 @@ class ChargeControllerBase:
             if self._chargecontroller_initalized is False:
                 self._chargecontroller_initalized = True
                 _LOGGER.debug("Chargecontroller is initialized and ready to work!")
-        ret = self._get_status()
+        if self._hub.options.charger.charger_is_outlet is True:
+            ret = self._get_status_outlet()
+        else:
+            ret = self._get_status()
         if ret == CHARGERSTATES.Error:
             msg = f"Chargecontroller returned faulty state. Charger reported {self._hub.chargerobject.value.lower()} as state."
             _LOGGER.error(msg)
@@ -108,6 +111,29 @@ class ChargeControllerBase:
         """
         pass
 
+    def _get_status_outlet(self):
+        ret = CHARGERSTATES.Error
+        update_timer = False
+        free_charge = self._hub.locale.data.free_charge(self._hub.locale.data)
+
+        if self._hub.charger_enabled.value is False:
+            update_timer = True
+            ret = CHARGERSTATES.Disabled
+        elif self._hub.charger_done.value is True:
+            ret = CHARGERSTATES.Done
+        elif datetime.now().hour in self._hub.non_hours and free_charge is False and self._hub.timer.is_override is False:
+            update_timer = True
+            ret = CHARGERSTATES.Stop
+        elif self._hub.chargertype.charger.entities.powerswitch == "on" and self._hub.chargertype.charger.entities.powermeter < 1:
+            ret = self._get_status_connected()
+            update_timer = (ret == CHARGERSTATES.Stop)
+        else:
+            ret = self._get_status_charging()
+            update_timer = True
+
+        if update_timer is True:
+            self.update_latestchargerstart()
+        return ret
 
     def _get_status(self):
         ret = CHARGERSTATES.Error

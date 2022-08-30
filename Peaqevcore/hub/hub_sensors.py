@@ -62,27 +62,54 @@ class IHubSensors:
             initval=0,
             startpeaks=options.startpeaks,
         )
-        self.chargerobject = ChargerObject(
-            data_type=self.chargertype.charger.native_chargerstates,
-            listenerentity=self.chargertype.charger.entities.chargerentity
-        )
-        resultdict[self.chargerobject.entity] = self.chargerobject.is_initialized
+        if len(self.chargertype.charger.entities.chargerentity) > 0:
+            self.chargerobject = ChargerObject(
+                data_type=self.chargertype.charger.native_chargerstates,
+                listenerentity=self.chargertype.charger.entities.chargerentity
+            )
+            resultdict[self.chargerobject.entity] = self.chargerobject.is_initialized
 
-        self.carpowersensor = CarPowerSensor(
-            data_type=int,
-            listenerentity=self.chargertype.charger.entities.powermeter,
-            powermeter_factor=self.chargertype.charger.options.powermeter_factor,
-            hubdata=self
-        )
-        self.chargerobject_switch = ChargerSwitch(
-            hass=state_machine,
-            data_type=bool,
-            listenerentity=self.chargertype.charger.entities.powerswitch,
-            initval=False,
-            currentname=self.chargertype.charger.entities.ampmeter,
-            ampmeter_is_attribute=self.chargertype.charger.options.ampmeter_is_attribute,
-            hubdata=self
-        )
+            self.carpowersensor = CarPowerSensor(
+                data_type=int,
+                listenerentity=self.chargertype.charger.entities.powermeter,
+                powermeter_factor=self.chargertype.charger.options.powermeter_factor,
+                hubdata=self,
+                init_override=True
+            )
+            self.chargerobject_switch = ChargerSwitch(
+                hass=state_machine,
+                data_type=bool,
+                listenerentity=self.chargertype.charger.entities.powerswitch,
+                initval=False,
+                currentname=self.chargertype.charger.entities.ampmeter,
+                ampmeter_is_attribute=self.chargertype.charger.options.ampmeter_is_attribute,
+                hubdata=self,
+                init_override=True
+            )
+
+        else:
+            self.chargerobject = ChargerObject(
+                data_type=self.chargertype.charger.native_chargerstates,
+                listenerentity="no entity",
+                init_override=True
+            )
+            resultdict[self.chargerobject.entity] = True
+            
+            self.carpowersensor = CarPowerSensor(
+                data_type=int,
+                listenerentity=self.chargertype.charger.entities.powermeter,
+                powermeter_factor=self.chargertype.charger.options.powermeter_factor,
+                hubdata=self
+            )
+            self.chargerobject_switch = ChargerSwitch(
+                hass=state_machine,
+                data_type=bool,
+                listenerentity=self.chargertype.charger.entities.powerswitch,
+                initval=False,
+                currentname=self.chargertype.charger.entities.ampmeter,
+                ampmeter_is_attribute=self.chargertype.charger.options.ampmeter_is_attribute,
+                hubdata=self
+            )
         self.totalhourlyenergy = HubMember(
             data_type=float,
             listenerentity=f"sensor.{domain}_{nametoid(CONSUMPTION_TOTAL_NAME)}_{HOURLY}",
@@ -91,8 +118,9 @@ class IHubSensors:
 
     def init_hub_values(self):
         """Initialize values from Home Assistant on the set objects"""
-        self.chargerobject.value = self.state_machine.states.get(self.chargerobject.entity).state if self.state_machine.states.get(
-            self.chargerobject.entity) is not None else 0
+        if self.chargerobject is not None:
+            self.chargerobject.value = self.state_machine.states.get(self.chargerobject.entity).state if self.state_machine.states.get(
+                self.chargerobject.entity) is not None else 0
         self.chargerobject_switch.value = self.state_machine.states.get(
             self.chargerobject_switch.entity).state if self.state_machine.states.get(
             self.chargerobject_switch.entity) is not None else ""

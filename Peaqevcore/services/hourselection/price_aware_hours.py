@@ -22,7 +22,6 @@ class PriceAwareHours(Hours):
         )
         self._hass = hub.state_machine
         self._prices = []
-        self._is_initialized = False
         super().__init__(price_aware=True)
 
     @property
@@ -88,20 +87,24 @@ class PriceAwareHours(Hours):
         return False
 
     def get_average_kwh_price(self):
-        #if self._is_initialized:
-        try:
-            return self._core.get_average_kwh_price()
-        except ZeroDivisionError as e:
-            _LOGGER.warning(e)
-        return 0
+        if self._is_initialized:
+            try:
+                return self._core.get_average_kwh_price()
+            except ZeroDivisionError as e:
+                _LOGGER.warning(e)
+            return 0
+        _LOGGER.debug("get avg kwh price, not initialized")
+        return "-"
 
     def get_total_charge(self):
-        #if self._is_initialized:
-        try:
-            return self._core.get_total_charge(self._hub.sensors.current_peak.value)
-        except ZeroDivisionError as e:
-            _LOGGER.warning(e)
-        return 0
+        if self._is_initialized:
+            try:
+                return self._core.get_total_charge(self._hub.sensors.current_peak.value)
+            except ZeroDivisionError as e:
+                _LOGGER.warning(e)
+            return 0
+        _LOGGER.debug("get avg kwh price, not initialized")
+        return "-"
 
     @staticmethod
     def _set_absolute_top_price(_input) -> float:

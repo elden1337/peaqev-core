@@ -22,9 +22,9 @@ class HourSelectionHelpers:
             return False
     
     @staticmethod
-    def _convert_none_list(lst:list) -> list:
+    def _convert_none_list(lst: any) -> list:
         ret = []
-        if lst is None:
+        if lst is None or not isinstance(lst, list):
             return ret
         try:
             for l in lst:

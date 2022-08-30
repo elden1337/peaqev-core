@@ -13,6 +13,7 @@ class Hours:
         self._non_hours = non_hours
         self._caution_hours = caution_hours
         self._price_aware = price_aware
+        self._is_initialized = False
 
     @property
     def state(self) -> str:
@@ -29,6 +30,11 @@ class Hours:
     @property
     @abstractmethod
     def non_hours(self):
+        pass
+
+    @property
+    @abstractmethod
+    def is_initialized(self):
         pass
 
     @non_hours.setter

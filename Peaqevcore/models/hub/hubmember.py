@@ -5,14 +5,14 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class HubMember:
-    def __init__(self, data_type, listenerentity = None, initval = None, name = None):
+    def __init__(self, data_type, listenerentity = None, initval = None, name = None, init_override:bool = False):
         self._value = initval
         self._type = data_type
         self._listenerentity = listenerentity
         self.name = name
         self.id = nametoid(self.name) if self.name is not None else None
         self.warned_not_initialized = False
-        self._is_initialized = False
+        self._is_initialized = init_override
 
     @property
     def is_initialized(self) -> bool:

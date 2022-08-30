@@ -13,7 +13,8 @@ class ChargerSwitch(HubMember):
             initval,
             currentname: str,
             ampmeter_is_attribute: bool,
-            hubdata=None
+            hubdata=None,
+            init_override:bool = False
     ):
         self._hubdata = hubdata
         self._hass = hass
@@ -21,11 +22,11 @@ class ChargerSwitch(HubMember):
         self._current = None
         self._current_attr_name = currentname
         self._ampmeter_is_attribute = ampmeter_is_attribute
-        super().__init__(data_type, listenerentity, initval)
+        super().__init__(data_type=data_type, listenerentity=listenerentity, init_override=init_override, initval=initval)
 
     @property
     def is_initialized(self) -> bool:
-        if not self._hubdata.chargerobject.is_initialized:
+        if self._hubdata.chargerobject is not None and not self._hubdata.chargerobject.is_initialized:
             return False
         return super().is_initialized
 
@@ -43,7 +44,9 @@ class ChargerSwitch(HubMember):
             pass
 
     def updatecurrent(self):
-        if self._ampmeter_is_attribute is True:
+        if self._hubdata.chargertype.charger.options.charger_is_outlet is True:
+            pass
+        elif self._ampmeter_is_attribute is True:
             ret = self._hass.states.get(self.entity)
             if ret is not None:
                 ret_attr = str(ret.attributes.get(self._current_attr_name))
