@@ -438,3 +438,6 @@ def test_set_tomorrow_as_comma_string():
     r.prices = [3.452, 1.311, 0.664, 0.664, 0.664, 3.37, 4.715, 6.25, 6.791, 7.457, 7.612, 7.467, 6.681, 6.367, 6.92, 6.871, 6.63, 6.804, 7.095, 6.63, 5.723, 7.321, 5.717, 3.386]
     r.prices_tomorrow = PRICES_BLANK
     assert r.prices_tomorrow == []
+
+
+    
