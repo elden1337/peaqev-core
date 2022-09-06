@@ -439,5 +439,16 @@ def test_set_tomorrow_as_comma_string():
     r.prices_tomorrow = PRICES_BLANK
     assert r.prices_tomorrow == []
 
+def test_top_up2():
+    r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_AGGRESSIVE], absolute_top_price=0, min_price=0, allow_top_up=True)
+    r._base_mock_hour = 0
+    r.prices = [1.4005, 1.1325, 1.04, 1.1325, 1.5325, 2.352, 2.92, 4.3455, 4.531, 4.265, 4.091, 3.674, 3.456, 3.4545, 3.6635, 3.7985, 3.9975, 4.215, 4.641, 4.9935, 4.165, 3.8975, 2.965, 2.026]
+    assert r.non_hours == [7,8,9,10,11,12,13,14,15,16,17,18,19,20,21]
+    r._base_mock_hour = 13
+    r.prices_tomorrow = [0.042, 0.034, 0.026, 0.022, 0.02, 0.023, 0.027, 0.037, 0.049, 0.068, 0.08, 0.093, 0.093, 0.091, 0.103, 0.178, 0.36, 0.427, 1.032, 0.972, 0.551, 0.628, 0.404, 0.355]
+    r._base_mock_hour = 23
+    assert r.non_hours == [17,18,19,20,21]
 
-    
+
+
+

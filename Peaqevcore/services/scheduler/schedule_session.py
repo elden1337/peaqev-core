@@ -23,16 +23,16 @@ class ScheduleSession:
         return self._hours_price
 
     @hours_price.setter
-    def hours_price(self, price:list):
+    def hours_price(self, prices:list):
         today_date = datetime.now() if self.MOCKDT is None else self.MOCKDT
         price_dict = dict()
-        for idx, p in enumerate(price[0]):
-            price_dict[datetime.combine(today_date.date(), time(idx, 0))] = p
-        if price[1] is not None:
+        for idx, price in enumerate(prices[0]):
+            price_dict[datetime.combine(today_date.date(), time(idx, 0))] = price
+        if prices[1] is not None:
             self._tomorrow_valid = True
             tomorrow_date = today_date.date() + timedelta(days=1)
-            for idx, p in enumerate(price[1]):
-                price_dict[datetime.combine(tomorrow_date, time(idx, 0))] = p
+            for idx, price in enumerate(prices[1]):
+                price_dict[datetime.combine(tomorrow_date, time(idx, 0))] = price
         else:
             self._tomorrow_valid = False
         self._hours_price = self._filter_price_dict(price_dict, self.starttime, self.departuretime)

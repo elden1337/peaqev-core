@@ -4,7 +4,6 @@ from ...models.hourselection.topupdto import HoursDTO, TopUpDTO
 import operator
 
 def top_up(model:TopUpDTO) -> HourObject:
-    """Sets top-up if tomorrow is x more expensive than today and vice versa"""
     if model.prices_tomorrow is None or len(model.prices_tomorrow) == 0:
         return
 
@@ -19,8 +18,6 @@ def top_up(model:TopUpDTO) -> HourObject:
         is_today = False
         cheap_max = max(tomorrow)
     
-    print(len(today))
-
     if cheap_max == 0 or len(today) < 9:
         return HourObject(
         nh=model.nh,
@@ -36,7 +33,7 @@ def top_up(model:TopUpDTO) -> HourObject:
             model.top_price, 
             model.min_price),
         today_dict=_create_partial_dict(
-            today, 
+            today,
             model.hour, 
             True), 
         tomorrow_dict=_create_partial_dict(
@@ -91,11 +88,7 @@ def _remove_and_add_for_top_up(
     for i in range(0, removed-1):
         try:
             if adddict[sorted_add[i]] > max_cheap:
-                if sorted_add[i] not in model.nh:
-                    model.nh.append(sorted_add[i])
-                    model.dyn_ch.pop(i)
-                    added += 1
-                if sorted_add[i] in model.dyn_ch.keys():
+                if sorted_add[i] not in model.nh or sorted_add[i] in model.dyn_ch.keys():
                     model.nh.append(sorted_add[i])
                     model.dyn_ch.pop(i)
                     added += 1
@@ -110,54 +103,49 @@ def _remove_and_add_for_top_up(
 
 def _append_items_to_remove(model:HoursDTO, remove_lists:dict, removedict:dict) -> int:
     ret = 0
+
+    def _append_non_hours(model:HoursDTO, nonhours_remove:list, removedict:dict) -> int:
+        _removed = 0
+        for i in [i for i in model.nh if i in removedict.keys() and removedict[i] < model.top_price]:
+            if i in removedict.keys():
+                nonhours_remove.append(i)
+                _removed += 1
+        return _removed
+
+    def _append_caution_hours(cautionhours:list, cautionhours_remove:list, removedict:dict) -> int:
+        _removed = 0
+        for i in cautionhours:
+            if i in removedict.keys():
+                cautionhours_remove.append(i)
+                _removed += 1
+        return _removed
+
+    def _append_dyn_caution_hours(dyn_ch: dict, dyn_cautionhours_remove:list, removedict:dict) -> int:
+        _removed = 0
+        for k,v in dyn_ch.items():
+            if k in removedict.keys():
+                dyn_cautionhours_remove.append(k)
+                _removed += 1
+        return _removed
+
     ret += _append_non_hours(model, remove_lists["nh_remove"], removedict)
     ret += _append_caution_hours(model.ch, remove_lists["ch_remove"], removedict)
     ret += _append_dyn_caution_hours(model.dyn_ch, remove_lists["dyn_ch_remove"], removedict)
     return ret
 
-def _append_non_hours(model:HoursDTO, nonhours_remove:list, removedict:dict) -> int:
-    _removed = 0
-    for i in [i for i in model.nh if i in removedict.keys() and removedict[i] < model.top_price]:
-        if i in removedict.keys():
-            nonhours_remove.append(i)
-            _removed += 1
-    return _removed
-
-def _append_caution_hours(cautionhours:list, cautionhours_remove:list, removedict:dict) -> int:
-    _removed = 0
-    for i in cautionhours:
-        if i in removedict.keys():
-            cautionhours_remove.append(i)
-            _removed += 1
-    return _removed
-
-def _append_dyn_caution_hours(dyn_ch: dict, dyn_cautionhours_remove:list, removedict:dict) -> int:
-    _removed = 0
-    for k,v in dyn_ch.items():
-        if k in removedict.keys():
-            dyn_cautionhours_remove.append(k)
-            _removed += 1
-    return _removed
-
 def _remove_items(remove_lists:dict, model: HoursDTO) -> None:
-    _remove_non_hours(remove_lists["nh_remove"],model.nh)
-    _remove_caution_hours(remove_lists["ch_remove"],model.ch)
-    _remove_dynamic_hours(remove_lists["dyn_ch_remove"], model.dyn_ch)
-
-def _remove_non_hours(checklist: list, deletelist: list):
-    if len(checklist) > 0:
-        for i in checklist:
-            deletelist.remove(i)
     
-def _remove_caution_hours(checklist: list, deletelist: list):
-    if len(checklist) > 0:
-        for i in checklist:
-            deletelist.remove(i)
-
-def _remove_dynamic_hours(checklist: list, deletedict: dict):
-    if len(checklist) > 0:
-        for i in checklist:
-            deletedict.pop(i)
+    def _remove_from_list(checklist: list, deletelist: list|dict):
+        if len(checklist) > 0:
+            for i in checklist:
+                if isinstance(deletelist, list):
+                    deletelist.remove(i)
+                elif isinstance(deletelist, dict):
+                    deletelist.pop(i)    
+    
+    _remove_from_list(remove_lists["nh_remove"],model.nh)
+    _remove_from_list(remove_lists["ch_remove"],model.ch)
+    _remove_from_list(remove_lists["dyn_ch_remove"], model.dyn_ch)
 
 def _create_partial_dict(input: list, hour:int, today:bool = True) -> dict:
     ret = dict()

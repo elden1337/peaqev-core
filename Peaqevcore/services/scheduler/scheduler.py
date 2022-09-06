@@ -105,7 +105,7 @@ class SchedulerFacade(Scheduler):
 
     def update(self):
         self._update(
-            avg24=self._hub.powersensormovingaverage24.value,
+            avg24=self._hub.sensors.powersensormovingaverage24.value,
             peak=self._hub.current_peak_dynamic,
             charged_amount=self._hub.charger.session.session_energy,
             prices=self._hub.hours.prices,
