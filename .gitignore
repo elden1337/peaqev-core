@@ -28,7 +28,6 @@ share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-.activate/
 MANIFEST
 
 # PyInstaller
@@ -176,3 +175,5 @@ cython_debug/
 # Ignore all local history of files
 .history
 .ionide
+pyvenv.cfg
+activate/*
