@@ -7,8 +7,8 @@ def top_up(model:TopUpDTO) -> HourObject:
     if model.prices_tomorrow is None or len(model.prices_tomorrow) == 0:
         return
 
-    today = list(model.prices[model.hour-1:23])
-    tomorrow = list(model.prices_tomorrow[0:model.hour-1])
+    today = list(model.prices[model.hour:24])
+    tomorrow = list(model.prices_tomorrow[0:max(model.hour-1,0)])
     cheap_max = 0
 
     if max(today) < (sum(tomorrow)/len(tomorrow)):

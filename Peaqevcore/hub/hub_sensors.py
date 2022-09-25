@@ -13,6 +13,7 @@ from typing import Any
 from ..services.locale.querytypes.const import HOURLY
 from ..models.hub.const import CONSUMPTION_TOTAL_NAME, AVERAGECONSUMPTION, AVERAGECONSUMPTION_24H, CHARGERDONE, CHARGERENABLED
 
+
 @dataclass
 class IHubSensors:
     charger_enabled: HubMember = field(init=False)

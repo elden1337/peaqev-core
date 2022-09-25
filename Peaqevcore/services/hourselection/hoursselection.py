@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 import statistics as stat
 from .top_up import top_up, TopUpDTO
@@ -10,6 +11,8 @@ from .hoursselection_helpers import HourSelectionHelpers
 from ...models.hourselection.hourobject import HourObject, HourObjectExtended
 from ...models.hourselection.hourselectionmodels import HourSelectionModel, HourSelectionOptions
 from ...models.hourselection.hourtypelist import HourTypeList
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class Hoursselection:
@@ -84,7 +87,11 @@ class Hoursselection:
 
     def get_average_kwh_price(self, testhour:int = None):
         ret = self._get_charge_or_price(testhour=testhour)
-        return round(sum(ret.values())/len(ret),2)
+        try:
+            return round(sum(ret.values())/len(ret),2)
+        except ZeroDivisionError as e:
+                _LOGGER.warning(f"get_average_kwh_price_core could not be calculated: {e}")
+        return 0
         
     def get_total_charge(self, currentpeak:float, testhour:int = None) -> float:
         ret = self._get_charge_or_price(currentpeak, testhour)

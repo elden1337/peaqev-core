@@ -105,5 +105,5 @@ class Session:
         self.update_session_pricing()
 
     def update_session_pricing(self):
-        if self._charger.session_is_active is False:
+        if self._charger._params._session_active is False:
             self.core.terminate()

@@ -91,7 +91,7 @@ class PriceAwareHours(Hours):
             try:
                 return self._core.get_average_kwh_price()
             except ZeroDivisionError as e:
-                _LOGGER.warning(e)
+                _LOGGER.warning(f"get_average_kwh_price could not be calculated: {e}")
             return 0
         _LOGGER.debug("get avg kwh price, not initialized")
         return "-"
@@ -101,7 +101,7 @@ class PriceAwareHours(Hours):
             try:
                 return self._core.get_total_charge(self._hub.sensors.current_peak.value)
             except ZeroDivisionError as e:
-                _LOGGER.warning(e)
+                _LOGGER.warning(f"get_total_charge could not be calculated: {e}")
             return 0
         _LOGGER.debug("get avg kwh price, not initialized")
         return "-"

@@ -78,3 +78,4 @@ class ScheduleSession:
     def _filter_price_dict(self, price_dict:dict, starttime:datetime, departuretime:datetime) -> dict:
         ret = {key:value for (key,value) in price_dict.items() if starttime <= key <= departuretime}
         return ret
+        
