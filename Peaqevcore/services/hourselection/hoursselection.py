@@ -140,7 +140,6 @@ class Hoursselection:
         listtype:HourTypeList = None,
         ) -> None:
         hour = self._set_hour(testhour)
-
         if listtype is not None:
             match listtype:
                 case HourTypeList.NonHour:
@@ -167,6 +166,8 @@ class Hoursselection:
             self.model.hours.non_hours = []
             self.model.hours.non_hours.extend(h for h in hours_today.nh if h >= hour)
             self.model.hours.non_hours.extend(h for h in hours_tomorrow.nh if h < hour)
+        else:
+            self.model.hours.non_hours = [h for h in self.model.hours.non_hours if (hour >= 13 and h < hour) or h >= hour]
             
     def _update_cautionhour_list(
         self, 
@@ -178,6 +179,8 @@ class Hoursselection:
             self.model.hours.caution_hours = []
             self.model.hours.caution_hours.extend(h for h in hours_today.ch if h >= hour)
             self.model.hours.caution_hours.extend(h for h in hours_tomorrow.ch if h < hour)
+        else:
+            self.model.hours.caution_hours = [h for h in self.model.hours.caution_hours if (hour >= 13 and h < hour) or h >= hour]
 
     def _update_dyn_cautionhour_dict(
         self, 
@@ -189,6 +192,8 @@ class Hoursselection:
             self.model.hours.dynamic_caution_hours = dict()
             self.model.hours.dynamic_caution_hours.update({k: v for k, v in hours_today.dyn_ch.items() if k >= hour})
             self.model.hours.dynamic_caution_hours.update({k: v for k, v in hours_tomorrow.dyn_ch.items() if k < hour})
+        else:
+            self.model.hours.dynamic_caution_hours = {k: v for k, v in self.model.hours.dynamic_caution_hours.items()  if (hour >= 13 and k < hour) or k >= hour}
 
     def _set_top_up(
         self, 
