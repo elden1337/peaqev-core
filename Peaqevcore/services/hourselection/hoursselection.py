@@ -7,7 +7,9 @@ from ...models.hourselection.const import (
     CAUTIONHOURTYPE_INTERMEDIATE,
     CAUTIONHOURTYPE
 )
-from .hoursselection_helpers import HourSelectionHelpers
+from .hoursselection_helpers import HourSelectionHelpers as helpers
+from .hoursselection_helpers import HourSelectionInterimUpdate as interim
+from .hoursselection_helpers import HourSelectionCalculations as calc
 from ...models.hourselection.hourobject import HourObject, HourObjectExtended
 from ...models.hourselection.hourselectionmodels import HourSelectionModel, HourSelectionOptions
 from ...models.hourselection.hourtypelist import HourTypeList
@@ -82,7 +84,7 @@ class Hoursselection:
 
     @prices_tomorrow.setter
     def prices_tomorrow(self, val):
-        self.model.prices_tomorrow = HourSelectionHelpers._convert_none_list(val)
+        self.model.prices_tomorrow = helpers._convert_none_list(val)
         self.update()
 
     def get_average_kwh_price(self, testhour:int = None):
@@ -111,20 +113,27 @@ class Hoursselection:
             hours_tomorrow = self._add_remove_limited_hours(
                 self._update_per_day(self.prices_tomorrow)
                 )
-
+            hours, hours_tomorrow = interim.interim_avg_update(
+                hours, 
+                hours_tomorrow, 
+                self.prices, 
+                self.prices_tomorrow, 
+                self.model.options.absolute_top_price, 
+                self.model.options.min_price
+                )
         self.model.hours.hours_today = hours
         self.model.hours.hours_tomorrow = hours_tomorrow
         self._update_hour_lists(testhour=testhour)
-        
+ 
     def _update_per_day(self, prices: list) -> HourObjectExtended:
         pricedict = dict
         if prices is not None and len(prices) > 1:
-            pricedict = HourSelectionHelpers._create_dict(prices)
-            normalized_pricedict = HourSelectionHelpers._create_dict(
-                HourSelectionHelpers._normalize_prices(prices)
+            pricedict = helpers._create_dict(prices)
+            normalized_pricedict = helpers._create_dict(
+                calc.normalize_prices(prices)
                 )
             if stat.stdev(prices) > 0.05:
-                prices_ranked = HourSelectionHelpers._rank_prices(pricedict, normalized_pricedict)
+                prices_ranked = calc.rank_prices(pricedict, normalized_pricedict)
                 ready_hours = self._determine_hours(prices_ranked, prices)
                 return HourObjectExtended(
                     ready_hours.nh, 

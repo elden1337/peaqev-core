@@ -10,53 +10,59 @@ def top_up(model:TopUpDTO) -> HourObject:
     today = list(model.prices[model.hour:24])
     tomorrow = list(model.prices_tomorrow[0:max(model.hour-1,0)])
     cheap_max = 0
-
-    if max(today) < (sum(tomorrow)/len(tomorrow)):
-        is_today = True
-        cheap_max = max(today)
-    elif max(tomorrow) < (sum(today)/len(today)):
-        is_today = False
-        cheap_max = max(tomorrow)
-    
-    if cheap_max == 0 or len(today) < 9:
-        return HourObject(
-        nh=model.nh,
-        ch=model.ch,
-        dyn_ch=model.dyn_ch
-        )
-    
-    result = _remove_and_add_for_top_up(
-        model=HoursDTO(
-            model.nh, 
-            model.ch, 
-            model.dyn_ch, 
-            model.top_price, 
-            model.min_price),
-        today_dict=_create_partial_dict(
-            today,
-            model.hour, 
-            True), 
-        tomorrow_dict=_create_partial_dict(
-            tomorrow, 
-            model.hour, 
-            False), 
-        max_cheap=cheap_max, 
-        today=is_today
-        )
-
-    result.nh = list(set(result.nh))
-    result.nh.sort()
     try:
-        dynamic_caution_hours = {key: value for (key, value) in result.dyn_ch.items() if key not in model.nh}
-    except Exception as e:
-        print(f"{e}: {result.dyn_ch}")
-        dynamic_caution_hours = {}
+        if max(today) < (sum(tomorrow)/len(tomorrow)):
+            is_today = True
+            cheap_max = max(today)
+        elif max(tomorrow) < (sum(today)/len(today)):
+            is_today = False
+            cheap_max = max(tomorrow)
+        
+        if cheap_max == 0 or len(today) < 9:
+            return HourObject(
+            nh=model.nh,
+            ch=model.ch,
+            dyn_ch=model.dyn_ch
+            )
+        
+        result = _remove_and_add_for_top_up(
+            model=HoursDTO(
+                model.nh, 
+                model.ch, 
+                model.dyn_ch, 
+                model.top_price, 
+                model.min_price),
+            today_dict=_create_partial_dict(
+                today,
+                model.hour, 
+                True), 
+            tomorrow_dict=_create_partial_dict(
+                tomorrow, 
+                model.hour, 
+                False), 
+            max_cheap=cheap_max, 
+            today=is_today
+            )
 
-    return HourObject(
-        nh=result.nh,
-        ch=[],
-        dyn_ch=dynamic_caution_hours
-    )
+        result.nh = list(set(result.nh))
+        result.nh.sort()
+        try:
+            dynamic_caution_hours = {key: value for (key, value) in result.dyn_ch.items() if key not in model.nh}
+        except Exception as e:
+            print(f"{e}: {result.dyn_ch}")
+            dynamic_caution_hours = {}
+
+        return HourObject(
+            nh=result.nh,
+            ch=[],
+            dyn_ch=dynamic_caution_hours
+        )
+    except ZeroDivisionError as e:
+        return HourObject(
+            nh=model.nh,
+            ch=model.ch,
+            dyn_ch=model.dyn_ch
+            )
 
 def _remove_and_add_for_top_up(
     model: HoursDTO,
