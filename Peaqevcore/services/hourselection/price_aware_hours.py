@@ -26,7 +26,7 @@ class PriceAwareHours(Hours):
 
     @property
     def options(self):
-        return self._core.options
+        return self._core.model.options
 
     @property
     def dynamic_caution_hours(self) -> dict:

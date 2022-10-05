@@ -1,5 +1,5 @@
 import statistics as stat
-from ...models.hourselection.hourobject import HourObject
+from ....models.hourselection.hourobject import HourObject
 
 class HourSelectionInterimUpdate:
     @staticmethod

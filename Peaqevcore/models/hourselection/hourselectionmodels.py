@@ -10,7 +10,6 @@ class HoursModel:
     hours_today: HourObject = field(default_factory=lambda : HourObject([],[],dict()))
     hours_tomorrow: HourObject = field(default_factory=lambda : HourObject([],[],dict()))
 
-
 @dataclass(frozen=False)
 class HourSelectionOptions:
     cautionhour_type: float = 0
@@ -19,6 +18,14 @@ class HourSelectionOptions:
     allow_top_up: bool = False
     conserve_top_up: bool = False
 
+    @staticmethod
+    def set_absolute_top_price(val) -> float:
+        if val is None:
+            return float("inf")
+        if val <= 0:
+            return float("inf")
+        return float(val)
+
 
 @dataclass(frozen=False)
 class HourSelectionModel:
@@ -26,3 +33,6 @@ class HourSelectionModel:
     prices_tomorrow: List[float] = field(default_factory=lambda : [])
     hours: HoursModel = HoursModel()
     options: HourSelectionOptions = HourSelectionOptions
+
+    def validate(self):
+        assert 0 < self.options.cautionhour_type <= 1
