@@ -134,16 +134,8 @@ class HourSelectionService:
         ) -> None:
         if self.model.options.allow_top_up is True and self.model.prices_tomorrow is not None and len(self.model.prices_tomorrow) > 0:
             ret = top_up(TopUpDTO(
-                self.model.hours.non_hours, 
-                self.model.hours.caution_hours, 
-                self.model.hours.dynamic_caution_hours, 
-                self.model.options.absolute_top_price,
-                self.model.options.min_price,
-                self.set_hour(testhour), 
-                self.model.hours.hours_today, 
-                self.model.hours.hours_tomorrow, 
-                self.model.prices_today, 
-                self.model.prices_tomorrow
+                raw_model=self.model,
+                hour=self.set_hour(testhour)
                 ))
             if ret.nh != self.model.hours.non_hours:
                 self.model.options.conserve_top_up = True
@@ -207,3 +199,17 @@ class HourSelectionService:
 
     def set_hour(self, testhour:int = None) -> int:
         return testhour if testhour is not None else self._base_mock_hour if self._base_mock_hour is not None else datetime.now().hour
+
+
+# class Hourhelper:
+#     _hour: int
+
+#     @property
+#     def hour(self):
+#         return self._hour
+
+#     @hour.setter
+#     def hour(self, val:int = None):
+
+#         #return testhour if testhour is not None else self._base_mock_hour if self._base_mock_hour is not None else datetime.now().hour
+#         self._hour = val    

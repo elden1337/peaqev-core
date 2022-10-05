@@ -20,18 +20,13 @@ def top_up(model:TopUpDTO) -> HourObject:
         
         if cheap_max == 0 or len(today) < 9:
             return HourObject(
-            nh=model.nh,
-            ch=model.ch,
-            dyn_ch=model.dyn_ch
+            nh=model.hours.nh,
+            ch=model.hours.ch,
+            dyn_ch=model.hours.dyn_ch
             )
         
         result = _remove_and_add_for_top_up(
-            model=HoursDTO(
-                model.nh, 
-                model.ch, 
-                model.dyn_ch, 
-                model.top_price, 
-                model.min_price),
+            model=model.hours,
             today_dict=_create_partial_dict(
                 today,
                 model.hour, 

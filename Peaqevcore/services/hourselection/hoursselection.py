@@ -86,8 +86,6 @@ class Hoursselection:
         ret = self._get_charge_or_price(currentpeak, testhour)
         return round(sum(ret.values()),1)
 
-    
-    
     def _get_charge_or_price(self, currentpeak:float = None, testhour:int = None) -> dict:
         hour = self.service.set_hour(testhour)
         ret = dict()
