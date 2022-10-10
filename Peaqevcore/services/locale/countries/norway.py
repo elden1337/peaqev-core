@@ -65,3 +65,11 @@ class NO_Mellom(Locale_Type):
     charged_peak = QUERYTYPE_AVERAGEOFTHREEDAYS
     query_model = QUERYTYPES[QUERYTYPE_AVERAGEOFTHREEDAYS]
 
+
+@dataclass(frozen=True)
+class NO_AskerNett(Locale_Type):
+    observed_peak = QUERYTYPE_AVERAGEOFTHREEDAYS_MIN
+    charged_peak = QUERYTYPE_AVERAGEOFTHREEDAYS
+    query_model = QUERYTYPES[QUERYTYPE_AVERAGEOFTHREEDAYS]
+    
+#docs: https://askernett.no/ny-nettleiemodell-for-alle-fra-1-juli-2022/
