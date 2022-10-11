@@ -4,7 +4,6 @@ from typing import List, Dict
 @dataclass
 class Price:
     price_aware: bool = False
-    allow_top_up: bool = False
     min_price: float = 0.0
     top_price: float = 0.0
     cautionhour_type: str = ""
