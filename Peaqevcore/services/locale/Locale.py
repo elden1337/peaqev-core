@@ -1,4 +1,4 @@
-from .countries.default import Default
+from .countries.default import Default, NoPeak
 from .countries.belgium import VregBelgium
 from .countries.sweden import SE_Bjerke_Energi, SE_FalbygdensEnergi, SE_Gothenburg, SE_Karlstad, SE_Kristinehamn, SE_Linde_Energi, SE_Malarenergi, SE_Malung_Salen, SE_Nacka_normal, SE_NACKA_timediff, SE_Partille, SE_SHE_AB, SE_Skovde, SE_Sollentuna
 from .countries.norway import NO_AgderEnergi, NO_Elvia, NO_GlitreEnergi, NO_LNett, NO_Lede, NO_Mellom, NO_Tensio, NO_BKK, NO_AskerNett
@@ -12,6 +12,7 @@ LOCALE_SE_NACKA_NORMAL = "Nacka, Sweden (Normal tariffe)"
 #LOCALE_SE_NACKA_TIMEDIFF = "Nacka, Sweden (Time differentiated tariffe)"
 LOCALE_SE_PARTILLE = "Partille, Sweden"
 LOCALE_DEFAULT = "Other, just want to test"
+LOCALE_NO_PEAK = "No peak shaving needed"
 LOCALE_SE_SALA = "Sala-Heby Energi AB, Sweden"
 LOCALE_SE_MALUNG_SALEN = "Malung-Sälen, Sweden (Malungs elverk)"
 LOCALE_SE_SKOVDE = "Skövde, Sweden"
@@ -33,6 +34,7 @@ LOCALE_NO_ASKER = "Asker Nett, Norway"
 
 LOCALETYPEDICT = {
     LOCALE_DEFAULT: Default,
+    LOCALE_NO_PEAK: NoPeak,
     LOCALE_SE_GOTHENBURG: SE_Gothenburg,
     LOCALE_SE_PARTILLE: SE_Partille,
     LOCALE_SE_KARLSTAD: SE_Karlstad,
@@ -55,7 +57,7 @@ LOCALETYPEDICT = {
     LOCALE_NO_BKK: NO_BKK,
     LOCALE_SE_MALARENERGI: SE_Malarenergi,
     LOCALE_NO_MELLOM: NO_Mellom,
-    LOCALE_NO_ASKER: NO_AskerNett
+    LOCALE_NO_ASKER: NO_AskerNett,
 }
 
 """Lookup locales for config flow"""
@@ -82,7 +84,8 @@ LOCALES = [
     LOCALE_SE_SALA,
     LOCALE_SE_SKOVDE,
     LOCALE_SE_SOLLENTUNA,
-    LOCALE_DEFAULT
+    LOCALE_DEFAULT,
+    LOCALE_NO_PEAK
     ]
 
 
