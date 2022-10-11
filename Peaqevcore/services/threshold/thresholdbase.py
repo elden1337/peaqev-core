@@ -35,9 +35,15 @@ class ThresholdBase:
 
     # this one must be done better. Currently cannot accommodate 1-32A single phase for instance.
     def _setcurrentdict(self):
-        if 0 < int(self._hub.sensors.carpowersensor.value) < 4000:
-            return CURRENTS_ONEPHASE_1_16
-        return CURRENTS_THREEPHASE_1_16
+            if self._hub.sensors.chargerobject_switch.current is not None:
+                divid = int(self._hub.sensors.carpowersensor.value)/int(self._hub.sensors.chargerobject_switch.current)
+                if divid < 300:
+                    return CURRENTS_ONEPHASE_1_16
+                else:
+                    return CURRENTS_THREEPHASE_1_16            
+            if 0 < int(self._hub.sensors.carpowersensor.value) < 4000:
+                return CURRENTS_ONEPHASE_1_16
+            return CURRENTS_THREEPHASE_1_16
 
     @staticmethod
     def _stop(
