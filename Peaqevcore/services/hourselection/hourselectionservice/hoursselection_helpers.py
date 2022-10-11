@@ -1,12 +1,13 @@
 import statistics as stat
 from ....models.hourselection.hourobject import HourObject
+from ....models.hourselection.hourselectionmodels import HourSelectionModel
 
 class HourSelectionInterimUpdate:
     @staticmethod
-    def interim_avg_update(today: HourObject, tomorrow: HourObject, prices_today: list, prices_tomorrow: list, max_price: float = None, min_price: float = None) -> (HourObject, HourObject):
-        avg = HourSelectionInterimUpdate._get_average_price(prices_today, prices_tomorrow)
-        _today = HourSelectionInterimUpdate._set_interim_per_day(avg, prices_today, today, max_price, min_price)
-        _tomorrow = HourSelectionInterimUpdate._set_interim_per_day(avg, prices_tomorrow, tomorrow,  max_price, min_price, False)
+    def interim_avg_update(today: HourObject, tomorrow: HourObject, model: HourSelectionModel) -> (HourObject, HourObject):
+        avg = HourSelectionInterimUpdate._get_average_price(model.prices_today, model.prices_tomorrow)
+        _today = HourSelectionInterimUpdate._set_interim_per_day(avg, model.prices_today, today, model.options.absolute_top_price, model.options.min_price)
+        _tomorrow = HourSelectionInterimUpdate._set_interim_per_day(avg, model.prices_tomorrow, tomorrow,  model.options.absolute_top_price, model.options.min_price, False)
         return _today, _tomorrow
 
     @staticmethod
@@ -117,7 +118,7 @@ class HourSelectionCalculations:
 
     @staticmethod
     def rank_prices(hourdict: dict, normalized_hourdict: dict) -> dict:
-        ret = dict()
+        ret = {}
         _maxval = max(hourdict.values())
         _max_normalized = max(normalized_hourdict.values())
         peaqstdev = _maxval/abs(_max_normalized/stat.stdev(normalized_hourdict.values()))
@@ -133,8 +134,6 @@ class HourSelectionCalculations:
     @staticmethod
     def _discard_excessive_hours(hours: dict):
         """There should always be at least four regular hours before absolute_top_price kicks in."""
-        if len(hours) < 20:
-            return hours
         while len(hours) >= 20:
             to_pop = dict(sorted(hours.items(), key=lambda item: item[1]['val']))    
             hours.pop(list(to_pop.keys())[0])

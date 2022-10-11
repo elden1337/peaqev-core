@@ -241,7 +241,8 @@ def test_total_charge_just_today():
     r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE],base_mock_hour=MOCKHOUR)
     r.prices = MOCKPRICES1
     r.update()
-    assert r.get_total_charge(2, MOCKHOUR) == 17.2
+    r.service._base_mock_hour = MOCKHOUR
+    assert r.get_total_charge(2) == 17.2
 
 def test_total_charge_today_tomorrow():
     MOCKHOUR = 18
@@ -249,22 +250,25 @@ def test_total_charge_today_tomorrow():
     r.prices = MOCKPRICES1
     r.prices_tomorrow = MOCKPRICES2
     r.update()
-    assert r.get_total_charge(2, MOCKHOUR) == 36.5
+    r.service._base_mock_hour = MOCKHOUR
+    assert r.get_total_charge(2) == 36.5
 
 def test_average_kwh_price_just_today():
     r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE])
     MOCKHOUR = 0
     r.prices = MOCKPRICES1
-    r.update(MOCKHOUR)
-    assert r.get_average_kwh_price(MOCKHOUR) == 0.35
+    r.service._base_mock_hour = MOCKHOUR
+    r.update()
+    assert r.get_average_kwh_price() == 0.35
 
 def test_average_kwh_price_today_tomorrow():
     MOCKHOUR = 18
     r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE])
     r.prices = MOCKPRICES1
     r.prices_tomorrow = MOCKPRICES2
-    r.update(MOCKHOUR)
-    assert r.get_average_kwh_price(MOCKHOUR) == 0.61
+    r.service._base_mock_hour = MOCKHOUR
+    r.update()
+    assert r.get_average_kwh_price() == 0.61
 
 def test_cheap_today_expensive_tomorrow_top_up():
     MOCKHOUR = 14
@@ -274,6 +278,13 @@ def test_cheap_today_expensive_tomorrow_top_up():
     r.update()
     assert r.non_hours == [5, 6, 7, 8, 9, 10, 11, 12,13]
     assert r.dynamic_caution_hours == {}
+
+def test_both_min_and_max_price():
+    MOCKHOUR = 0
+    r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE], allow_top_up=False, base_mock_hour=MOCKHOUR, absolute_top_price=1, min_price=0.5)
+    r.prices = [1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,0.4,0.4,1.2,1.2,1.2]
+    r.update()
+    assert r.non_hours == [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,21,22,23]
 
 def test_cheap_today_expensive_tomorrow_top_up_top_price():
     MOCKHOUR = 22
@@ -367,16 +378,16 @@ def test_over_midnight_top_up_conserve_top_up():
     r.prices = [0.019, 0.015, 0.014, 0.013, 0.013, 0.017, 0.019, 0.067, 0.157, 0.199, 0.177, 0.131, 0.025, 0.022, 0.02, 0.021, 0.024, 0.323, 1.94, 1.97, 1.5, 0.677, 1.387, 0.227]
     r.prices_tomorrow = [0.046, 0.026, 0.035, 0.066, 0.135, 0.359, 2.154, 3.932, 5.206, 4.947, 3.848, 2.991, 2.457, 2.492, 2.273, 2.177, 2.142, 2.555, 2.77, 2.185, 2.143, 1.318, 0.021, 0.02]
     assert r.non_hours == [6, 7, 8, 9, 10, 11,12]
-    #assert r.model.options.conserve_top_up is True
+    assert r.model.options.conserve_top_up is True
     
     r.service._base_mock_hour = 23
     assert r.non_hours == [6, 7, 8, 9, 10, 11,12,13]
-    #assert r.model.options.conserve_top_up is True
+    assert r.model.options.conserve_top_up is True
     
     r.service._base_mock_hour = 2
     r.prices = [0.046, 0.026, 0.035, 0.066, 0.135, 0.359, 2.154, 3.932, 5.206, 4.947, 3.848, 2.991, 2.457, 2.492, 2.273, 2.177, 2.142, 2.555, 2.77, 2.185, 2.143, 1.318, 0.021, 0.02]
     r.prices_tomorrow = []
-    #assert r.model.options.conserve_top_up is True
+    assert r.model.options.conserve_top_up is True
     
     r.service._base_mock_hour = 13
     assert r.non_hours == []

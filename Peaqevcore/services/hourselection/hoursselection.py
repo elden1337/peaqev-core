@@ -74,20 +74,20 @@ class Hoursselection:
             self.service._base_mock_hour = testhour
         self.service.update()
 
-    def get_average_kwh_price(self, testhour:int = None):
-        ret = self._get_charge_or_price(testhour=testhour)
+    def get_average_kwh_price(self):
+        ret = self._get_charge_or_price()
         try:
             return round(sum(ret.values())/len(ret),2)
         except ZeroDivisionError as e:
                 _LOGGER.warning(f"get_average_kwh_price_core could not be calculated: {e}")
         return 0
         
-    def get_total_charge(self, currentpeak:float, testhour:int = None) -> float:
-        ret = self._get_charge_or_price(currentpeak, testhour)
+    def get_total_charge(self, currentpeak:float) -> float:
+        ret = self._get_charge_or_price(currentpeak)
         return round(sum(ret.values()),1)
 
-    def _get_charge_or_price(self, currentpeak:float = None, testhour:int = None) -> dict:
-        hour = self.service.set_hour(testhour)
+    def _get_charge_or_price(self, currentpeak:float = None) -> dict:
+        hour = self.service.set_hour()
         ret = dict()
 
         def _looper_charge(h:int):
