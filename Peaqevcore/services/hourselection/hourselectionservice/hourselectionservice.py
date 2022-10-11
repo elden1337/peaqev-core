@@ -1,7 +1,6 @@
 import logging
 from datetime import datetime
 import statistics as stat
-from ..top_up import top_up, TopUpDTO
 from ....models.hourselection.const import (
     CAUTIONHOURTYPE_SUAVE,
     CAUTIONHOURTYPE_INTERMEDIATE,
@@ -37,7 +36,7 @@ class HourSelectionService:
             hours_tomorrow = self._add_remove_limited_hours(
                 self._update_per_day(self.model.prices_tomorrow)
                 )
-            hours, hours_tomorrow = interim.interim_avg_update(
+            hours, hours_tomorrow, conserve = interim.interim_avg_update(
                 today=hours, 
                 tomorrow=hours_tomorrow, 
                 model =self.model
@@ -84,22 +83,6 @@ class HourSelectionService:
             self.model.hours.update_non_hours(hour)
             self.model.hours.update_caution_hours(hour)
             self.model.hours.update_dynanmic_caution_hours(hour)
-        self._set_top_up(hour)
-        
-    def _set_top_up(
-        self, 
-        testhour: int = None
-        ) -> None:
-        if self.model.options.allow_top_up is True and self.model.prices_tomorrow is not None and len(self.model.prices_tomorrow) > 0:
-            ret = top_up(TopUpDTO(
-                raw_model=self.model,
-                hour=self.set_hour(testhour)
-                ))
-            if ret.nh != self.model.hours.non_hours:
-                self.model.hours.conserve_top_up = True
-                self.model.hours.non_hours = ret.nh
-                self.model.hours.caution_hours = ret.ch
-                self.model.hours.dynamic_caution_hours = ret.dyn_ch
 
     def _add_remove_limited_hours(self, hours: HourObjectExtended) -> HourObject:
         """Removes cheap hours and adds expensive hours set by user limitation"""

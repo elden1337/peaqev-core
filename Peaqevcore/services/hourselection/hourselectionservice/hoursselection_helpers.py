@@ -1,21 +1,46 @@
 import statistics as stat
+from typing import Tuple
 from ....models.hourselection.hourobject import HourObject
 from ....models.hourselection.hourselectionmodels import HourSelectionModel
 
 class HourSelectionInterimUpdate:
     @staticmethod
-    def interim_avg_update(today: HourObject, tomorrow: HourObject, model: HourSelectionModel) -> (HourObject, HourObject):
+    def interim_avg_update(today: HourObject, tomorrow: HourObject, model: HourSelectionModel) -> Tuple[HourObject, HourObject, bool]:
         avg = HourSelectionInterimUpdate._get_average_price(model.prices_today, model.prices_tomorrow)
-        _today = HourSelectionInterimUpdate._set_interim_per_day(avg, model.prices_today, today, model.options.absolute_top_price, model.options.min_price)
-        _tomorrow = HourSelectionInterimUpdate._set_interim_per_day(avg, model.prices_tomorrow, tomorrow,  model.options.absolute_top_price, model.options.min_price, False)
-        return _today, _tomorrow
+        _today = HourSelectionInterimUpdate._set_interim_per_day(
+            True,
+            avg, 
+            model.prices_today, 
+            today, 
+            model.options.absolute_top_price, 
+            model.options.min_price
+            )
+        _tomorrow = HourSelectionInterimUpdate._set_interim_per_day(
+            False,
+            avg, 
+            model.prices_tomorrow, 
+            tomorrow,  
+            model.options.absolute_top_price, 
+            model.options.min_price
+            )
+
+        conserve = True if _today[1] is True or _tomorrow[1] is True else False
+        return _today[0], _tomorrow[0], conserve
 
     @staticmethod
-    def _set_interim_per_day(avg: float, prices: list, hour_obj: HourObject, max_price: float = None, min_price: float = None, is_today: bool = True) -> HourObject:
+    def _set_interim_per_day(
+        is_today: bool,
+        avg: float, 
+        prices: list, 
+        hour_obj: HourObject, 
+        max_price: float = None, 
+        min_price: float = None, 
+        ) -> Tuple[HourObject, bool]:
         new_nonhours = []
         new_ok_hours = []
         _max_price = float('inf') if max_price is None else max_price
         _min_price = float('-inf') if min_price is None else min_price
+        conserve_top_up = False
 
         for idx, p in enumerate(prices):
             if (idx >= 14 and is_today) or idx < 14:
@@ -33,6 +58,9 @@ class HourSelectionInterimUpdate:
                     if h in hour_obj.dyn_ch.keys():
                         hour_obj.dyn_ch.pop(h)
         hour_obj.nh.sort()
+        
+        if len(new_nonhours) > 0 or len(new_ok_hours) > 0:
+            conserve_top_up = True
 
         for h in new_ok_hours:
             if h in hour_obj.nh:
@@ -40,8 +68,8 @@ class HourSelectionInterimUpdate:
             elif h in hour_obj.ch:
                 hour_obj.ch.remove(h)
                 hour_obj.dyn_ch.pop(h)    
-
-        return HourObject(hour_obj.nh, hour_obj.ch, hour_obj.dyn_ch)
+        print(hour_obj.nh)
+        return HourObject(hour_obj.nh, hour_obj.ch, hour_obj.dyn_ch), conserve_top_up
 
     @staticmethod
     def _get_average_price(prices_today: list, prices_tomorrow:list) -> float:
