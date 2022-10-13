@@ -1,16 +1,31 @@
 from abc import abstractmethod
 from ...util import _convert_quarterly_minutes
 from datetime import datetime
-#from ...hub.hub import HubBase
+import logging
+from enum import Enum
+from ...models.phases import Phases
 from ...models.const import (
     CURRENTS_ONEPHASE_1_16, CURRENTS_THREEPHASE_1_16
 )
+
+_LOGGER = logging.getLogger(__name__)
+
+CURRENT_DICT = {
+    Phases.OnePhase: CURRENTS_ONEPHASE_1_16,
+    Phases.ThreePhase: CURRENTS_THREEPHASE_1_16,
+    Phases.Unknown: CURRENTS_THREEPHASE_1_16
+}
 
 
 class ThresholdBase:
     BASECURRENT = 6
     def __init__(self, hub):
         self._hub = hub
+        self._phases = Phases.Unknown
+
+    @property
+    def phases(self) -> str:
+        return self._phases.name
 
     @property
     def stop(self) -> float:
@@ -33,17 +48,23 @@ class ThresholdBase:
     def allowedcurrent(self) -> int:
         pass
 
+    def _setcurrentdict(self) -> dict:
     # this one must be done better. Currently cannot accommodate 1-32A single phase for instance.
-    def _setcurrentdict(self):
-            if self._hub.sensors.chargerobject_switch.current is not None:
-                divid = int(self._hub.sensors.carpowersensor.value)/int(self._hub.sensors.chargerobject_switch.current)
-                if divid < 300:
-                    return CURRENTS_ONEPHASE_1_16
-                else:
-                    return CURRENTS_THREEPHASE_1_16            
+        try:
+            divid = int(self._hub.sensors.carpowersensor.value)/int(self._hub.sensors.chargerobject_switch.current)
+            if int(self._hub.sensors.carpowersensor.value) == 0:
+                self._phases = Phases.Unknown
+            elif divid < 300:
+                self._phases = Phases.OnePhase
+            else:
+                self._phases = Phases.ThreePhase
+        except:
+            _LOGGER.debug("Currents-dictionary: could not divide charger amps with charger power. Falling back to legacy-method.")
             if 0 < int(self._hub.sensors.carpowersensor.value) < 4000:
-                return CURRENTS_ONEPHASE_1_16
-            return CURRENTS_THREEPHASE_1_16
+                self._phases = Phases.OnePhase
+            else:
+                self._phases = Phases.ThreePhase
+        return CURRENT_DICT[self._phases]
 
     @staticmethod
     def _stop(

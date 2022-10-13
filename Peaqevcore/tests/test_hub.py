@@ -7,7 +7,6 @@ from ..services.locale.Locale import LOCALE_SE_GOTHENBURG
 OPTIONS_REGULAR = HubOptions(
     price=Price(
         price_aware=True,
-        allow_top_up=False,
         cautionhour_type=CAUTIONHOURTYPE_SUAVE
     ),
     peaqev_lite=False,
