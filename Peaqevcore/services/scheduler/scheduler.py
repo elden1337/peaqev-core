@@ -4,6 +4,9 @@ from ...models.hourselection.hourselectionmodels import HourSelectionOptions
 from .schedule_session import ScheduleSession
 from ...models.chargerstates import CHARGERSTATES
 
+
+
+
 class Scheduler:
     """This class obj is what constitutes a running scheduler."""
     def __init__(self, options:HourSelectionOptions = None):
@@ -131,3 +134,38 @@ class SchedulerFacade(Scheduler):
     def caution_hours(self) -> dict:
         """dynamic caution hours"""
         return self.model.caution_hours
+
+
+
+
+class Schedule:
+    start_date: date
+    end_date: date
+    start_time: time
+    end_time: time
+    charge_amount: float
+    weekdays: int
+
+
+class Schedules:
+    #list of schedule with id
+    pass
+
+class SchedulerCommands:
+    def __init__(self) -> None:
+        pass
+
+    def create(self) -> int:
+        pass
+
+    def edit(self, scheduler_id: int) -> bool:
+        pass
+
+    def delete(self, scheduler_id: int) -> bool:
+        pass
+
+    def pause(self, scheduler_id: int) -> bool:
+        pass
+
+    def resume(self, scheduler_id: int) -> bool:
+        pass
