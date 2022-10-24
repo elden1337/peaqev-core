@@ -32,11 +32,11 @@ class ChargerBase:
         self.servicecalls = ServiceCalls(domain, model, options)
 
     @abstractmethod
-    def validatecharger(self):
+    def validatecharger(self) -> bool:
         pass
 
     @abstractmethod
-    def getentities(self, domain: str = None, endings: list = None):
+    def get_entities(self):
         pass
 
     @abstractmethod
