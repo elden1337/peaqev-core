@@ -2,7 +2,6 @@ from abc import abstractmethod
 from ...util import _convert_quarterly_minutes
 from datetime import datetime
 import logging
-from enum import Enum
 from ...models.phases import Phases
 from ...models.const import (
     CURRENTS_ONEPHASE_1_16, CURRENTS_THREEPHASE_1_16
