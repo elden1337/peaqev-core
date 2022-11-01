@@ -1,12 +1,9 @@
-from ast import Pow
 import time
-from datetime import datetime
-from statistics import mean
 from .power_reading import PowerReading
 from .energy_weekly import EnergyWeekly
 
 class SessionPrice:
-    def __init__(self, weekly_dict: dict = {}) -> None:
+    def __init__(self, init_average_data = None) -> None:
         self._total_price: int = 0
         self._price: int = 0
         self._current_power: int = 0
@@ -14,7 +11,7 @@ class SessionPrice:
         self._current_time: int = 0
         self._time_delta: int = 0
         self._readings: list = []
-        self.average_data = EnergyWeekly()
+        self.average_data = EnergyWeekly(init_average_data)
 
     @property
     def energy_average(self) -> float:
@@ -29,11 +26,12 @@ class SessionPrice:
         return round(self.get_status()["energy"]["value"], 3)
 
     def reset(self):
-        self.__init__(self.energy_weekly_dict)
+        self.__init__(self.average_data.export)
 
     def terminate(self, mock_time: float=None):
         print("called terminate")
         self.update_power_reading(0, mock_time)
+        self.average_data.update(self.total_energy)
         self.get_status()
 
     def set_status(self) -> None:

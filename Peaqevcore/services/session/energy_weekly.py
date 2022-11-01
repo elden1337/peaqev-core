@@ -17,7 +17,13 @@ class EnergyWeekly:
         if incoming_dict is not None:
             self.unpack(incoming_dict)
         else:
-            self.model = {}
+            self.set_init_model()
+
+    def set_init_model(self):
+        ret = {}
+        for i in range(0,6):
+            ret[i] = Day(0,0)
+        self.model = ret
 
     @property
     def export(self) -> dict[int, dict[str, float]]:
@@ -56,21 +62,22 @@ class EnergyWeekly:
             return 0.0
 
     def unpack(self, incoming: dict) -> dict[int, Day]:
-        model = {}
-        for idx, m in incoming.items():
-            m_ret = Day(m["sessions"], m["total_charge"])
-            model[idx] = m_ret
-        self.model = model
+        if isinstance(incoming, dict) and len(incoming) > 0:
+            model = {}
+            for idx, m in incoming.items():
+                m_ret = Day(m["sessions"], m["total_charge"])
+                model[idx] = m_ret
+            self.model = model
 
     def update(self, charge:float):
-        self.model[datetime.now().weekday()].charge += charge
-        self.model[datetime.now().weekday()].sessions += 1
+        if charge > 0:
+            self.model[datetime.now().weekday()].charge += charge
+            self.model[datetime.now().weekday()].sessions += 1
 
     def average_for_day(self, day: int) -> float:
         try:
             return self.model[day].charge/self.model[day].sessions
         except:
-            print("error")
             return 0.0
 
 # EXAMPLE = {
@@ -85,7 +92,7 @@ class EnergyWeekly:
 
 # EXPORT_EXAMPLE = {0: {'sessions': 1, 'total_charge': 50}, 1: {'sessions': 4, 'total_charge': 50}, 2: {'sessions': 2, 'total_charge': 15}, 3: {'sessions': 3, 'total_charge': 20}, 4: {'sessions': 10, 'total_charge': 123}, 5: {'sessions': 0, 'total_charge': 0}, 6: {'sessions': 10, 'total_charge': 110}}
 
-# e = EnergyWeekly(EXPORT_EXAMPLE)
+# e = EnergyWeekly()
 # print(e.model)
 # print(e.average)
 # print(e.average_for_day(0))
