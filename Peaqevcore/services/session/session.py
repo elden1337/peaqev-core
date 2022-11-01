@@ -1,10 +1,12 @@
 from ast import Pow
 import time
+from datetime import datetime
+from statistics import mean
 from .power_reading import PowerReading
-
+from .energy_weekly import EnergyWeekly
 
 class SessionPrice:
-    def __init__(self) -> None:
+    def __init__(self, weekly_dict: dict = {}) -> None:
         self._total_price: int = 0
         self._price: int = 0
         self._current_power: int = 0
@@ -12,13 +14,22 @@ class SessionPrice:
         self._current_time: int = 0
         self._time_delta: int = 0
         self._readings: list = []
+        self.average_data = EnergyWeekly()
+
+    @property
+    def energy_average(self) -> float:
+        return self.average_data.average
+
+    @property
+    def energy_weekly_dict(self) -> dict:
+        return self.average_data.export
 
     @property
     def total_energy(self) -> float:
         return round(self.get_status()["energy"]["value"], 3)
 
     def reset(self):
-        self.__init__()
+        self.__init__(self.energy_weekly_dict)
 
     def terminate(self, mock_time: float=None):
         print("called terminate")
@@ -103,6 +114,14 @@ class Session:
     def session_price(self, val):
         self.core.update_price(val)
         self.update_session_pricing()
+
+    @property
+    def energy_average(self) -> float:
+        return self.core.energy_average
+
+    @property
+    def energy_weekly_dict(self) -> dict:
+        return self.core.energy_weekly_dict
 
     def update_session_pricing(self):
         if self._charger._params.session_active is False:

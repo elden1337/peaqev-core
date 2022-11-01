@@ -1,7 +1,10 @@
 import statistics as stat
 from typing import Tuple
+import logging
 from ....models.hourselection.hourobject import HourObject
 from ....models.hourselection.hourselectionmodels import HourSelectionModel
+
+_LOGGER = logging.getLogger(__name__)
 
 class HourSelectionInterimUpdate:
     @staticmethod
@@ -81,14 +84,20 @@ class HourSelectionInterimUpdate:
 class HourSelectionHelpers:
     @staticmethod
     def _create_dict(input: list):
-        ret = dict()
+        ret = {}
         for idx, val in enumerate(input):
             ret[idx] = val
-        try:
-            assert len(ret) == 24
-        except Exception:
+        print(len(ret))
+        if 23 <= len(ret) <= 24:
+            return ret
+        elif len(ret) == 25:
+            _LOGGER.debug(f"Looks like we are heading into DST. re-parsing hours")
+            input.pop(2)
+            return HourSelectionHelpers._create_dict(input)
+        else:
+            _LOGGER.exception(f"Could not create dictionary from pricelist: {input} with len {len(ret)}.")
             raise ValueError
-        return ret
+        
 
     @staticmethod
     def _try_parse(input:str, parsetype:type):
