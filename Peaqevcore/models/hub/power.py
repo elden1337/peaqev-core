@@ -3,6 +3,7 @@ import logging
 from ...util import nametoid
 from ...models.const import DOMAIN
 from .hubmember import HubMember
+from ...hub.killswitch import KillSwitch
 from .const import (TOTALPOWER, HOUSEPOWER)
 
 _LOGGER = logging.getLogger(__name__)
@@ -15,6 +16,7 @@ class Power:
         self._house = HubMember(data_type=int, initval=0, name=HOUSEPOWER)
         self._powersensor_includes_car = powersensor_includes_car
         self._setup()
+        self.killswitch = KillSwitch(update_interval=120, grace_interval=300)
 
     @property
     def is_initialized(self) -> bool:
@@ -26,6 +28,7 @@ class Power:
 
     @property
     def total(self) -> HubMember:
+        self.killswitch.check
         return self._total
 
     @total.setter
@@ -34,6 +37,7 @@ class Power:
 
     @property
     def house(self) -> HubMember:
+        self.killswitch.check
         return self._house
 
     @house.setter
@@ -56,3 +60,4 @@ class Power:
             if config_sensor_value is not None:
                 self.house.value = config_sensor_value
             self.total.value = (float(self.house.value) + float(carpowersensor_value))
+        self.killswitch.update
