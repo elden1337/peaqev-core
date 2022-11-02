@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
+from decimal import DivisionByZero
 import logging
 
 _LOGGER = logging.getLogger(__name__)
@@ -21,7 +22,7 @@ class EnergyWeekly:
 
     def set_init_model(self):
         ret = {}
-        for i in range(0,6):
+        for i in range(0,7):
             ret[i] = Day(0,0)
         self.model = ret
 
@@ -35,6 +36,7 @@ class EnergyWeekly:
                 "total_charge": m.charge
             }
             ret[idx] = m_ret
+        return ret
 
     @property
     def average(self) -> float:
@@ -42,7 +44,8 @@ class EnergyWeekly:
         charge = sum([h.charge for h in self.model.values()])
         try:
             return round(charge/sessions,1)
-        except:
+        except DivisionByZero as e:
+            _LOGGER.debug(f"Could not calculate average. {e}")
             return 0.0
         
     @property
@@ -68,6 +71,8 @@ class EnergyWeekly:
                 m_ret = Day(m["sessions"], m["total_charge"])
                 model[idx] = m_ret
             self.model = model
+        else: 
+            return self.set_init_model()
 
     def update(self, charge:float):
         if charge > 0:

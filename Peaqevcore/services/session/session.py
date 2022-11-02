@@ -1,6 +1,10 @@
 import time
 from .power_reading import PowerReading
 from .energy_weekly import EnergyWeekly
+import logging
+
+_LOGGER = logging.getLogger(__name__)
+
 
 class SessionPrice:
     def __init__(self, init_average_data = None) -> None:
@@ -29,9 +33,9 @@ class SessionPrice:
         self.__init__(self.average_data.export)
 
     def terminate(self, mock_time: float=None):
-        print("called terminate")
-        self.update_power_reading(0, mock_time)
+        _LOGGER.debug(f"Called terminate on session_price. Trying to add {self.total_energy} to statistics.")
         self.average_data.update(self.total_energy)
+        self.update_power_reading(0, mock_time)
         self.get_status()
 
     def set_status(self) -> None:
