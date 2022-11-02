@@ -20,6 +20,10 @@ class KillSwitch:
         self._is_dead: bool = False
 
     @property
+    def total_timer(self) -> int:
+        return sum(self._update_interval, self._grace_interval)
+
+    @property
     def is_dead(self) -> bool:
         return self._is_dead
 
@@ -39,6 +43,7 @@ class KillSwitch:
     def update(self):
         self._last_update = time.time()
         self._grace_period = False
+        self._is_dead = False
         self._grace_period_start = 0
 
 
