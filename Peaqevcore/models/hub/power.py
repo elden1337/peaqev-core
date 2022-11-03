@@ -59,9 +59,15 @@ class Power:
         if self._powersensor_includes_car is True:
             if config_sensor_value is not None:
                 self.total.value = config_sensor_value
-            self.house.value = (float(self.total.value) - float(carpowersensor_value))
+            new_val = (float(self.total.value) - float(carpowersensor_value))
+            if new_val != self.house.value:
+                self.killswitch.update
+            self.house.value = new_val
         else:
             if config_sensor_value is not None:
                 self.house.value = config_sensor_value
-            self.total.value = (float(self.house.value) + float(carpowersensor_value))
-        self.killswitch.update
+            new_val = (float(self.house.value) + float(carpowersensor_value))
+            if new_val != self.total.value:
+                self.killswitch.update
+            self.total.value = new_val
+        
