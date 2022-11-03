@@ -42,11 +42,12 @@ class EnergyWeekly:
     def average(self) -> float:
         sessions = sum([h.sessions for h in self.model.values()])
         charge = sum([h.charge for h in self.model.values()])
+        ret = 0.0
         try:
-            return round(charge/sessions,1)
-        except DivisionByZero as e:
-            _LOGGER.debug(f"Could not calculate average. {e}")
-            return 0.0
+            ret = charge/sessions
+        except:
+            _LOGGER.debug(f"Could not calculate average")
+        return round(ret,1)
         
     @property
     def total_sessions(self) -> int:
@@ -67,9 +68,12 @@ class EnergyWeekly:
     def unpack(self, incoming: dict) -> dict[int, Day]:
         if isinstance(incoming, dict) and len(incoming) > 0:
             model = {}
-            for idx, m in incoming.items():
-                m_ret = Day(m["sessions"], m["total_charge"])
-                model[idx] = m_ret
+            for i in range(0,7):
+                if i in incoming.keys():
+                    m_ret = Day(incoming[i]["sessions"], incoming[i]["total_charge"])    
+                else:
+                    m_ret = Day(0,0)
+                model[i] = m_ret
             self.model = model
         else: 
             return self.set_init_model()
@@ -96,8 +100,10 @@ class EnergyWeekly:
 # }
 
 # EXPORT_EXAMPLE = {0: {'sessions': 1, 'total_charge': 50}, 1: {'sessions': 4, 'total_charge': 50}, 2: {'sessions': 2, 'total_charge': 15}, 3: {'sessions': 3, 'total_charge': 20}, 4: {'sessions': 10, 'total_charge': 123}, 5: {'sessions': 0, 'total_charge': 0}, 6: {'sessions': 10, 'total_charge': 110}}
-
+# EXPORT_MISSING = {0: {'sessions': 1, 'total_charge': 50}, 2: {'sessions': 2, 'total_charge': 15}, 3: {'sessions': 3, 'total_charge': 20}, 4: {'sessions': 10, 'total_charge': 123}, 5: {'sessions': 0, 'total_charge': 0}, 6: {'sessions': 10, 'total_charge': 110}}
 # e = EnergyWeekly()
+# e.unpack(EXPORT_MISSING)
+# print(e.export)
 # print(e.model)
 # print(e.average)
 # print(e.average_for_day(0))
