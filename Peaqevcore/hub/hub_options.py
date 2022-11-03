@@ -23,7 +23,6 @@ class HubOptions:
     peaqev_lite: bool = False
     powersensor_includes_car: bool = False
     powersensor: str = field(init=False)
-    behavior_on_default: bool = False
     startpeaks: dict = field(default_factory=dict)
     cautionhours: List = field(default_factory=lambda: [])
     nonhours: List = field(default_factory=lambda: [])
