@@ -246,3 +246,12 @@ class SE_Malarenergi(Locale_Type):
     """
     Det högre priset gäller bara på helgfria vardagar 07.00-20.00 under november till mars.
     """
+
+@dataclass(frozen=True)
+class SE_TekniskaVerken_Link(Locale_Type):
+    observed_peak = QUERYTYPE_BASICMAX
+    charged_peak = QUERYTYPE_BASICMAX
+    query_model = QUERYTYPES[QUERYTYPE_BASICMAX]
+
+    #docs: unknown
+    
