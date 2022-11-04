@@ -254,4 +254,12 @@ class SE_TekniskaVerken_Link(Locale_Type):
     query_model = QUERYTYPES[QUERYTYPE_BASICMAX]
 
     #docs: unknown
+
+@dataclass(frozen=True)
+class SE_Eskilstuna(Locale_Type):
+    observed_peak = QUERYTYPE_BASICMAX
+    charged_peak = QUERYTYPE_BASICMAX
+    query_model = QUERYTYPES[QUERYTYPE_BASICMAX]
+
+    #docs: unknown
     

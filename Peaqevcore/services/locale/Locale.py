@@ -16,12 +16,14 @@ from .countries.sweden import (
     SE_Skovde, 
     SE_Sollentuna,
     SE_TekniskaVerken_Link,
+    SE_Eskilstuna
     #SE_Telge_Energi
     )
 from .countries.norway import NO_AgderEnergi, NO_Elvia, NO_GlitreEnergi, NO_LNett, NO_Lede, NO_Mellom, NO_Tensio, NO_BKK, NO_AskerNett
 
 
 """LOCALETYPES"""
+LOCALE_SE_ESKILSTUNA = "Eskilstuna elnät, Sweden"
 LOCALE_SE_GOTHENBURG = "Gothenburg, Sweden"
 LOCALE_SE_KARLSTAD = "Karlstad, Sweden"
 LOCALE_SE_KRISTINEHAMN = "Kristinehamn, Sweden"
@@ -53,6 +55,7 @@ LOCALE_NO_ASKER = "Asker Nett, Norway"
 LOCALETYPEDICT = {
     LOCALE_DEFAULT: Default,
     LOCALE_NO_PEAK: NoPeak,
+    LOCALE_SE_ESKILSTUNA: SE_Eskilstuna,
     LOCALE_SE_GOTHENBURG: SE_Gothenburg,
     LOCALE_SE_PARTILLE: SE_Partille,
     LOCALE_SE_KARLSTAD: SE_Karlstad,
