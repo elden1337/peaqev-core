@@ -31,7 +31,6 @@ class KillSwitch:
     def check(self):
         if self._grace_period:
             if time.time() - self._grace_period_start > self._grace_interval:
-                _LOGGER.error(f"{datetime.now()} - Error! The grace-period for sensor {self._bound_sensor} has timed out. Peaqev will stop charging. Please check {self._bound_sensor} and it's integration.")
                 self._is_dead = True
                 #self.__init__(self._bound_sensor, self._update_interval, self._grace_interval)
         elif time.time() - self._last_update > self._update_interval:
