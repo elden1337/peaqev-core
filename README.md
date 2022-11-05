@@ -1,6 +1,7 @@
 [![CodeQL](https://github.com/elden1337/peaqev-core/actions/workflows/codeql.yml/badge.svg)](https://github.com/elden1337/peaqev-core/actions/workflows/codeql.yml) [![Python application](https://github.com/elden1337/peaqev-core/actions/workflows/python-app.yml/badge.svg)](https://github.com/elden1337/peaqev-core/actions/workflows/python-app.yml) 
 [![Downloads](https://img.shields.io/pypi/dm/peaqevcore.svg)](https://pypi.org/project/peaqevcore/)
-[![Buy me a coffee](https://img.shields.io/static/v1.svg?label=Buy%20me%20a%20coffee&message=🥨&color=black&logo=buy%20me%20a%20coffee&logoColor=white&labelColor=6f4e37)](https://www.buymeacoffee.com/elden)
+[![Paypal](https://img.shields.io/badge/Sponsor-PayPal-orange.svg)](https://www.paypal.com/donate/?hosted_button_id=GLGW8QAAQC2FG)
+[![BuyMeACoffee](https://img.shields.io/badge/Sponsor-BuyMeACoffee-orange.svg)](https://buymeacoffee.com/elden)
 
 <img src="https://raw.githubusercontent.com/elden1337/hass-peaq/main/assets/icon.png" width="125">
 
