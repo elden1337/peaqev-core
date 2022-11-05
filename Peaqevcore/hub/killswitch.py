@@ -14,7 +14,7 @@ class KillSwitch:
         self._update_interval: int = update_interval
         self._grace_interval: int = grace_interval
         self._bound_sensor: str = sensor
-        self._last_update: int = 0
+        self._last_update: int = time.time()
         self._grace_period: bool = False
         self._grace_period_start: int = 0
         self._is_dead: bool = False
