@@ -1,10 +1,29 @@
 from .countries.default import Default, NoPeak
 from .countries.belgium import VregBelgium
-from .countries.sweden import SE_Bjerke_Energi, SE_FalbygdensEnergi, SE_Gothenburg, SE_Karlstad, SE_Kristinehamn, SE_Linde_Energi, SE_Malarenergi, SE_Malung_Salen, SE_Nacka_normal, SE_NACKA_timediff, SE_Partille, SE_SHE_AB, SE_Skovde, SE_Sollentuna
+from .countries.sweden import (
+    SE_Bjerke_Energi,
+    SE_FalbygdensEnergi, 
+    SE_Gothenburg, 
+    SE_Karlstad, 
+    SE_Kristinehamn, 
+    SE_Linde_Energi, 
+    SE_Malarenergi, 
+    SE_Malung_Salen, 
+    SE_Nacka_normal, 
+    SE_NACKA_timediff, 
+    SE_Partille, 
+    SE_SHE_AB, 
+    SE_Skovde, 
+    SE_Sollentuna,
+    SE_TekniskaVerken_Link,
+    SE_Eskilstuna
+    #SE_Telge_Energi
+    )
 from .countries.norway import NO_AgderEnergi, NO_Elvia, NO_GlitreEnergi, NO_LNett, NO_Lede, NO_Mellom, NO_Tensio, NO_BKK, NO_AskerNett
 
 
 """LOCALETYPES"""
+LOCALE_SE_ESKILSTUNA = "Eskilstuna elnät, Sweden"
 LOCALE_SE_GOTHENBURG = "Gothenburg, Sweden"
 LOCALE_SE_KARLSTAD = "Karlstad, Sweden"
 LOCALE_SE_KRISTINEHAMN = "Kristinehamn, Sweden"
@@ -15,6 +34,7 @@ LOCALE_DEFAULT = "Other, just want to test"
 LOCALE_NO_PEAK = "No peak shaving needed"
 LOCALE_SE_SALA = "Sala-Heby Energi AB, Sweden"
 LOCALE_SE_MALUNG_SALEN = "Malung-Sälen, Sweden (Malungs elverk)"
+LOCALE_SE_TEKNISKA_LINK = "Tekniska verken Linköping, Sweden"
 LOCALE_SE_SKOVDE = "Skövde, Sweden"
 LOCALE_SE_SOLLENTUNA = "Sollentuna Energi, Sweden"
 LOCALE_BE_VREG = "Belgium (VREG)"
@@ -35,6 +55,7 @@ LOCALE_NO_ASKER = "Asker Nett, Norway"
 LOCALETYPEDICT = {
     LOCALE_DEFAULT: Default,
     LOCALE_NO_PEAK: NoPeak,
+    LOCALE_SE_ESKILSTUNA: SE_Eskilstuna,
     LOCALE_SE_GOTHENBURG: SE_Gothenburg,
     LOCALE_SE_PARTILLE: SE_Partille,
     LOCALE_SE_KARLSTAD: SE_Karlstad,
@@ -44,6 +65,7 @@ LOCALETYPEDICT = {
     LOCALE_SE_SALA: SE_SHE_AB,
     LOCALE_SE_SKOVDE: SE_Skovde,
     LOCALE_SE_SOLLENTUNA: SE_Sollentuna,
+    LOCALE_SE_TEKNISKA_LINK: SE_TekniskaVerken_Link,
     LOCALE_BE_VREG: VregBelgium,
     LOCALE_SE_BJERKE_ENERGI: SE_Bjerke_Energi,
     LOCALE_NO_GLITRE_ENERGI: NO_GlitreEnergi,
@@ -84,6 +106,7 @@ LOCALES = [
     LOCALE_SE_SALA,
     LOCALE_SE_SKOVDE,
     LOCALE_SE_SOLLENTUNA,
+    LOCALE_SE_TEKNISKA_LINK,
     LOCALE_DEFAULT,
     LOCALE_NO_PEAK
     ]

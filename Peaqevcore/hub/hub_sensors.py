@@ -46,8 +46,8 @@ class IHubSensors:
 
         self.charger_enabled = HubMember(
             data_type=bool,
-            listenerentity=f"binary_sensor.{domain}_{nametoid(CHARGERENABLED)}",
-            initval=options.behavior_on_default
+            listenerentity=f"switch.{domain}_{nametoid(CHARGERENABLED)}",
+            initval=False
         )
         self.charger_done = HubMember(
             data_type=bool,
