@@ -3,6 +3,8 @@
 [![Paypal](https://img.shields.io/badge/Sponsor-PayPal-orange.svg)](https://www.paypal.com/donate/?hosted_button_id=GLGW8QAAQC2FG)
 [![BuyMeACoffee](https://img.shields.io/badge/Sponsor-BuyMeACoffee-orange.svg)](https://buymeacoffee.com/elden)
 
+<img src="https://raw.githubusercontent.com/creativecommons/cc-assets/main/license_badges/big/by_nc_nd.svg" width="105">
+
 <img src="https://raw.githubusercontent.com/elden1337/hass-peaq/main/assets/icon.png" width="125">
 
 ## Core classes for Peaqev car charging.
