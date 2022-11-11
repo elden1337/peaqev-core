@@ -14,17 +14,13 @@ class HourSelectionInterimUpdate:
             True,
             avg, 
             model.prices_today, 
-            today, 
-            model.options.absolute_top_price, 
-            model.options.min_price
+            today
             )
         _tomorrow = HourSelectionInterimUpdate._set_interim_per_day(
             False,
             avg, 
             model.prices_tomorrow, 
-            tomorrow,  
-            model.options.absolute_top_price, 
-            model.options.min_price
+            tomorrow
             )
         return _today[0], _tomorrow[0]
 
@@ -34,19 +30,15 @@ class HourSelectionInterimUpdate:
         avg: float, 
         prices: list, 
         hour_obj: HourObject, 
-        max_price: float = None, 
-        min_price: float = None, 
         ) -> Tuple[HourObject, bool]:
         new_nonhours = []
         new_ok_hours = []
-        _max_price = float('inf') if max_price is None else max_price
-        _min_price = float('-inf') if min_price is None else min_price
 
         for idx, p in enumerate(prices):
             if (idx >= 14 and is_today) or idx < 14:
-                if p > avg or p > _max_price:
+                if p > avg:
                     new_nonhours.append(idx)
-                elif p <= avg or p <= _min_price:
+                elif p <= avg:
                     new_ok_hours.append(idx)
         
         for h in new_nonhours:
