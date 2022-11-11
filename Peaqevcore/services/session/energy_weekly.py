@@ -78,9 +78,9 @@ class EnergyWeekly:
         else: 
             return self.set_init_model()
 
-    def update(self, charge:float):
-        if charge > 0:
-            self.model[datetime.now().weekday()].charge += charge
+    def update(self, _charge:float):
+        if _charge > 0:
+            self.model[datetime.now().weekday()].charge += _charge
             self.model[datetime.now().weekday()].sessions += 1
 
     def average_for_day(self, day: int) -> float:
