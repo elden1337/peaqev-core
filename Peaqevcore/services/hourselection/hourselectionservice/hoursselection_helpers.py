@@ -8,7 +8,7 @@ _LOGGER = logging.getLogger(__name__)
 
 class HourSelectionInterimUpdate:
     @staticmethod
-    def interim_avg_update(today: HourObject, tomorrow: HourObject, model: HourSelectionModel) -> Tuple[HourObject, HourObject, bool]:
+    def interim_avg_update(today: HourObject, tomorrow: HourObject, model: HourSelectionModel) -> Tuple[HourObject, HourObject]:
         avg = HourSelectionInterimUpdate._get_average_price(model.prices_today, model.prices_tomorrow)
         _today = HourSelectionInterimUpdate._set_interim_per_day(
             True,
@@ -26,9 +26,7 @@ class HourSelectionInterimUpdate:
             model.options.absolute_top_price, 
             model.options.min_price
             )
-
-        conserve = True if _today[1] is True or _tomorrow[1] is True else False
-        return _today[0], _tomorrow[0], conserve
+        return _today[0], _tomorrow[0]
 
     @staticmethod
     def _set_interim_per_day(
@@ -43,7 +41,6 @@ class HourSelectionInterimUpdate:
         new_ok_hours = []
         _max_price = float('inf') if max_price is None else max_price
         _min_price = float('-inf') if min_price is None else min_price
-        conserve_top_up = False
 
         for idx, p in enumerate(prices):
             if (idx >= 14 and is_today) or idx < 14:
@@ -71,7 +68,6 @@ class HourSelectionInterimUpdate:
             elif h in hour_obj.ch:
                 hour_obj.ch.remove(h)
                 hour_obj.dyn_ch.pop(h)    
-        print(hour_obj.nh)
         return HourObject(hour_obj.nh, hour_obj.ch, hour_obj.dyn_ch), conserve_top_up
 
     @staticmethod
@@ -87,7 +83,6 @@ class HourSelectionHelpers:
         ret = {}
         for idx, val in enumerate(input):
             ret[idx] = val
-        print(len(ret))
         if 23 <= len(ret) <= 24:
             return ret
         elif len(ret) == 25:
