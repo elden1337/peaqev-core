@@ -22,7 +22,7 @@ class HourSelectionInterimUpdate:
             model.prices_tomorrow, 
             tomorrow
             )
-        return _today[0], _tomorrow[0]
+        return _today, _tomorrow
 
     @staticmethod
     def _set_interim_per_day(
@@ -30,7 +30,7 @@ class HourSelectionInterimUpdate:
         avg: float, 
         prices: list, 
         hour_obj: HourObject, 
-        ) -> Tuple[HourObject, bool]:
+        ) -> HourObject:
         new_nonhours = []
         new_ok_hours = []
 
@@ -50,9 +50,6 @@ class HourSelectionInterimUpdate:
                     if h in hour_obj.dyn_ch.keys():
                         hour_obj.dyn_ch.pop(h)
         hour_obj.nh.sort()
-        
-        if len(new_nonhours) > 0 or len(new_ok_hours) > 0:
-            conserve_top_up = True
 
         for h in new_ok_hours:
             if h in hour_obj.nh:
@@ -60,7 +57,7 @@ class HourSelectionInterimUpdate:
             elif h in hour_obj.ch:
                 hour_obj.ch.remove(h)
                 hour_obj.dyn_ch.pop(h)    
-        return HourObject(hour_obj.nh, hour_obj.ch, hour_obj.dyn_ch), conserve_top_up
+        return HourObject(hour_obj.nh, hour_obj.ch, hour_obj.dyn_ch)
 
     @staticmethod
     def _get_average_price(prices_today: list, prices_tomorrow:list) -> float:
@@ -108,7 +105,7 @@ class HourSelectionHelpers:
             return HourSelectionHelpers._make_array_from_empty(lst)
 
     @staticmethod
-    def _make_array_from_empty(input) -> list:
+    def _make_array_from_empty(input: str) -> list:
         array = input.split(",")
         list = [p for p in array if len(p) > 0]
         ret = []
@@ -118,11 +115,11 @@ class HourSelectionHelpers:
                     parsed_item = HourSelectionHelpers._try_parse(l, float)
                     if not parsed_item:
                         parsed_item = HourSelectionHelpers._try_parse(l, int)
-                    assert type(parsed_item) is float or type(parsed_item) is int
+                    assert isinstance(parsed_item, (float,int))
                     ret.append(parsed_item)
                 return ret
             except:
-                return []
+                pass
         return []
 
 

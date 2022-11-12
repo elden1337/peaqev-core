@@ -1,6 +1,10 @@
 from dataclasses import dataclass, field
 from typing import List, Dict
 from .hourobject import HourObject
+import logging
+
+_LOGGER = logging.getLogger(__name__)
+
 
 @dataclass(frozen=False)
 class HoursModel:
@@ -45,13 +49,25 @@ class HourSelectionOptions:
     min_price: float = 0
 
     @staticmethod
-    def set_absolute_top_price(val) -> float:
-        if val is None:
+    def set_absolute_top_price(top, min) -> float:
+        if not HourSelectionOptions.validate_top_min_prices(top, min):
+            top = 0
+            HourSelectionOptions.min_price = 0
+            _LOGGER.warning("Setting top-price and min-price to zero because of min-price being larger than top-price. Please fix in options.")
+        if top is None:
             return float("inf")
-        if val <= 0:
+        if top <= 0:
             return float("inf")
-        return float(val)
+        return float(top)
 
+    @staticmethod
+    def validate_top_min_prices(top, min) -> bool:
+        if any(
+            [top != 0, min != 0]
+        ):  
+            return top > min
+        return True
+        
 
 @dataclass(frozen=False)
 class HourSelectionModel:

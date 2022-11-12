@@ -23,8 +23,8 @@ class Hoursselection:
         self.model = HourSelectionModel(
             options=HourSelectionOptions(
                 cautionhour_type=cautionhour_type, 
-                absolute_top_price=HourSelectionOptions.set_absolute_top_price(absolute_top_price), 
-                min_price=min_price
+                min_price=min_price,
+                absolute_top_price=HourSelectionOptions.set_absolute_top_price(absolute_top_price, min_price)
                 )
             )
         

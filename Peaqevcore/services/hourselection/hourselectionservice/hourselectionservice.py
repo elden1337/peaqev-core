@@ -52,15 +52,20 @@ class HourSelectionService:
         self.update_hour_lists(testhour=testhour)
  
     def _update_per_day(self, prices: list) -> HourObjectExtended:
-        pricedict = dict
+        pricedict = {}
         if prices is not None and len(prices) > 1:
             pricedict = helpers._create_dict(prices)
             normalized_pricedict = helpers._create_dict(
                 calc.normalize_prices(prices)
                 )
             if stat.stdev(prices) > 0.05:
-                prices_ranked = calc.rank_prices(pricedict, normalized_pricedict)
-                ready_hours = self._determine_hours(prices_ranked, prices)
+                ready_hours = self._determine_hours(
+                    calc.rank_prices(
+                        pricedict, 
+                        normalized_pricedict
+                        ), 
+                        prices
+                        )
                 return HourObjectExtended(
                     ready_hours.nh, 
                     ready_hours.ch, 
@@ -108,7 +113,10 @@ class HourSelectionService:
         _ch = []
         for p in price_list:
             _permax = self._set_permax(price_list[p]["permax"])
-            if float(price_list[p]["permax"]) <= self.model.options.cautionhour_type or float(price_list[p]["val"]) <= (sum(prices)/len(prices)):
+            if any([
+                float(price_list[p]["permax"]) <= self.model.options.cautionhour_type,
+                float(price_list[p]["val"]) <= (sum(prices)/len(prices))
+            ]):
                 _ch.append(p)
                 _dyn_ch[p] = round(_permax,2)
             else:
