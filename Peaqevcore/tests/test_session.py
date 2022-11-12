@@ -1,5 +1,6 @@
 from ..services.session.session import SessionPrice
 import pytest
+from datetime import datetime
 
 def test_session_fluctuate():
     s = SessionPrice()
@@ -151,6 +152,32 @@ def test_session_get_status():
 
     assert s.total_energy == 2.5
     assert s.total_price == 6.5
+
+
+def test_session_get_statistics():
+    s = SessionPrice()
+    timer = 1651607299
+    s._set_delta(timer)
+    s.update_price(2, timer)
+    s.update_power_reading(4000, timer)
+    timer += 900
+    status = s.get_status()
+    s.update_price(3, timer)
+    timer += 900
+    status = s.get_status()
+    s.update_power_reading(0, timer) 
+    timer += 900
+    status = s.get_status()
+    s.update_power_reading(1000, timer)
+    timer += 1800
+    status = s.get_status()
+    assert status["energy"]["value"] == 2
+    s.terminate(timer)
+    assert s.total_energy == 2.5
+    assert s.average_data.average == 2.5
+    export = s.average_data.export
+    assert export[datetime.fromtimestamp(timer).weekday()]['total_charge'] == 2.5
+    
 
 
 

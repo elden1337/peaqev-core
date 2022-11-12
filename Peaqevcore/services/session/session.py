@@ -35,7 +35,7 @@ class SessionPrice:
     def terminate(self, mock_time: float=None):
         self.update_power_reading(0, mock_time)
         _LOGGER.debug(f"Called terminate on session_price. Trying to add {self.total_energy} to statistics.")
-        self.average_data.update(self.total_energy)
+        self.average_data.update(self.total_energy, mock_time)
         self.get_status()
 
     def set_status(self) -> None:
