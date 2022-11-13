@@ -24,10 +24,12 @@ class Hoursselection:
             options=HourSelectionOptions(
                 cautionhour_type=cautionhour_type, 
                 min_price=min_price,
-                absolute_top_price=HourSelectionOptions.set_absolute_top_price(absolute_top_price, min_price)
+                absolute_top_price=HourSelectionOptions.set_absolute_top_price(
+                    absolute_top_price, 
+                    min_price
+                    )
                 )
             )
-        
         self.model.validate()
         self.service = HourSelectionService(self.model, base_mock_hour)
     

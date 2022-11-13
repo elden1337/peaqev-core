@@ -251,7 +251,7 @@ def test_total_charge_today_tomorrow():
     r.prices_tomorrow = MOCKPRICES2
     r.update()
     r.service._base_mock_hour = MOCKHOUR
-    assert r.get_total_charge(2) == 36.5
+    assert r.get_total_charge(2) == 30.5
 
 def test_average_kwh_price_just_today():
     r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE])
@@ -268,7 +268,7 @@ def test_average_kwh_price_today_tomorrow():
     r.prices_tomorrow = MOCKPRICES2
     r.service._base_mock_hour = MOCKHOUR
     r.update()
-    assert r.get_average_kwh_price() == 0.61
+    assert r.get_average_kwh_price() == 0.55
 
 def test_cheap_today_expensive_tomorrow_top_up():
     MOCKHOUR = 14
@@ -276,7 +276,7 @@ def test_cheap_today_expensive_tomorrow_top_up():
     r.prices = MOCKPRICES_CHEAP
     r.prices_tomorrow = MOCKPRICES_EXPENSIVE
     r.update()
-    assert r.non_hours == [5, 6, 7, 8, 9, 10, 11, 12,13]
+    assert r.non_hours == [18,19,21,5, 6, 7, 8, 9, 10, 11, 12,13]
     assert r.dynamic_caution_hours == {}
 
 def test_both_min_and_max_price():
@@ -299,7 +299,7 @@ def test_cheap_today_expensive_tomorrow_no_top_up():
     r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE], base_mock_hour=MOCKHOUR)
     r.prices = MOCKPRICES_CHEAP
     r.prices_tomorrow = MOCKPRICES_EXPENSIVE
-    assert r.non_hours == [5,6,7,8,9,10,11,12,13]
+    assert r.non_hours == [18,19,21,5,6,7,8,9,10,11,12,13]
     assert r.dynamic_caution_hours == {}
 
 def test_expensive_today_cheap_tomorrow_top_up():
@@ -307,7 +307,7 @@ def test_expensive_today_cheap_tomorrow_top_up():
     r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_INTERMEDIATE], base_mock_hour=MOCKHOUR)
     r.prices = MOCKPRICES_EXPENSIVE
     r.prices_tomorrow = MOCKPRICES_CHEAP
-    assert r.non_hours == [14, 15, 16, 17, 18, 19,20,21,22,23]
+    assert r.non_hours == [14, 15, 16, 17, 18, 19,20,21,22,23,11,12]
     assert r.dynamic_caution_hours == {}
     
 def test_expensive_today_cheap_tomorrow_no_top_up():
@@ -315,7 +315,7 @@ def test_expensive_today_cheap_tomorrow_no_top_up():
     r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE], base_mock_hour=MOCKHOUR)
     r.prices = MOCKPRICES_EXPENSIVE
     r.prices_tomorrow = MOCKPRICES_CHEAP
-    assert r.non_hours == [5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
+    assert r.non_hours == [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
 
 def test_new_test():
     MOCKHOUR = 13
@@ -353,7 +353,7 @@ def test_allow_top_up_extreme_2():
     r.prices = [1.032, 0.663, 0.663, 0.699, 0.842, 1.102, 4.764, 4.949, 5.9, 7.612, 7.493, 7.245, 6.987, 6.464, 5.958, 5.959, 6.342, 6.685, 7.049, 5.957, 5.332, 4.74, 3.045, 0.663]
     r.prices_tomorrow = [0.798, 0.797, 0.727, 0.755, 0.513, 0.456, 0.349, 0.447, 0.928, 2.323, 2.349, 1.062, 0.37, 0.221, 0.211, 0.28, 0.362, 0.716, 1.038, 1.05, 0.826, 0.496, 0.307, 0.133]
     r.service._base_mock_hour = 20
-    assert r.non_hours == [20,21,22]
+    assert r.non_hours == [20,21,22,9,10,11]
 
 def test_allow_top_up_extreme_1():
     MOCKHOUR = 13
@@ -362,7 +362,7 @@ def test_allow_top_up_extreme_1():
     r.prices_tomorrow = [0.798, 0.797, 0.727, 0.755, 0.513, 0.456, 0.349, 0.447, 0.928, 2.323, 2.349, 1.062, 0.37, 0.221, 0.211, 0.28, 0.362, 0.716, 1.038, 1.05, 0.826, 0.496, 0.307, 0.133]
     r.service._base_mock_hour = 20
     r.update()
-    assert r.non_hours == [20,21,22]
+    assert r.non_hours == [20,21,22,9,10,11]
 
 def test_over_midnight_no_top_up():
     MOCKHOUR = 23
@@ -394,9 +394,9 @@ def test_regular5():
     assert r.non_hours == [7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22]
     r.prices_tomorrow = [0.69, 0.706, 0.721, 0.688, 0.77, 0.863, 1.008, 1.263, 2.473, 2.065, 1.948, 2.499, 2.339, 3.133, 2.538, 2.861, 3.309, 4.258, 4.98, 4.904, 4.01, 3.351, 1.215, 1.065]
     r.service._base_mock_hour = 13
-    assert r.non_hours == [8,9,10,11,12]
+    assert r.non_hours == [13,14,15,17,18,20,7,8,9,10,11,12]
     r.service._base_mock_hour = 22
-    assert r.non_hours == [8, 9, 10, 11, 12, 13,14,15,16,17,18,19,20,21]
+    assert r.non_hours == [7, 8,9, 10, 11, 12, 13,14,15,16,17,18,19,20,21]
 
 def test_regular5_max_price():
     r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_INTERMEDIATE], absolute_top_price=0.7, min_price=0)
@@ -446,6 +446,14 @@ def test_negative_prices_and_min_price():
     r.service._base_mock_hour = 14
     r.prices_tomorrow = [-0.014, -0.027, -0.028, -0.028, -0.028, -0.027, -0.015, -0.005, 0, 0.008, 0.013, 0.022, 0.02, 0.023, 0.026, 0.028, 0.06, 0.101, 0.082, 0.128, 0.08, 0.068, 0.073, 0.068]
     assert r.non_hours == []
+
+def test_high_diff_in_interim_update():
+    r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE], absolute_top_price=0, min_price=0)
+    r.service._base_mock_hour = 7
+    r.prices = [0.139, 0.157, 0.176, 0.196, 0.219, 0.232, 0.263, 0.3, 0.345, 0.436, 0.488, 0.523, 0.565, 0.521, 0.475, 0.515, 1.972, 2.521, 2.351, 1.074, 0.488, 0.416, 0.378, 0.364]
+    r.service._base_mock_hour = 14
+    r.prices_tomorrow = [0.47, 0.475, 0.499, 0.489, 0.499, 0.616, 1.341, 2.69, 2.74, 2.237, 1.914, 1.746, 1.926, 2.227, 2.719, 2.853, 2.855, 3.416, 2.928, 2.519, 2.105, 1.344, 0.287, 0.232]
+    assert r.non_hours == [16,17,18,19,6,7,8,9,10,11,12,13]
     
     
 

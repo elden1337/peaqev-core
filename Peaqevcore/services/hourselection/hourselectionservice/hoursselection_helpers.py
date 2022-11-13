@@ -63,7 +63,7 @@ class HourSelectionInterimUpdate:
     def _get_average_price(prices_today: list, prices_tomorrow:list) -> float:
         ret = prices_today[14::]
         ret[len(ret):] = prices_tomorrow[0:14]
-        return stat.mean(ret)
+        return min(stat.median(ret), stat.mean(ret))
 
 
 class HourSelectionHelpers:
