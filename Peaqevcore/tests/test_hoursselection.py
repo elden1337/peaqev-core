@@ -454,6 +454,35 @@ def test_high_diff_in_interim_update():
     r.service._base_mock_hour = 14
     r.prices_tomorrow = [0.47, 0.475, 0.499, 0.489, 0.499, 0.616, 1.341, 2.69, 2.74, 2.237, 1.914, 1.746, 1.926, 2.227, 2.719, 2.853, 2.855, 3.416, 2.928, 2.519, 2.105, 1.344, 0.287, 0.232]
     assert r.non_hours == [16,17,18,19,6,7,8,9,10,11,12,13]
+
+def test_22115_adjusted_average_today_only():
+    #average today is 0.63
+    r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE], absolute_top_price=0, min_price=0)
+    r.service._base_mock_hour = 7
+    r.prices = [0.139, 0.157, 0.176, 0.196, 0.219, 0.232, 0.263, 0.3, 0.345, 0.436, 0.488, 0.523, 0.565, 0.521, 0.475, 0.515, 1.972, 2.521, 2.351, 1.074, 0.488, 0.416, 0.378, 0.364]
+    #r.service._base_mock_hour = 14
+    #r.prices_tomorrow = [0.47, 0.475, 0.499, 0.489, 0.499, 0.616, 1.341, 2.69, 2.74, 2.237, 1.914, 1.746, 1.926, 2.227, 2.719, 2.853, 2.855, 3.416, 2.928, 2.519, 2.105, 1.344, 0.287, 0.232]
+    assert r.non_hours == [16,17,18]
+    assert r.caution_hours == [10,11,12,13,14,15,19,20]
+
+def test_22115_adjusted_average_today_only_lower():
+    #average today is 0.63
+    r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE], absolute_top_price=0, min_price=0)
+    r.service._base_mock_hour = 7
+    r.adjusted_average = 0.33
+    r.prices = [0.139, 0.157, 0.176, 0.196, 0.219, 0.232, 0.263, 0.3, 0.345, 0.436, 0.488, 0.523, 0.565, 0.521, 0.475, 0.515, 1.972, 2.521, 2.351, 1.074, 0.488, 0.416, 0.378, 0.364]
+    assert r.non_hours == [16,17,18]
+    assert r.caution_hours == [7,8,9,10,11,12,13,14,15,19,20,21,22,23]
+
+def test_22115_adjusted_average_today_only_raise():
+    #average today is 0.63
+    r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE], absolute_top_price=0, min_price=0)
+    r.service._base_mock_hour = 7
+    r.adjusted_average = 0.93
+    r.prices = [0.139, 0.157, 0.176, 0.196, 0.219, 0.232, 0.263, 0.3, 0.345, 0.436, 0.488, 0.523, 0.565, 0.521, 0.475, 0.515, 1.972, 2.521, 2.351, 1.074, 0.488, 0.416, 0.378, 0.364]
+    assert r.non_hours == [17,18]
+    assert r.caution_hours == [16,19]
+    
     
     
 

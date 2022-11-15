@@ -24,11 +24,9 @@ class HourSelectionService:
 
     def update(
         self, 
-        testhour:int = None
+        adjusted_average:float = None
         ):
-        if testhour is not None:
-            self._base_mock_hour = testhour
-        hours_ready = self._update_per_day(self.model.prices_today)
+        hours_ready = self._update_per_day(prices=self.model.prices_today, adjusted_average=adjusted_average)
         hours = self._add_remove_limited_hours(hours_ready)
         hours_tomorrow = HourObject([],[],dict())
         if self.model.prices_tomorrow is not None and len(self.model.prices_tomorrow) > 0:
@@ -49,9 +47,9 @@ class HourSelectionService:
         else:
             self.model.hours.hours_today = hours
             self.model.hours.hours_tomorrow = hours_tomorrow
-        self.update_hour_lists(testhour=testhour)
+        self.update_hour_lists()
  
-    def _update_per_day(self, prices: list) -> HourObjectExtended:
+    def _update_per_day(self, prices: list, adjusted_average:float = None) -> HourObjectExtended:
         pricedict = {}
         if prices is not None and len(prices) > 1:
             pricedict = helpers._create_dict(prices)
@@ -62,7 +60,8 @@ class HourSelectionService:
                 ready_hours = self._determine_hours(
                     calc.rank_prices(
                         pricedict, 
-                        normalized_pricedict
+                        normalized_pricedict,
+                        adjusted_average
                         ), 
                         prices
                         )
@@ -76,10 +75,9 @@ class HourSelectionService:
 
     def update_hour_lists(
         self, 
-        testhour:int = None, 
         listtype:HourTypeList = None,
         ) -> None:
-        hour = self.set_hour(testhour)
+        hour = self.set_hour()
         if listtype is not None:
             match listtype:
                 case HourTypeList.NonHour:

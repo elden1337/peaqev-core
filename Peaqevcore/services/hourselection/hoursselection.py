@@ -32,6 +32,7 @@ class Hoursselection:
             )
         self.model.validate()
         self.service = HourSelectionService(self.model, base_mock_hour)
+        self._adjusted_average = None
     
     @property
     def non_hours(self) -> list:
@@ -69,10 +70,19 @@ class Hoursselection:
         self.model.prices_tomorrow = helpers._convert_none_list(val)
         self.update()
 
+    @property
+    def adjusted_average(self):
+        return self._adjusted_average
+
+    @adjusted_average.setter
+    def adjusted_average(self, val):
+        self._adjusted_average = val
+
     def update(self, testhour:int = None) -> None:
         if testhour is not None:
             self.service._base_mock_hour = testhour
-        self.service.update()
+        print(self.adjusted_average)
+        self.service.update(adjusted_average=self.adjusted_average)
 
     def get_average_kwh_price(self):
         ret = self._get_charge_or_price()
