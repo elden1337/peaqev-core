@@ -8,8 +8,8 @@ _LOGGER = logging.getLogger(__name__)
 
 class HourSelectionInterimUpdate:
     @staticmethod
-    def interim_avg_update(today: HourObject, tomorrow: HourObject, model: HourSelectionModel) -> Tuple[HourObject, HourObject]:
-        avg = HourSelectionInterimUpdate._get_average_price(model.prices_today, model.prices_tomorrow)
+    def interim_avg_update(today: HourObject, tomorrow: HourObject, model: HourSelectionModel, adjusted_average:float = None) -> Tuple[HourObject, HourObject]:
+        avg = HourSelectionInterimUpdate._get_average_price(model.prices_today, model.prices_tomorrow, adjusted_average)
         _today = HourSelectionInterimUpdate._set_interim_per_day(
             True,
             avg, 
@@ -60,7 +60,7 @@ class HourSelectionInterimUpdate:
         return HourObject(hour_obj.nh, hour_obj.ch, hour_obj.dyn_ch)
 
     @staticmethod
-    def _get_average_price(prices_today: list, prices_tomorrow:list) -> float:
+    def _get_average_price(prices_today: list, prices_tomorrow:list, adjusted_average:float = None) -> float:
         ret = prices_today[14::]
         ret[len(ret):] = prices_tomorrow[0:14]
         return min(stat.median(ret), stat.mean(ret))

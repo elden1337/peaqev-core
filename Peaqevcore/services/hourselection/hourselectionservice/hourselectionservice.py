@@ -30,12 +30,13 @@ class HourSelectionService:
         hours = self._add_remove_limited_hours(hours_ready)
         hours_tomorrow = HourObject([],[],dict())
         if self.model.prices_tomorrow is not None and len(self.model.prices_tomorrow) > 0:
-            tomorrow_ready = self._update_per_day(self.model.prices_tomorrow)
+            tomorrow_ready = self._update_per_day(self.model.prices_tomorrow, adjusted_average=adjusted_average)
             hours_tomorrow = self._add_remove_limited_hours(tomorrow_ready)
             hours, hours_tomorrow = interim.interim_avg_update(
                 today=hours, 
                 tomorrow=hours_tomorrow, 
-                model =self.model
+                model =self.model,
+                adjusted_average=adjusted_average
                 )
             
             self.model.hours.hours_today = self._add_remove_limited_hours(
