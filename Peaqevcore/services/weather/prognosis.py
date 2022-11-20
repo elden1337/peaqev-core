@@ -1,8 +1,47 @@
 from datetime import datetime
 import logging
-from ...models.weather.weather_object import WeatherObject
+#from ...models.weather.weather_object import WeatherObject
+#from ...models.weather.prognosis_export_model import PrognosisExportModel
+from enum import Enum
+from dataclasses import dataclass, field
+from time import mktime, strptime
 
 _LOGGER = logging.getLogger(__name__)
+
+
+class WeatherType(Enum):
+    Sunny = "sunny"
+    Cloudy = "cloudy"
+    PartlyCloudy = "partlycloudy"
+    Snowy = "snowy"
+
+
+@dataclass
+class PrognosisExportModel:
+  prognosis_temp: float
+  corrected_temp: float
+  windchill_temp: float
+  delta_temp_from_now: float
+  DT: datetime
+  TimeDelta: int
+
+@dataclass
+class WeatherObject:
+    _DTstr: str
+    WeatherCondition: WeatherType
+    Temperature: float
+    Wind_Speed: float
+    Wind_Bearing: float
+    Precipitation_Probability: float
+    Precipitation: float
+    DT: datetime = field(init=False)
+
+    def __post_init__(self):
+        self.DT = self._parse_datetime()
+
+    def _parse_datetime(self) -> datetime:        
+      time_obj = strptime(self._DTstr, "%Y-%m-%dT%H:%M:%S+00:00")
+      return datetime.fromtimestamp(mktime(time_obj))
 
 
 class WeatherPrognosis:
@@ -48,18 +87,21 @@ class WeatherPrognosis:
           else:
             temp = p.Temperature
           hourdiff = int(c.seconds/3600)
-          hour_prognosis = PrognosisExportModel(p.Temperature, temp, self.correct_temperature_for_windchill(temp, p.Wind_Speed), p.DT, hourdiff)
+          hour_prognosis = PrognosisExportModel(
+            prognosis_temp=p.Temperature, 
+            corrected_temp=temp, 
+            windchill_temp=self._correct_temperature_for_windchill(temp, p.Wind_Speed), 
+            delta_temp_from_now=round(temp - current_temperature,1),
+            DT=p.DT, 
+            TimeDelta=hourdiff
+            )
           ret.append(hour_prognosis)
         return ret
   
-    def correct_temperature_for_windchill(self, temp: float, windspeed: float) -> float:
+    def _correct_temperature_for_windchill(self, temp: float, windspeed: float) -> float:
         windspeed_corrected = windspeed
         ret =13.12 + (0.6215 * temp)-(11.37*windspeed_corrected**0.16) + (0.3965 * temp * windspeed_corrected**0.16) 
         return round(ret,1)
-
-        #how hot is it outside?
-        #what is the prognosis?
-        #what kind of weatherenum is it (add/remove based on that)
 
 
 test_input = [
@@ -285,16 +327,17 @@ test_input = [
 w = WeatherPrognosis()
 w.set_prognosis(test_input)
 
+for ww in w.prognosis_list:
+  print(ww)
+
 prog = w.make_hvac_prognosis(1.6)
 
 for p in prog:
   print(p)
 
-# for w in w.prognosis_list:
-#     print(w)
 
 
-#time_str = "2022-11-17T16:00:00+00:00"
+
 
 
 

@@ -157,6 +157,18 @@ class HourSelectionCalculations:
                 ret[key] = {"val": hourdict[key], "permax": _permax}
         return HourSelectionCalculations._discard_excessive_hours(ret)
 
+    @staticmethod
+    def get_offset_dict(normalized_hourdict: dict):
+        ret = {}
+        _prices = [p-min(normalized_hourdict.values()) for p in normalized_hourdict.values()]
+        average_val = stat.mean(_prices)
+        for i in range(0,24):
+            try:
+                ret[i] = round((_prices[i]/average_val) - 1,2)
+            except:
+                ret[i] = 1
+        return ret
+
     # @staticmethod
     # def rank_prices(hourdict: dict, normalized_hourdict: dict) -> dict:
     #     ret = {}

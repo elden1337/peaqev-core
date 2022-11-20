@@ -13,6 +13,7 @@ class HoursModel:
     dynamic_caution_hours: Dict[int, float] = field(default_factory=lambda : {})
     hours_today: HourObject = field(default_factory=lambda : HourObject([],[],dict()))
     hours_tomorrow: HourObject = field(default_factory=lambda : HourObject([],[],dict()))
+    offset_dict: Dict[int, int] = field(default_factory=lambda: {})
 
     def update_non_hours(
         self, 
@@ -41,6 +42,11 @@ class HoursModel:
         ret.update({k: v for k, v in self.hours_tomorrow.dyn_ch.items() if k < hour})
         self.dynamic_caution_hours = ret
 
+    def update_offset_dict(self) -> None:
+        ret = {}
+        ret['today'] = self.hours_today.offset_dict
+        ret['tomorrow'] = self.hours_tomorrow.offset_dict
+        self.offset_dict = ret
 
 @dataclass(frozen=False)
 class HourSelectionOptions:
@@ -53,7 +59,7 @@ class HourSelectionOptions:
         if not HourSelectionOptions.validate_top_min_prices(top, min):
             top = 0
             HourSelectionOptions.min_price = 0
-            _LOGGER.warning("Setting top-price and min-price to zero because of min-price being larger than top-price. Please fix in options.")
+            _LOGGER.warning(f"Setting top-price and min-price to zero because of min-price being larger than top-price. Please fix in options. top:{top} min:{min}")
         if top is None:
             return float("inf")
         if top <= 0:
@@ -63,10 +69,10 @@ class HourSelectionOptions:
     @staticmethod
     def validate_top_min_prices(top, min) -> bool:
         if any(
-            [top != 0, min != 0]
+            [top == 0, min == 0]
         ):  
-            return top > min
-        return True
+            return True
+        return top > min
         
 
 @dataclass(frozen=False)

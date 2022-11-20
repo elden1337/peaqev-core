@@ -35,6 +35,10 @@ class Hoursselection:
         self._adjusted_average = None
     
     @property
+    def offset_dict(self) -> dict:
+        return self.model.hours.offset_dict
+
+    @property
     def non_hours(self) -> list:
         self.service.update_hour_lists(listtype=HourTypeList.NonHour)
         return self.model.hours.non_hours

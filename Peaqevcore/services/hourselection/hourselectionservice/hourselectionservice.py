@@ -9,7 +9,7 @@ from ....models.hourselection.const import (
 from .hoursselection_helpers import HourSelectionHelpers as helpers
 from .hoursselection_helpers import HourSelectionInterimUpdate as interim
 from .hoursselection_helpers import HourSelectionCalculations as calc
-from ....models.hourselection.hourobject import HourObject, HourObjectExtended
+from ....models.hourselection.hourobject import HourObject
 from ....models.hourselection.hourselectionmodels import HourSelectionModel
 from ....models.hourselection.hourtypelist import HourTypeList
 
@@ -40,17 +40,17 @@ class HourSelectionService:
                 )
             
             self.model.hours.hours_today = self._add_remove_limited_hours(
-                HourObjectExtended(hours.nh, hours.ch, hours.dyn_ch, hours_ready.pricedict)
+                HourObject(nh=hours.nh, ch=hours.ch, dyn_ch=hours.dyn_ch, pricedict=hours_ready.pricedict, offset_dict=hours_ready.offset_dict)
                 )
             self.model.hours.hours_tomorrow = self._add_remove_limited_hours(
-                HourObjectExtended(hours_tomorrow.nh, hours_tomorrow.ch, hours_tomorrow.dyn_ch, tomorrow_ready.pricedict)
+                HourObject(nh=hours_tomorrow.nh, ch=hours_tomorrow.ch, dyn_ch=hours_tomorrow.dyn_ch, pricedict=tomorrow_ready.pricedict, offset_dict=tomorrow_ready.offset_dict)
             )
         else:
             self.model.hours.hours_today = hours
             self.model.hours.hours_tomorrow = hours_tomorrow
         self.update_hour_lists()
  
-    def _update_per_day(self, prices: list, adjusted_average:float = None) -> HourObjectExtended:
+    def _update_per_day(self, prices: list, adjusted_average:float = None) -> HourObject:
         pricedict = {}
         if prices is not None and len(prices) > 1:
             pricedict = helpers._create_dict(prices)
@@ -66,13 +66,16 @@ class HourSelectionService:
                         ), 
                         prices
                         )
-                return HourObjectExtended(
-                    ready_hours.nh, 
-                    ready_hours.ch, 
-                    ready_hours.dyn_ch, 
-                    pricedict
+                ret= HourObject(
+                    nh=ready_hours.nh, 
+                    ch=ready_hours.ch, 
+                    dyn_ch=ready_hours.dyn_ch, 
+                    pricedict=pricedict
                     )
-            return HourObjectExtended([], [], dict(), pricedict)
+            else:
+                ret= HourObject(nh=[], ch=[], dyn_ch={},pricedict=pricedict)
+            ret.offset_dict=calc.get_offset_dict(normalized_pricedict)
+            return ret
 
     def update_hour_lists(
         self, 
@@ -93,15 +96,16 @@ class HourSelectionService:
             self.model.hours.update_non_hours(hour)
             self.model.hours.update_caution_hours(hour)
             self.model.hours.update_dynanmic_caution_hours(hour)
+            self.model.hours.update_offset_dict()
 
-    def _add_remove_limited_hours(self, hours: HourObjectExtended) -> HourObject:
+    def _add_remove_limited_hours(self, hours: HourObject) -> HourObject:
         """Removes cheap hours and adds expensive hours set by user limitation"""
         if hours is None:
             return HourObject([],[],dict())
         if self.model.options.absolute_top_price is not None:
                 ret = hours.add_expensive_hours(self.model.options.absolute_top_price)
         else: 
-            ret = HourObject(hours.nh, hours.ch, hours.dyn_ch)
+            ret = HourObject(nh=hours.nh, ch=hours.ch, dyn_ch=hours.dyn_ch,offset_dict=hours.offset_dict)
         if self.model.options.min_price > 0:
             ret = hours.remove_cheap_hours(self.model.options.min_price)
         return ret

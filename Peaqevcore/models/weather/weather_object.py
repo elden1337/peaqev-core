@@ -1,7 +1,7 @@
 from datetime import datetime
 from dataclasses import dataclass, field
 from time import mktime, strptime
-
+from .weather_type import WeatherType
 
 @dataclass
 class WeatherObject:
