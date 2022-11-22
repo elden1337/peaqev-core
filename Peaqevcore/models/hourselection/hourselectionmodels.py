@@ -13,7 +13,7 @@ class HoursModel:
     dynamic_caution_hours: Dict[int, float] = field(default_factory=lambda : {})
     hours_today: HourObject = field(default_factory=lambda : HourObject([],[],dict()))
     hours_tomorrow: HourObject = field(default_factory=lambda : HourObject([],[],dict()))
-    offset_dict: Dict[int, int] = field(default_factory=lambda: {})
+    offset_dict: Dict[Dict[str,float], Dict[str, float]] = field(default_factory=lambda: {})
 
     def update_non_hours(
         self, 

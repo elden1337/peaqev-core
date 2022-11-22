@@ -35,7 +35,7 @@ class Hoursselection:
         self._adjusted_average = None
     
     @property
-    def offset_dict(self) -> dict:
+    def offsets(self) -> dict:
         return self.model.hours.offset_dict
 
     @property

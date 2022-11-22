@@ -61,9 +61,16 @@ class HourSelectionInterimUpdate:
 
     @staticmethod
     def _get_average_price(prices_today: list, prices_tomorrow:list, adjusted_average:float = None) -> float:
+        if adjusted_average is not None:
+            _affect_today = adjusted_average / stat.mean(prices_today)
+            _affect_tomorrow = adjusted_average / stat.mean(prices_tomorrow)
+        else:
+            _affect_tomorrow = _affect_today = 1
+
         ret = prices_today[14::]
         ret[len(ret):] = prices_tomorrow[0:14]
-        return min(stat.median(ret), stat.mean(ret))
+        affected_ret= stat.mean(ret) * stat.mean([_affect_today, _affect_tomorrow])
+        return affected_ret if adjusted_average is not None else min(stat.median(ret), stat.mean(ret))
 
 
 class HourSelectionHelpers:
@@ -145,12 +152,8 @@ class HourSelectionCalculations:
 
         prices_avg = stat.mean(hourdict.values())
         if adjusted_average is not None:
-            print(f"prices_avg is: {prices_avg}")
-            print(f"maxval before: {_maxval}")
             _maxval += (adjusted_average - prices_avg)
             prices_avg = adjusted_average
-            print(f"adj_avg is: {prices_avg}")
-            print(f"maxval after: {_maxval}")
         for key in hourdict:
             if hourdict[key] > (prices_avg*0.7):
                 _permax = round(hourdict[key] / _maxval, 2)
