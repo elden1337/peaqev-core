@@ -92,9 +92,10 @@ class HourSelectionService:
         return hours
 
     def _determine_hours(self, price_list: dict, prices: list) -> HourObject:
+        #check this method
         ret = HourObject([],[],{})
         for p in price_list:
-            _permax = self._set_permax(price_list[p]["permax"])
+            _permax = self._set_permax(price_list[p]["permax"]) #this is weird?
             if any([
                 float(price_list[p]["permax"]) <= self.model.options.cautionhour_type,
                 float(price_list[p]["val"]) <= (sum(prices)/len(prices))
@@ -106,12 +107,14 @@ class HourSelectionService:
         return ret
 
     def _set_permax(self, price_input) -> float:
+        #check this method
         _permax = round(abs(price_input - 1), 2)
         if self.model.options.cautionhour_type == CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE]:
             _permax += 0.15
         elif self.model.options.cautionhour_type == CAUTIONHOURTYPE[CAUTIONHOURTYPE_INTERMEDIATE]:
             _permax += 0.05
         return _permax
+        
 
     def set_hour(self, testhour:int = None) -> int:
         return testhour if testhour is not None else self._mock_hour if self._mock_hour is not None else datetime.now().hour
