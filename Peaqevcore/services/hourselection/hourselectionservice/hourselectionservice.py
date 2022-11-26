@@ -22,51 +22,16 @@ class HourSelectionService:
         self.model = model
         self._mock_hour = base_mock_hour
 
-    # def update(
-    #     self
-    # ) -> None:
-    #     hours_ready = self._update_per_day(prices=self.model.prices_today)
-    #     hours = self._add_remove_limited_hours(hours_ready)
-    #     hours_tomorrow = HourObject([],[],dict())
-    #     if self.model.prices_tomorrow is not None and len(self.model.prices_tomorrow) > 0:
-    #         tomorrow_ready = self._update_per_day(self.model.prices_tomorrow)
-    #         hours_tomorrow = self._add_remove_limited_hours(tomorrow_ready)
-    #         hours, hours_tomorrow = interim.interim_avg_update(
-    #             today=hours, 
-    #             tomorrow=hours_tomorrow, 
-    #             model =self.model,
-    #             adjusted_average=self.model.adjusted_average
-    #             )
-            
-    #         self.model.hours.hours_today = self._add_remove_limited_hours(
-    #             HourObject(nh=hours.nh, ch=hours.ch, dyn_ch=hours.dyn_ch, pricedict=hours_ready.pricedict, offset_dict=hours_ready.offset_dict)
-    #             )
-    #         self.model.hours.hours_tomorrow = self._add_remove_limited_hours(
-    #             HourObject(nh=hours_tomorrow.nh, ch=hours_tomorrow.ch, dyn_ch=hours_tomorrow.dyn_ch, pricedict=tomorrow_ready.pricedict, offset_dict=tomorrow_ready.offset_dict)
-    #         )
-    #     else:
-    #         self.model.hours.hours_today = hours
-    #         self.model.hours.hours_tomorrow = hours_tomorrow
-    #     self.update_hour_lists()
-
     def update(
         self
     ) -> None:
-        hours = self._update_per_day(prices=self.model.prices_today)
-        hours_tomorrow = self._update_per_day(prices=self.model.prices_tomorrow)
-        
         hours, hours_tomorrow = self.interim_day_update(
-            today=hours, 
-            tomorrow=hours_tomorrow
+            today=self._update_per_day(prices=self.model.prices_today), 
+            tomorrow=self._update_per_day(prices=self.model.prices_tomorrow)
             )
         
-        self.model.hours.hours_today = self._add_remove_limited_hours(
-            HourObject(nh=hours.nh, ch=hours.ch, dyn_ch=hours.dyn_ch, pricedict=hours.pricedict, offset_dict=hours.offset_dict)
-            )
-        self.model.hours.hours_tomorrow = self._add_remove_limited_hours(
-            HourObject(nh=hours_tomorrow.nh, ch=hours_tomorrow.ch, dyn_ch=hours_tomorrow.dyn_ch, pricedict=hours_tomorrow.pricedict, offset_dict=hours_tomorrow.offset_dict)
-        )
-        
+        self.model.hours.hours_today = self._add_remove_limited_hours(hours)
+        self.model.hours.hours_tomorrow = self._add_remove_limited_hours(hours_tomorrow)
         self.update_hour_lists()
 
     def _update_per_day(self, prices: list) -> HourObject:
@@ -121,13 +86,10 @@ class HourSelectionService:
     def _add_remove_limited_hours(self, hours: HourObject) -> HourObject:
         """Removes cheap hours and adds expensive hours set by user limitation"""
         if hours is None or all([len(hours.nh) == 0, len(hours.ch) == 0, len(hours.dyn_ch) == 0]):
-            #_LOGGER.warning("Hours are not determined.")
             return HourObject([],[],{})
-        else: 
-            ret = HourObject(nh=hours.nh, ch=hours.ch, dyn_ch=hours.dyn_ch,offset_dict=hours.offset_dict)
-        ret = hours.add_expensive_hours(self.model.options.absolute_top_price)
-        ret = hours.remove_cheap_hours(self.model.options.min_price)
-        return ret
+        hours.add_expensive_hours(self.model.options.absolute_top_price)
+        hours.remove_cheap_hours(self.model.options.min_price)
+        return hours
 
     def _determine_hours(self, price_list: dict, prices: list) -> HourObject:
         ret = HourObject([],[],{})
