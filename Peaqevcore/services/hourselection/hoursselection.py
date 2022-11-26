@@ -1,4 +1,5 @@
 import logging
+from typing import Tuple
 from ...models.hourselection.const import (
     CAUTIONHOURTYPE_SUAVE,
     CAUTIONHOURTYPE_INTERMEDIATE,
@@ -84,8 +85,7 @@ class Hoursselection:
 
     def update(self, testhour:int = None) -> None:
         if testhour is not None:
-            self.service._base_mock_hour = testhour
-        print(self.adjusted_average)
+            self.service._mock_hour = testhour
         self.service.update(adjusted_average=self.adjusted_average)
 
     def get_average_kwh_price(self):
@@ -140,4 +140,41 @@ class Hoursselection:
                     _looper_price(h, True)
         return ret
 
-    
+    # def _get_charge_or_price(self, currentpeak:float = None) -> Tuple[dict, dict]:
+    #     hour = self.service.set_hour()
+    #     if currentpeak is not None:
+    #         self.current_peak = currentpeak
+    #     total_prices = self.prices
+    #     total_prices.append(self.prices_tomorrow)
+
+    #     def _looper_charge(_range: range) -> dict:
+    #         _chargeret = {}
+    #         for h in _range:
+    #             if h in self.model.hours.dynamic_caution_hours:
+    #                     _chargeret[h] = self.model.hours.dynamic_caution_hours[h] * self.current_peak
+    #             elif h in self.model.hours.non_hours:
+    #                 _chargeret[h] = 0
+    #             else:
+    #                 _chargeret[h] = self.current_peak
+    #         return _chargeret
+
+    #     def _looper_price(_range: range, tomorrow_active:bool) -> dict:
+    #         _priceret = {}
+    #         for h in _range:
+    #             print(h)
+
+    #             if h in self.model.hours.dynamic_caution_hours:
+    #                     if tomorrow_active:
+    #                         if h < hour and len(self.prices_tomorrow) > 0:
+    #                             _priceret[h] = self.model.hours.dynamic_caution_hours[h] * total_prices[h]
+    #                     if h >= hour:
+    #                         _priceret[h] = self.model.hours.dynamic_caution_hours[h] * total_prices[h]
+    #             elif h not in self.model.hours.non_hours:
+    #                 if h < hour and len(self.prices_tomorrow) > 0:
+    #                     _priceret[h] = total_prices[h]
+    #                 if h >= hour:
+    #                     _priceret[h] = total_prices[h]
+    #         return _priceret
+
+    #     search_range = range(0,24) if self.prices_tomorrow is None or len(self.prices_tomorrow) < 1 else range(hour, (hour+24))
+    #     return _looper_price(search_range, True if search_range[-1] > 24 else False), _looper_charge(search_range)

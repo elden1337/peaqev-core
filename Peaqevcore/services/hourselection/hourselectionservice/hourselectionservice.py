@@ -20,7 +20,7 @@ class HourSelectionService:
     def __init__(self,
     model: HourSelectionModel, base_mock_hour: int = None):
         self.model = model
-        self._base_mock_hour = base_mock_hour
+        self._mock_hour = base_mock_hour
 
     def update(
         self, 
@@ -135,4 +135,4 @@ class HourSelectionService:
         return _permax
 
     def set_hour(self, testhour:int = None) -> int:
-        return testhour if testhour is not None else self._base_mock_hour if self._base_mock_hour is not None else datetime.now().hour
+        return testhour if testhour is not None else self._mock_hour if self._mock_hour is not None else datetime.now().hour
