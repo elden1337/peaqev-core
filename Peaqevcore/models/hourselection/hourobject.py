@@ -16,7 +16,7 @@ class HourObject:
             elif h in self.ch:
                 self.ch.remove(h)
                 self.dyn_ch.pop(h)    
-        return HourObject(nh=self.nh, ch=self.ch, dyn_ch=self.dyn_ch, offset_dict=self.offset_dict)
+        return self
 
     def add_expensive_hours(self, max_price: float = 0):
         lst = (h for h in self.pricedict if self.pricedict[h] >= max_price)
@@ -29,4 +29,4 @@ class HourObject:
                     if h in self.dyn_ch.keys():
                         self.dyn_ch.pop(h)
         self.nh.sort()
-        return HourObject(nh=self.nh, ch=self.ch, dyn_ch=self.dyn_ch, offset_dict=self.offset_dict)
+        return self

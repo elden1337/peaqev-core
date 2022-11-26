@@ -1,76 +1,7 @@
 import statistics as stat
-from typing import Tuple
 import logging
-from ....models.hourselection.hourobject import HourObject
-from ....models.hourselection.hourselectionmodels import HourSelectionModel
 
 _LOGGER = logging.getLogger(__name__)
-
-class HourSelectionInterimUpdate:
-    @staticmethod
-    def interim_avg_update(today: HourObject, tomorrow: HourObject, model: HourSelectionModel, adjusted_average:float = None) -> Tuple[HourObject, HourObject]:
-        avg = HourSelectionInterimUpdate._get_average_price(model.prices_today, model.prices_tomorrow, adjusted_average)
-        _today = HourSelectionInterimUpdate._set_interim_per_day(
-            True,
-            avg, 
-            model.prices_today, 
-            today
-            )
-        _tomorrow = HourSelectionInterimUpdate._set_interim_per_day(
-            False,
-            avg, 
-            model.prices_tomorrow, 
-            tomorrow
-            )
-        return _today, _tomorrow
-
-    @staticmethod
-    def _set_interim_per_day(
-        is_today: bool,
-        avg: float, 
-        prices: list, 
-        hour_obj: HourObject, 
-        ) -> HourObject:
-        new_nonhours = []
-        new_ok_hours = []
-
-        for idx, p in enumerate(prices):
-            if (idx >= 14 and is_today) or idx < 14:
-                if p > avg:
-                    new_nonhours.append(idx)
-                elif p <= avg:
-                    new_ok_hours.append(idx)
-        
-        for h in new_nonhours:
-            if h not in hour_obj.nh:
-                hour_obj.nh.append(h)
-                if h in hour_obj.ch:
-                    hour_obj.ch.remove(h)
-                if len(hour_obj.dyn_ch) > 0:
-                    if h in hour_obj.dyn_ch.keys():
-                        hour_obj.dyn_ch.pop(h)
-        hour_obj.nh.sort()
-
-        for h in new_ok_hours:
-            if h in hour_obj.nh:
-                hour_obj.nh.remove(h)
-            elif h in hour_obj.ch:
-                hour_obj.ch.remove(h)
-                hour_obj.dyn_ch.pop(h)    
-        return HourObject(hour_obj.nh, hour_obj.ch, hour_obj.dyn_ch)
-
-    @staticmethod
-    def _get_average_price(prices_today: list, prices_tomorrow:list, adjusted_average:float = None) -> float:
-        if adjusted_average is not None:
-            _affect_today = adjusted_average / stat.mean(prices_today)
-            _affect_tomorrow = adjusted_average / stat.mean(prices_tomorrow)
-        else:
-            _affect_tomorrow = _affect_today = 1
-
-        ret = prices_today[14::]
-        ret[len(ret):] = prices_tomorrow[0:14]
-        affected_ret= stat.mean(ret) * stat.mean([_affect_today, _affect_tomorrow])
-        return affected_ret if adjusted_average is not None else min(stat.median(ret), stat.mean(ret))
 
 
 class HourSelectionHelpers:
