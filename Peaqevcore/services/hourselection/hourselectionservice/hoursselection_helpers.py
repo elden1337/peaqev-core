@@ -61,7 +61,11 @@ class HourSelectionHelpers:
         return []
 
 
+
 class HourSelectionCalculations:
+    
+    
+    
     @staticmethod
     def normalize_prices(prices:list) -> list:
         min_price = min(prices)
@@ -72,19 +76,21 @@ class HourSelectionCalculations:
         for p in prices:
             pp = p+c
             divider = min_price if min_price > 0 else c
-            ret.append(pp/divider)
+            ret.append(round(pp-divider,3))
         return ret
 
     @staticmethod
     def rank_prices(hourdict: dict, normalized_hourdict: dict, adjusted_average:float = None) -> dict:
-        _adj_avg = 1 if not isinstance(adjusted_average, float) else adjusted_average
-        CAUTIONHOUR_CUTOFF = 1
+        """Rank the normalized pricelist to find out which are going to become non- or caution-hours"""
         
+        CAUTIONHOUR_CUTOFF = 0.7 #cutoff from the average to allow prices below average to become cautionary.
+
+        _adj_avg = stat.mean(hourdict.values()) if not isinstance(adjusted_average, (float,int)) else adjusted_average
         adj_average_norm = _adj_avg * (stat.mean(normalized_hourdict.values())/stat.mean(hourdict.values()))
         cautions = [h for h in normalized_hourdict if normalized_hourdict[h] > (adj_average_norm * CAUTIONHOUR_CUTOFF)]
+        maxval = max(hourdict.values())
         ret = {}
         
-        maxval = max(hourdict.values())
         for c in cautions:
             ret[c] = {"val": hourdict[c], "permax": round(hourdict[c] / maxval,2)}
 

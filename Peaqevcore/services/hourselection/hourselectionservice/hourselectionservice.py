@@ -35,7 +35,6 @@ class HourSelectionService:
             today=self._update_per_day(prices=self.model.prices_today), 
             tomorrow=self._update_per_day(prices=self.model.prices_tomorrow)
             )
-        
         self.model.hours.hours_today = self._add_remove_limited_hours(hours)
         self.model.hours.hours_tomorrow = self._add_remove_limited_hours(hours_tomorrow)
         self.update_hour_lists()
