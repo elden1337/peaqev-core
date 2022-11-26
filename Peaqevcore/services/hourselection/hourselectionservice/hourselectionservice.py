@@ -5,6 +5,7 @@ import statistics as stat
 from ....models.hourselection.const import (
     CAUTIONHOURTYPE_SUAVE,
     CAUTIONHOURTYPE_INTERMEDIATE,
+    CAUTIONHOURTYPE_AGGRESSIVE,
     CAUTIONHOURTYPE
 )
 from .hoursselection_helpers import HourSelectionHelpers as helpers
@@ -15,6 +16,11 @@ from ....models.hourselection.hourtypelist import HourTypeList
 
 _LOGGER = logging.getLogger(__name__)
 
+ALLOWANCE_SCHEMA = {
+            CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE]: 1.15,
+            CAUTIONHOURTYPE[CAUTIONHOURTYPE_INTERMEDIATE]: 1.05,
+            CAUTIONHOURTYPE[CAUTIONHOURTYPE_AGGRESSIVE]: 1
+        }
 
 class HourSelectionService:
     def __init__(self,
@@ -92,30 +98,28 @@ class HourSelectionService:
         return hours
 
     def _determine_hours(self, price_list: dict, prices: list) -> HourObject:
-        #check this method
         ret = HourObject([],[],{})
         for p in price_list:
-            _permax = self._set_permax(price_list[p]["permax"]) #this is weird?
-            if any([
-                float(price_list[p]["permax"]) <= self.model.options.cautionhour_type,
-                float(price_list[p]["val"]) <= (sum(prices)/len(prices))
-            ]):
+            _permax = self._set_charge_allowance(price_list[p]["permax"])
+            if self._should_be_cautionhour(price_list[p], prices):
                 ret.ch.append(p)
                 ret.dyn_ch[p] = round(_permax,2)
             else:
                 ret.nh.append(p)
         return ret
 
-    def _set_permax(self, price_input) -> float:
-        #check this method
-        _permax = round(abs(price_input - 1), 2)
-        if self.model.options.cautionhour_type == CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE]:
-            _permax += 0.15
-        elif self.model.options.cautionhour_type == CAUTIONHOURTYPE[CAUTIONHOURTYPE_INTERMEDIATE]:
-            _permax += 0.05
-        return _permax
-        
+    def _should_be_cautionhour(self, price_item, prices) -> bool:
+        first = any([
+                    float(price_item["permax"]) <= self.model.options.cautionhour_type,
+                    float(price_item["val"]) <= (sum(prices)/len(prices))
+                ])
+        second = (self.model.current_peak > 0 and self.model.current_peak*price_item["permax"] > 1) or self.model.current_peak == 0
+        return all([first, second])
 
+    def _set_charge_allowance(self, price_input) -> float:
+        _allowance = round(abs(price_input - 1), 2)
+        return _allowance * ALLOWANCE_SCHEMA[self.model.options.cautionhour_type]
+        
     def set_hour(self, testhour:int = None) -> int:
         return testhour if testhour is not None else self._mock_hour if self._mock_hour is not None else datetime.now().hour
 

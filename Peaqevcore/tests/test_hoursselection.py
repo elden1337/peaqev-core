@@ -176,6 +176,7 @@ def test_mockprices5_suave():
     r.prices = MOCKPRICES5
     r.update()
     assert r.non_hours == [7,8,9,10]
+    print(r.dynamic_caution_hours)
     assert r.caution_hours == [5,6,11,12,13,14,16,17,18,19,20,21]
     assert list(r.dynamic_caution_hours.keys()) == r.caution_hours
 
@@ -184,7 +185,7 @@ def test_mockprices5_intermediate():
     r.prices = MOCKPRICES5
     r.update()
     assert r.non_hours == [6,7,8,9,10,11,12]
-    assert r.caution_hours == [5,13,14,16,17,18,19,20,21]
+    assert r.caution_hours == [5,13,14,15,16,17,18,19,20,21]
     assert list(r.dynamic_caution_hours.keys()) == r.caution_hours
 
 def test_mockprices5_aggressive():

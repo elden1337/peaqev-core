@@ -90,23 +90,6 @@ class HourSelectionCalculations:
 
         return HourSelectionCalculations._discard_excessive_hours(ret)
 
-    # @staticmethod
-    # def rank_prices(hourdict: dict, normalized_hourdict: dict, adjusted_average:float = None) -> dict:
-    #     ret = {}
-    #     _maxval = max(hourdict.values())
-    #     #_max_normalized = max(normalized_hourdict.values())
-
-    #     prices_avg = stat.mean(hourdict.values())
-    #     if adjusted_average is not None:
-    #         _maxval += (adjusted_average - prices_avg)
-    #         prices_avg = adjusted_average
-    #     for key in hourdict:
-    #         if hourdict[key] > (prices_avg*0.7):
-    #             _permax = round(hourdict[key] / _maxval, 2)
-    #             ret[key] = {"val": hourdict[key], "permax": _permax}
-    #     return HourSelectionCalculations._discard_excessive_hours(ret)
-    
-
     @staticmethod
     def get_offset_dict(normalized_hourdict: dict):
         ret = {}
