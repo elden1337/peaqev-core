@@ -88,7 +88,6 @@ class HourSelectionHelpers:
         else:
             _LOGGER.exception(f"Could not create dictionary from pricelist: {input} with len {len(ret)}.")
             raise ValueError
-        
 
     @staticmethod
     def _try_parse(input:str, parsetype:type):
@@ -126,6 +125,7 @@ class HourSelectionHelpers:
                     ret.append(parsed_item)
                 return ret
             except:
+                _LOGGER.warning("Unable to create empty list for prices.")
                 pass
         return []
 
@@ -148,7 +148,7 @@ class HourSelectionCalculations:
     def rank_prices(hourdict: dict, normalized_hourdict: dict, adjusted_average:float = None) -> dict:
         ret = {}
         _maxval = max(hourdict.values())
-        _max_normalized = max(normalized_hourdict.values())
+        #_max_normalized = max(normalized_hourdict.values())
 
         prices_avg = stat.mean(hourdict.values())
         if adjusted_average is not None:

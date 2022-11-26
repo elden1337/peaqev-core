@@ -23,20 +23,19 @@ class HourSelectionService:
         self._mock_hour = base_mock_hour
 
     def update(
-        self, 
-        adjusted_average:float = None
-        ):
-        hours_ready = self._update_per_day(prices=self.model.prices_today, adjusted_average=adjusted_average)
+        self
+    ) -> None:
+        hours_ready = self._update_per_day(prices=self.model.prices_today)
         hours = self._add_remove_limited_hours(hours_ready)
         hours_tomorrow = HourObject([],[],dict())
         if self.model.prices_tomorrow is not None and len(self.model.prices_tomorrow) > 0:
-            tomorrow_ready = self._update_per_day(self.model.prices_tomorrow, adjusted_average=adjusted_average)
+            tomorrow_ready = self._update_per_day(self.model.prices_tomorrow)
             hours_tomorrow = self._add_remove_limited_hours(tomorrow_ready)
             hours, hours_tomorrow = interim.interim_avg_update(
                 today=hours, 
                 tomorrow=hours_tomorrow, 
                 model =self.model,
-                adjusted_average=adjusted_average
+                adjusted_average=self.model.adjusted_average
                 )
             
             self.model.hours.hours_today = self._add_remove_limited_hours(
@@ -49,8 +48,8 @@ class HourSelectionService:
             self.model.hours.hours_today = hours
             self.model.hours.hours_tomorrow = hours_tomorrow
         self.update_hour_lists()
- 
-    def _update_per_day(self, prices: list, adjusted_average:float = None) -> HourObject:
+
+    def _update_per_day(self, prices: list) -> HourObject:
         pricedict = {}
         if prices is not None and len(prices) > 1:
             pricedict = helpers._create_dict(prices)
@@ -62,7 +61,7 @@ class HourSelectionService:
                     calc.rank_prices(
                         pricedict, 
                         normalized_pricedict,
-                        adjusted_average
+                        self.model.adjusted_average
                         ), 
                         prices
                         )
@@ -101,30 +100,27 @@ class HourSelectionService:
     def _add_remove_limited_hours(self, hours: HourObject) -> HourObject:
         """Removes cheap hours and adds expensive hours set by user limitation"""
         if hours is None:
+            _LOGGER.warning("Hours are not determined.")
             return HourObject([],[],dict())
-        if self.model.options.absolute_top_price is not None:
-                ret = hours.add_expensive_hours(self.model.options.absolute_top_price)
         else: 
             ret = HourObject(nh=hours.nh, ch=hours.ch, dyn_ch=hours.dyn_ch,offset_dict=hours.offset_dict)
-        if self.model.options.min_price > 0:
-            ret = hours.remove_cheap_hours(self.model.options.min_price)
+        ret = hours.add_expensive_hours(self.model.options.absolute_top_price)
+        ret = hours.remove_cheap_hours(self.model.options.min_price)
         return ret
 
     def _determine_hours(self, price_list: dict, prices: list) -> HourObject:
-        _nh = []
-        _dyn_ch = {}
-        _ch = []
+        ret = HourObject([],[],{})
         for p in price_list:
             _permax = self._set_permax(price_list[p]["permax"])
             if any([
                 float(price_list[p]["permax"]) <= self.model.options.cautionhour_type,
                 float(price_list[p]["val"]) <= (sum(prices)/len(prices))
             ]):
-                _ch.append(p)
-                _dyn_ch[p] = round(_permax,2)
+                ret.ch.append(p)
+                ret.dyn_ch[p] = round(_permax,2)
             else:
-                _nh.append(p)
-        return HourObject(_nh, _ch, _dyn_ch)
+                ret.nh.append(p)
+        return ret
 
     def _set_permax(self, price_input) -> float:
         _permax = round(abs(price_input - 1), 2)

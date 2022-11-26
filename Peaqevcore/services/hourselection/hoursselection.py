@@ -33,7 +33,6 @@ class Hoursselection:
             )
         self.model.validate()
         self.service = HourSelectionService(self.model, base_mock_hour)
-        self._adjusted_average = None
     
     @property
     def offsets(self) -> dict:
@@ -77,16 +76,16 @@ class Hoursselection:
 
     @property
     def adjusted_average(self):
-        return self._adjusted_average
+        return self.model.adjusted_average
 
     @adjusted_average.setter
     def adjusted_average(self, val):
-        self._adjusted_average = val
+        self.model.adjusted_average = val
 
     def update(self, testhour:int = None) -> None:
         if testhour is not None:
             self.service._mock_hour = testhour
-        self.service.update(adjusted_average=self.adjusted_average)
+        self.service.update()
 
     def get_average_kwh_price(self):
         ret = self._get_charge_or_price()

@@ -79,6 +79,7 @@ class HourSelectionOptions:
 class HourSelectionModel:
     prices_today: List[float] = field(default_factory=lambda : [])
     prices_tomorrow: List[float] = field(default_factory=lambda : [])
+    adjusted_average: float = None
     hours: HoursModel = HoursModel()
     options: HourSelectionOptions = HourSelectionOptions
 
