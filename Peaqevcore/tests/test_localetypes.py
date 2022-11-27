@@ -65,7 +65,6 @@ def test_overridden_number_in_import():
     p1.reset()
     p1.try_update(new_val=0.22, timestamp=datetime.combine(date(2022, 7, 13), time(21, 30)))
     p1.peaks.set_init_dict(to_state_machine, datetime.combine(date(2022, 7, 13), time(21, 30)))
-    print(p1.peaks._p)
     assert p1.charged_peak == 1.43
 
 def test_SE_Gothenburg():
@@ -103,10 +102,7 @@ def test_generic_querytype_avg_threehour2s():
     d4 = date(2022, 7, 19)
     dt4 = datetime.combine(d4, t)
     p.query_model.try_update(new_val=1.5, timestamp=dt4)
-    print(p.query_model._peaks)
-    print(p.query_model.peaks)
-
-
+    
 def test_SE_Kristinehamn():
     p = SE_Kristinehamn
     p.query_model.try_update(new_val=0.5, timestamp=datetime.combine(date(2022, 6, 14), time(20, 30)))
@@ -156,9 +152,6 @@ def test_overridden_number_in_import():
     p1.reset()
     p1.try_update(new_val=0.22, timestamp=datetime.combine(date(2022, 7, 2), time(15, 30)))
     p1.peaks.set_init_dict(to_state_machine, datetime.combine(date(2022, 7, 2), time(15, 30)))
-    #p1.try_update(new_val=0.23, timestamp=datetime.combine(date(2022, 7, 2), time(15, 31)))
-    print(p1.peaks.p)
-    #assert p1.charged_peak == 1.43
     assert len(p1.peaks._p) == 2
 
 def test_quarterly():

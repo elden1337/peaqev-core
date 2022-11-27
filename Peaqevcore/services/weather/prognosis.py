@@ -324,16 +324,16 @@ test_input = [
 ]
 
 
-w = WeatherPrognosis()
-w.set_prognosis(test_input)
+# w = WeatherPrognosis()
+# w.set_prognosis(test_input)
 
-for ww in w.prognosis_list:
-  print(ww)
+# for ww in w.prognosis_list:
+#   print(ww)
 
-prog = w.make_hvac_prognosis(1.6)
+# prog = w.make_hvac_prognosis(1.6)
 
-for p in prog:
-  print(p)
+# for p in prog:
+#   print(p)
 
 
 

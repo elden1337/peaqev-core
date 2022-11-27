@@ -28,9 +28,7 @@ class HourSelectionService:
         self.model = model
         self._mock_hour = base_mock_hour
 
-    def update(
-        self
-    ) -> None:
+    def update(self) -> None:
         hours, hours_tomorrow = self.interim_day_update(
             today=self._update_per_day(prices=self.model.prices_today), 
             tomorrow=self._update_per_day(prices=self.model.prices_tomorrow)
@@ -123,65 +121,46 @@ class HourSelectionService:
         return testhour if testhour is not None else self._mock_hour if self._mock_hour is not None else datetime.now().hour
 
     def interim_day_update(self, today: HourObject, tomorrow: HourObject) -> Tuple[HourObject, HourObject]:
+        """Updates the non- and caution-hours with an adjusted mean of 14h - 13h today-tomorrow to get a more sane nightly curve."""
         if len(self.model.prices_tomorrow) == 0:
-            return today, tomorrow
-        avg = self._get_average_price()
-        _today = self._set_interim_per_day(
-            True,
-            avg, 
-            self.model.prices_today, 
-            today
-            )
-        _tomorrow = self._set_interim_per_day(
-            False,
-            avg, 
-            self.model.prices_tomorrow, 
-            tomorrow
-            )
-        return _today, _tomorrow
+            #return what we sent in. This function is not eligable for single day prices.
+            return today, tomorrow 
 
-    def _set_interim_per_day(
-        self,
-        is_today: bool,
-        avg: float, 
-        prices: list, 
-        hour_obj: HourObject, 
-        ) -> HourObject:
-        new_nonhours = []
-        new_ok_hours = []
+        pricelist = self.model.prices_today[14::]
+        pricelist[len(pricelist):] = self.model.prices_tomorrow[0:14]
+        new_hours = self._update_per_day(pricelist)
+        today = self._update_interim_lists(range(14,24), today, new_hours)
+        tomorrow = self._update_interim_lists(range(0,14), tomorrow, new_hours)
+        return today, tomorrow
 
-        for idx, p in enumerate(prices):
-            if (idx >= 14 and is_today) or idx < 14:
-                if p > avg:
-                    new_nonhours.append(idx)
-                elif p <= avg:
-                    new_ok_hours.append(idx)
-        for h in new_nonhours:
-            if h not in hour_obj.nh:
-                hour_obj.nh.append(h)
-                if h in hour_obj.ch:
-                    hour_obj.ch.remove(h)
-                if len(hour_obj.dyn_ch) > 0:
-                    if h in hour_obj.dyn_ch.keys():
-                        hour_obj.dyn_ch.pop(h)
-        hour_obj.nh.sort()
+    def _update_interim_lists(self, _range: range, oldobj: HourObject, newobj: HourObject) -> HourObject:
+        for i in _range:
+            if i in newobj.nh:
+                if i not in oldobj.nh:
+                    oldobj.nh.append(i)
+                    oldobj.ch = self._try_remove(i, oldobj.ch)
+                    oldobj.dyn_ch = self._try_remove(i, oldobj.dyn_ch)
+            elif i in newobj.ch:
+                if i not in oldobj.ch:
+                    oldobj.ch.append(i)
+                    oldobj.dyn_ch[i] = newobj.dyn_ch[i]
+                    oldobj.nh = self._try_remove(i, oldobj.nh)
+            else:
+                oldobj.nh = self._try_remove(i, oldobj.nh)
+                oldobj.ch = self._try_remove(i, oldobj.ch)
+                oldobj.dyn_ch = self._try_remove(i, oldobj.dyn_ch)
+            oldobj.nh = sorted(oldobj.nh)
+            oldobj.ch = sorted(oldobj.ch)
+            oldobj.dyn_ch = dict(sorted(oldobj.dyn_ch.items()))
+            oldobj.pricedict[i] = newobj.pricedict[i]
+            oldobj.offset_dict[i] = newobj.offset_dict[i]
+        return oldobj
 
-        for h in new_ok_hours:
-            if h in hour_obj.nh:
-                hour_obj.nh.remove(h)
-            elif h in hour_obj.ch:
-                hour_obj.ch.remove(h)
-                hour_obj.dyn_ch.pop(h)    
-        return hour_obj
-
-    def _get_average_price(self) -> float:
-        if self.model.adjusted_average is not None:
-            _affect_today = self.model.adjusted_average / stat.mean(self.model.prices_today)
-            _affect_tomorrow = self.model.adjusted_average / stat.mean(self.model.prices_tomorrow)
-        else:
-            _affect_tomorrow = _affect_today = 1
-
-        ret = self.model.prices_today[14::]
-        ret[len(ret):] = self.model.prices_tomorrow[0:14]
-        affected_ret= stat.mean(ret) * stat.mean([_affect_today, _affect_tomorrow])
-        return affected_ret if self.model.adjusted_average is not None else min(stat.median(ret), stat.mean(ret))
+    def _try_remove(self, value, collection: list|dict):
+        if isinstance(collection, dict):
+            if value in collection.keys():
+                collection.pop(value)
+        elif isinstance(collection, list):
+            if value in collection:
+                collection.remove(value)
+        return collection

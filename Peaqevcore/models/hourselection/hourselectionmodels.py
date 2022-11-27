@@ -84,5 +84,16 @@ class HourSelectionModel:
     hours: HoursModel = HoursModel()
     options: HourSelectionOptions = HourSelectionOptions
 
+    def __post_init__(self):
+        self.validate()
+
     def validate(self):
         assert 0 < self.options.cautionhour_type <= 1
+        assert isinstance(self.prices_today, list)
+        assert isinstance(self.prices_tomorrow, list)
+
+        if isinstance(self.adjusted_average, (int, float)):
+            assert self.adjusted_average >= 0
+        else:
+            assert self.adjusted_average is None
+        
