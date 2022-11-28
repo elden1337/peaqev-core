@@ -30,12 +30,9 @@ class HourSelectionService:
         self._preserve_interim: bool = False
 
     def update(self, caller: str = None) -> None:
-        print(caller)
         if self._preserve_interim and caller == "today":
-            print(f"before: {self.model.hours.hours_today.nh}")
             self.model.hours.hours_today = self.model.hours.hours_tomorrow
             self.model.hours.hours_tomorrow = HourObject([], [], {})
-            print(f"after: {self.model.hours.hours_today.nh}")
             return
 
         hours, hours_tomorrow = self.interim_day_update(

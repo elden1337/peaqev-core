@@ -29,7 +29,11 @@ MOCKPRICELIST = [
     MOCKPRICES4,
     MOCKPRICES5,
     MOCKPRICES6,
-    MOCKPRICES7
+    MOCKPRICES7,
+    [1.918, 1.795, 1.654, 1.348, 1.348, 1.432, 1.695, 1.797, 1.837, 1.993, 2.032, 2.163, 2.113, 2.059, 2.131, 2.142, 2.247, 2.366, 2.37, 2.213, 2.067, 1.724, 1.334, 1.136],
+    [1.713, 1.716, 1.663, 1.568, 1.58, 1.631, 1.996, 2.471, 2.771, 2.808, 3.095, 3.166, 3.155, 3.155, 3.154, 3.162, 3.333, 3.394, 3.275, 2.984, 2.747, 4.32, 3.14, 2.853],
+    [2.853, 3.14, 4.32, 2.853, 2.855, 3.02, 3.532, 5.259, 6.032, 6.057, 6.065, 5.924, 5.686, 5.77, 6.071, 6.13, 6.257, 6.815, 6.621, 6.157, 5.31, 4.481, 3.951, 3.568],
+    [1.71, 1.714, 1.661, 1.566, 1.578, 1.628, 1.994, 2.468, 2.767, 2.804, 3.091, 3.162, 3.151, 3.151, 3.15, 3.158, 3.329, 3.39, 3.27, 2.98, 2.743, 2.578, 2.409, 1.918]
 ]
 
 def test_mockprices1_non_hours():
@@ -267,7 +271,7 @@ def test_average_kwh_price_just_today():
     r.prices = MOCKPRICES1
     r.service._mock_hour = MOCKHOUR
     r.update()
-    assert r.get_average_kwh_price() == 0.0
+    assert r.get_average_kwh_price() == 0.34
 
 def test_average_kwh_price_today_tomorrow():
     MOCKHOUR = 18
@@ -276,7 +280,7 @@ def test_average_kwh_price_today_tomorrow():
     r.prices_tomorrow = MOCKPRICES2
     r.service._mock_hour = MOCKHOUR
     r.update()
-    assert r.get_average_kwh_price() == 0.0
+    assert r.get_average_kwh_price() == 0.61
 
 def test_cheap_today_expensive_tomorrow():
     MOCKHOUR = 14
@@ -535,7 +539,6 @@ def test_22127_1_adjusted_average():
     assert r.non_hours == [9,10,11,12,13,14,15,16,17,18,19,20]
     assert r.caution_hours == []
 
-
 def test_22127_2_adjusted_average():
     r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_INTERMEDIATE], absolute_top_price=0, min_price=0)
     #avg today is 1.87
@@ -601,5 +604,47 @@ def test_not_too_shallow_caution_hours():
     assert len(val) == 0
     assert len(val2) == 0
 
+def test_charge_below_average_today_only():
+    r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE], absolute_top_price=0, min_price=0)
+    r.service._mock_hour = 0
+    _avg = 0
+    tests = {}
+    for price in MOCKPRICELIST:
+        r.prices = price
+        _avg = stat.mean(price)
+        tests[_avg] = r.get_average_kwh_price()
+        assert 0 < r.get_average_kwh_price() < _avg
 
+def test_charge_price_fixed_today_only():
+    r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE], absolute_top_price=0, min_price=0)
+    r.service._mock_hour = 0
+    r.prices = [1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2]
+    assert r.get_average_kwh_price() == 1
+
+def test_charge_price_fixed_today_only():
+    r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE], absolute_top_price=0, min_price=0)
+    r.service._mock_hour = 13
+    r.prices = [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1]
+    r.prices_tomorrow = [1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]
+    assert r.get_average_kwh_price() == 1
+    
+def test_charge_below_average_today_and_tomorrow():
+    r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE], absolute_top_price=0, min_price=0)
+    r.service._mock_hour = 14
+    _avg = 0
+    for price in MOCKPRICELIST:
+        for price2 in MOCKPRICELIST:
+            if price == price2:
+                continue
+            r.prices = price
+            r.prices_tomorrow = price2
+            total = price[14::] + price2[0:14]
+            _avg = round(stat.mean(total),2)
+            assert 0 < r.get_average_kwh_price() < _avg
+            # print(price)
+            # print(price2)
+            # print(f"avg price 14-13: {_avg}")
+            # print(f"avg kwh-price: {r.get_average_kwh_price()}")
+            # print('--------')
+    
 

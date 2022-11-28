@@ -64,8 +64,6 @@ class HourSelectionHelpers:
 
 class HourSelectionCalculations:
     
-    
-    
     @staticmethod
     def normalize_prices(prices:list) -> list:
         min_price = min(prices)

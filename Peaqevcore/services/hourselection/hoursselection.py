@@ -36,7 +36,7 @@ class Hoursselection:
     
     @property
     def offsets(self) -> dict:
-        print(f"offset: {self.model.hours.offset_dict}")
+        #print(f"offset: {self.model.hours.offset_dict}")
         return self.model.hours.offset_dict
 
     @property
@@ -108,7 +108,7 @@ class Hoursselection:
 
     def _get_charge_or_price(self, charge:bool = False) -> dict:
         hour = self.service.set_hour()
-        ret = dict()
+        ret = {}
 
         def _looper_charge(h:int):
             if h in self.model.hours.dynamic_caution_hours:
@@ -133,14 +133,14 @@ class Hoursselection:
 
         if self.prices_tomorrow is None or len(self.prices_tomorrow) < 1:
             for h in range(hour,24):
-                if charge is not None:
+                if charge:
                     _looper_charge(h)
                 else:
                     _looper_price(h, False)
         else:
             for h in range(hour,(hour+24)):
                 h = h-24 if h > 23 else h
-                if charge is not None:
+                if charge:
                     _looper_charge(h)
                 else:
                     _looper_price(h, True)
