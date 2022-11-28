@@ -30,7 +30,6 @@ class QueryService:
             QueryService.DATETIMEPARTS.get(dtpart)(timer), 
             arg
             )
-        print(f"{dtpart}: {_logic}. datetime: {timer}")
         return _logic
 
     AND = "AND"

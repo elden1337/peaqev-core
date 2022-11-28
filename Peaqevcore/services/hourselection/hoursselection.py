@@ -1,4 +1,5 @@
 import logging
+from typing import Tuple
 from ...models.hourselection.const import (
     CAUTIONHOURTYPE_SUAVE,
     CAUTIONHOURTYPE_INTERMEDIATE,
@@ -32,25 +33,28 @@ class Hoursselection:
             )
         self.model.validate()
         self.service = HourSelectionService(self.model, base_mock_hour)
-        self._adjusted_average = None
     
     @property
     def offsets(self) -> dict:
+        print(f"offset: {self.model.hours.offset_dict}")
         return self.model.hours.offset_dict
 
     @property
     def non_hours(self) -> list:
         self.service.update_hour_lists(listtype=HourTypeList.NonHour)
+        #print(f"nh: {self.model.hours.non_hours}")
         return self.model.hours.non_hours
 
     @property
     def caution_hours(self) -> list:
         self.service.update_hour_lists(listtype=HourTypeList.CautionHour)
+        #print(f"ch: {self.model.hours.caution_hours}")
         return self.model.hours.caution_hours
 
     @property
     def dynamic_caution_hours(self) -> dict:
         self.service.update_hour_lists(listtype=HourTypeList.DynCautionHour)
+        #print(f"dyn_ch: {self.model.hours.dynamic_caution_hours}")
         return self.model.hours.dynamic_caution_hours
 
     @property
@@ -63,7 +67,7 @@ class Hoursselection:
         if self.prices == self.prices_tomorrow:
             self.prices_tomorrow = []
         else:
-            self.update()
+            self.update(caller="today")
 
     @property
     def prices_tomorrow(self) -> list:
@@ -72,21 +76,22 @@ class Hoursselection:
     @prices_tomorrow.setter
     def prices_tomorrow(self, val):
         self.model.prices_tomorrow = helpers._convert_none_list(val)
+        if self.model.prices_tomorrow != []:
+            self.service._preserve_interim = False
         self.update()
 
     @property
     def adjusted_average(self):
-        return self._adjusted_average
+        return self.model.adjusted_average
 
     @adjusted_average.setter
     def adjusted_average(self, val):
-        self._adjusted_average = val
+        self.model.adjusted_average = val
 
-    def update(self, testhour:int = None) -> None:
+    def update(self, testhour:int = None, caller:str = None) -> None:
         if testhour is not None:
-            self.service._base_mock_hour = testhour
-        print(self.adjusted_average)
-        self.service.update(adjusted_average=self.adjusted_average)
+            self.service._mock_hour = testhour
+        self.service.update(caller)
 
     def get_average_kwh_price(self):
         ret = self._get_charge_or_price()
@@ -97,20 +102,21 @@ class Hoursselection:
         return 0
         
     def get_total_charge(self, currentpeak:float) -> float:
-        ret = self._get_charge_or_price(currentpeak)
+        self.model.current_peak = currentpeak
+        ret = self._get_charge_or_price(True)
         return round(sum(ret.values()),1)
 
-    def _get_charge_or_price(self, currentpeak:float = None) -> dict:
+    def _get_charge_or_price(self, charge:bool = False) -> dict:
         hour = self.service.set_hour()
         ret = dict()
 
         def _looper_charge(h:int):
             if h in self.model.hours.dynamic_caution_hours:
-                    ret[h] = self.model.hours.dynamic_caution_hours[h] * currentpeak
+                    ret[h] = self.model.hours.dynamic_caution_hours[h] * self.model.current_peak
             elif h in self.model.hours.non_hours:
                 ret[h] = 0
             else:
-                ret[h] = currentpeak
+                ret[h] = self.model.current_peak
 
         def _looper_price(h:int, tomorrow_active:bool):
             if h in self.model.hours.dynamic_caution_hours:
@@ -127,17 +133,15 @@ class Hoursselection:
 
         if self.prices_tomorrow is None or len(self.prices_tomorrow) < 1:
             for h in range(hour,24):
-                if currentpeak is not None:
+                if charge is not None:
                     _looper_charge(h)
                 else:
                     _looper_price(h, False)
         else:
             for h in range(hour,(hour+24)):
                 h = h-24 if h > 23 else h
-                if currentpeak is not None:
+                if charge is not None:
                     _looper_charge(h)
                 else:
                     _looper_price(h, True)
         return ret
-
-    

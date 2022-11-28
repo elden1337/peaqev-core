@@ -1,13 +1,14 @@
 import logging
 from datetime import datetime
+from typing import Tuple
 import statistics as stat
 from ....models.hourselection.const import (
     CAUTIONHOURTYPE_SUAVE,
     CAUTIONHOURTYPE_INTERMEDIATE,
+    CAUTIONHOURTYPE_AGGRESSIVE,
     CAUTIONHOURTYPE
 )
 from .hoursselection_helpers import HourSelectionHelpers as helpers
-from .hoursselection_helpers import HourSelectionInterimUpdate as interim
 from .hoursselection_helpers import HourSelectionCalculations as calc
 from ....models.hourselection.hourobject import HourObject
 from ....models.hourselection.hourselectionmodels import HourSelectionModel
@@ -15,42 +16,37 @@ from ....models.hourselection.hourtypelist import HourTypeList
 
 _LOGGER = logging.getLogger(__name__)
 
+ALLOWANCE_SCHEMA = {
+            CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE]: 1.15,
+            CAUTIONHOURTYPE[CAUTIONHOURTYPE_INTERMEDIATE]: 1.05,
+            CAUTIONHOURTYPE[CAUTIONHOURTYPE_AGGRESSIVE]: 1
+        }
 
 class HourSelectionService:
     def __init__(self,
     model: HourSelectionModel, base_mock_hour: int = None):
         self.model = model
-        self._base_mock_hour = base_mock_hour
+        self._mock_hour = base_mock_hour
+        self._preserve_interim: bool = False
 
-    def update(
-        self, 
-        adjusted_average:float = None
-        ):
-        hours_ready = self._update_per_day(prices=self.model.prices_today, adjusted_average=adjusted_average)
-        hours = self._add_remove_limited_hours(hours_ready)
-        hours_tomorrow = HourObject([],[],dict())
-        if self.model.prices_tomorrow is not None and len(self.model.prices_tomorrow) > 0:
-            tomorrow_ready = self._update_per_day(self.model.prices_tomorrow, adjusted_average=adjusted_average)
-            hours_tomorrow = self._add_remove_limited_hours(tomorrow_ready)
-            hours, hours_tomorrow = interim.interim_avg_update(
-                today=hours, 
-                tomorrow=hours_tomorrow, 
-                model =self.model,
-                adjusted_average=adjusted_average
-                )
-            
-            self.model.hours.hours_today = self._add_remove_limited_hours(
-                HourObject(nh=hours.nh, ch=hours.ch, dyn_ch=hours.dyn_ch, pricedict=hours_ready.pricedict, offset_dict=hours_ready.offset_dict)
-                )
-            self.model.hours.hours_tomorrow = self._add_remove_limited_hours(
-                HourObject(nh=hours_tomorrow.nh, ch=hours_tomorrow.ch, dyn_ch=hours_tomorrow.dyn_ch, pricedict=tomorrow_ready.pricedict, offset_dict=tomorrow_ready.offset_dict)
+    def update(self, caller: str = None) -> None:
+        print(caller)
+        if self._preserve_interim and caller == "today":
+            print(f"before: {self.model.hours.hours_today.nh}")
+            self.model.hours.hours_today = self.model.hours.hours_tomorrow
+            self.model.hours.hours_tomorrow = HourObject([], [], {})
+            print(f"after: {self.model.hours.hours_today.nh}")
+            return
+
+        hours, hours_tomorrow = self.interim_day_update(
+            today=self._update_per_day(prices=self.model.prices_today), 
+            tomorrow=self._update_per_day(prices=self.model.prices_tomorrow)
             )
-        else:
-            self.model.hours.hours_today = hours
-            self.model.hours.hours_tomorrow = hours_tomorrow
+        self.model.hours.hours_today = self._add_remove_limited_hours(hours)
+        self.model.hours.hours_tomorrow = self._add_remove_limited_hours(hours_tomorrow)
         self.update_hour_lists()
- 
-    def _update_per_day(self, prices: list, adjusted_average:float = None) -> HourObject:
+
+    def _update_per_day(self, prices: list) -> HourObject:
         pricedict = {}
         if prices is not None and len(prices) > 1:
             pricedict = helpers._create_dict(prices)
@@ -62,7 +58,7 @@ class HourSelectionService:
                     calc.rank_prices(
                         pricedict, 
                         normalized_pricedict,
-                        adjusted_average
+                        self.model.adjusted_average
                         ), 
                         prices
                         )
@@ -76,6 +72,7 @@ class HourSelectionService:
                 ret= HourObject(nh=[], ch=[], dyn_ch={},pricedict=pricedict)
             ret.offset_dict=calc.get_offset_dict(normalized_pricedict)
             return ret
+        return HourObject([],[],{})
 
     def update_hour_lists(
         self, 
@@ -100,39 +97,102 @@ class HourSelectionService:
 
     def _add_remove_limited_hours(self, hours: HourObject) -> HourObject:
         """Removes cheap hours and adds expensive hours set by user limitation"""
-        if hours is None:
-            return HourObject([],[],dict())
-        if self.model.options.absolute_top_price is not None:
-                ret = hours.add_expensive_hours(self.model.options.absolute_top_price)
-        else: 
-            ret = HourObject(nh=hours.nh, ch=hours.ch, dyn_ch=hours.dyn_ch,offset_dict=hours.offset_dict)
-        if self.model.options.min_price > 0:
-            ret = hours.remove_cheap_hours(self.model.options.min_price)
-        return ret
+        if hours is None or all([len(hours.nh) == 0, len(hours.ch) == 0, len(hours.dyn_ch) == 0]):
+            return HourObject([],[],{})
+        hours.add_expensive_hours(self.model.options.absolute_top_price)
+        hours.remove_cheap_hours(self.model.options.min_price)
+        return hours
 
     def _determine_hours(self, price_list: dict, prices: list) -> HourObject:
-        _nh = []
-        _dyn_ch = {}
-        _ch = []
+        ret = HourObject([],[],{})
         for p in price_list:
-            _permax = self._set_permax(price_list[p]["permax"])
-            if any([
-                float(price_list[p]["permax"]) <= self.model.options.cautionhour_type,
-                float(price_list[p]["val"]) <= (sum(prices)/len(prices))
-            ]):
-                _ch.append(p)
-                _dyn_ch[p] = round(_permax,2)
+            _permax = self._set_charge_allowance(price_list[p]["permax"])
+            if self._should_be_cautionhour(price_list[p], prices):
+                ret.ch.append(p)
+                ret.dyn_ch[p] = round(_permax,2)
             else:
-                _nh.append(p)
-        return HourObject(_nh, _ch, _dyn_ch)
+                ret.nh.append(p)
+        return ret
 
-    def _set_permax(self, price_input) -> float:
-        _permax = round(abs(price_input - 1), 2)
-        if self.model.options.cautionhour_type == CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE]:
-            _permax += 0.15
-        elif self.model.options.cautionhour_type == CAUTIONHOURTYPE[CAUTIONHOURTYPE_INTERMEDIATE]:
-            _permax += 0.05
-        return _permax
+    def _should_be_cautionhour(self, price_item, prices) -> bool:
+        first = any([
+                    float(price_item["permax"]) <= self.model.options.cautionhour_type,
+                    float(price_item["val"]) <= (sum(prices)/len(prices))
+                ])
+        second = (self.model.current_peak > 0 and self.model.current_peak*price_item["permax"] > 1) or self.model.current_peak == 0
+        return all([first, second])
 
+    def _set_charge_allowance(self, price_input) -> float:
+        _allowance = round(abs(price_input - 1), 2)
+        return _allowance * ALLOWANCE_SCHEMA[self.model.options.cautionhour_type]
+        
     def set_hour(self, testhour:int = None) -> int:
-        return testhour if testhour is not None else self._base_mock_hour if self._base_mock_hour is not None else datetime.now().hour
+        return testhour if testhour is not None else self._mock_hour if self._mock_hour is not None else datetime.now().hour
+
+    def interim_day_update(self, today: HourObject, tomorrow: HourObject) -> Tuple[HourObject, HourObject]:
+        """Updates the non- and caution-hours with an adjusted mean of 14h - 13h today-tomorrow to get a more sane nightly curve."""
+        if len(self.model.prices_tomorrow) == 0:
+            #return what we sent in. This function is not eligable for single day prices.
+            return today, tomorrow 
+
+        pricelist = self.model.prices_today[14::]
+        pricelist[len(pricelist):] = self.model.prices_tomorrow[0:14]
+        new_hours = self._update_per_day(pricelist)
+        
+        today = self._update_interim_lists(range(14,24), today, new_hours, 14)
+        tomorrow = self._update_interim_lists(range(0,14), tomorrow, new_hours, -10)
+
+        self._preserve_interim = True
+        return today, tomorrow
+
+    def _convert_collections(self, newobj: HourObject, index_deviation: int) -> HourObject:
+        """Converts the hourobject-collections to interim days, based on the index-deviation provided."""
+
+        def _chop_list(lst: list):
+            return [n+index_deviation for n in lst if 0 <= n+index_deviation < 24]
+        def _chop_dict(dct: dict):
+            return {key+index_deviation:value for (key,value) in dct.items() if 0 <= key+index_deviation < 24}
+        ret = HourObject([], [], {})
+        ret.nh = _chop_list(newobj.nh)
+        ret.ch = _chop_list(newobj.ch)
+        ret.dyn_ch = _chop_dict(newobj.dyn_ch)
+        ret.offset_dict = _chop_dict(newobj.offset_dict)
+        ret.pricedict = _chop_dict(newobj.pricedict)
+
+        return ret
+
+    def _update_interim_lists(self, _range: range, oldobj: HourObject, newobj: HourObject, index_devidation: int) -> HourObject:
+        _newobj = self._convert_collections(newobj, index_devidation)
+        for i in _range:
+            if i in _newobj.nh:
+                if i not in oldobj.nh:
+                    oldobj.nh.append(i)
+                    oldobj.ch = self._try_remove(i, oldobj.ch)
+                    oldobj.dyn_ch = self._try_remove(i, oldobj.dyn_ch)
+            elif i in _newobj.ch:
+                if i not in oldobj.ch:
+                    oldobj.ch.append(i)
+                    oldobj.dyn_ch[i] = _newobj.dyn_ch[i]
+                    oldobj.nh = self._try_remove(i, oldobj.nh)
+            else:
+                oldobj.nh = self._try_remove(i, oldobj.nh)
+                oldobj.ch = self._try_remove(i, oldobj.ch)
+                oldobj.dyn_ch = self._try_remove(i, oldobj.dyn_ch)
+            oldobj.nh = sorted(oldobj.nh)
+            oldobj.ch = sorted(oldobj.ch)
+            oldobj.dyn_ch = dict(sorted(oldobj.dyn_ch.items()))
+        
+        for r in _newobj.offset_dict.keys():
+            oldobj.offset_dict[r] = _newobj.offset_dict[r]
+            oldobj.pricedict[r] = _newobj.pricedict[r]
+
+        return oldobj
+
+    def _try_remove(self, value, collection: list|dict):
+        if isinstance(collection, dict):
+            if value in collection.keys():
+                collection.pop(value)
+        elif isinstance(collection, list):
+            if value in collection:
+                collection.remove(value)
+        return collection

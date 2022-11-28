@@ -12,7 +12,3 @@ class CautionHourType(Enum):
 
 
 ttt = CautionHourType(CAUTIONHOURTYPE_SUAVE)
-#detta är enumvärdet
-print(ttt.name)
-#detta är strängen
-print(ttt.value)
