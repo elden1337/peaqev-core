@@ -36,21 +36,25 @@ class Hoursselection:
     
     @property
     def offsets(self) -> dict:
+        #print(f"offset: {self.model.hours.offset_dict}")
         return self.model.hours.offset_dict
 
     @property
     def non_hours(self) -> list:
         self.service.update_hour_lists(listtype=HourTypeList.NonHour)
+        #print(f"nh: {self.model.hours.non_hours}")
         return self.model.hours.non_hours
 
     @property
     def caution_hours(self) -> list:
         self.service.update_hour_lists(listtype=HourTypeList.CautionHour)
+        #print(f"ch: {self.model.hours.caution_hours}")
         return self.model.hours.caution_hours
 
     @property
     def dynamic_caution_hours(self) -> dict:
         self.service.update_hour_lists(listtype=HourTypeList.DynCautionHour)
+        #print(f"dyn_ch: {self.model.hours.dynamic_caution_hours}")
         return self.model.hours.dynamic_caution_hours
 
     @property

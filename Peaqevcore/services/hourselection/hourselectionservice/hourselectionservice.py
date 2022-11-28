@@ -129,21 +129,40 @@ class HourSelectionService:
         pricelist = self.model.prices_today[14::]
         pricelist[len(pricelist):] = self.model.prices_tomorrow[0:14]
         new_hours = self._update_per_day(pricelist)
-        today = self._update_interim_lists(range(14,24), today, new_hours)
-        tomorrow = self._update_interim_lists(range(0,14), tomorrow, new_hours)
+        
+        today = self._update_interim_lists(range(14,24), today, new_hours, 14)
+        tomorrow = self._update_interim_lists(range(0,14), tomorrow, new_hours, -10)
+
         return today, tomorrow
 
-    def _update_interim_lists(self, _range: range, oldobj: HourObject, newobj: HourObject) -> HourObject:
+    def _convert_collections(self, newobj: HourObject, index_deviation: int) -> HourObject:
+        """Converts the hourobject-collections to interim days, based on the index-deviation provided."""
+
+        def _chop_list(lst: list):
+            return [n+index_deviation for n in lst if 0 <= n+index_deviation < 24]
+        def _chop_dict(dct: dict):
+            return {key+index_deviation:value for (key,value) in dct.items() if 0 <= key+index_deviation < 24}
+        ret = HourObject([], [], {})
+        ret.nh = _chop_list(newobj.nh)
+        ret.ch = _chop_list(newobj.ch)
+        ret.dyn_ch = _chop_dict(newobj.dyn_ch)
+        ret.offset_dict = _chop_dict(newobj.offset_dict)
+        ret.pricedict = _chop_dict(newobj.pricedict)
+
+        return ret
+
+    def _update_interim_lists(self, _range: range, oldobj: HourObject, newobj: HourObject, index_devidation: int) -> HourObject:
+        _newobj = self._convert_collections(newobj, index_devidation)
         for i in _range:
-            if i in newobj.nh:
+            if i in _newobj.nh:
                 if i not in oldobj.nh:
                     oldobj.nh.append(i)
                     oldobj.ch = self._try_remove(i, oldobj.ch)
                     oldobj.dyn_ch = self._try_remove(i, oldobj.dyn_ch)
-            elif i in newobj.ch:
+            elif i in _newobj.ch:
                 if i not in oldobj.ch:
                     oldobj.ch.append(i)
-                    oldobj.dyn_ch[i] = newobj.dyn_ch[i]
+                    oldobj.dyn_ch[i] = _newobj.dyn_ch[i]
                     oldobj.nh = self._try_remove(i, oldobj.nh)
             else:
                 oldobj.nh = self._try_remove(i, oldobj.nh)
@@ -152,8 +171,11 @@ class HourSelectionService:
             oldobj.nh = sorted(oldobj.nh)
             oldobj.ch = sorted(oldobj.ch)
             oldobj.dyn_ch = dict(sorted(oldobj.dyn_ch.items()))
-            oldobj.pricedict[i] = newobj.pricedict[i]
-            oldobj.offset_dict[i] = newobj.offset_dict[i]
+        
+        for r in _newobj.offset_dict.keys():
+            oldobj.offset_dict[r] = _newobj.offset_dict[r]
+            oldobj.pricedict[r] = _newobj.pricedict[r]
+
         return oldobj
 
     def _try_remove(self, value, collection: list|dict):
