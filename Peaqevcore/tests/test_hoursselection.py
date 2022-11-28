@@ -1,4 +1,5 @@
 import pytest
+import statistics as stat
 from ..services.hourselection.hoursselection import Hoursselection as h
 from ..services.hourselection.hourselectionservice.hoursselection_helpers import HourSelectionHelpers, HourSelectionCalculations
 from ..models.hourselection.const import (CAUTIONHOURTYPE_AGGRESSIVE, CAUTIONHOURTYPE_INTERMEDIATE, CAUTIONHOURTYPE_SUAVE, CAUTIONHOURTYPE)
@@ -20,6 +21,16 @@ MOCKPRICES_CHEAP = [0.042, 0.034, 0.026, 0.022, 0.02, 0.023, 0.027, 0.037, 0.049
 MOCKPRICES_EXPENSIVE = [0.366, 0.359, 0.357, 0.363, 0.402, 2.026, 4.036, 4.935, 6.689, 4.66, 4.145, 4.094, 3.526, 2.861, 2.583, 2.456, 2.414, 2.652, 2.799, 3.896, 4.232, 4.228, 3.824, 2.084]
 MOCK220621 = [1.987, 1.813, 0.996, 0.527, 0.759, 1.923, 3.496, 4.512, 4.375, 3.499, 2.602, 2.926, 2.857, 2.762, 2.354, 2.678, 3.117, 2.384, 3.062, 2.376, 2.245, 2.046, 1.84, 0.372]
 MOCK220622 = [0.142, 0.106, 0.1, 0.133, 0.266, 0.412, 2.113, 3, 4.98, 4.374, 3.913, 3.796, 3.491, 3.241, 3.173, 2.647, 2.288, 2.254, 2.497, 2.247, 2.141, 2.2, 2.113, 0.363]
+
+MOCKPRICELIST = [
+    MOCKPRICES1,
+    MOCKPRICES2,
+    MOCKPRICES3,
+    MOCKPRICES4,
+    MOCKPRICES5,
+    MOCKPRICES6,
+    MOCKPRICES7
+]
 
 def test_mockprices1_non_hours():
     r = h(base_mock_hour=21)
@@ -337,16 +348,16 @@ def test_negative_prices():
     assert r.non_hours == [20]
 
 def test_over_midnight():
-    MOCKHOUR = 23
-    MOCKHOUR2 = 2
     r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE], absolute_top_price=0, min_price=0)
     r.prices = [0.019, 0.015, 0.014, 0.013, 0.013, 0.017, 0.019, 0.067, 0.157, 0.199, 0.177, 0.131, 0.025, 0.022, 0.02, 0.021, 0.024, 0.323, 1.94, 1.97, 1.5, 0.677, 1.387, 0.227]
     r.prices_tomorrow = [0.046, 0.026, 0.035, 0.066, 0.135, 0.359, 2.154, 3.932, 5.206, 4.947, 3.848, 2.991, 2.457, 2.492, 2.273, 2.177, 2.142, 2.555, 2.77, 2.185, 2.143, 1.318, 0.021, 0.02]
-    r.update(testhour=MOCKHOUR)
+    r.service._mock_hour = 23
+    assert r.service._preserve_interim == True
     assert r.non_hours == [7,8,9]
     r.prices = [0.046, 0.026, 0.035, 0.066, 0.135, 0.359, 2.154, 3.932, 5.206, 4.947, 3.848, 2.991, 2.457, 2.492, 2.273, 2.177, 2.142, 2.555, 2.77, 2.185, 2.143, 1.318, 0.021, 0.02]
     r.prices_tomorrow = []
-    r.update(MOCKHOUR2)
+    r.service._mock_hour = 2
+    assert r.service._preserve_interim == True
     assert r.non_hours == [7,8,9]
 
 def test_very_high_prices():
@@ -559,4 +570,36 @@ def test_22128_1_adjusted_average():
     r.prices_tomorrow = [2.851, 2.787, 2.855, 2.853, 2.855, 3.02, 3.532, 5.259, 6.032, 6.057, 6.065, 5.924, 5.686, 5.77, 6.071, 6.13, 6.257, 6.815, 6.621, 6.157, 5.31, 4.481, 3.951, 3.568]
     assert r.non_hours == [7,8,9,10,11,12,13]
     assert r.dynamic_caution_hours == {14: 0.5, 15: 0.5, 16: 0.47, 17: 0.46, 18: 0.48, 19: 0.54, 0: 0.56, 2: 0.56, 3: 0.56, 4: 0.56, 5: 0.53, 6: 0.44}
+
+def test_same_price_same_offset():
+    """should be equal offset for equal prices over the days due to interim-day update"""
+    r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_INTERMEDIATE], absolute_top_price=0, min_price=0)
+    r.service._mock_hour = 0
+    r.prices = [1.713, 1.716, 1.663, 1.568, 1.58, 1.631, 1.996, 2.471, 2.771, 2.808, 3.095, 3.166, 3.155, 3.155, 3.154, 3.162, 3.333, 3.394, 3.275, 2.984, 2.747, 4.32, 3.14, 2.853]
+    r.service._mock_hour = 14
+    r.prices_tomorrow = [2.853, 3.14, 4.32, 2.853, 2.855, 3.02, 3.532, 5.259, 6.032, 6.057, 6.065, 5.924, 5.686, 5.77, 6.071, 6.13, 6.257, 6.815, 6.621, 6.157, 5.31, 4.481, 3.951, 3.568]
+    assert r.offsets['today'][23] == r.offsets['tomorrow'][0]
+    assert r.offsets['today'][22] == r.offsets['tomorrow'][1]
+    assert r.offsets['today'][21] == r.offsets['tomorrow'][2]
+    
+def test_offset_total():
+    """should be close to zero offset on average"""
+    r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_INTERMEDIATE], absolute_top_price=0, min_price=0)
+    r.service._mock_hour = 0
+    for price in MOCKPRICELIST:
+        r.prices = price
+        assert round(stat.mean(r.offsets['today'].values()),2) == 0
+
+def test_not_too_shallow_caution_hours():
+    r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE], absolute_top_price=0, min_price=0)
+    r.service._mock_hour = 0
+    r.prices = [1.713, 1.716, 1.663, 1.568, 1.58, 1.631, 1.996, 2.471, 2.771, 2.808, 3.095, 3.166, 3.155, 3.155, 3.154, 3.162, 3.333, 3.394, 3.275, 2.984, 2.747, 4.32, 3.14, 2.853]
+    val = [c for c in r.dynamic_caution_hours.values() if c < 0.3]
+    r.service._mock_hour = 14
+    r.prices_tomorrow = [2.853, 3.14, 4.32, 2.853, 2.855, 3.02, 3.532, 5.259, 6.032, 6.057, 6.065, 5.924, 5.686, 5.77, 6.071, 6.13, 6.257, 6.815, 6.621, 6.157, 5.31, 4.481, 3.951, 3.568]
+    val2 = [c for c in r.dynamic_caution_hours.values() if c < 0.3]
+    assert len(val) == 0
+    assert len(val2) == 0
+
+
 

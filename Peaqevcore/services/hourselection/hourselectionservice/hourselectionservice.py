@@ -27,8 +27,17 @@ class HourSelectionService:
     model: HourSelectionModel, base_mock_hour: int = None):
         self.model = model
         self._mock_hour = base_mock_hour
+        self._preserve_interim: bool = False
 
-    def update(self) -> None:
+    def update(self, caller: str = None) -> None:
+        print(caller)
+        if self._preserve_interim and caller == "today":
+            print(f"before: {self.model.hours.hours_today.nh}")
+            self.model.hours.hours_today = self.model.hours.hours_tomorrow
+            self.model.hours.hours_tomorrow = HourObject([], [], {})
+            print(f"after: {self.model.hours.hours_today.nh}")
+            return
+
         hours, hours_tomorrow = self.interim_day_update(
             today=self._update_per_day(prices=self.model.prices_today), 
             tomorrow=self._update_per_day(prices=self.model.prices_tomorrow)
@@ -133,6 +142,7 @@ class HourSelectionService:
         today = self._update_interim_lists(range(14,24), today, new_hours, 14)
         tomorrow = self._update_interim_lists(range(0,14), tomorrow, new_hours, -10)
 
+        self._preserve_interim = True
         return today, tomorrow
 
     def _convert_collections(self, newobj: HourObject, index_deviation: int) -> HourObject:

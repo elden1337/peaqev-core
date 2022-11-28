@@ -36,7 +36,7 @@ class Hoursselection:
     
     @property
     def offsets(self) -> dict:
-        #print(f"offset: {self.model.hours.offset_dict}")
+        print(f"offset: {self.model.hours.offset_dict}")
         return self.model.hours.offset_dict
 
     @property
@@ -67,7 +67,7 @@ class Hoursselection:
         if self.prices == self.prices_tomorrow:
             self.prices_tomorrow = []
         else:
-            self.update()
+            self.update(caller="today")
 
     @property
     def prices_tomorrow(self) -> list:
@@ -76,6 +76,8 @@ class Hoursselection:
     @prices_tomorrow.setter
     def prices_tomorrow(self, val):
         self.model.prices_tomorrow = helpers._convert_none_list(val)
+        if self.model.prices_tomorrow != []:
+            self.service._preserve_interim = False
         self.update()
 
     @property
@@ -86,10 +88,10 @@ class Hoursselection:
     def adjusted_average(self, val):
         self.model.adjusted_average = val
 
-    def update(self, testhour:int = None) -> None:
+    def update(self, testhour:int = None, caller:str = None) -> None:
         if testhour is not None:
             self.service._mock_hour = testhour
-        self.service.update()
+        self.service.update(caller)
 
     def get_average_kwh_price(self):
         ret = self._get_charge_or_price()
