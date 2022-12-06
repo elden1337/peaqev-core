@@ -641,10 +641,36 @@ def test_charge_below_average_today_and_tomorrow():
             total = price[14::] + price2[0:14]
             _avg = round(stat.mean(total),2)
             assert 0 < r.get_average_kwh_price() < _avg
-            # print(price)
-            # print(price2)
-            # print(f"avg price 14-13: {_avg}")
-            # print(f"avg kwh-price: {r.get_average_kwh_price()}")
-            # print('--------')
+            print(f"{_avg}; {r.get_average_kwh_price()}; {round((r.get_average_kwh_price()/_avg)-1,2)}")
+    #assert 1 < 0
+
+def test_charge_below_average_today_and_tomorrow_compare_to_mediancharge():
+    r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE], absolute_top_price=0, min_price=0)
+    r.service._mock_hour = 14
+    _avg = 0
+    for price in MOCKPRICELIST:
+        for price2 in MOCKPRICELIST:
+            if price == price2:
+                continue
+            r.prices = price
+            r.prices_tomorrow = price2
+            total = price[14::] + price2[0:14]
+            legacy_charge = stat.mean([h for h in price[14::] if h < stat.mean(price)] + [h for h in price2[0:14:] if h < stat.mean(price2)])
+            _avg = round(stat.mean(total),2)
+            assert r.get_average_kwh_price() <= round(legacy_charge,1)
+            print(f"{_avg}; {r.get_average_kwh_price()}; {legacy_charge}")
+    #assert 1 < 0
+
+def test_charge_below_average_today_only_compare_to_mediancharge():
+    #for intermediate and aggressive it always works below mediancharge, for suave no because of caution-hours.
+    r = h(cautionhour_type=CAUTIONHOURTYPE[CAUTIONHOURTYPE_INTERMEDIATE], absolute_top_price=0, min_price=0)
+    r.service._mock_hour = 0
+    for price in MOCKPRICELIST:
+        r.prices = price
+        legacy_charge = stat.mean([h for h in price if h < stat.mean(price)])
+        _avg = round(stat.mean(price),2)
+        assert r.get_average_kwh_price() < legacy_charge
+        print(f"{_avg}; {r.get_average_kwh_price()}; {legacy_charge}; lenpeaq:{24-len(r.non_hours)-len(r.caution_hours)}; lenlegacy:{len([h for h in price if h < stat.mean(price)])}")
+    assert 1 < 0
     
 
