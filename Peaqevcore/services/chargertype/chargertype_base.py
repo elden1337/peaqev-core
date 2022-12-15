@@ -17,6 +17,7 @@ CHARGERSTATES_BASE = {
 @dataclass
 class ChargerBase:
     domainname:str = ""
+    max_amps = 16
     native_chargerstates:list = field(default_factory=lambda: [])
     servicecalls:ServiceCalls = None
     chargerstates = CHARGERSTATES_BASE
@@ -30,6 +31,10 @@ class ChargerBase:
             options: ServiceCallsOptions,
     ) -> None:
         self.servicecalls = ServiceCalls(domain, model, options)
+
+    @abstractmethod
+    def get_allowed_amps(self) -> int:
+        pass
 
     @abstractmethod
     def validatecharger(self) -> bool:

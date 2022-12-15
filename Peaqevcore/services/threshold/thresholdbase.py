@@ -4,16 +4,10 @@ from datetime import datetime
 import logging
 from ...models.phases import Phases
 from ...models.const import (
-    CURRENTS_ONEPHASE_1_16, CURRENTS_THREEPHASE_1_16
+    CURRENTS_ONEPHASE_1_16, CURRENTS_THREEPHASE_1_16, CURRENTS_ONEPHASE_1_32, CURRENTS_THREEPHASE_1_32
 )
 
 _LOGGER = logging.getLogger(__name__)
-
-CURRENT_DICT = {
-    Phases.OnePhase: CURRENTS_ONEPHASE_1_16,
-    Phases.ThreePhase: CURRENTS_THREEPHASE_1_16,
-    Phases.Unknown: CURRENTS_THREEPHASE_1_16
-}
 
 
 class ThresholdBase:
@@ -49,21 +43,34 @@ class ThresholdBase:
 
     def _setcurrentdict(self) -> dict:
     # this one must be done better. Currently cannot accommodate 1-32A single phase for instance.
+        """only allow amps if user has set this value high enough"""
+        if self._hub.chargertype.charger.max_amps > 16:
+            _threephase = {k: v for (k, v) in CURRENTS_THREEPHASE_1_32.items() if v <= self._hub.chargertype.charger.max_amps}
+            _onephase = {k: v for (k, v) in CURRENTS_ONEPHASE_1_32.items() if v <= self._hub.chargertype.charger.max_amps}
+        else:
+            _threephase = CURRENTS_THREEPHASE_1_16
+            _onephase = CURRENTS_ONEPHASE_1_16
+
         try:
             divid = int(self._hub.sensors.carpowersensor.value)/int(self._hub.sensors.chargerobject_switch.current)
             if int(self._hub.sensors.carpowersensor.value) == 0:
                 self._phases = Phases.Unknown
+                ret = _threephase
             elif divid < 300:
                 self._phases = Phases.OnePhase
+                ret = _onephase
             else:
                 self._phases = Phases.ThreePhase
+                ret = _threephase
         except:
             _LOGGER.debug("Currents-dictionary: could not divide charger amps with charger power. Falling back to legacy-method.")
             if 0 < int(self._hub.sensors.carpowersensor.value) < 4000:
                 self._phases = Phases.OnePhase
+                ret = _onephase
             else:
                 self._phases = Phases.ThreePhase
-        return CURRENT_DICT[self._phases]
+                ret = _threephase
+        return ret
 
     @staticmethod
     def _stop(
