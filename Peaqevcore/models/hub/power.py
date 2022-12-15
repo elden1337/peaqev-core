@@ -48,6 +48,14 @@ class Power:
     def house(self, val):
         self._house = val
 
+    @property
+    def car_power(self) -> int:
+        try:
+            ret = int(self._total.value - self._house.value)
+            return max(0,ret)
+        except:
+            return 0
+
     def _setup(self):
         if self._powersensor_includes_car is True:
             self.total.entity = self.config_sensor

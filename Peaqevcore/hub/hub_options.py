@@ -26,5 +26,5 @@ class HubOptions:
     startpeaks: dict = field(default_factory=dict)
     cautionhours: List = field(default_factory=lambda: [])
     nonhours: List = field(default_factory=lambda: [])
-    fuse_max: int = 0
+    fuse_type: str = ""
 
