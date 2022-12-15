@@ -17,7 +17,7 @@ CHARGERSTATES_BASE = {
 @dataclass
 class ChargerBase:
     domainname:str = ""
-    max_amps = 16
+    max_amps = 16 #base-number if nothing else is spawned from the chargertype
     native_chargerstates:list = field(default_factory=lambda: [])
     servicecalls:ServiceCalls = None
     chargerstates = CHARGERSTATES_BASE

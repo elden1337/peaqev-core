@@ -22,5 +22,6 @@ class Threshold(ThresholdBase):
             amps,
             self._hub.sensors.totalhourlyenergy.value,
             self._hub.current_peak_dynamic,
-            self._hub.sensors.locale.data.is_quarterly(self._hub.sensors.locale.data)
+            self._hub.sensors.locale.data.is_quarterly(self._hub.sensors.locale.data),
+            self._hub.power_canary.max_current_amp
         )

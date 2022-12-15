@@ -1,4 +1,8 @@
+import logging
 from enum import Enum
+
+_LOGGER = logging.getLogger(__name__)
+
 
 class Fuses(Enum):
     FUSE_3_16 = "3phase 16A"
@@ -9,11 +13,11 @@ class Fuses(Enum):
     FUSE_3_63 = "3phase 63A"
     DEFAULT = "Not set"
 
-    def parse_from_config(fusetype:str):
+    def parse_from_config(fusetype: str):
         try:
             for f in Fuses:
                 if fusetype == f.value:
                     return f
         except Exception as e:
-            print("Unable to parse fuse-type, invalid value: {e}")
+            _LOGGER.error("Unable to parse fuse-type, invalid value: {e}")
             return Fuses.DEFAULT
