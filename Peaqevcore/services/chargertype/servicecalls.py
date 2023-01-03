@@ -2,14 +2,10 @@ from dataclasses import dataclass, field
 from ...models.chargertype.servicecalls_dto import ServiceCallsDTO
 from ...models.chargertype.servicecalls_options import ServiceCallsOptions
 from ...models.chargertype.calltype import CallType
+from ...models.chargertype.calltype_enum import CallTypes
 from .const import (
     DOMAIN,
-    ON,
-    OFF,
-    RESUME,
-    PAUSE,
-    PARAMS,
-    UPDATECURRENT,
+    PARAMS
 )
 
 
@@ -36,19 +32,19 @@ class ServiceCalls:
         calltype = self._get_call_type(call)
         ret[call] = calltype.call
         ret["params"] = calltype.params
-        if call is UPDATECURRENT:
+        if call is CallTypes.UPDATECURRENT:
             if self.options.allowupdatecurrent is True:
                 ret[PARAMS] = self.update_current.params
             else:
                 raise AttributeError
         return ret
 
-    def _get_call_type(self, call) -> CallType:
+    def _get_call_type(self, call: CallTypes) -> CallType:
         _callsdict = {
-            ON: self.on,
-            OFF: self.off,
-            PAUSE: self.pause,
-            RESUME: self.resume,
-            UPDATECURRENT: self.update_current
+            CallTypes.ON: self.on,
+            CallTypes.OFF: self.off,
+            CallTypes.PAUSE: self.pause,
+            CallTypes.RESUME: self.resume,
+            CallTypes.UPDATECURRENT: self.update_current
         }
         return _callsdict.get(call)

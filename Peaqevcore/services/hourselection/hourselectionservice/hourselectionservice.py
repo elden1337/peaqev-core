@@ -95,9 +95,10 @@ class HourSelectionService:
     def _add_remove_limited_hours(self, hours: HourObject) -> HourObject:
         """Removes cheap hours and adds expensive hours set by user limitation"""
         if hours is None or all([len(hours.nh) == 0, len(hours.ch) == 0, len(hours.dyn_ch) == 0]):
-            return HourObject([],[],{})
+            return HourObject([],[],{},offset_dict=hours.offset_dict,pricedict=hours.pricedict)
         hours.add_expensive_hours(self.model.options.absolute_top_price)
         hours.remove_cheap_hours(self.model.options.min_price)
+        
         return hours
 
     def _determine_hours(self, price_list: dict, prices: list) -> HourObject:

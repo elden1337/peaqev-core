@@ -22,7 +22,7 @@ class ChargerObject(HubMember):
                 self._is_initialized = True
                 return True
         if not self._warned_not_initialized:
-            _LOGGER.warning(f"Chargerobject-state not found in given state-list. Value was: {self.value}")
+            _LOGGER.warning(f"Unable to communicate with the charger-integration. Chargerobject value is: {self.value}. Unable to continue. Please check and reboot Home Assistant.")
             self._warned_not_initialized = True
         return False
 
