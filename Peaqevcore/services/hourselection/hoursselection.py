@@ -1,10 +1,6 @@
 import logging
 from typing import Tuple
-from ...models.hourselection.const import (
-    CAUTIONHOURTYPE_SUAVE,
-    CAUTIONHOURTYPE_INTERMEDIATE,
-    CAUTIONHOURTYPE
-)
+from ...models.hourselection.cautionhourtype import CautionHourType
 from .hourselectionservice.hoursselection_helpers import HourSelectionHelpers as helpers
 from ...models.hourselection.hourselectionmodels import HourSelectionModel, HourSelectionOptions
 from ...models.hourselection.hourtypelist import HourTypeList
@@ -18,7 +14,7 @@ class Hoursselection:
             self,      
             absolute_top_price: float = 0,
             min_price: float = 0,
-            cautionhour_type: float = CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE],
+            cautionhour_type: float = CautionHourType.get_num_value(CautionHourType.SUAVE),
             base_mock_hour: int = None
     ):
         self.model = HourSelectionModel(

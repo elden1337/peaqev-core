@@ -1,14 +1,15 @@
 from enum import Enum
-from const import (
-    CAUTIONHOURTYPE_SUAVE,
-    CAUTIONHOURTYPE_INTERMEDIATE,
-    CAUTIONHOURTYPE_AGGRESSIVE
-)
 
 class CautionHourType(Enum):
-    Suave = CAUTIONHOURTYPE_SUAVE
-    Intermediate = CAUTIONHOURTYPE_INTERMEDIATE
-    Aggressive = CAUTIONHOURTYPE_AGGRESSIVE
+    SUAVE = "Suave"
+    INTERMEDIATE = "Intermediate"
+    AGGRESSIVE = "Aggressive"
 
-
-ttt = CautionHourType(CAUTIONHOURTYPE_SUAVE)
+    @staticmethod
+    def get_num_value(type):
+        values = {
+            CautionHourType.SUAVE: 0.75,
+            CautionHourType.INTERMEDIATE: 0.5,
+            CautionHourType.AGGRESSIVE: 0.4
+            }
+        return values[type]

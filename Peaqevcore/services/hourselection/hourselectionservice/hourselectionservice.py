@@ -2,12 +2,7 @@ import logging
 from datetime import datetime
 from typing import Tuple
 import statistics as stat
-from ....models.hourselection.const import (
-    CAUTIONHOURTYPE_SUAVE,
-    CAUTIONHOURTYPE_INTERMEDIATE,
-    CAUTIONHOURTYPE_AGGRESSIVE,
-    CAUTIONHOURTYPE
-)
+from ....models.hourselection.cautionhourtype import CautionHourType
 from .hoursselection_helpers import HourSelectionHelpers as helpers
 from .hoursselection_helpers import HourSelectionCalculations as calc
 from ....models.hourselection.hourobject import HourObject
@@ -17,10 +12,10 @@ from ....models.hourselection.hourtypelist import HourTypeList
 _LOGGER = logging.getLogger(__name__)
 
 ALLOWANCE_SCHEMA = {
-            CAUTIONHOURTYPE[CAUTIONHOURTYPE_SUAVE]: 1.15,
-            CAUTIONHOURTYPE[CAUTIONHOURTYPE_INTERMEDIATE]: 1.05,
-            CAUTIONHOURTYPE[CAUTIONHOURTYPE_AGGRESSIVE]: 1
-        }
+    CautionHourType.get_num_value(CautionHourType.SUAVE): 1.15,
+    CautionHourType.get_num_value(CautionHourType.INTERMEDIATE): 1.05,
+    CautionHourType.get_num_value(CautionHourType.AGGRESSIVE): 1
+}
 
 class HourSelectionService:
     def __init__(self,
