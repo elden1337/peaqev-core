@@ -6,10 +6,20 @@ class CautionHourType(Enum):
     AGGRESSIVE = "Aggressive"
 
     @staticmethod
-    def get_num_value(type):
+    def get_num_value(type_state):
         values = {
-            CautionHourType.SUAVE: 0.75,
-            CautionHourType.INTERMEDIATE: 0.5,
-            CautionHourType.AGGRESSIVE: 0.4
+            CautionHourType.SUAVE.value: 0.75,
+            CautionHourType.INTERMEDIATE.value: 0.5,
+            CautionHourType.AGGRESSIVE.value: 0.4
             }
-        return values[type]
+
+        if isinstance(type_state, str):
+            tt = type_state
+        elif isinstance(type_state, CautionHourType):
+            tt = type_state.value
+
+        return values[tt]
+
+
+
+        
