@@ -58,7 +58,7 @@ class HubMember:
 
     @property
     def use_attribute(self) -> bool:
-        return len(self._listenerattribute) > 0
+        return self._listenerattribute is not None
 
     @property
     def attribute(self) -> str:
