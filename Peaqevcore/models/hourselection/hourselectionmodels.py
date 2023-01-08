@@ -38,8 +38,8 @@ class HoursModel:
         hour:int
         ) -> None:
         ret = {}
-        ret.update({k: v for k, v in self.hours_today.dyn_ch.items() if k >= hour})
-        ret.update({k: v for k, v in self.hours_tomorrow.dyn_ch.items() if k < hour})
+        ret.update({k: v for k, v in self.hours_today.dyn_ch.items() if k >= hour and k not in self.hours_today.nh})
+        ret.update({k: v for k, v in self.hours_tomorrow.dyn_ch.items() if k < hour and k not in self.hours_tomorrow.nh})
         self.dynamic_caution_hours = ret
 
     def update_offset_dict(self) -> None:
