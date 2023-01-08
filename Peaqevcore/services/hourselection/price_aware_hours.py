@@ -76,6 +76,15 @@ class PriceAwareHours(Hours):
         self._core.prices_tomorrow = val
 
     @property
+    def adjusted_average(self) -> float:
+        return self._core.adjusted_average
+
+    @adjusted_average.setter
+    def adjusted_average(self, val):
+        if isinstance(val, (float, int)):
+            self._core.adjusted_average = val
+
+    @property
     def is_initialized(self) -> bool:
         if self.prices is not None:
             if len(self.prices) > 0:
