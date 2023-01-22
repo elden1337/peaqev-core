@@ -1,7 +1,5 @@
 import logging
-from typing import Tuple
 from ...models.hourselection.cautionhourtype import CautionHourType
-from .hourselectionservice.hoursselection_helpers import HourSelectionHelpers as helpers
 from ...models.hourselection.hourselectionmodels import HourSelectionModel, HourSelectionOptions
 from ...models.hourselection.hourtypelist import HourTypeList
 from .hourselectionservice.hourselectionservice import HourSelectionService
@@ -17,17 +15,13 @@ class Hoursselection:
             cautionhour_type: float = CautionHourType.get_num_value(CautionHourType.SUAVE),
             base_mock_hour: int = None
     ):
-        _LOGGER.debug(f"init hourselection instance: {id(self)}")
         self.model = HourSelectionModel(
             options=HourSelectionOptions(
                 cautionhour_type=cautionhour_type, 
                 min_price=min_price,
-                absolute_top_price=HourSelectionOptions.set_absolute_top_price(
-                    absolute_top_price, 
-                    min_price
+                top_price= absolute_top_price
                     )
                 )
-            )
         self.model.validate()
         self.service = HourSelectionService(self.model, base_mock_hour)
     
@@ -40,13 +34,11 @@ class Hoursselection:
     def non_hours(self) -> list:
         self.service.update_hour_lists(listtype=HourTypeList.NonHour)
         #print(f"nh: {self.model.hours.non_hours}")
-        _LOGGER.debug(f"nonhours from instance: {id(self)}")
         return self.model.hours.non_hours
 
     @property
     def caution_hours(self) -> list:
         self.service.update_hour_lists(listtype=HourTypeList.CautionHour)
-        _LOGGER.debug(f"cautionhours from instance: {id(self)}")
         #print(f"ch: {self.model.hours.caution_hours}")
         return self.model.hours.caution_hours
 
@@ -54,7 +46,6 @@ class Hoursselection:
     def dynamic_caution_hours(self) -> dict:
         self.service.update_hour_lists(listtype=HourTypeList.DynCautionHour)
         #print(f"dyn_ch: {self.model.hours.dynamic_caution_hours}")
-        _LOGGER.debug(f"dynamic cautionhours from instance: {id(self)}")
         return self.model.hours.dynamic_caution_hours
 
     @property
@@ -75,7 +66,7 @@ class Hoursselection:
 
     @prices_tomorrow.setter
     def prices_tomorrow(self, val):
-        self.model.prices_tomorrow = helpers._convert_none_list(val)
+        self.model.prices_tomorrow = self.service.helpers.convert_none_list(val)
         if self.model.prices_tomorrow != []:
             self.service._preserve_interim = False
         self.update()

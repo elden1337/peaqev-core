@@ -3,8 +3,8 @@ from datetime import datetime
 from typing import Tuple
 import statistics as stat
 from ....models.hourselection.cautionhourtype import CautionHourType
-from .hoursselection_helpers import HourSelectionHelpers as helpers
-from .hoursselection_helpers import HourSelectionCalculations as calc
+from .hoursselection_helpers import HourSelectionHelpers
+from .hoursselection_helpers import HourSelectionCalculations
 from ....models.hourselection.hourobject import HourObject
 from ....models.hourselection.hourselectionmodels import HourSelectionModel
 from ....models.hourselection.hourtypelist import HourTypeList
@@ -23,6 +23,8 @@ class HourSelectionService:
         self.model = model
         self._mock_hour = base_mock_hour
         self._preserve_interim: bool = False
+        self.calc = HourSelectionCalculations()
+        self.helpers = HourSelectionHelpers()
 
     def update(self, caller: str = None) -> None:
         if self._preserve_interim and caller == "today":
@@ -41,13 +43,13 @@ class HourSelectionService:
     def _update_per_day(self, prices: list) -> HourObject:
         pricedict = {}
         if prices is not None and len(prices) > 1:
-            pricedict = helpers._create_dict(prices)
-            normalized_pricedict = helpers._create_dict(
-                calc.normalize_prices(prices)
+            pricedict = self.helpers.create_dict(prices)
+            normalized_pricedict = self.helpers.create_dict(
+                self.calc.normalize_prices(prices)
                 )
             if stat.stdev(prices) > 0.05:
                 ready_hours = self._determine_hours(
-                    calc.rank_prices(
+                    self.calc.rank_prices(
                         pricedict, 
                         normalized_pricedict,
                         self.model.adjusted_average
@@ -62,9 +64,20 @@ class HourSelectionService:
                     )
             else:
                 ret= HourObject(nh=[], ch=[], dyn_ch={},pricedict=pricedict)
-            ret.offset_dict=calc.get_offset_dict(normalized_pricedict)
+            ret.offset_dict=self._get_offset_dict(normalized_pricedict)
             return ret
         return HourObject([],[],{})
+
+    def _get_offset_dict(self, normalized_hourdict: dict):
+        ret = {}
+        _prices = [p-min(normalized_hourdict.values()) for p in normalized_hourdict.values()]
+        average_val = stat.mean(_prices)
+        for i in range(0,24):
+            try:
+                ret[i] = round((_prices[i]/average_val) - 1,2)
+            except:
+                ret[i] = 1
+        return ret
 
     def update_hour_lists(
         self, 
@@ -138,7 +151,7 @@ class HourSelectionService:
         self._preserve_interim = True
         return today, tomorrow
 
-    def _convert_collections(self, newobj: HourObject, index_deviation: int) -> HourObject:
+    def _convert_collections(self, new: HourObject, index_deviation: int) -> HourObject:
         """Converts the hourobject-collections to interim days, based on the index-deviation provided."""
 
         def _chop_list(lst: list):
@@ -146,40 +159,40 @@ class HourSelectionService:
         def _chop_dict(dct: dict):
             return {key+index_deviation:value for (key,value) in dct.items() if 0 <= key+index_deviation < 24}
         ret = HourObject([], [], {})
-        ret.nh = _chop_list(newobj.nh)
-        ret.ch = _chop_list(newobj.ch)
-        ret.dyn_ch = _chop_dict(newobj.dyn_ch)
-        ret.offset_dict = _chop_dict(newobj.offset_dict)
-        ret.pricedict = _chop_dict(newobj.pricedict)
+        ret.nh = _chop_list(new.nh)
+        ret.ch = _chop_list(new.ch)
+        ret.dyn_ch = _chop_dict(new.dyn_ch)
+        ret.offset_dict = _chop_dict(new.offset_dict)
+        ret.pricedict = _chop_dict(new.pricedict)
 
         return ret
 
-    def _update_interim_lists(self, _range: range, oldobj: HourObject, newobj: HourObject, index_devidation: int) -> HourObject:
-        _newobj = self._convert_collections(newobj, index_devidation)
+    def _update_interim_lists(self, _range: range, old: HourObject, new: HourObject, index_devidation: int) -> HourObject:
+        _new = self._convert_collections(new, index_devidation)
         for i in _range:
-            if i in _newobj.nh:
-                if i not in oldobj.nh:
-                    oldobj.nh.append(i)
-                    oldobj.ch = self._try_remove(i, oldobj.ch)
-                    oldobj.dyn_ch = self._try_remove(i, oldobj.dyn_ch)
-            elif i in _newobj.ch:
-                if i not in oldobj.ch:
-                    oldobj.ch.append(i)
-                    oldobj.dyn_ch[i] = _newobj.dyn_ch[i]
-                    oldobj.nh = self._try_remove(i, oldobj.nh)
+            if i in _new.nh:
+                if i not in old.nh:
+                    old.nh.append(i)
+                    old.ch = self._try_remove(i, old.ch)
+                    old.dyn_ch = self._try_remove(i, old.dyn_ch)
+            elif i in _new.ch:
+                if i not in old.ch:
+                    old.ch.append(i)
+                    old.dyn_ch[i] = _new.dyn_ch[i]
+                    old.nh = self._try_remove(i, old.nh)
             else:
-                oldobj.nh = self._try_remove(i, oldobj.nh)
-                oldobj.ch = self._try_remove(i, oldobj.ch)
-                oldobj.dyn_ch = self._try_remove(i, oldobj.dyn_ch)
-            oldobj.nh = sorted(oldobj.nh)
-            oldobj.ch = sorted(oldobj.ch)
-            oldobj.dyn_ch = dict(sorted(oldobj.dyn_ch.items()))
+                old.nh = self._try_remove(i, old.nh)
+                old.ch = self._try_remove(i, old.ch)
+                old.dyn_ch = self._try_remove(i, old.dyn_ch)
+            old.nh = sorted(old.nh)
+            old.ch = sorted(old.ch)
+            old.dyn_ch = dict(sorted(old.dyn_ch.items()))
         
-        for r in _newobj.offset_dict.keys():
-            oldobj.offset_dict[r] = _newobj.offset_dict[r]
-            oldobj.pricedict[r] = _newobj.pricedict[r]
+        for r in _new.offset_dict.keys():
+            old.offset_dict[r] = _new.offset_dict[r]
+            old.pricedict[r] = _new.pricedict[r]
 
-        return oldobj
+        return old
 
     def _try_remove(self, value, collection: list|dict):
         if isinstance(collection, dict):

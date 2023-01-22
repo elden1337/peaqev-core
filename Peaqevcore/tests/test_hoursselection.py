@@ -108,14 +108,14 @@ def test_cautionhour_negative_error():
 
 def test_create_dict():
     r = h()
-    ret = HourSelectionHelpers._create_dict(MOCKPRICES1)
+    ret = r.service.helpers.create_dict(MOCKPRICES1)
     assert ret[20] == 2.603
     assert len(ret) == 24
 
 def test_create_dict_error():
     r = h()
     with pytest.raises(ValueError):
-              HourSelectionHelpers._create_dict(MOCKPRICES_SHORT)
+              r.service.helpers.create_dict(MOCKPRICES_SHORT)
 
 # def test_rank_prices():
 #     r = h()
@@ -126,9 +126,9 @@ def test_create_dict_error():
 
 def test_rank_prices_permax():
     r = h()
-    hourly = HourSelectionHelpers._create_dict(MOCKPRICES1)
-    norm_hourly = HourSelectionHelpers._create_dict(HourSelectionCalculations.normalize_prices(MOCKPRICES1))
-    ret = HourSelectionCalculations.rank_prices(hourly, norm_hourly)
+    hourly = r.service.helpers.create_dict(MOCKPRICES1)
+    norm_hourly = r.service.helpers.create_dict(r.service.calc.normalize_prices(MOCKPRICES1))
+    ret = r.service.calc.rank_prices(hourly, norm_hourly)
     for r in ret:
         assert 0 <= ret[r]["permax"] <= 1
 
