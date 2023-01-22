@@ -17,7 +17,7 @@ def test_scheduler_overnight_1():
     assert s.model.hours_charge == {datetime(2022, 7, 21, 1, 0): 0.7, datetime(2022, 7, 21, 3, 0): 1, datetime(2022, 7, 21, 4, 0): 1}
 
 def test_scheduler_overnight_1_maxprice():
-    opt = HourSelectionOptions(absolute_top_price=0.4)
+    opt = HourSelectionOptions(top_price=0.4)
     s = Scheduler(opt)
     MOCKDT = datetime.strptime('22-07-20 19:00', '%y-%m-%d %H:%M')
     dep_time_obj = datetime.strptime('22-07-21 06:00', '%y-%m-%d %H:%M')

@@ -51,12 +51,15 @@ class HoursModel:
 @dataclass(frozen=False)
 class HourSelectionOptions:
     cautionhour_type: float = 0
-    absolute_top_price: float = 0
+    top_price: float = 0
     min_price: float = 0
+    absolute_top_price: float = field(init=False)
 
-    @staticmethod
-    def set_absolute_top_price(top, min) -> float:
-        if not HourSelectionOptions.validate_top_min_prices(top, min):
+    def __post_init__(self):
+        self.absolute_top_price = self.set_absolute_top_price(self.top_price, self.min_price)
+
+    def set_absolute_top_price(self, top, min) -> float:
+        if not self.validate_top_min_prices(top, min):
             top = 0
             HourSelectionOptions.min_price = 0
             _LOGGER.warning(f"Setting top-price and min-price to zero because of min-price being larger than top-price. Please fix in options. top:{top} min:{min}")
@@ -66,8 +69,7 @@ class HourSelectionOptions:
             return float("inf")
         return float(top)
 
-    @staticmethod
-    def validate_top_min_prices(top, min) -> bool:
+    def validate_top_min_prices(self, top, min) -> bool:
         if any(
             [top == 0, min == 0]
         ):  
