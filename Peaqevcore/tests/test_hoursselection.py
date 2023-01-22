@@ -680,3 +680,40 @@ def test_weird_pricelist():
     r.service._mock_hour = 20
     assert len(r.offsets["today"]) > 0
     assert len(r.offsets["tomorrow"]) > 0
+
+def test_cheapest_cautionhour_in_nonhours():
+    """
+    in frontend, 9 and 11 were non-hours but 10 was cautionhour with the below settings.
+    possibly because of midnight-recalculation (ie a reboot might fix)
+    """
+    r = h(cautionhour_type=CautionHourType.get_num_value(CautionHourType.INTERMEDIATE), absolute_top_price=5.5, min_price=0)
+    r.prices = [0.342, 0.13, 0.127, 0.058, 0.078, 0.139, 0.126, 0.23, 0.379, 0.407, 0.493, 0.658, 0.658, 0.685, 0.768, 0.888, 0.925, 0.968, 0.978, 0.918, 0.853, 0.803, 0.7, 0.648]
+    r.adjusted_average = 1.34
+    r.service._mock_hour = 0
+    assert r.non_hours == [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+    assert r.dynamic_caution_hours == {9: 0.61, 10: 0.53}
+    
+def test_230108():
+    r = h(cautionhour_type=CautionHourType.get_num_value(CautionHourType.INTERMEDIATE), absolute_top_price=5.5, min_price=0)
+    r.prices = [0.342, 0.13, 0.127, 0.058, 0.078, 0.139, 0.126, 0.23, 0.379, 0.407, 0.493, 0.658, 0.658, 0.685, 0.768, 0.888, 0.925, 0.968, 0.978, 0.918, 0.853, 0.803, 0.7, 0.648]
+    r.adjusted_average = 1.34
+    r.service._mock_hour = 12
+    assert 13 in r.non_hours
+    r.prices_tomorrow = [0.966, 0.901, 0.843, 0.551, 0.662, 0.965, 1.463, 1.796, 2.061, 2.253, 2.157, 2.173, 1.91, 1.874, 1.947, 2.048, 2.195, 2.304, 2.285, 2.206, 2.03, 1.884, 1.173, 1.128]
+    
+    
+# def test_230114():
+#     r = h(cautionhour_type=CautionHourType.get_num_value(CautionHourType.INTERMEDIATE), absolute_top_price=5.5, min_price=0)
+#     r.prices = [0.3851625, 0.3827625, 0.3413, 0.1827375, 0.112175, 0.068175, 0.08505, 0.1418375, 0.1972125, 0.2680625, 0.2506375, 0.16446249999999998, 0.09741250000000001, 0.0849, 0.0856125, 0.2684875, 0.38557499999999995, 0.43436250000000004, 0.38811249999999997, 0.3640749999999999, 0.17528749999999998, 0.2922375, 0.43632499999999996, 0.4551625]
+#     assert r.offsets == {}
+
+# def test_230115():
+#     r = h(cautionhour_type=CautionHourType.get_num_value(CautionHourType.INTERMEDIATE), absolute_top_price=5.5, min_price=0)
+#     r.prices = [0.4969125, 0.507875, 0.507875, 0.5421750000000001, 0.5877125000000001, 0.6408499999999999, 0.9391375, 1.21775, 1.2558375, 1.2786125000000002, 1.3878375, 1.396975, 1.265125, 1.54485, 1.923825, 1.9844125, 2.054275, 1.8261250000000002, 1.2498, 1.1251125000000002, 0.9264875, 0.8390500000000001, 0.7202750000000001, 0.6539249999999999]
+#     assert r.offsets == {}
+    
+    
+
+
+
+

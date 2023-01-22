@@ -19,7 +19,3 @@ class CautionHourType(Enum):
             tt = type_state.value
 
         return values[tt]
-
-
-
-        

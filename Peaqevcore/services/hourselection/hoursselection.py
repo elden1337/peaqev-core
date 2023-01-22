@@ -17,7 +17,7 @@ class Hoursselection:
             cautionhour_type: float = CautionHourType.get_num_value(CautionHourType.SUAVE),
             base_mock_hour: int = None
     ):
-        _LOGGER.debug(f"init hourselection: {id(self)}")
+        _LOGGER.debug(f"init hourselection instance: {id(self)}")
         self.model = HourSelectionModel(
             options=HourSelectionOptions(
                 cautionhour_type=cautionhour_type, 
@@ -46,6 +46,7 @@ class Hoursselection:
     @property
     def caution_hours(self) -> list:
         self.service.update_hour_lists(listtype=HourTypeList.CautionHour)
+        _LOGGER.debug(f"cautionhours from instance: {id(self)}")
         #print(f"ch: {self.model.hours.caution_hours}")
         return self.model.hours.caution_hours
 
@@ -53,7 +54,7 @@ class Hoursselection:
     def dynamic_caution_hours(self) -> dict:
         self.service.update_hour_lists(listtype=HourTypeList.DynCautionHour)
         #print(f"dyn_ch: {self.model.hours.dynamic_caution_hours}")
-        _LOGGER.debug(f"cautionhours from instance: {id(self)}")
+        _LOGGER.debug(f"dynamic cautionhours from instance: {id(self)}")
         return self.model.hours.dynamic_caution_hours
 
     @property
