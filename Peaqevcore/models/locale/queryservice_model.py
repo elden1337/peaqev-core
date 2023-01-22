@@ -3,16 +3,16 @@ from typing import List
 from .enums import Dividents, DatePartDateType, DatePartModelType
 
 @dataclass
-class datepart_model:
+class DatePartModel:
     type: DatePartModelType = field(default_factory=lambda : DatePartModelType.Unset)
     dttype:  DatePartDateType = field(default_factory=lambda : DatePartDateType.Unset)
     values: List[int] = field(default_factory=lambda : [])
 
 @dataclass
-class group:
+class Group:
     divident: Dividents = field(default_factory=lambda: Dividents.UNSET)
-    dateparts: List[datepart_model] = field(default_factory=lambda : [datepart_model()])
+    dateparts: List[DatePartModel] = field(default_factory=lambda : [DatePartModel()])
 
 @dataclass
-class queryservicemodel:
-    groups: List[group] = field(default_factory=lambda : [group()])
+class QueryServiceModel:
+    groups: List[Group] = field(default_factory=lambda : [Group()])

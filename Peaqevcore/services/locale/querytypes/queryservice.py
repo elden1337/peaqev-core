@@ -1,10 +1,10 @@
 from datetime import datetime
 from typing import List
 from ....models.locale.enums import Dividents, DatePartDateType, DatePartModelType
-from ....models.locale.queryservice_model import queryservicemodel as model
+from ....models.locale.queryservice_model import QueryServiceModel
 
 class QueryService:
-    def __init__(self, args: model=model()):
+    def __init__(self, args: QueryServiceModel=QueryServiceModel()):
         self._settings = args
     
     def should_register_peak(self, dt: datetime) -> bool:
