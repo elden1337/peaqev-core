@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import List
-from ....models.locale.enums import Dividents
+from ....models.locale.enums import Dividents, DatePartDateType, DatePartModelType
 from ....models.locale.queryservice_model import queryservicemodel as model
 
 class QueryService:
@@ -35,18 +35,18 @@ class QueryService:
     AND = "AND"
     OR = "OR"
     LOGIC = {
-        "eq": lambda a, dtp : dtp == a,
-        "lt": lambda a, dtp : a < dtp,
-        "gt": lambda a, dtp : a > dtp,
-        "not": lambda a, dtp : dtp != a,
-        "lteq": lambda a, dtp : a <= dtp,
-        "gteq": lambda a, dtp : a >= dtp,
-        "in": lambda a, dtp : a in dtp
+        DatePartModelType.Equal: lambda a, dtp : dtp == a,
+        DatePartModelType.Less: lambda a, dtp : a < dtp,
+        DatePartModelType.Greater: lambda a, dtp : a > dtp,
+        DatePartModelType.Not: lambda a, dtp : dtp != a,
+        DatePartModelType.LessOrEqual: lambda a, dtp : a <= dtp,
+        DatePartModelType.GreaterOrEqual: lambda a, dtp : a >= dtp,
+        DatePartModelType.In: lambda a, dtp : a in dtp
     }
     DATETIMEPARTS = {
-        "weekday": lambda d : d.weekday(),
-        "month":  lambda d : d.month,
-        "hour":  lambda d : d.hour,
+        DatePartDateType.Weekday: lambda d : d.weekday(),
+        DatePartDateType.Month:  lambda d : d.month,
+        DatePartDateType.Hour:  lambda d : d.hour,
     }
 
 

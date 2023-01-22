@@ -117,7 +117,6 @@ class LocaleData:
         self._data = None
         self._type = input_type
         self._domain = domain
-
         self._data = LOCALETYPEDICT[input_type]
 
     @property

@@ -1,11 +1,11 @@
 from dataclasses import dataclass, field
 from typing import List
-from .enums import Dividents
+from .enums import Dividents, DatePartDateType, DatePartModelType
 
 @dataclass
 class datepart_model:
-    type: str = field(default_factory=lambda : "")
-    dttype: str = field(default_factory=lambda : "")
+    type: DatePartModelType = field(default_factory=lambda : DatePartModelType.Unset)
+    dttype:  DatePartDateType = field(default_factory=lambda : DatePartDateType.Unset)
     values: List[int] = field(default_factory=lambda : [])
 
 @dataclass

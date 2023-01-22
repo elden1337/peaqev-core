@@ -19,7 +19,6 @@ class Locale_Type:
     price: LocalePrice = None
     free_charge_pattern: FreeChargePattern = None
     peak_cycle: str = HOURLY
-    #converted: bool = False #transition key to remove sql-dependency
     is_quarterly: bool = field(init=False, repr=False)
     
 

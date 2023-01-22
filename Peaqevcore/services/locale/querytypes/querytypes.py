@@ -85,10 +85,6 @@ class LocaleQuery:
     def try_update(self, new_val, timestamp: datetime=datetime.now()):
         if self._props.queryservice.should_register_peak(dt=timestamp) is False:
             return
-        #* When using self.peaks self._sanatize_values() is called
-        #* if self.peaks.is_dirty
-        # if self.peaks.is_dirty:
-        #     self._sanitize_values()
         _dt = (timestamp.day, timestamp.hour)
         if len(self.peaks.p) == 0:
             """first addition for this month"""
