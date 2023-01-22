@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 from abc import abstractmethod
-from .const import NON_HOUR, CAUTION_HOUR, CHARGING_PERMITTED
+from ..const import NON_HOUR, CAUTION_HOUR, CHARGING_PERMITTED
 
 class Hours:
     def __init__(

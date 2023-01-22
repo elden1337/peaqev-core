@@ -1,7 +1,7 @@
 import logging
 from .hoursbase import Hours
-from .hoursselection import Hoursselection as core_hours
-from ...models.hourselection.cautionhourtype import CautionHourType
+from ..hoursselection import Hoursselection as core_hours
+from ....models.hourselection.cautionhourtype import CautionHourType
 
 _LOGGER = logging.getLogger(__name__)
 
