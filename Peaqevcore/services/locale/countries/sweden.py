@@ -1,7 +1,7 @@
 from ....services.locale.querytypes.queryservice import QueryService
 from ....models.locale.enums.querytype import QueryType
 from ..time_pattern import TimePattern
-from ....models.locale.price import LocalePrice
+from ....models.locale.price import LocalePrice, SeasonedPrice, TieredPrice
 from ....models.locale.enums.price_type import PriceType
 from ....models.locale.enums.calendar_periods import CalendarPeriods
 from ..querytypes.const import (
@@ -201,9 +201,26 @@ class SE_Bjerke_Energi(Locale_Type):
     query_model = QUERYTYPES[QueryType.Max]
     price = LocalePrice(
         price_type=PriceType.Seasoned,
-        currency="SEK"
-        value=
-    )
+        currency="SEK",
+        value=[
+        SeasonedPrice(validity=TimePattern([
+        {
+            CalendarPeriods.Month:   [11,12,1,2,3],
+            CalendarPeriods.Weekday: [0, 1, 2, 3, 4, 5, 6],
+            CalendarPeriods.Hour:    [6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21]
+        }
+    ]), 
+    value=106.25), 
+    SeasonedPrice(validity=TimePattern([
+        {
+            CalendarPeriods.Month:   [4, 5, 6, 7, 8, 9, 10],
+            CalendarPeriods.Weekday: [0, 1, 2, 3, 4, 5, 6],
+            CalendarPeriods.Hour:    [6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21]
+        }
+    ]), 
+    value=50)
+    ])
+    
     free_charge_pattern = TimePattern([
         {
             CalendarPeriods.Month:   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],

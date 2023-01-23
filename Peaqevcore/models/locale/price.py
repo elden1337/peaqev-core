@@ -1,19 +1,22 @@
+from __future__ import annotations
 from dataclasses import dataclass
+from ...services.locale.time_pattern import TimePattern
 from .enums.price_type import PriceType
 
-class Tier:
+@dataclass
+class TieredPrice:
     lower_peak_limit: float
     value: float
 
-
-class TieredPrice:
-    values: list[Tier]
-
+@dataclass
+class SeasonedPrice:
+    validity: TimePattern
+    value: float
 
 @dataclass
 class LocalePrice:
     price_type: PriceType
-    value: float | TieredPrice
+    value: float | list[TieredPrice] | list[SeasonedPrice]
     currency:str
 
     def is_equal(self, other_currency: str) -> bool:
