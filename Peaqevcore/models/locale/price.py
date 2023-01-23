@@ -16,7 +16,8 @@ class LocalePrice:
     value: float | TieredPrice
     currency:str
 
-
+    def is_equal(self, other_currency: str) -> bool:
+        return self.currency.lower == other_currency.lower
 
 
 #if tiered, do a list of the tiers

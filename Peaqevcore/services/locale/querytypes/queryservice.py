@@ -1,6 +1,8 @@
 from datetime import datetime
 from typing import List
-from ....models.locale.enums import Dividents, DatePartDateType, DatePartModelType
+from ....models.locale.enums.dividents import Dividents
+from ....models.locale.enums.datepart_modeltype import DatePartModelType
+from ....models.locale.enums.datepart_datetype import DatePartDateType
 from ....models.locale.queryservice_model import QueryServiceModel
 
 class QueryService:

@@ -1,5 +1,6 @@
 from ....models.locale.queryservice_model import QueryServiceModel, Group, DatePartModel
-from ....models.locale.enums import DatePartDateType, DatePartModelType
+from ....models.locale.enums.datepart_datetype import DatePartDateType
+from ....models.locale.enums.datepart_modeltype import DatePartModelType
 from .const import (
     QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19,
     QUERYTYPE_HIGHLOAD,

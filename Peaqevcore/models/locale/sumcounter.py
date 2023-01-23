@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from .enums import TimePeriods
+from .enums.time_periods import TimePeriods
 
 @dataclass(frozen=True)
 class SumCounter:

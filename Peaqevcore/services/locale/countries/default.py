@@ -1,22 +1,19 @@
+from ....models.locale.enums.querytype import QueryType
 from ..free_charge import FreeChargePattern
 from ....models.locale.enums import CalendarPeriods
-from ..querytypes.const import (
-    QUERYTYPE_BASICMAX
-)
-
 from ..locale_model import Locale_Type
 from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class Default(Locale_Type):
-    observed_peak = QUERYTYPE_BASICMAX
-    charged_peak = QUERYTYPE_BASICMAX
+    observed_peak = QueryType.Max
+    charged_peak = QueryType.Max
 
 
 @dataclass(frozen=True)
 class NoPeak(Locale_Type):
-    observed_peak = QUERYTYPE_BASICMAX
-    charged_peak = QUERYTYPE_BASICMAX
+    observed_peak = QueryType.Max
+    charged_peak = QueryType.Max
     free_charge_pattern = FreeChargePattern([
         {
             CalendarPeriods.Month: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],

@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 from typing import List
-from .enums import Dividents, DatePartDateType, DatePartModelType
+from .enums.datepart_datetype import DatePartDateType
+from .enums.datepart_modeltype import DatePartModelType
+from .enums.dividents import Dividents
 
 @dataclass
 class DatePartModel:

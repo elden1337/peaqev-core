@@ -1,15 +1,15 @@
-from peaqevcore.models.locale.enums import TimePeriods
+from ....models.locale.enums import TimePeriods
+from ....models.locale.enums.querytype import QueryType
 from ..querytypes.querytypes import QUERYTYPES
-from ..querytypes.const import QUERYTYPE_BASICMAX
 from dataclasses import dataclass
 from ..locale_model import Locale_Type
 
 
 @dataclass(frozen=True)
 class VregBelgium(Locale_Type):
-    observed_peak = QUERYTYPE_BASICMAX
-    charged_peak = QUERYTYPE_BASICMAX
-    query_model = QUERYTYPES[QUERYTYPE_BASICMAX]
+    observed_peak = QueryType.Max
+    charged_peak = QueryType.Max
+    query_model = QUERYTYPES[QueryType.Max]
     #TODO: to be decided. Should charged_peak be turned into the real charged peak, ie the average of the months in a year? could be issues with the long term stats there and it won't help peaq in any way.
     peak_cycle = TimePeriods.QuarterHourly
 
