@@ -1,12 +1,10 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 
+from peaqevcore.models.locale.enums import TimePeriods
+
 from ..locale.free_charge import FreeChargePattern
 from ...models.locale.price import LocalePrice
-from .querytypes.const import (
-HOURLY,
-QUARTER_HOURLY
-)
 from .querytypes.querytypes import(
 LocaleQuery
 )
@@ -18,7 +16,7 @@ class Locale_Type:
     query_model: LocaleQuery
     price: LocalePrice = None
     free_charge_pattern: FreeChargePattern = None
-    peak_cycle: str = HOURLY
+    peak_cycle: TimePeriods = TimePeriods.Hourly
     is_quarterly: bool = field(init=False, repr=False)
     
 
@@ -29,7 +27,7 @@ class Locale_Type:
         return self.free_charge_pattern.free_charge(now)
 
     def is_quarterly(self) -> bool:
-        return self.peak_cycle == QUARTER_HOURLY
+        return self.peak_cycle == TimePeriods.QuarterHourly
 
 
 

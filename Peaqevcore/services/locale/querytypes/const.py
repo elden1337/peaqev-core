@@ -13,7 +13,3 @@ QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22 = "skövde"
 QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR = "kristinehamn"
 QUERYTYPE_SOLLENTUNA = "sollentuna"
 QUERYTYPE_SOLLENTUNA_MIN = "sollentuna_min"
-
-"""Misc"""
-QUARTER_HOURLY = "quarter-hourly"
-HOURLY = "hourly"

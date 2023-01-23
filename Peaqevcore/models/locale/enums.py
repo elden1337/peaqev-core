@@ -13,6 +13,7 @@ class SumTypes(Enum):
 
 
 class TimePeriods(Enum):
+    QuarterHourly = 0
     Hourly = 1
     Daily = 2
     Weekly = 3

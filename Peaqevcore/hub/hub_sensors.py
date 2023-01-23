@@ -10,7 +10,7 @@ from ..models.hub.power import Power
 from .hub_options import HubOptions
 from ..util import nametoid
 from typing import Any
-from ..services.locale.querytypes.const import HOURLY
+from .const import HOURLY
 from ..models.hub.const import CONSUMPTION_TOTAL_NAME, AVERAGECONSUMPTION, AVERAGECONSUMPTION_24H, CHARGERDONE, CHARGERENABLED
 
 
