@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from ...models.locale.enums.querytype import QueryType
 from ...models.locale.enums.time_periods import TimePeriods
-from ..locale.free_charge import FreeChargePattern
+from ..locale.time_pattern import TimePattern
 from ...models.locale.price import LocalePrice
 from .querytypes.querytypes import LocaleQuery
 
@@ -13,7 +13,7 @@ class Locale_Type:
     charged_peak: QueryType
     query_model: LocaleQuery
     price: LocalePrice = None
-    free_charge_pattern: FreeChargePattern = None
+    free_charge_pattern: TimePattern = None
     peak_cycle: TimePeriods = TimePeriods.Hourly
     is_quarterly: bool = field(init=False, repr=False)
     

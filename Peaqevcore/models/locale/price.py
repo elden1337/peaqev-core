@@ -17,6 +17,7 @@ class LocalePrice:
     currency:str
 
     def is_equal(self, other_currency: str) -> bool:
+        """Use this method if necessary to test against the el-price currency"""
         return self.currency.lower == other_currency.lower
 
 
