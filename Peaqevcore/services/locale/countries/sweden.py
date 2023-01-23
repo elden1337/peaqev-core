@@ -1,6 +1,8 @@
+from ....models.locale.enums.querytype import QueryType
 from ..free_charge import FreeChargePattern
 from ....models.locale.price import LocalePrice
-from ....models.locale.enums import CalendarPeriods, PriceType
+from ....models.locale.enums.price_type import PriceType
+from ....models.locale.enums.calendar_periods import CalendarPeriods
 from ..querytypes.const import (
     QUERYTYPE_AVERAGEOFFIVEDAYS, 
     QUERYTYPE_AVERAGEOFFIVEDAYS_MIN, 
@@ -23,9 +25,10 @@ from ..locale_model import Locale_Type
 
 @dataclass(frozen=True)
 class SE_Sollentuna(Locale_Type):
-    observed_peak = QUERYTYPE_SOLLENTUNA_MIN
-    charged_peak = QUERYTYPE_SOLLENTUNA
-    query_model = QUERYTYPES[QUERYTYPE_SOLLENTUNA]
+    observed_peak = QueryType.AverageOfThreeHours
+    charged_peak = QueryType.AverageOfThreeHours
+    query_model = QUERYTYPES[QueryType.AverageOfThreeHours]
+    #add service Sollentuna
     free_charge_pattern = FreeChargePattern([
     {
         CalendarPeriods.Month: [1,2,3,4,5,6,7,8,9,10,11,12],
@@ -45,9 +48,10 @@ class SE_Sollentuna(Locale_Type):
 
 @dataclass(frozen=True)
 class SE_Skovde(Locale_Type):
-    observed_peak = QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22
-    charged_peak = QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22
-    query_model= QUERYTYPES[QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22]
+    observed_peak = QueryType.Max
+    charged_peak = QueryType.Max
+    query_model= QUERYTYPES[QueryType.Max]
+    #add service QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22
     free_charge_pattern = FreeChargePattern([
         {
             CalendarPeriods.Month: [11, 12, 1, 2, 3],
@@ -67,9 +71,10 @@ class SE_Skovde(Locale_Type):
 
 @dataclass(frozen=True)
 class SE_SHE_AB(Locale_Type):    
-    observed_peak = QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19_MIN
-    charged_peak = QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19
-    query_model = QUERYTYPES[QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19]
+    observed_peak = QueryType.AverageOfThreeHours
+    charged_peak = QueryType.AverageOfThreeHours
+    query_model = QUERYTYPES[QueryType.AverageOfThreeHours]
+    #add service QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19
     free_charge_pattern = FreeChargePattern([
         {
             CalendarPeriods.Month: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
@@ -92,21 +97,21 @@ class SE_SHE_AB(Locale_Type):
 
 @dataclass(frozen=True)
 class SE_Partille(Locale_Type):
-    observed_peak = QUERYTYPE_BASICMAX
-    charged_peak = QUERYTYPE_BASICMAX
-    query_model = QUERYTYPES[QUERYTYPE_BASICMAX]
+    observed_peak = QueryType.Max
+    charged_peak = QueryType.Max
+    query_model = QUERYTYPES[QueryType.Max]
 
 @dataclass(frozen=True)
 class SE_FalbygdensEnergi(Locale_Type):
-    observed_peak = QUERYTYPE_BASICMAX
-    charged_peak = QUERYTYPE_BASICMAX
-    query_model = QUERYTYPES[QUERYTYPE_BASICMAX]
+    observed_peak = QueryType.Max
+    charged_peak = QueryType.Max
+    query_model = QUERYTYPES[QueryType.Max]
 
 @dataclass(frozen=True)
 class SE_Nacka_normal(Locale_Type):
-    observed_peak = QUERYTYPE_AVERAGEOFTHREEHOURS_MIN
-    charged_peak = QUERYTYPE_AVERAGEOFTHREEHOURS
-    query_model = QUERYTYPES[QUERYTYPE_AVERAGEOFTHREEHOURS]
+    observed_peak = QueryType.AverageOfThreeHours
+    charged_peak = QueryType.AverageOfThreeHours
+    query_model = QUERYTYPES[QueryType.AverageOfThreeHours]
 
     #https://www.nackaenergi.se/images/downloads/natavgifter/FAQ_NYA_TARIFFER.pdf
 
@@ -121,9 +126,9 @@ class SE_NACKA_timediff(Locale_Type):
 
 @dataclass(frozen=True)
 class SE_Malung_Salen(Locale_Type):
-    observed_peak = QUERYTYPE_AVERAGEOFFIVEDAYS_MIN
-    charged_peak = QUERYTYPE_AVERAGEOFFIVEDAYS
-    query_model = QUERYTYPES[QUERYTYPE_AVERAGEOFFIVEDAYS]
+    observed_peak = QueryType.AverageOfFiveDays
+    charged_peak = QueryType.AverageOfFiveDays
+    query_model = QUERYTYPES[QueryType.AverageOfFiveDays]
     free_charge_pattern = FreeChargePattern([
         {
             CalendarPeriods.Month: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
@@ -138,9 +143,9 @@ class SE_Malung_Salen(Locale_Type):
 
 @dataclass(frozen=True)
 class SE_Linde_Energi(Locale_Type):
-    observed_peak = QUERYTYPE_BASICMAX
-    charged_peak = QUERYTYPE_BASICMAX
-    query_model = QUERYTYPES[QUERYTYPE_BASICMAX]
+    observed_peak = QueryType.Max
+    charged_peak = QueryType.Max
+    query_model = QUERYTYPES[QueryType.Max]
     #docs: https://www.lindeenergi.se/elnat/elnatspriser/effekttariffer.4.1491a0b016e44ba6ccfe91b4.html
 
     """
@@ -152,9 +157,11 @@ class SE_Linde_Energi(Locale_Type):
 
 @dataclass(frozen=True)
 class SE_Kristinehamn(Locale_Type):
-    observed_peak = QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR
-    charged_peak = QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR
-    query_model = QUERYTYPES[QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR]
+    observed_peak = QueryType.Max
+    charged_peak = QueryType.Max
+    query_model = QUERYTYPES[QueryType.Max]
+
+    #add service QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR
     """
     https://kristinehamnsenergi.se/elnat/elnatsavgiften/effektavgift-villa-med-bergvarmepump/
     vardagar november-mars, kl 07.00-17.00 > highload instead of normal load. other times, normal load
@@ -163,9 +170,9 @@ class SE_Kristinehamn(Locale_Type):
 
 @dataclass(frozen=True)
 class SE_Karlstad(Locale_Type):
-    observed_peak = QUERYTYPE_BASICMAX #todo check if correct
-    charged_peak = QUERYTYPE_BASICMAX #todo check if correct
-    query_model = QUERYTYPES[QUERYTYPE_BASICMAX]
+    observed_peak = QueryType.Max #todo check if correct
+    charged_peak = QueryType.Max #todo check if correct
+    query_model = QUERYTYPES[QueryType.Max]
     #docs: https://karlstadsnat.se/elnat/kund/priser-och-tariffer/effekttariff/        
     """
     Note, high load extra is added on weekdays from 6-18 during november - march. 
@@ -175,9 +182,9 @@ class SE_Karlstad(Locale_Type):
 
 @dataclass(frozen=True)
 class SE_Gothenburg(Locale_Type):
-    observed_peak = QUERYTYPE_AVERAGEOFTHREEDAYS_MIN
-    charged_peak = QUERYTYPE_AVERAGEOFTHREEDAYS
-    query_model = QUERYTYPES[QUERYTYPE_AVERAGEOFTHREEDAYS]
+    observed_peak = QueryType.AverageOfThreeDays
+    charged_peak = QueryType.AverageOfThreeDays
+    query_model = QUERYTYPES[QueryType.AverageOfThreeDays]
     price = LocalePrice(
         price_type=PriceType.Static, 
         value=36.25, 
@@ -187,9 +194,9 @@ class SE_Gothenburg(Locale_Type):
 
 @dataclass(frozen=True)
 class SE_Bjerke_Energi(Locale_Type):
-    observed_peak = QUERYTYPE_BASICMAX
-    charged_peak = QUERYTYPE_BASICMAX
-    query_model = QUERYTYPES[QUERYTYPE_BASICMAX]
+    observed_peak = QueryType.Max
+    charged_peak = QueryType.Max
+    query_model = QUERYTYPES[QueryType.Max]
     free_charge_pattern = FreeChargePattern([
         {
             CalendarPeriods.Month: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
@@ -210,9 +217,9 @@ class SE_Bjerke_Energi(Locale_Type):
 
 @dataclass(frozen=True)
 class SE_Telge_Energi(Locale_Type):
-    observed_peak = QUERYTYPE_BASICMAX
-    charged_peak = QUERYTYPE_BASICMAX
-    query_model = QUERYTYPES[QUERYTYPE_BASICMAX]
+    observed_peak = QueryType.Max
+    charged_peak = QueryType.Max
+    query_model = QUERYTYPES[QueryType.Max]
     free_charge_pattern = FreeChargePattern([
         {
             CalendarPeriods.Month: [4,5,6,7,8,9,10],
@@ -237,9 +244,9 @@ class SE_Telge_Energi(Locale_Type):
 
 @dataclass(frozen=True)
 class SE_Malarenergi(Locale_Type):
-    observed_peak = QUERYTYPE_AVERAGEOFTHREEHOURS_MIN
-    charged_peak = QUERYTYPE_AVERAGEOFTHREEHOURS
-    query_model = QUERYTYPES[QUERYTYPE_AVERAGEOFTHREEHOURS]
+    observed_peak = QueryType.AverageOfThreeHours
+    charged_peak = QueryType.AverageOfThreeHours
+    query_model = QUERYTYPES[QueryType.AverageOfThreeHours]
 
     #docs: https://www.malarenergi.se/el/elnat/effekttariffer/
     
@@ -249,17 +256,17 @@ class SE_Malarenergi(Locale_Type):
 
 @dataclass(frozen=True)
 class SE_TekniskaVerken_Link(Locale_Type):
-    observed_peak = QUERYTYPE_BASICMAX
-    charged_peak = QUERYTYPE_BASICMAX
-    query_model = QUERYTYPES[QUERYTYPE_BASICMAX]
+    observed_peak = QueryType.Max
+    charged_peak = QueryType.Max
+    query_model = QUERYTYPES[QueryType.Max]
 
     #docs: unknown
 
 @dataclass(frozen=True)
 class SE_Eskilstuna(Locale_Type):
-    observed_peak = QUERYTYPE_BASICMAX
-    charged_peak = QUERYTYPE_BASICMAX
-    query_model = QUERYTYPES[QUERYTYPE_BASICMAX]
+    observed_peak = QueryType.Max
+    charged_peak = QueryType.Max
+    query_model = QUERYTYPES[QueryType.Max]
 
     #docs: unknown
     

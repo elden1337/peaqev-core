@@ -1,4 +1,4 @@
-from ....models.locale.enums import TimePeriods
+from ....models.locale.enums.time_periods import TimePeriods
 from ....models.locale.enums.querytype import QueryType
 from ..querytypes.querytypes import QUERYTYPES
 from dataclasses import dataclass

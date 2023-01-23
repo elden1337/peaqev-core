@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 
-from peaqevcore.models.locale.enums import TimePeriods
+from peaqevcore.models.locale.enums.time_periods import TimePeriods
 
 from ..locale.free_charge import FreeChargePattern
 from ...models.locale.price import LocalePrice

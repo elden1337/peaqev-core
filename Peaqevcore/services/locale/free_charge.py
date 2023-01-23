@@ -1,4 +1,4 @@
-from ...models.locale.enums import CalendarPeriods
+from ...models.locale.enums.calendar_periods import CalendarPeriods
 from typing import Dict, List
 from dataclasses import dataclass
 from datetime import datetime

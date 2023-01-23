@@ -1,6 +1,6 @@
 from ....models.locale.enums.querytype import QueryType
 from ..free_charge import FreeChargePattern
-from ....models.locale.enums import CalendarPeriods
+from ....models.locale.enums.calendar_periods import CalendarPeriods
 from ..locale_model import Locale_Type
 from dataclasses import dataclass
 

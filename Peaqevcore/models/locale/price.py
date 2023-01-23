@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from .enums import PriceType
+from .enums.price_type import PriceType
 
 class Tier:
     lower_peak_limit: float
