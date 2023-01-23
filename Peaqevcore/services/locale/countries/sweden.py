@@ -1,3 +1,4 @@
+from ....services.locale.querytypes.queryservice import QueryService
 from ....models.locale.enums.querytype import QueryType
 from ..free_charge import FreeChargePattern
 from ....models.locale.price import LocalePrice
@@ -18,6 +19,7 @@ from ..querytypes.const import (
     QUERYTYPE_AVERAGEOFTHREEHOURS
 )
 
+from ..querytypes.querysets import QUERYSETS
 from ..querytypes.querytypes import QUERYTYPES
 from dataclasses import dataclass
 from ..locale_model import Locale_Type
@@ -28,7 +30,8 @@ class SE_Sollentuna(Locale_Type):
     observed_peak = QueryType.AverageOfThreeHours
     charged_peak = QueryType.AverageOfThreeHours
     query_model = QUERYTYPES[QueryType.AverageOfThreeHours]
-    #add service Sollentuna
+    query_model.set_query_service(QueryService(QUERYSETS[QUERYTYPE_SOLLENTUNA]))
+    
     free_charge_pattern = FreeChargePattern([
     {
         CalendarPeriods.Month: [1,2,3,4,5,6,7,8,9,10,11,12],
@@ -51,7 +54,8 @@ class SE_Skovde(Locale_Type):
     observed_peak = QueryType.Max
     charged_peak = QueryType.Max
     query_model= QUERYTYPES[QueryType.Max]
-    #add service QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22
+    query_model.set_query_service(QueryService(QUERYSETS[QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22]))
+    
     free_charge_pattern = FreeChargePattern([
         {
             CalendarPeriods.Month: [11, 12, 1, 2, 3],
@@ -74,7 +78,8 @@ class SE_SHE_AB(Locale_Type):
     observed_peak = QueryType.AverageOfThreeHours
     charged_peak = QueryType.AverageOfThreeHours
     query_model = QUERYTYPES[QueryType.AverageOfThreeHours]
-    #add service QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19
+    query_model.set_query_service(QueryService(QUERYSETS[QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19]))
+    
     free_charge_pattern = FreeChargePattern([
         {
             CalendarPeriods.Month: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
@@ -160,8 +165,8 @@ class SE_Kristinehamn(Locale_Type):
     observed_peak = QueryType.Max
     charged_peak = QueryType.Max
     query_model = QUERYTYPES[QueryType.Max]
-
-    #add service QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR
+    query_model.set_query_service(QueryService(QUERYSETS[QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR]))
+    
     """
     https://kristinehamnsenergi.se/elnat/elnatsavgiften/effektavgift-villa-med-bergvarmepump/
     vardagar november-mars, kl 07.00-17.00 > highload instead of normal load. other times, normal load

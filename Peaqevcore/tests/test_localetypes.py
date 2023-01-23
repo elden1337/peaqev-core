@@ -1,6 +1,6 @@
 from datetime import datetime, date, time
 import pytest
-
+from ..models.locale.enums.querytype import QueryType
 from ..services.locale.querytypes.const import QUERYTYPE_AVERAGEOFTHREEDAYS, QUERYTYPE_AVERAGEOFTHREEHOURS, QUERYTYPE_SOLLENTUNA
 from ..services.locale.querytypes.querytypes import QUERYTYPES
 from ..services.locale.countries.sweden import SE_SHE_AB, SE_Bjerke_Energi, SE_Gothenburg, SE_Kristinehamn, SE_Skovde, SE_Sollentuna
@@ -13,7 +13,7 @@ def test_SE_Bjerke_Energi():
     del(p)
 
 def test_generic_querytype_avg_threedays():
-    pt = QUERYTYPES[QUERYTYPE_AVERAGEOFTHREEDAYS]
+    pt = QUERYTYPES[QueryType.AverageOfThreeDays]
     pt.reset()
     pt.try_update(new_val=1.2, timestamp=datetime.combine(date(2022, 7, 14), time(20, 30)))
     pt.try_update(new_val=2, timestamp=datetime.combine(date(2022, 7, 14), time(21, 30)))
@@ -24,7 +24,7 @@ def test_generic_querytype_avg_threedays():
     assert pt._charged_peak_value == 1.3
 
 def test_generic_querytype_avg_threedays2():
-    pg = QUERYTYPES[QUERYTYPE_AVERAGEOFTHREEDAYS]
+    pg = QUERYTYPES[QueryType.AverageOfThreeDays]
     pg.reset()
     pg.try_update(new_val=1.2, timestamp=datetime.combine(date(2022, 7, 14), time(20, 30)))
     pg.try_update(new_val=2, timestamp=datetime.combine(date(2022, 7, 14), time(21, 30)))
@@ -33,7 +33,7 @@ def test_generic_querytype_avg_threedays2():
 
 def test_generic_querytype_avg_threedays3():
     to_state_machine = {'m': 7, 'p': {'14h21': 2}}
-    p1 = QUERYTYPES[QUERYTYPE_AVERAGEOFTHREEDAYS]
+    p1 = QUERYTYPES[QueryType.AverageOfThreeDays]
     p1.reset()
     p1.try_update(new_val=1, timestamp=datetime.combine(date(2022, 7, 15), time(21, 30)))
     p1.peaks.set_init_dict(to_state_machine, datetime.combine(date(2022, 7, 15), time(21, 30)))
@@ -47,7 +47,7 @@ def test_generic_querytype_avg_threedays3():
 
 def test_faulty_number_in_import():
     to_state_machine = {'m': 7, 'p': {'14h21': 2, '11h22': 1.49, '12h9': 1.93, '12h14': 0.73}}
-    p1 = QUERYTYPES[QUERYTYPE_AVERAGEOFTHREEDAYS]
+    p1 = QUERYTYPES[QueryType.AverageOfThreeDays]
     p1.reset()
     p1.try_update(new_val=1, timestamp=datetime.combine(date(2022, 7, 15), time(21, 30)))
     p1.peaks.set_init_dict(to_state_machine, datetime.combine(date(2022, 7, 15), time(21, 30)))
@@ -61,7 +61,7 @@ def test_faulty_number_in_import():
     
 def test_overridden_number_in_import():
     to_state_machine = {'m': 7, 'p': {'11h22': 1.49, '12h9': 1.93, '13h16': 0.86}}
-    p1 = QUERYTYPES[QUERYTYPE_AVERAGEOFTHREEDAYS]
+    p1 = QUERYTYPES[QueryType.AverageOfThreeDays]
     p1.reset()
     p1.try_update(new_val=0.22, timestamp=datetime.combine(date(2022, 7, 13), time(21, 30)))
     p1.peaks.set_init_dict(to_state_machine, datetime.combine(date(2022, 7, 13), time(21, 30)))
@@ -148,7 +148,7 @@ def test_peak_new_hour_multiple():
     
 def test_overridden_number_in_import():
     to_state_machine = {'m': 7, 'p': {'1h15': 1.5}}
-    p1 = QUERYTYPES[QUERYTYPE_AVERAGEOFTHREEDAYS]
+    p1 = QUERYTYPES[QueryType.AverageOfThreeDays]
     p1.reset()
     p1.try_update(new_val=0.22, timestamp=datetime.combine(date(2022, 7, 2), time(15, 30)))
     p1.peaks.set_init_dict(to_state_machine, datetime.combine(date(2022, 7, 2), time(15, 30)))
@@ -172,6 +172,8 @@ def test_peak_new_month_2():
     p.query_model.try_update(new_val=0.03, timestamp=datetime.combine(date(2022, 8, 1), time(22, 30)))
     assert p.query_model.observed_peak == 0.03
     assert len(p.query_model.peaks._p) == 1
-    p.query_model.try_update(new_val=0.03, timestamp=datetime.combine(date(2022, 8, 2), time(22, 30)))
+    p.query_model.try_update(new_val=0.06, timestamp=datetime.combine(date(2022, 8, 2), time(22, 30)))
     assert len(p.query_model.peaks._p) == 2
+    assert p.query_model.charged_peak == 0.04
+    assert p.query_model.observed_peak == 0.03
 

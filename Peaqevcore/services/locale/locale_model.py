@@ -1,18 +1,16 @@
 from dataclasses import dataclass, field
 from datetime import datetime
-
-from peaqevcore.models.locale.enums.time_periods import TimePeriods
-
+from ...models.locale.enums.querytype import QueryType
+from ...models.locale.enums.time_periods import TimePeriods
 from ..locale.free_charge import FreeChargePattern
 from ...models.locale.price import LocalePrice
-from .querytypes.querytypes import(
-LocaleQuery
-)
+from .querytypes.querytypes import LocaleQuery
+
 
 @dataclass(frozen=True)
 class Locale_Type:
-    observed_peak: str
-    charged_peak: str
+    observed_peak: QueryType
+    charged_peak: QueryType
     query_model: LocaleQuery
     price: LocalePrice = None
     free_charge_pattern: FreeChargePattern = None

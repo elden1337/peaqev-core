@@ -21,7 +21,7 @@ from ....models.locale.enums.time_periods import TimePeriods
 from ....models.locale.sumcounter import SumCounter
 from ....models.locale.queryproperties import QueryProperties
 
-from .querysets import QUERYSETS
+# from .querysets import QUERYSETS
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -51,7 +51,7 @@ class LocaleQuery:
         self._charged_peak_value = 0
 
     def set_query_service(self, service: QueryService) -> None:
-        self._props.queryservice = service()
+        self._props.queryservice = service
 
     @property
     def peaks(self) -> PeaksModel:

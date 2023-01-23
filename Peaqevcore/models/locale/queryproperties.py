@@ -8,4 +8,4 @@ class QueryProperties:
     sumtype: SumTypes
     timecalc:TimePeriods
     cycle: TimePeriods
-    queryservice: QueryService = field(init=False)
+    queryservice: QueryService = QueryService()
