@@ -2,7 +2,7 @@ from datetime import datetime, date, time
 import math
 from ...models.hourselection.hourselectionmodels import HourSelectionOptions
 from .schedule_session import ScheduleSession
-from ...models.chargerstates import CHARGERSTATES
+from ...models.chargecontroller_states import ChargeControllerStates
 
 class Scheduler:
     """This class obj is what constitutes a running scheduler."""
@@ -120,7 +120,7 @@ class SchedulerFacade(Scheduler):
     def check_states(self):
         if not self.scheduler_active and self.schedule_created:
             self.cancel()
-        elif self._hub.chargecontroller.status is CHARGERSTATES.Done.name:
+        elif self._hub.chargecontroller.status is ChargeControllerStates.Done.name:
             self.cancel()
 
     @property

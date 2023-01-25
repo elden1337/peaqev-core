@@ -2,17 +2,17 @@ from abc import abstractmethod
 from dataclasses import dataclass, field
 from ...models.chargertype.servicecalls_dto import ServiceCallsDTO
 from ...models.chargertype.servicecalls_options import ServiceCallsOptions
-from ...models.chargerstates import CHARGERSTATES
+from ...models.chargecontroller_states import ChargeControllerStates
 from ...models.chargertype.charger_options import ChargerOptions
 from ...models.chargertype.calltype import CallType
 from ...models.chargertype.charger_entities_model import ChargerEntitiesModel
 from .servicecalls import ServiceCalls
 
 CHARGERSTATES_BASE = {
-    CHARGERSTATES.Idle: [],
-    CHARGERSTATES.Connected: [],
-    CHARGERSTATES.Charging: [],
-    CHARGERSTATES.Done: []
+    ChargeControllerStates.Idle: [],
+    ChargeControllerStates.Connected: [],
+    ChargeControllerStates.Charging: [],
+    ChargeControllerStates.Done: []
 }
 
 @dataclass

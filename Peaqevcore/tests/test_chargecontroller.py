@@ -2,12 +2,12 @@ from unittest import mock
 import pytest
 import time
 from ..services.chargecontroller.chargecontrollerbase import ChargeControllerBase
-from ..models.chargerstates import CHARGERSTATES
+from ..models.chargecontroller_states import ChargeControllerStates
 
 _CHARGERSTATESMOCK = {
-    CHARGERSTATES.Idle: ["idle"],
-    CHARGERSTATES.Connected: ["connected"],
-    CHARGERSTATES.Charging: ["charging"],
+    ChargeControllerStates.Idle: ["idle"],
+    ChargeControllerStates.Connected: ["connected"],
+    ChargeControllerStates.Charging: ["charging"],
 }
 _NONHOURSMOCK = [5,6,7]
 
