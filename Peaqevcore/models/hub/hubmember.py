@@ -24,6 +24,7 @@ class HubMember:
         self._is_initialized = init_override
 
     def _set_listeners(self, listenerentity:str|None) -> Tuple[str, str|None]:
+        """Sets the listening entity. If it contains a |, the value after that will be considered the listener-attribute."""
         if listenerentity is None:
             return None, None
         try:

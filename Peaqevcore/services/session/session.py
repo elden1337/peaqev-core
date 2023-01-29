@@ -127,5 +127,5 @@ class Session:
         return self.core.energy_weekly_dict
 
     def update_session_pricing(self):
-        if self._charger._params.session_active is False:
+        if self._charger.params.session_active is False:
             self.core.terminate()

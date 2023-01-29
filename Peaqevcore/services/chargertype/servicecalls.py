@@ -32,7 +32,7 @@ class ServiceCalls:
         calltype = self._get_call_type(call)
         ret[call] = calltype.call
         ret["params"] = calltype.params
-        if call is CallTypes.UPDATECURRENT:
+        if call is CallTypes.UpdateCurrent:
             if self.options.allowupdatecurrent is True:
                 ret[PARAMS] = self.update_current.params
             else:
@@ -41,10 +41,10 @@ class ServiceCalls:
 
     def _get_call_type(self, call: CallTypes) -> CallType:
         _callsdict = {
-            CallTypes.ON: self.on,
-            CallTypes.OFF: self.off,
-            CallTypes.PAUSE: self.pause,
-            CallTypes.RESUME: self.resume,
-            CallTypes.UPDATECURRENT: self.update_current
+            CallTypes.On: self.on,
+            CallTypes.Off: self.off,
+            CallTypes.Pause: self.pause,
+            CallTypes.Resume: self.resume,
+            CallTypes.UpdateCurrent: self.update_current
         }
         return _callsdict.get(call)
