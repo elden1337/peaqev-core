@@ -22,7 +22,7 @@ class Locale_Type:
         if self.free_charge_pattern is None:
             return False
         now = datetime.now() if mockdt is datetime.min else mockdt
-        return self.free_charge_pattern.free_charge(now)
+        return self.free_charge_pattern.valid(now)
 
     def is_quarterly(self) -> bool:
         return self.peak_cycle == TimePeriods.QuarterHourly

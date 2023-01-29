@@ -13,7 +13,7 @@ TIMEPATTERN_FUNC = {
 class TimePattern:
     pattern: List[Dict[CalendarPeriods,List[int]]]
 
-    def free_charge(self, dt = datetime.now()) -> bool:
+    def valid(self, dt = datetime.now()) -> bool:
         total = []
         for p in self.pattern:
             total.append(all(TIMEPATTERN_FUNC[k](v, dt) for k, v in p.items()))
