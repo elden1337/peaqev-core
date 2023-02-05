@@ -712,6 +712,40 @@ def test_cautionhourtypes():
         # r.prices_tomorrow = [0.966, 0.901, 0.843, 0.551, 0.662, 0.965, 1.463, 1.796, 2.061, 2.253, 2.157, 2.173, 1.91, 1.874, 1.947, 2.048, 2.195, 2.304, 2.285, 2.206, 2.03, 1.884, 1.173, 1.128]
         # print(c)
     
+def test_230205_cautionhourtypes():
+    nonhours = {
+        CautionHourType.SUAVE.value: [6, 7, 8, 9, 10, 11,12],
+        CautionHourType.INTERMEDIATE.value: [17, 6, 7, 8, 9, 10, 11, 12, 13],
+        CautionHourType.AGGRESSIVE.value: [17, 6, 7, 8, 9, 10, 11, 12, 13]
+    }
+    cautionhours = {
+        CautionHourType.SUAVE.value: {4: 0.51, 5: 0.47, 13: 0.29, 14: 0.46, 16: 0.51, 17: 0.41, 18: 0.45, 19: 0.46, 20: 0.51, 21: 0.51, 22: 0.51},
+        CautionHourType.INTERMEDIATE.value: {4: 0.46, 5: 0.43, 14: 0.42, 16: 0.46, 18: 0.41, 19: 0.42, 20: 0.46, 21: 0.46, 22: 0.46},
+        CautionHourType.AGGRESSIVE.value: {4: 0.44,5: 0.41, 14: 0.4, 16: 0.44, 18: 0.39, 19: 0.4, 20: 0.44, 21: 0.44, 22: 0.44}
+    }
+    for c in CautionHourType:
+        r = h(cautionhour_type=c, absolute_top_price=3, min_price=0)
+        assert r.model.options.cautionhour_type == VALUES_CONVERSION[c.value]
+        r.prices = [0.711, 0.519, 0.494, 0.474, 0.458, 0.453, 0.457, 0.484, 0.996, 1.54, 1.544, 1.523, 1.493, 1.475, 1.513, 1.603, 1.707, 1.95, 1.846, 1.812, 1.714, 1.706, 1.706, 1.055]
+        r.prices_tomorrow = [1.497, 1.208, 1.125, 1.28, 1.707, 1.796, 2.499, 2.854, 3.035, 2.854, 2.633, 2.558, 2.4, 2.266, 1.829, 2.06, 2.503, 2.739, 2.252, 1.783, 1.713, 1.206, 0.803, 0.586]
+        r.adjusted_average = 1.38
+        r.service._mock_hour = 15
+        assert r.non_hours == nonhours[c.value]
+        assert r.dynamic_caution_hours == cautionhours[c.value]
+
+def test_230205_interimday():
+    r = h(cautionhour_type=CautionHourType.INTERMEDIATE.value, absolute_top_price=3, min_price=0)
+    r.prices = [0.711, 0.519, 0.494, 0.474, 0.458, 0.453, 0.457, 0.484, 0.996, 1.54, 1.544, 1.523, 1.493, 1.475, 1.513, 1.603, 1.707, 1.95, 1.846, 1.812, 1.714, 1.706, 1.706, 1.055]
+    r.prices_tomorrow = [1.497, 1.208, 1.125, 1.28, 1.707, 1.796, 2.499, 2.854, 3.035, 2.854, 2.633, 2.558, 2.4, 2.266, 1.829, 2.06, 2.503, 2.739, 2.252, 1.783, 1.713, 1.206, 0.803, 0.586]
+    r.adjusted_average = 1.38
+    r.service._mock_hour = 13
+    assert r.non_hours == [13, 17, 6, 7, 8, 9,10,11,12]
+    assert r.caution_hours == [16, 18, 19, 20, 21, 22,4,5]
+    r.service._mock_hour = 14
+    assert r.non_hours == [17, 6, 7, 8, 9,10,11,12,13]
+    assert r.caution_hours == [16, 18, 19, 20, 21, 22,4,5]
+        
+
 # def test_230114():
 #     r = h(cautionhour_type=CautionHourType.INTERMEDIATE, absolute_top_price=5.5, min_price=0)
 #     r.prices = [0.3851625, 0.3827625, 0.3413, 0.1827375, 0.112175, 0.068175, 0.08505, 0.1418375, 0.1972125, 0.2680625, 0.2506375, 0.16446249999999998, 0.09741250000000001, 0.0849, 0.0856125, 0.2684875, 0.38557499999999995, 0.43436250000000004, 0.38811249999999997, 0.3640749999999999, 0.17528749999999998, 0.2922375, 0.43632499999999996, 0.4551625]

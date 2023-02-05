@@ -65,12 +65,14 @@ class LocalePrice:
         for t in self.value:
             pass
     
-    
+
 class PriceOverride:
     """When to override peaks"""
     def __init__(self, price:LocalePrice) -> None:
         self._price = price
         pass
+
+    #if tiered price we should obv allow up to just below the next level.
 
     @property
     def increase(self) -> float:

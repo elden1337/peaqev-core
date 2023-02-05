@@ -3,7 +3,7 @@ from ...models.hourselection.cautionhourtype import CautionHourType
 from ...models.hourselection.hourselectionmodels import HourSelectionModel, HourSelectionOptions
 from ...models.hourselection.hourtypelist import HourTypeList
 from .hourselectionservice.hourselectionservice import HourSelectionService
-
+from .hourselectionservice.hoursselection_helpers import HourSelectionHelpers
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -67,7 +67,7 @@ class Hoursselection:
 
     @prices_tomorrow.setter
     def prices_tomorrow(self, val):
-        self.model.prices_tomorrow = self.service.helpers.convert_none_list(val)
+        self.model.prices_tomorrow = HourSelectionHelpers.convert_none_list(val)
         if self.model.prices_tomorrow != []:
             self.service._preserve_interim = False
         self.update()

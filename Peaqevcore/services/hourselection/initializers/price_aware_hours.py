@@ -14,9 +14,9 @@ class PriceAwareHours(Hours):
         self._cautionhour_type = CautionHourType.get_num_value(hub.options.price.cautionhour_type)
         self._cautionhour_type_string = hub.options.price.cautionhour_type
         self._core = core_hours(
-            self._set_absolute_top_price(hub.options.price.top_price),
-            hub.options.price.min_price,
-            self._cautionhour_type_string
+            absolute_top_price=self._set_absolute_top_price(hub.options.price.top_price),
+            min_price=hub.options.price.min_price,
+            cautionhour_type=self._cautionhour_type_string
         )
         self._hass = hub.state_machine
         self._prices = []
@@ -38,17 +38,9 @@ class PriceAwareHours(Hours):
     def non_hours(self) -> list:
         return self._core.non_hours
 
-    @non_hours.setter
-    def non_hours(self, val):
-        pass
-
     @property
     def caution_hours(self) -> list:
         return self._core.caution_hours
-
-    @caution_hours.setter
-    def caution_hours(self, val):
-        pass
 
     @property
     def absolute_top_price(self):

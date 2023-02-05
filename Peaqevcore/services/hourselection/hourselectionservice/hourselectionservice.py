@@ -32,7 +32,7 @@ class HourSelectionService:
             self.model.hours.hours_tomorrow = HourObject([], [], {})
             return
 
-        hours, hours_tomorrow = self.interim_day_update(
+        hours, hours_tomorrow = self._interim_day_update(
             today=self._update_per_day(prices=self.model.prices_today), 
             tomorrow=self._update_per_day(prices=self.model.prices_tomorrow)
             )
@@ -112,15 +112,15 @@ class HourSelectionService:
     def _determine_hours(self, price_list: dict, prices: list) -> HourObject:
         ret = HourObject([],[],{})
         for p in price_list:
-            _permax = self._set_charge_allowance(price_list[p]["permax"])
-            if self._should_be_cautionhour(price_list[p], prices):
+            _permax = self.__set_charge_allowance(price_list[p]["permax"])
+            if self.__should_be_cautionhour(price_list[p], prices):
                 ret.ch.append(p)
                 ret.dyn_ch[p] = round(_permax,2)
             else:
                 ret.nh.append(p)
         return ret
 
-    def _should_be_cautionhour(self, price_item, prices) -> bool:
+    def __should_be_cautionhour(self, price_item, prices) -> bool:
         first = any([
                     float(price_item["permax"]) <= self.model.options.cautionhour_type,
                     float(price_item["val"]) <= (sum(prices)/len(prices))
@@ -128,62 +128,49 @@ class HourSelectionService:
         second = (self.model.current_peak > 0 and self.model.current_peak*price_item["permax"] > 1) or self.model.current_peak == 0
         return all([first, second])
 
-    def _set_charge_allowance(self, price_input) -> float:
-        _allowance = round(abs(price_input - 1), 2)
-        return _allowance * ALLOWANCE_SCHEMA[self.model.options.cautionhour_type]
+    def __set_charge_allowance(self, price_input) -> float:
+        return round(abs(price_input - 1), 2) * ALLOWANCE_SCHEMA[self.model.options.cautionhour_type]
         
     def set_hour(self, testhour:int = None) -> int:
         return testhour if testhour is not None else self._mock_hour if self._mock_hour is not None else datetime.now().hour
 
-    def interim_day_update(self, today: HourObject, tomorrow: HourObject) -> Tuple[HourObject, HourObject]:
+    def _interim_day_update(self, today: HourObject, tomorrow: HourObject) -> Tuple[HourObject, HourObject]:
         """Updates the non- and caution-hours with an adjusted mean of 14h - 13h today-tomorrow to get a more sane nightly curve."""
-        if len(self.model.prices_tomorrow) == 0:
-            #return what we sent in. This function is not eligable for single day prices.
-            return today, tomorrow 
 
-        pricelist = self.model.prices_today[14::]
-        pricelist[len(pricelist):] = self.model.prices_tomorrow[0:14]
+        if len(self.model.prices_tomorrow) < 23:
+            return today, tomorrow 
+        
+        #hour = self._mock_hour if self._mock_hour is not None else 14
+        hour =14
+        negative_hour = (24 - hour)*-1
+
+        pricelist = self.model.prices_today[hour::]
+        pricelist[len(pricelist):] = self.model.prices_tomorrow[0:hour]
         new_hours = self._update_per_day(pricelist)
         
-        today = self._update_interim_lists(range(14,24), today, new_hours, 14)
-        tomorrow = self._update_interim_lists(range(0,14), tomorrow, new_hours, -10)
+        today = self._update_interim_lists(range(hour,24), today, new_hours, hour)
+        tomorrow = self._update_interim_lists(range(0,hour), tomorrow, new_hours, negative_hour)
 
         self._preserve_interim = True
         return today, tomorrow
 
-    def _convert_collections(self, new: HourObject, index_deviation: int) -> HourObject:
-        """Converts the hourobject-collections to interim days, based on the index-deviation provided."""
-
-        def _chop_list(lst: list):
-            return [n+index_deviation for n in lst if 0 <= n+index_deviation < 24]
-        def _chop_dict(dct: dict):
-            return {key+index_deviation:value for (key,value) in dct.items() if 0 <= key+index_deviation < 24}
-        ret = HourObject([], [], {})
-        ret.nh = _chop_list(new.nh)
-        ret.ch = _chop_list(new.ch)
-        ret.dyn_ch = _chop_dict(new.dyn_ch)
-        ret.offset_dict = _chop_dict(new.offset_dict)
-        ret.pricedict = _chop_dict(new.pricedict)
-
-        return ret
-
     def _update_interim_lists(self, _range: range, old: HourObject, new: HourObject, index_devidation: int) -> HourObject:
-        _new = self._convert_collections(new, index_devidation)
+        _new = HourSelectionHelpers._convert_collections(new, index_devidation)
         for i in _range:
             if i in _new.nh:
                 if i not in old.nh:
                     old.nh.append(i)
-                    old.ch = self._try_remove(i, old.ch)
-                    old.dyn_ch = self._try_remove(i, old.dyn_ch)
+                    old.ch = HourSelectionHelpers._try_remove(i, old.ch)
+                    old.dyn_ch = HourSelectionHelpers._try_remove(i, old.dyn_ch)
             elif i in _new.ch:
                 if i not in old.ch:
                     old.ch.append(i)
                     old.dyn_ch[i] = _new.dyn_ch[i]
-                    old.nh = self._try_remove(i, old.nh)
+                    old.nh = HourSelectionHelpers._try_remove(i, old.nh)
             else:
-                old.nh = self._try_remove(i, old.nh)
-                old.ch = self._try_remove(i, old.ch)
-                old.dyn_ch = self._try_remove(i, old.dyn_ch)
+                old.nh = HourSelectionHelpers._try_remove(i, old.nh)
+                old.ch = HourSelectionHelpers._try_remove(i, old.ch)
+                old.dyn_ch = HourSelectionHelpers._try_remove(i, old.dyn_ch)
             old.nh = sorted(old.nh)
             old.ch = sorted(old.ch)
             old.dyn_ch = dict(sorted(old.dyn_ch.items()))
@@ -191,14 +178,8 @@ class HourSelectionService:
         for r in _new.offset_dict.keys():
             old.offset_dict[r] = _new.offset_dict[r]
             old.pricedict[r] = _new.pricedict[r]
-
         return old
 
-    def _try_remove(self, value, collection: list|dict):
-        if isinstance(collection, dict):
-            if value in collection.keys():
-                collection.pop(value)
-        elif isinstance(collection, list):
-            if value in collection:
-                collection.remove(value)
-        return collection
+    
+
+    
