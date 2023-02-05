@@ -70,3 +70,8 @@ class Hours:
     @abstractmethod
     def options(self):
         pass
+
+    @property
+    @abstractmethod
+    def offsets(self) -> dict:
+        pass

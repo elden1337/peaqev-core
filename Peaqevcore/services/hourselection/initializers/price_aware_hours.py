@@ -76,6 +76,10 @@ class PriceAwareHours(Hours):
             self._core.adjusted_average = val
 
     @property
+    def offsets(self) -> dict:
+        return self._core.offsets
+
+    @property
     def is_initialized(self) -> bool:
         if self.prices is not None:
             if len(self.prices) > 0:
