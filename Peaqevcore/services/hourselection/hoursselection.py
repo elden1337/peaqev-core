@@ -12,12 +12,13 @@ class Hoursselection:
             self,      
             absolute_top_price: float = 0,
             min_price: float = 0,
-            cautionhour_type: float = CautionHourType.get_num_value(CautionHourType.SUAVE),
+            cautionhour_type: str = CautionHourType.SUAVE.value,
             base_mock_hour: int = None
     ):
+        cc = cautionhour_type
         self.model = HourSelectionModel(
             options=HourSelectionOptions(
-                cautionhour_type=cautionhour_type, 
+                cautionhour_type=CautionHourType.get_num_value(cc), 
                 min_price=min_price,
                 top_price= absolute_top_price
                     )
