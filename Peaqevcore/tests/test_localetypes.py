@@ -3,7 +3,7 @@ import pytest
 from ..models.locale.enums.querytype import QueryType
 from ..services.locale.querytypes.const import QUERYTYPE_AVERAGEOFTHREEDAYS, QUERYTYPE_AVERAGEOFTHREEHOURS, QUERYTYPE_SOLLENTUNA
 from ..services.locale.querytypes.querytypes import QUERYTYPES
-from ..services.locale.countries.sweden import SE_SHE_AB, SE_Bjerke_Energi, SE_Gothenburg, SE_Kristinehamn, SE_Skovde, SE_Sollentuna
+from ..services.locale.countries.sweden import SE_SHE_AB, SE_Bjerke_Energi, SE_Gothenburg, SE_Kristinehamn, SE_Skovde, SE_Sollentuna, SE_Ellevio
 from ..services.locale.countries.belgium import VregBelgium
 
 def test_SE_Bjerke_Energi():
@@ -176,4 +176,17 @@ def test_peak_new_month_2():
     assert len(p.query_model.peaks._p) == 2
     assert p.query_model.charged_peak == 0.04
     assert p.query_model.observed_peak == 0.03
+
+def test_se_ellevio():
+    p = SE_Ellevio
+    assert p.free_charge(p) is False
+    p.query_model.try_update(new_val=1.2, timestamp=datetime.combine(date(2022, 7, 14), time(22, 30)))
+    p.query_model.try_update(new_val=1, timestamp=datetime.combine(date(2022, 7, 16), time(22, 30)))
+    p.query_model.try_update(new_val=1.5, timestamp=datetime.combine(date(2022, 7, 17), time(22, 30)))
+    p.query_model.try_update(new_val=1.7, timestamp=datetime.combine(date(2022, 7, 17), time(22, 30)))
+    p.query_model.try_update(new_val=1.5, timestamp=datetime.combine(date(2022, 7, 19), time(22, 30)))
+    assert p.query_model.observed_peak > 0
+    del(p)
+
+
 
