@@ -1,7 +1,8 @@
 from ....services.locale.querytypes.queryservice import QueryService
 from ....models.locale.enums.querytype import QueryType
 from ..time_pattern import TimePattern
-from ....models.locale.price import LocalePrice, SeasonedPrice, TieredPrice
+from ....models.locale.price.locale_price import LocalePrice
+from ....models.locale.price.models.seasoned_price import SeasonedPrice
 from ....models.locale.enums.price_type import PriceType
 from ....models.locale.enums.calendar_periods import CalendarPeriods
 from ..querytypes.const import (
@@ -193,6 +194,17 @@ class SE_Gothenburg(Locale_Type):
         currency="SEK"
     )
 
+@dataclass(frozen=True)
+class SE_Ellevio(Locale_Type):
+    #docs: https://www.ellevio.se/privat/om-din-el/forsta-din-elkostnad/ny-prismodell-for-elnatet/
+    observed_peak = QueryType.AverageOfThreeDays
+    charged_peak = QueryType.AverageOfThreeDays
+    query_model = QUERYTYPES[QueryType.AverageOfThreeDays]
+    price = LocalePrice(
+        price_type=PriceType.Static,
+        value=65,
+        currency="SEK"
+    )
 
 @dataclass(frozen=True)
 class SE_Bjerke_Energi(Locale_Type):

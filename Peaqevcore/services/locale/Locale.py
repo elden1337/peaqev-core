@@ -16,7 +16,8 @@ from .countries.sweden import (
     SE_Skovde, 
     SE_Sollentuna,
     SE_TekniskaVerken_Link,
-    SE_Eskilstuna
+    SE_Eskilstuna,
+    SE_Ellevio
     #SE_Telge_Energi
     )
 from .countries.norway import NO_AgderEnergi, NO_Elvia, NO_GlitreEnergi, NO_LNett, NO_Lede, NO_Mellom, NO_Tensio, NO_BKK, NO_AskerNett
@@ -51,6 +52,7 @@ LOCALE_NO_BKK = "BKK, Norway"
 LOCALE_SE_MALARENERGI = "Mälarenergi, Sweden"
 LOCALE_NO_MELLOM = "Mellom, Norway"
 LOCALE_NO_ASKER = "Asker Nett, Norway"
+LOCALE_SE_ELLEVIO = "Ellevio, Sweden"
 
 LOCALETYPEDICT = {
     LOCALE_DEFAULT: Default,
@@ -80,6 +82,7 @@ LOCALETYPEDICT = {
     LOCALE_SE_MALARENERGI: SE_Malarenergi,
     LOCALE_NO_MELLOM: NO_Mellom,
     LOCALE_NO_ASKER: NO_AskerNett,
+    LOCALE_SE_ELLEVIO: SE_Ellevio
 }
 
 """Lookup locales for config flow"""
@@ -95,6 +98,7 @@ LOCALES = [
     LOCALE_NO_TENSIO,
     LOCALE_NO_ASKER,
     LOCALE_SE_BJERKE_ENERGI,
+    LOCALE_SE_ELLEVIO,
     LOCALE_SE_FALBYDGENS_ENERGI,
     LOCALE_SE_GOTHENBURG,
     LOCALE_SE_KRISTINEHAMN,
