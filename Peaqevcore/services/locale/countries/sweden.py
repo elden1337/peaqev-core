@@ -27,15 +27,14 @@ class SE_Sollentuna(Locale_Type):
 
     free_charge_pattern = TimePattern([
         {
-            CalendarPeriods.Month:   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+            CalendarPeriods.Month:   [*range(1,13)],
             CalendarPeriods.Weekday: [0, 1, 2, 3, 4],
             CalendarPeriods.Hour:    [19, 20, 21, 22, 23, 0, 1, 2, 3, 4, 5, 6]
         },
         {
-            CalendarPeriods.Month:   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+            CalendarPeriods.Month:   [*range(1,13)],
             CalendarPeriods.Weekday: [5, 6],
-            CalendarPeriods.Hour:    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
-                                      23]
+            CalendarPeriods.Hour:    [*range(0,24)]
         }
     ])
 
@@ -59,9 +58,8 @@ class SE_Skovde(Locale_Type):
         },
         {
             CalendarPeriods.Month:   [4, 5, 6, 7, 8, 9, 10],
-            CalendarPeriods.Weekday: [0, 1, 2, 3, 4, 5, 6],
-            CalendarPeriods.Hour:    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
-                                      23]
+            CalendarPeriods.Weekday: [*range(0,7)],
+            CalendarPeriods.Hour:    [*range(0,24)]
         }
     ])
 
@@ -78,7 +76,7 @@ class SE_SHE_AB(Locale_Type):
 
     free_charge_pattern = TimePattern([
         {
-            CalendarPeriods.Month:   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+            CalendarPeriods.Month:   [*range(1,13)],
             CalendarPeriods.Weekday: [5, 6],
             CalendarPeriods.Hour:    [19, 20, 21, 22, 23, 0, 1, 2, 3, 4, 5, 6]
         }
@@ -205,6 +203,37 @@ class SE_Ellevio(Locale_Type):
         value=65,
         currency="SEK"
     )
+
+@dataclass
+class SE_JBF(Locale_Type):
+    #docs: http://www.jbf.nu/sv/natavgift
+    observed_peak = QueryType.AverageOfThreeHours
+    charged_peak = QueryType.AverageOfThreeHours
+    query_model = QUERYTYPES[QueryType.AverageOfThreeHours]
+    query_model.set_query_service(QueryService(QUERYSETS[QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22]))
+    price = LocalePrice(
+        price_type=PriceType.Static,
+        value=96.6,
+        currency="SEK"
+    )
+    free_charge_pattern = TimePattern([
+        {
+            CalendarPeriods.Month:   [4,5,6,7,8,9,10],
+            CalendarPeriods.Weekday: [*range(0,7)],
+            CalendarPeriods.Hour:    [*range(0,24)]
+        },
+        {
+            CalendarPeriods.Month:   [11,12,1,2,3],
+            CalendarPeriods.Weekday: [5,6],
+            CalendarPeriods.Hour:    [*range(0,24)]
+        },
+        {
+            CalendarPeriods.Month:   [11,12,1,2,3],
+            CalendarPeriods.Weekday: [0,1,2,3,4],
+            CalendarPeriods.Hour:    [23,0,1,2,3,4,5]
+        }
+    ])
+    #Högbelastningstid är vardagar kl. 06.00 – 22.00 under månaderna november – mars.
 
 @dataclass(frozen=True)
 class SE_Bjerke_Energi(Locale_Type):
