@@ -3,7 +3,7 @@ import pytest
 from ..models.locale.enums.querytype import QueryType
 from ..services.locale.querytypes.const import QUERYTYPE_AVERAGEOFTHREEDAYS, QUERYTYPE_AVERAGEOFTHREEHOURS, QUERYTYPE_SOLLENTUNA
 from ..services.locale.querytypes.querytypes import QUERYTYPES
-from ..services.locale.countries.sweden import SE_SHE_AB, SE_Bjerke_Energi, SE_Gothenburg, SE_Kristinehamn, SE_Skovde, SE_Sollentuna, SE_Ellevio
+from ..services.locale.countries.sweden import SE_SHE_AB, SE_Bjerke_Energi, SE_Gothenburg, SE_Kristinehamn, SE_Skovde, SE_Sollentuna, SE_Ellevio,SE_JBF
 from ..services.locale.countries.belgium import VregBelgium
 
 def test_SE_Bjerke_Energi():
@@ -179,7 +179,7 @@ def test_peak_new_month_2():
 
 def test_se_ellevio():
     p = SE_Ellevio
-    assert p.free_charge(p) is False
+    assert p.free_charge(p, mockdt=datetime.now()) is False
     p.query_model.try_update(new_val=1.2, timestamp=datetime.combine(date(2022, 7, 14), time(22, 30)))
     p.query_model.try_update(new_val=1, timestamp=datetime.combine(date(2022, 7, 16), time(22, 30)))
     p.query_model.try_update(new_val=1.5, timestamp=datetime.combine(date(2022, 7, 17), time(22, 30)))
@@ -188,5 +188,18 @@ def test_se_ellevio():
     assert p.query_model.observed_peak > 0
     del(p)
 
+def test_se_jbf():
+    p = SE_JBF
+    assert p.free_charge(p, mockdt=datetime.combine(date(2023, 2, 14), time(21, 59))) is False
+    assert p.free_charge(p, mockdt=datetime.combine(date(2023, 2, 14), time(22, 1))) is True
+    assert p.free_charge(p, mockdt=datetime.combine(date(2023, 5, 17), time(12, 0))) is True
+
+    p.query_model.try_update(new_val=1.2, timestamp=datetime.combine(date(2023, 2, 6), time(10, 30)))
+    p.query_model.try_update(new_val=1, timestamp=datetime.combine(date(2023, 2, 6), time(11, 30)))
+    assert p.query_model.observed_peak == 1
+    assert p.query_model.charged_peak == 1.1
+    p.query_model.try_update(new_val=2, timestamp=datetime.combine(date(2023, 2, 6), time(12, 30)))
+    assert p.query_model.charged_peak == 1.4
+    del(p)    
 
 

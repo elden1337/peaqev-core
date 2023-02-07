@@ -230,7 +230,7 @@ class SE_JBF(Locale_Type):
         {
             CalendarPeriods.Month:   [11,12,1,2,3],
             CalendarPeriods.Weekday: [0,1,2,3,4],
-            CalendarPeriods.Hour:    [23,0,1,2,3,4,5]
+            CalendarPeriods.Hour:    [22,23,0,1,2,3,4,5]
         }
     ])
     #Högbelastningstid är vardagar kl. 06.00 – 22.00 under månaderna november – mars.
