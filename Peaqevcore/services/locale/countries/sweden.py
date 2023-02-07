@@ -204,7 +204,7 @@ class SE_Ellevio(Locale_Type):
         currency="SEK"
     )
 
-@dataclass
+@dataclass(frozen=True)
 class SE_JBF(Locale_Type):
     #docs: http://www.jbf.nu/sv/natavgift
     observed_peak = QueryType.AverageOfThreeHours
