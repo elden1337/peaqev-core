@@ -14,14 +14,14 @@ class QueryService:
         main_grouping = (s for s in self._settings.groups if s.divident is not Dividents.UNSET)
         for s in main_grouping:
             group_ret = []
-            grouping = (a for a in s.dateparts if len(a.values) > 0)
+            grouping = (a for a in s.dateparts if len(a.values))
             for a in grouping:
                 group_ret.append(QueryService.datepart(a.type, a.dttype, a.values, dt))
             if s.divident is Dividents.AND:
                 main_ret.append(all(group_ret))
             else:
                 main_ret.append(any(group_ret))
-        return any(main_ret) if len(main_ret) > 0 else True
+        return any(main_ret) if len(main_ret) else True
 
     @staticmethod
     def datepart(logic: str, dtpart: str, arguments: List[int], timer: datetime) -> bool:

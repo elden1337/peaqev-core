@@ -48,7 +48,7 @@ class HourSelectionHelpers:
     @staticmethod
     def _make_array_from_empty(input: str) -> list:
         array = input.split(",")
-        list = [p for p in array if len(p) > 0]
+        list = [p for p in array if len(p)]
         ret = []
         if len(list) > 24:
             try:

@@ -169,7 +169,7 @@ class ChargeControllerBase:
         return ret
 
     def _is_done(self, charger_state) -> bool:
-        if len(self._hub.chargertype.charger.chargerstates[ChargeControllerStates.Done]) > 0:
+        if len(self._hub.chargertype.charger.chargerstates[ChargeControllerStates.Done]):
             return charger_state in self._hub.chargertype.charger.chargerstates[ChargeControllerStates.Done]
         return time.time() - self.latest_charger_start > self.done_timeout
 

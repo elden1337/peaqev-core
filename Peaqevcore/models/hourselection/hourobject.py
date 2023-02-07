@@ -25,7 +25,7 @@ class HourObject:
                 self.nh.append(h)
                 if h in self.ch:
                     self.ch.remove(h)
-                if len(self.dyn_ch) > 0:
+                if len(self.dyn_ch):
                     if h in self.dyn_ch.keys():
                         self.dyn_ch.pop(h)
         self.nh.sort()

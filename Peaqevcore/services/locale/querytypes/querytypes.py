@@ -108,7 +108,7 @@ class LocaleQuery:
         if self.sum_counter.groupby in [TimePeriods.Daily, TimePeriods.UnSet]:
             #todo: check this if it breaks the updatehour
             _datekeys = [k for k in self.peaks.p.keys() if dt[0] in k]
-            if len(_datekeys) > 0:
+            if len(_datekeys):
                 if new_val > self.peaks.p.get(_datekeys[0]):
                         self.peaks.pop_key(_datekeys[0])
                         self.peaks.add_kv_pair(dt, new_val)
@@ -140,7 +140,7 @@ class LocaleQuery:
             for k in self._peaks.p.keys():
                 if countX(self._peaks.p.keys(), k[0]) > 1:
                     duplicates[k] = self._peaks.p[k]
-            if len(duplicates) > 0:
+            if len(duplicates):
                 minkey = min(duplicates, key=duplicates.get)
                 self._peaks.p.pop(minkey)
         while len(self._peaks.p) > self.sum_counter.counter:
@@ -148,28 +148,10 @@ class LocaleQuery:
         self._peaks.is_dirty = False
         self._update_peaks()
 
-# QUERYTYPES = {
-#     QUERYTYPE_AVERAGEOFTHREEHOURS: LocaleQuery(sum_type=SumTypes.Avg, time_calc=TimePeriods.Hourly, cycle=TimePeriods.Monthly, sum_counter=SumCounter(counter=3, groupby=TimePeriods.Hourly)),
-#     QUERYTYPE_AVERAGEOFTHREEDAYS: LocaleQuery(sum_type=SumTypes.Avg, time_calc=TimePeriods.Hourly, cycle=TimePeriods.Monthly, sum_counter=SumCounter(counter=3, groupby=TimePeriods.Daily)),
-#     QUERYTYPE_BASICMAX: LocaleQuery(sum_type=SumTypes.Max, time_calc=TimePeriods.Hourly, cycle=TimePeriods.Monthly),
-#     QUERYTYPE_AVERAGEOFFIVEDAYS: LocaleQuery(sum_type=SumTypes.Avg, time_calc=TimePeriods.Hourly, cycle=TimePeriods.Monthly, sum_counter=SumCounter(counter=5, groupby=TimePeriods.Daily)),
-#     QUERYTYPE_SOLLENTUNA: LocaleQuery(sum_type=SumTypes.Avg, time_calc=TimePeriods.Hourly, cycle=TimePeriods.Monthly, sum_counter=SumCounter(counter=3, groupby=TimePeriods.Hourly), query_service=QueryService(QUERYSETS[QUERYTYPE_SOLLENTUNA])),
-#     QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22: LocaleQuery(sum_type=SumTypes.Max, time_calc=TimePeriods.Hourly, cycle=TimePeriods.Monthly, query_service=QueryService(QUERYSETS[QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22])),
-#     QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19: LocaleQuery(sum_type=SumTypes.Avg, time_calc=TimePeriods.Hourly, cycle=TimePeriods.Monthly, sum_counter=SumCounter(counter=3, groupby=TimePeriods.Hourly), query_service=QueryService(QUERYSETS[QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19])),
-#     QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR: LocaleQuery(sum_type=SumTypes.Max, time_calc=TimePeriods.Hourly, cycle=TimePeriods.Monthly, query_service=QueryService(QUERYSETS[QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR])),
-#     QUERYTYPE_HIGHLOAD: LocaleQuery(sum_type=SumTypes.Max, time_calc=TimePeriods.Hourly, cycle=TimePeriods.Monthly, query_service=QueryService(QUERYSETS[QUERYTYPE_HIGHLOAD]))
-# }
-
 
 QUERYTYPES = {
     QueryType.AverageOfThreeHours: LocaleQuery(sum_type=SumTypes.Avg, time_calc=TimePeriods.Hourly, cycle=TimePeriods.Monthly, sum_counter=SumCounter(counter=3, groupby=TimePeriods.Hourly)),
     QueryType.AverageOfThreeDays: LocaleQuery(sum_type=SumTypes.Avg, time_calc=TimePeriods.Hourly, cycle=TimePeriods.Monthly, sum_counter=SumCounter(counter=3, groupby=TimePeriods.Daily)),
     QueryType.Max: LocaleQuery(sum_type=SumTypes.Max, time_calc=TimePeriods.Hourly, cycle=TimePeriods.Monthly),
-    QueryType.AverageOfFiveDays: LocaleQuery(sum_type=SumTypes.Avg, time_calc=TimePeriods.Hourly, cycle=TimePeriods.Monthly, sum_counter=SumCounter(counter=5, groupby=TimePeriods.Daily)),
-    #split here
-    # QUERYTYPE_SOLLENTUNA: LocaleQuery(sum_type=SumTypes.Avg, time_calc=TimePeriods.Hourly, cycle=TimePeriods.Monthly, sum_counter=SumCounter(counter=3, groupby=TimePeriods.Hourly), query_service=QueryService(QUERYSETS[QUERYTYPE_SOLLENTUNA])),
-    # QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22: LocaleQuery(sum_type=SumTypes.Max, time_calc=TimePeriods.Hourly, cycle=TimePeriods.Monthly, query_service=QueryService(QUERYSETS[QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22])),
-    # QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19: LocaleQuery(sum_type=SumTypes.Avg, time_calc=TimePeriods.Hourly, cycle=TimePeriods.Monthly, sum_counter=SumCounter(counter=3, groupby=TimePeriods.Hourly), query_service=QueryService(QUERYSETS[QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19])),
-    # QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR: LocaleQuery(sum_type=SumTypes.Max, time_calc=TimePeriods.Hourly, cycle=TimePeriods.Monthly, query_service=QueryService(QUERYSETS[QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR])),
-    # QUERYTYPE_HIGHLOAD: LocaleQuery(sum_type=SumTypes.Max, time_calc=TimePeriods.Hourly, cycle=TimePeriods.Monthly, query_service=QueryService(QUERYSETS[QUERYTYPE_HIGHLOAD]))
+    QueryType.AverageOfFiveDays: LocaleQuery(sum_type=SumTypes.Avg, time_calc=TimePeriods.Hourly, cycle=TimePeriods.Monthly, sum_counter=SumCounter(counter=5, groupby=TimePeriods.Daily))
 }

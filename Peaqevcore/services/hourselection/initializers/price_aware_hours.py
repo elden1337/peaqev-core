@@ -82,7 +82,7 @@ class PriceAwareHours(Hours):
     @property
     def is_initialized(self) -> bool:
         if self.prices is not None:
-            if len(self.prices) > 0:
+            if len(self.prices):
                 if self._is_initialized is False:
                     self._is_initialized = True
                     _LOGGER.debug("Hourselection has initialized")

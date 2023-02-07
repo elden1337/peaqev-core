@@ -66,7 +66,7 @@ class EnergyWeekly:
             return 0.0
 
     def unpack(self, incoming: dict) -> dict[int, Day]:
-        if isinstance(incoming, dict) and len(incoming) > 0:
+        if isinstance(incoming, dict) and len(incoming):
             model = {}
             for i in range(0,7):
                 if i in incoming.keys():

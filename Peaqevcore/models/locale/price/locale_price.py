@@ -21,7 +21,7 @@ class LocalePrice:
             case PriceType.Tiered:
                 assert type(self.value) == list
                 assert isinstance(self.value[0], TieredPrice)
-        assert len(self.currency) > 0
+        assert len(self.currency)
 
     @property
     def price(self) -> float:

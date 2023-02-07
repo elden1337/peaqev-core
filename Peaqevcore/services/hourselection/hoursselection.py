@@ -113,12 +113,12 @@ class Hoursselection:
         def _looper_price(h:int, tomorrow_active:bool):
             if h in self.model.hours.dynamic_caution_hours:
                     if tomorrow_active:
-                        if h < hour and len(self.prices_tomorrow) > 0:
+                        if h < hour and len(self.prices_tomorrow):
                             ret[h] = self.model.hours.dynamic_caution_hours[h] * self.prices_tomorrow[h]
                     if h >= hour:
                         ret[h] = self.model.hours.dynamic_caution_hours[h] * self.prices[h]
             elif h not in self.model.hours.non_hours:
-                if h < hour and len(self.prices_tomorrow) > 0:
+                if h < hour and len(self.prices_tomorrow):
                     ret[h] = self.prices_tomorrow[h]
                 if h >= hour:
                     ret[h] = self.prices[h]
