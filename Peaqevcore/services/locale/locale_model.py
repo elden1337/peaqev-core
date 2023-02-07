@@ -3,7 +3,7 @@ from datetime import datetime
 from ...models.locale.enums.querytype import QueryType
 from ...models.locale.enums.time_periods import TimePeriods
 from ..locale.time_pattern import TimePattern
-from ...models.locale.price import LocalePrice
+from ...models.locale.price.locale_price import LocalePrice
 from .querytypes.querytypes import LocaleQuery
 
 

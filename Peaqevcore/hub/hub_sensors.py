@@ -120,16 +120,11 @@ class IHubSensors:
     def init_hub_values(self):
         """Initialize values from Home Assistant on the set objects"""
         if self.chargerobject is not None:
-            self.chargerobject.value = self.state_machine.states.get(self.chargerobject.entity).state if self.state_machine.states.get(
-                self.chargerobject.entity) is not None else 0
-        self.chargerobject_switch.value = self.state_machine.states.get(
-            self.chargerobject_switch.entity).state if self.state_machine.states.get(
-            self.chargerobject_switch.entity) is not None else ""
+            self.chargerobject.value = self.state_machine.states.get(self.chargerobject.entity).state if self.state_machine.states.get(self.chargerobject.entity) is not None else 0
+        self.chargerobject_switch.value = self.state_machine.states.get(self.chargerobject_switch.entity).state if self.state_machine.states.get(self.chargerobject_switch.entity) is not None else ""
         self.chargerobject_switch.updatecurrent()
-        self.carpowersensor.value = self.state_machine.states.get(self.carpowersensor.entity).state if self.state_machine.states.get(
-            self.carpowersensor.entity) is not None else 0
-        self.totalhourlyenergy.value = self.state_machine.states.get(self.totalhourlyenergy.entity) if self.state_machine.states.get(
-            self.totalhourlyenergy.entity) is not None else 0
+        self.carpowersensor.value = self.state_machine.states.get(self.carpowersensor.entity).state if isinstance(self.state_machine.states.get(self.carpowersensor.entity),(float,int)) else 0
+        self.totalhourlyenergy.value = self.state_machine.states.get(self.totalhourlyenergy.entity) if isinstance(self.state_machine.states.get(self.totalhourlyenergy.entity),(float,int)) else 0
 
 
 @dataclass
