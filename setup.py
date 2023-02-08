@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="peaqevcore",
-    version="11.2.0",
+    version="12.0.1",
     author="Magnus Eldén",
     description="Core types for peaqev car charging",
     url="https://github.com/elden1337/peaqev-core",
@@ -29,6 +29,7 @@ setuptools.setup(
         "peaqevcore.models.locale",
         "peaqevcore.models.locale.enums",
         "peaqevcore.models.locale.price",
+        "peaqevcore.models.locale.price.models",
         "peaqevcore.services.scheduler",
         "peaqevcore.services.timer"
         ],

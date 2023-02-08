@@ -5,7 +5,7 @@ from .chargecontrollerbase import ChargeControllerBase
 
 class ChargeController(ChargeControllerBase):
     def __init__(self, hub):
-        super().__init__(charger_state_translation=self.self._hub.chargertype.charger.chargerstates)
+        super().__init__(charger_state_translation=self.self._hub.chargertype.chargerstates)
 
     @property
     def below_startthreshold(self) -> bool:

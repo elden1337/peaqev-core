@@ -124,7 +124,7 @@ class ChargeControllerBase:
         elif datetime.now().hour in self._hub.non_hours and free_charge is False and self._hub.timer.is_override is False:
             update_timer = True
             ret = ChargeControllerStates.Stop
-        elif self._hub.chargertype.charger.entities.powerswitch == "on" and self._hub.chargertype.charger.entities.powermeter < 1:
+        elif self._hub.chargertype.entities.powerswitch == "on" and self._hub.chargertype.entities.powermeter < 1:
             ret = self._get_status_connected()
             update_timer = (ret == ChargeControllerStates.Stop)
         else:
@@ -144,23 +144,23 @@ class ChargeControllerBase:
         if self._hub.charger_enabled.value is False:
             update_timer = True
             ret = ChargeControllerStates.Disabled
-        elif charger_state in self._hub.chargertype.charger.chargerstates[ChargeControllerStates.Done]:
+        elif charger_state in self._hub.chargertype.chargerstates[ChargeControllerStates.Done]:
             self._hub.charger_done.value = True
             ret = ChargeControllerStates.Done
-        elif charger_state in self._hub.chargertype.charger.chargerstates[ChargeControllerStates.Idle]:
+        elif charger_state in self._hub.chargertype.chargerstates[ChargeControllerStates.Idle]:
             update_timer = True
             ret = ChargeControllerStates.Idle
             if self._hub.charger_done.value is True:
                 self._hub.charger_done.value = False
-        elif charger_state not in self._hub.chargertype.charger.chargerstates[ChargeControllerStates.Idle] and self._hub.charger_done.value is True:
+        elif charger_state not in self._hub.chargertype.chargerstates[ChargeControllerStates.Idle] and self._hub.charger_done.value is True:
             ret = ChargeControllerStates.Done
         elif datetime.now().hour in self._hub.non_hours and free_charge is False and self._hub.timer.is_override is False:
             update_timer = True
             ret = ChargeControllerStates.Stop
-        elif charger_state in self._hub.chargertype.charger.chargerstates[ChargeControllerStates.Connected]:
+        elif charger_state in self._hub.chargertype.chargerstates[ChargeControllerStates.Connected]:
             ret = self._get_status_connected(charger_state)
             update_timer = (ret == ChargeControllerStates.Stop)
-        elif charger_state in self._hub.chargertype.charger.chargerstates[ChargeControllerStates.Charging]:
+        elif charger_state in self._hub.chargertype.chargerstates[ChargeControllerStates.Charging]:
             ret = self._get_status_charging()
             update_timer = True
 
@@ -169,8 +169,8 @@ class ChargeControllerBase:
         return ret
 
     def _is_done(self, charger_state) -> bool:
-        if len(self._hub.chargertype.charger.chargerstates[ChargeControllerStates.Done]):
-            return charger_state in self._hub.chargertype.charger.chargerstates[ChargeControllerStates.Done]
+        if len(self._hub.chargertype.chargerstates[ChargeControllerStates.Done]):
+            return charger_state in self._hub.chargertype.chargerstates[ChargeControllerStates.Done]
         return time.time() - self.latest_charger_start > self.done_timeout
 
     def update_latestchargerstart(self):

@@ -63,34 +63,34 @@ class IHubSensors:
             initval=0,
             startpeaks=options.startpeaks,
         )
-        if len(self.chargertype.charger.entities.chargerentity):
+        if len(self.chargertype.entities.chargerentity):
             self.chargerobject = ChargerObject(
-                data_type=self.chargertype.charger.native_chargerstates,
-                listenerentity=self.chargertype.charger.entities.chargerentity
+                data_type=self.chargertype.native_chargerstates,
+                listenerentity=self.chargertype.entities.chargerentity
             )
             resultdict[self.chargerobject.entity] = self.chargerobject.is_initialized
 
             self.carpowersensor = CarPowerSensor(
                 data_type=int,
-                listenerentity=self.chargertype.charger.entities.powermeter,
-                powermeter_factor=self.chargertype.charger.options.powermeter_factor,
+                listenerentity=self.chargertype.entities.powermeter,
+                powermeter_factor=self.chargertype.options.powermeter_factor,
                 hubdata=self,
                 init_override=True
             )
             self.chargerobject_switch = ChargerSwitch(
                 hass=state_machine,
                 data_type=bool,
-                listenerentity=self.chargertype.charger.entities.powerswitch,
+                listenerentity=self.chargertype.entities.powerswitch,
                 initval=False,
-                currentname=self.chargertype.charger.entities.ampmeter,
-                ampmeter_is_attribute=self.chargertype.charger.options.ampmeter_is_attribute,
+                currentname=self.chargertype.entities.ampmeter,
+                ampmeter_is_attribute=self.chargertype.options.ampmeter_is_attribute,
                 hubdata=self,
                 init_override=True
             )
 
         else:
             self.chargerobject = ChargerObject(
-                data_type=self.chargertype.charger.native_chargerstates,
+                data_type=self.chargertype.native_chargerstates,
                 listenerentity="no entity",
                 init_override=True
             )
@@ -98,17 +98,17 @@ class IHubSensors:
             
             self.carpowersensor = CarPowerSensor(
                 data_type=int,
-                listenerentity=self.chargertype.charger.entities.powermeter,
-                powermeter_factor=self.chargertype.charger.options.powermeter_factor,
+                listenerentity=self.chargertype.entities.powermeter,
+                powermeter_factor=self.chargertype.options.powermeter_factor,
                 hubdata=self
             )
             self.chargerobject_switch = ChargerSwitch(
                 hass=state_machine,
                 data_type=bool,
-                listenerentity=self.chargertype.charger.entities.powerswitch,
+                listenerentity=self.chargertype.entities.powerswitch,
                 initval=False,
-                currentname=self.chargertype.charger.entities.ampmeter,
-                ampmeter_is_attribute=self.chargertype.charger.options.ampmeter_is_attribute,
+                currentname=self.chargertype.entities.ampmeter,
+                ampmeter_is_attribute=self.chargertype.options.ampmeter_is_attribute,
                 hubdata=self
             )
         self.totalhourlyenergy = HubMember(

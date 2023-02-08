@@ -48,9 +48,9 @@ class ThresholdBase:
 
     def _setcurrentdict(self) -> dict:
         """only allow amps if user has set this value high enough"""
-        if self._hub.chargertype.charger.max_amps != 16:
-            _threephase = {k: v for (k, v) in CURRENTS_THREEPHASE_1_32.items() if v <= self._hub.chargertype.charger.max_amps}
-            _onephase = {k: v for (k, v) in CURRENTS_ONEPHASE_1_32.items() if v <= self._hub.chargertype.charger.max_amps}
+        if self._hub.chargertype.max_amps != 16:
+            _threephase = {k: v for (k, v) in CURRENTS_THREEPHASE_1_32.items() if v <= self._hub.chargertype.max_amps}
+            _onephase = {k: v for (k, v) in CURRENTS_ONEPHASE_1_32.items() if v <= self._hub.chargertype.max_amps}
         else:
             _threephase = CURRENTS_THREEPHASE_1_16
             _onephase = CURRENTS_ONEPHASE_1_16
