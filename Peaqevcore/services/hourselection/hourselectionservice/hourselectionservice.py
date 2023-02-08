@@ -171,8 +171,8 @@ class HourSelectionService:
                 old.nh = HourSelectionHelpers._try_remove(i, old.nh)
                 old.ch = HourSelectionHelpers._try_remove(i, old.ch)
                 old.dyn_ch = HourSelectionHelpers._try_remove(i, old.dyn_ch)
-            old.nh = sorted(old.nh)
-            old.ch = sorted(old.ch)
+            old.nh.sort()
+            old.ch.sort()
             old.dyn_ch = dict(sorted(old.dyn_ch.items()))
         
         for r in _new.offset_dict.keys():
