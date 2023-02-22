@@ -24,7 +24,7 @@ class Hoursselection:
                     )
                 )
         self.model.validate()
-        self.service = HourSelectionService(self.model, base_mock_hour)
+        self.service = HourSelectionService(parent=self, base_mock_hour=base_mock_hour)
     
     @property
     def offsets(self) -> dict:
@@ -82,7 +82,7 @@ class Hoursselection:
 
     def update_top_price(self, dyn_top_price) -> None: 
         self.model.options.set_absolute_top_price(dyn_top_price, self.model.options.min_price)
-        self.update()
+        self.update(caller="today")
 
     def update(self, testhour:int = None, caller:str = None) -> None:
         if testhour is not None:

@@ -90,7 +90,7 @@ class PriceAwareHours(Hours):
         return False
 
     def update_top_price(self, dyn_top_price) -> None: 
-        if self._hub.options.dynamic_top_price:
+        if self._hub.options.price.dynamic_top_price:
             self._core.update_top_price(dyn_top_price)
 
     def get_average_kwh_price(self):

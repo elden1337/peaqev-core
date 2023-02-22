@@ -18,9 +18,8 @@ ALLOWANCE_SCHEMA = {
 }
 
 class HourSelectionService:
-    def __init__(self,
-    model: HourSelectionModel, base_mock_hour: int = None):
-        self.model = model
+    def __init__(self, parent, base_mock_hour: int = None):
+        self.parent = parent
         self._mock_hour = base_mock_hour
         self._preserve_interim: bool = False
         self.calc = HourSelectionCalculations()
@@ -28,16 +27,16 @@ class HourSelectionService:
 
     def update(self, caller: str = None) -> None:
         if self._preserve_interim and caller == "today":
-            self.model.hours.hours_today = self.model.hours.hours_tomorrow
-            self.model.hours.hours_tomorrow = HourObject([], [], {})
+            self.parent.model.hours.hours_today = self.parent.model.hours.hours_tomorrow
+            self.parent.model.hours.hours_tomorrow = HourObject([], [], {})
             return
 
         hours, hours_tomorrow = self._interim_day_update(
-            today=self._update_per_day(prices=self.model.prices_today), 
-            tomorrow=self._update_per_day(prices=self.model.prices_tomorrow)
+            today=self._update_per_day(prices=self.parent.model.prices_today), 
+            tomorrow=self._update_per_day(prices=self.parent.model.prices_tomorrow)
             )
-        self.model.hours.hours_today = self._add_remove_limited_hours(hours)
-        self.model.hours.hours_tomorrow = self._add_remove_limited_hours(hours_tomorrow)
+        self.parent.model.hours.hours_today = self._add_remove_limited_hours(hours)
+        self.parent.model.hours.hours_tomorrow = self._add_remove_limited_hours(hours_tomorrow)
         self.update_hour_lists()
 
     def _update_per_day(self, prices: list) -> HourObject:
@@ -52,7 +51,7 @@ class HourSelectionService:
                     self.calc.rank_prices(
                         pricedict, 
                         normalized_pricedict,
-                        self.model.adjusted_average
+                        self.parent.model.adjusted_average
                         ), 
                         prices
                         )
@@ -87,25 +86,25 @@ class HourSelectionService:
         if listtype is not None:
             match listtype:
                 case HourTypeList.NonHour:
-                    self.model.hours.update_non_hours(hour)
+                    self.parent.model.hours.update_non_hours(hour)
                 case HourTypeList.CautionHour:
-                    self.model.hours.update_caution_hours(hour)
+                    self.parent.model.hours.update_caution_hours(hour)
                 case HourTypeList.DynCautionHour:
-                    self.model.hours.update_dynanmic_caution_hours(hour)   
+                    self.parent.model.hours.update_dynanmic_caution_hours(hour)   
                 case _:
                     pass
         else:
-            self.model.hours.update_non_hours(hour)
-            self.model.hours.update_caution_hours(hour)
-            self.model.hours.update_dynanmic_caution_hours(hour)
-            self.model.hours.update_offset_dict()
+            self.parent.model.hours.update_non_hours(hour)
+            self.parent.model.hours.update_caution_hours(hour)
+            self.parent.model.hours.update_dynanmic_caution_hours(hour)
+            self.parent.model.hours.update_offset_dict()
 
     def _add_remove_limited_hours(self, hours: HourObject) -> HourObject:
         """Removes cheap hours and adds expensive hours set by user limitation"""
         if hours is None or all([len(hours.nh) == 0, len(hours.ch) == 0, len(hours.dyn_ch) == 0]):
             return HourObject([],[],{},offset_dict=hours.offset_dict,pricedict=hours.pricedict)
-        hours.add_expensive_hours(self.model.options.absolute_top_price)
-        hours.remove_cheap_hours(self.model.options.min_price)
+        hours.add_expensive_hours(self.parent.model.options.absolute_top_price)
+        hours.remove_cheap_hours(self.parent.model.options.min_price)
         
         return hours
 
@@ -122,14 +121,14 @@ class HourSelectionService:
 
     def __should_be_cautionhour(self, price_item, prices) -> bool:
         first = any([
-                    float(price_item["permax"]) <= self.model.options.cautionhour_type,
+                    float(price_item["permax"]) <= self.parent.model.options.cautionhour_type,
                     float(price_item["val"]) <= (sum(prices)/len(prices))
                 ])
-        second = (self.model.current_peak > 0 and self.model.current_peak*price_item["permax"] > 1) or self.model.current_peak == 0
+        second = (self.parent.model.current_peak > 0 and self.parent.model.current_peak*price_item["permax"] > 1) or self.parent.model.current_peak == 0
         return all([first, second])
 
     def __set_charge_allowance(self, price_input) -> float:
-        return round(abs(price_input - 1), 2) * ALLOWANCE_SCHEMA[self.model.options.cautionhour_type]
+        return round(abs(price_input - 1), 2) * ALLOWANCE_SCHEMA[self.parent.model.options.cautionhour_type]
         
     def set_hour(self, testhour:int = None) -> int:
         return testhour if testhour is not None else self._mock_hour if self._mock_hour is not None else datetime.now().hour
@@ -137,15 +136,15 @@ class HourSelectionService:
     def _interim_day_update(self, today: HourObject, tomorrow: HourObject) -> Tuple[HourObject, HourObject]:
         """Updates the non- and caution-hours with an adjusted mean of 14h - 13h today-tomorrow to get a more sane nightly curve."""
 
-        if len(self.model.prices_tomorrow) < 23:
+        if len(self.parent.model.prices_tomorrow) < 23:
             return today, tomorrow 
         
         #hour = self._mock_hour if self._mock_hour is not None else 14
         hour =14
         negative_hour = (24 - hour)*-1
 
-        pricelist = self.model.prices_today[hour::]
-        pricelist[len(pricelist):] = self.model.prices_tomorrow[0:hour]
+        pricelist = self.parent.model.prices_today[hour::]
+        pricelist[len(pricelist):] = self.parent.model.prices_tomorrow[0:hour]
         new_hours = self._update_per_day(pricelist)
         
         today = self._update_interim_lists(range(hour,24), today, new_hours, hour)
