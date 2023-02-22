@@ -43,6 +43,12 @@ class ChargerBase:
     def max_amps(self, val) -> None:
         self._max_amps = val
 
+    @property
+    @abstractmethod
+    def type(self):
+        """type returns the implemented chargertype."""
+        pass
+
     @abstractmethod
     def get_allowed_amps(self) -> int:
         pass
