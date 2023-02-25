@@ -54,26 +54,29 @@ class ThresholdBase:
         else:
             _threephase = CURRENTS_THREEPHASE_1_16
             _onephase = CURRENTS_ONEPHASE_1_16
-
-        try:
-            divid = int(self._hub.sensors.carpowersensor.value)/int(self._hub.sensors.chargerobject_switch.current)
-            if int(self._hub.sensors.carpowersensor.value) == 0:
-                self._phases = Phases.Unknown
-                ret = _threephase
-            elif divid < 300:
-                self._phases = Phases.OnePhase
-                ret = _onephase
-            else:
-                self._phases = Phases.ThreePhase
-                ret = _threephase
-        except:
-            _LOGGER.debug("Currents-dictionary: could not divide charger amps with charger power. Falling back to legacy-method.")
-            if 0 < int(self._hub.sensors.carpowersensor.value) < 4000:
-                self._phases = Phases.OnePhase
-                ret = _onephase
-            else:
-                self._phases = Phases.ThreePhase
-                ret = _threephase
+        if hasattr(self._hub.sensors, "carpowersensor"):
+            try:
+                divid = int(self._hub.sensors.carpowersensor.value)/int(self._hub.sensors.chargerobject_switch.current)
+                if int(self._hub.sensors.carpowersensor.value) == 0:
+                    self._phases = Phases.Unknown
+                    ret = _threephase
+                elif divid < 300:
+                    self._phases = Phases.OnePhase
+                    ret = _onephase
+                else:
+                    self._phases = Phases.ThreePhase
+                    ret = _threephase
+            except:
+                _LOGGER.debug("Currents-dictionary: could not divide charger amps with charger power. Falling back to legacy-method.")
+                if 0 < int(self._hub.sensors.carpowersensor.value) < 4000:
+                    self._phases = Phases.OnePhase
+                    ret = _onephase
+                else:
+                    self._phases = Phases.ThreePhase
+                    ret = _threephase
+        else:
+            self._phases = Phases.ThreePhase
+            ret = _threephase
         self._currents = ret
         return ret
 

@@ -43,17 +43,18 @@ class IHubSensors:
         self.chargertype = chargerobject
         self.state_machine = state_machine
         resultdict = {}
-
+        
         self.charger_enabled = HubMember(
             data_type=bool,
             listenerentity=f"switch.{domain}_{nametoid(CHARGERENABLED)}",
             initval=False
         )
-        self.charger_done = HubMember(
-            data_type=bool,
-            listenerentity=f"binary_sensor.{domain}_{nametoid(CHARGERDONE)}",
-            initval=False
-        )
+        if self.chargertype.type.value != "None":
+            self.charger_done = HubMember(
+                data_type=bool,
+                listenerentity=f"binary_sensor.{domain}_{nametoid(CHARGERDONE)}",
+                initval=False
+            )
         self.locale = LocaleData(
             options.locale,
             domain
@@ -88,7 +89,7 @@ class IHubSensors:
                 init_override=True
             )
 
-        else:
+        elif self.chargertype.type.value != "None":
             self.chargerobject = ChargerObject(
                 data_type=self.chargertype.native_chargerstates,
                 listenerentity="no entity",
@@ -119,11 +120,12 @@ class IHubSensors:
 
     def init_hub_values(self):
         """Initialize values from Home Assistant on the set objects"""
-        if self.chargerobject is not None:
-            self.chargerobject.value = self.state_machine.states.get(self.chargerobject.entity).state if self.state_machine.states.get(self.chargerobject.entity) is not None else 0
-        self.chargerobject_switch.value = self.state_machine.states.get(self.chargerobject_switch.entity).state if self.state_machine.states.get(self.chargerobject_switch.entity) is not None else ""
-        self.chargerobject_switch.updatecurrent()
-        self.carpowersensor.value = self.state_machine.states.get(self.carpowersensor.entity).state if isinstance(self.state_machine.states.get(self.carpowersensor.entity),(float,int)) else 0
+        if self.chargertype.type.value != "None":
+            if self.chargerobject is not None:
+                self.chargerobject.value = self.state_machine.states.get(self.chargerobject.entity).state if self.state_machine.states.get(self.chargerobject.entity) is not None else 0
+            self.chargerobject_switch.value = self.state_machine.states.get(self.chargerobject_switch.entity).state if self.state_machine.states.get(self.chargerobject_switch.entity) is not None else ""
+            self.chargerobject_switch.updatecurrent()
+            self.carpowersensor.value = self.state_machine.states.get(self.carpowersensor.entity).state if isinstance(self.state_machine.states.get(self.carpowersensor.entity),(float,int)) else 0
         self.totalhourlyenergy.value = self.state_machine.states.get(self.totalhourlyenergy.entity) if isinstance(self.state_machine.states.get(self.totalhourlyenergy.entity),(float,int)) else 0
 
 

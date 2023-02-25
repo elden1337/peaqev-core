@@ -56,18 +56,19 @@ class HourSelectionOptions:
     absolute_top_price: float = field(init=False)
 
     def __post_init__(self):
-        self.absolute_top_price = self.set_absolute_top_price(self.top_price, self.min_price)
+        self.set_absolute_top_price(self.top_price, self.min_price)
 
-    def set_absolute_top_price(self, top, min) -> float:
+    def set_absolute_top_price(self, top, min) -> None:
         if not self.validate_top_min_prices(top, min):
             top = 0
             HourSelectionOptions.min_price = 0
             _LOGGER.warning(f"Setting top-price and min-price to zero because of min-price being larger than top-price. Please fix in options. top:{top} min:{min}")
         if top is None:
-            return float("inf")
-        if top <= 0:
-            return float("inf")
-        return float(top)
+            self.absolute_top_price = float("inf")
+        elif top <= 0:
+            self.absolute_top_price = float("inf")
+        else:
+            self.absolute_top_price = float(top)
 
     def validate_top_min_prices(self, top, min) -> bool:
         if any(
