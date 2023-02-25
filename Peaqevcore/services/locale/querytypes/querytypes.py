@@ -3,25 +3,12 @@ import logging
 
 from ....models.locale.enums.querytype import QueryType
 
-from .const import (
-    QUERYTYPE_AVERAGEOFTHREEHOURS,
-    QUERYTYPE_AVERAGEOFTHREEDAYS,
-    QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19,
-    QUERYTYPE_BASICMAX,
-    QUERYTYPE_AVERAGEOFFIVEDAYS,
-    QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR,
-    QUERYTYPE_HIGHLOAD,
-    QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22,
-    QUERYTYPE_SOLLENTUNA
-    )
 from .queryservice import QueryService
 from ....models.locale.peaks_model import PeaksModel
 from ....models.locale.enums.sum_types import SumTypes
 from ....models.locale.enums.time_periods import TimePeriods
 from ....models.locale.sumcounter import SumCounter
 from ....models.locale.queryproperties import QueryProperties
-
-# from .querysets import QUERYSETS
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -33,7 +20,6 @@ class LocaleQuery:
         time_calc: TimePeriods, 
         cycle: TimePeriods, 
         sum_counter: SumCounter = None,
-        #query_service: QueryService = None
         ) -> None:    
         self._peaks: PeaksModel = PeaksModel({})
         self._props = QueryProperties(

@@ -26,6 +26,3 @@ class Locale_Type:
 
     def is_quarterly(self) -> bool:
         return self.peak_cycle == TimePeriods.QuarterHourly
-
-
-

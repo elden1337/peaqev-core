@@ -3,17 +3,21 @@ from ..time_pattern import TimePattern
 from ....models.locale.enums.calendar_periods import CalendarPeriods
 from ..locale_model import Locale_Type
 from dataclasses import dataclass
+from ..querytypes.querysets import QUERYSETS
+from ..querytypes.querytypes import QUERYTYPES
 
 @dataclass(frozen=True)
 class Default(Locale_Type):
     observed_peak = QueryType.Max
     charged_peak = QueryType.Max
+    query_model = QUERYTYPES[QueryType.Max]
 
 
 @dataclass(frozen=True)
 class NoPeak(Locale_Type):
     observed_peak = QueryType.Max
     charged_peak = QueryType.Max
+    query_model = QUERYTYPES[QueryType.Max]
     free_charge_pattern = TimePattern([
         {
             CalendarPeriods.Month: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
