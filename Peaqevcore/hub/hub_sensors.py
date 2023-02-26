@@ -64,7 +64,7 @@ class IHubSensors:
             initval=0,
             startpeaks=options.startpeaks,
         )
-        if len(self.chargertype.entities.chargerentity):
+        if len(self.chargertype.entities.chargerentity) and self.chargertype.type.value != "None":
             self.chargerobject = ChargerObject(
                 data_type=self.chargertype.native_chargerstates,
                 listenerentity=self.chargertype.entities.chargerentity
