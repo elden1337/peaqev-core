@@ -5,6 +5,7 @@ from ..services.locale.querytypes.const import QUERYTYPE_AVERAGEOFTHREEDAYS, QUE
 from ..services.locale.querytypes.querytypes import QUERYTYPES
 from ..services.locale.countries.sweden import SE_SHE_AB, SE_Bjerke_Energi, SE_Gothenburg, SE_Kristinehamn, SE_Skovde, SE_Sollentuna, SE_Ellevio,SE_JBF
 from ..services.locale.countries.belgium import VregBelgium
+from ..services.locale.countries.default import NoPeak
 
 def test_SE_Bjerke_Energi():
     p = SE_Bjerke_Energi
@@ -202,4 +203,8 @@ def test_se_jbf():
     assert p.query_model.charged_peak == 1.4
     del(p)    
 
-
+def test_no_peak():
+    p = NoPeak
+    assert p.free_charge(p, mockdt=datetime.now()) is True
+    p.query_model.try_update(new_val=1.5, timestamp=datetime.combine(date(2023, 7, 19), time(22, 30)))
+    assert p.query_model.charged_peak == 0

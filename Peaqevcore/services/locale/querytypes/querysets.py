@@ -6,11 +6,18 @@ from .const import (
     QUERYTYPE_HIGHLOAD,
     QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22,
     QUERYTYPE_SOLLENTUNA,
-    QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR
+    QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR,
+    QUERYTYPE_NEVER
     )
 from .queryservice import Dividents
 
 QUERYSETS = {
+    QUERYTYPE_NEVER: QueryServiceModel(
+    [Group(divident=Dividents.AND, dateparts=[
+        DatePartModel(type=DatePartModelType.GreaterOrEqual, dttype=DatePartDateType.Hour, values=[24])
+        ])
+    ]
+    ),
     QUERYTYPE_SOLLENTUNA: QueryServiceModel(
     [Group(divident=Dividents.AND, dateparts=[
         DatePartModel(type=DatePartModelType.GreaterOrEqual, dttype=DatePartDateType.Hour, values=[7]),
