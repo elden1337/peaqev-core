@@ -30,7 +30,11 @@ class IHubSensors:
     power: Power = field(init=False)
 
     @abstractmethod
-    def setup(self):
+    def setup(self,
+        state_machine,
+        options: HubOptions,
+        domain: str, 
+        chargerobject: Any):
         pass
 
     def setup_base(
@@ -168,12 +172,6 @@ class HubSensors(IHubSensors):
             powersensor_includes_car=options.powersensor_includes_car
         )
 
-class HubSensorsFactory:
-    @staticmethod
-    def create(options: HubOptions) -> IHubSensors:
-        if options.peaqev_lite:
-            return HubSensorsLite()
-        return HubSensors()
 
 
 

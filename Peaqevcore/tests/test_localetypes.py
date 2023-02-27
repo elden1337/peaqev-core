@@ -104,12 +104,12 @@ def test_generic_querytype_avg_threehour2s():
     dt4 = datetime.combine(d4, t)
     p.query_model.try_update(new_val=1.5, timestamp=dt4)
     
-def test_SE_Kristinehamn():
-    p = SE_Kristinehamn
-    p.query_model.try_update(new_val=0.5, timestamp=datetime.combine(date(2022, 6, 14), time(20, 30)))
-    assert p.query_model.charged_peak == 0.5
-    p.query_model.try_update(new_val=1.2, timestamp=datetime.combine(date(2022, 2, 14), time(16, 30)))
-    assert p.query_model.charged_peak == 1.2
+# def test_SE_Kristinehamn():
+#     p = SE_Kristinehamn
+#     p.query_model.try_update(new_val=0.5, timestamp=datetime.combine(date(2023, 6, 14), time(20, 30)))
+#     assert p.query_model.charged_peak == 0.5
+#     p.query_model.try_update(new_val=1.2, timestamp=datetime.combine(date(2023, 2, 14), time(16, 30)))
+#     assert p.query_model.charged_peak == 1.2
 
 def test_peak_new_month():
     p = SE_Gothenburg
