@@ -82,7 +82,7 @@ class Hoursselection:
 
     def update_top_price(self, dyn_top_price) -> None: 
         self.model.options.set_absolute_top_price(dyn_top_price, self.model.options.min_price)
-        self.update(caller="today")
+        self.update()
 
     def update(self, testhour:int = None, caller:str = None) -> None:
         if testhour is not None:
