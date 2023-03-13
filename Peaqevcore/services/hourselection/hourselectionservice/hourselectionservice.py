@@ -3,8 +3,8 @@ from datetime import datetime
 from typing import Tuple
 import statistics as stat
 from ....models.hourselection.cautionhourtype import CautionHourType
-from .hoursselection_helpers import HourSelectionHelpers
-from .hoursselection_helpers import HourSelectionCalculations
+from .hoursselection_helpers import convert_collections, try_remove
+from .hourselection_calculations import normalize_prices, rank_prices
 from ....models.hourselection.hourobject import HourObject
 from ....models.hourselection.hourselectionmodels import HourSelectionModel
 from ....models.hourselection.hourtypelist import HourTypeList
@@ -22,8 +22,6 @@ class HourSelectionService:
         self.parent = parent
         self._mock_hour = base_mock_hour
         self._preserve_interim: bool = False
-        self.calc = HourSelectionCalculations()
-        self.helpers = HourSelectionHelpers()
 
     def update(self, caller: str = None) -> None:
         if self._preserve_interim and caller == "today":
@@ -44,11 +42,11 @@ class HourSelectionService:
         if prices is not None and len(prices) > 1:
             pricedict = self.helpers.create_dict(prices)
             normalized_pricedict = self.helpers.create_dict(
-                self.calc.normalize_prices(prices)
+                normalize_prices(prices)
                 )
             if stat.stdev(prices) > 0.05:
                 ready_hours = self._determine_hours(
-                    self.calc.rank_prices(
+                    rank_prices(
                         pricedict, 
                         normalized_pricedict,
                         self.parent.model.adjusted_average
@@ -101,8 +99,14 @@ class HourSelectionService:
 
     def _add_remove_limited_hours(self, hours: HourObject) -> HourObject:
         """Removes cheap hours and adds expensive hours set by user limitation"""
-        if hours is None or all([len(hours.nh) == 0, len(hours.ch) == 0, len(hours.dyn_ch) == 0]):
+        if hours is None or all(
+            [
+                len(hours.nh) == 0, 
+                len(hours.ch) == 0, 
+                len(hours.dyn_ch) == 0
+            ]):
             return HourObject([],[],{},offset_dict=hours.offset_dict,pricedict=hours.pricedict)
+        
         hours.add_expensive_hours(self.parent.model.options.absolute_top_price)
         hours.remove_cheap_hours(self.parent.model.options.min_price)
         
@@ -154,22 +158,22 @@ class HourSelectionService:
         return today, tomorrow
 
     def _update_interim_lists(self, _range: range, old: HourObject, new: HourObject, index_devidation: int) -> HourObject:
-        _new = HourSelectionHelpers._convert_collections(new, index_devidation)
+        _new = convert_collections(new, index_devidation)
         for i in _range:
             if i in _new.nh:
                 if i not in old.nh:
                     old.nh.append(i)
-                    old.ch = HourSelectionHelpers._try_remove(i, old.ch)
-                    old.dyn_ch = HourSelectionHelpers._try_remove(i, old.dyn_ch)
+                    old.ch = try_remove(i, old.ch)
+                    old.dyn_ch = try_remove(i, old.dyn_ch)
             elif i in _new.ch:
                 if i not in old.ch:
                     old.ch.append(i)
                     old.dyn_ch[i] = _new.dyn_ch[i]
-                    old.nh = HourSelectionHelpers._try_remove(i, old.nh)
+                    old.nh = try_remove(i, old.nh)
             else:
-                old.nh = HourSelectionHelpers._try_remove(i, old.nh)
-                old.ch = HourSelectionHelpers._try_remove(i, old.ch)
-                old.dyn_ch = HourSelectionHelpers._try_remove(i, old.dyn_ch)
+                old.nh = try_remove(i, old.nh)
+                old.ch = try_remove(i, old.ch)
+                old.dyn_ch = try_remove(i, old.dyn_ch)
             old.nh.sort()
             old.ch.sort()
             old.dyn_ch = dict(sorted(old.dyn_ch.items()))

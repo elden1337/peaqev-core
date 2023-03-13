@@ -1,7 +1,6 @@
 import pytest
 import statistics as stat
 from ..services.hourselection.hoursselection import Hoursselection as h
-from ..services.hourselection.hourselectionservice.hoursselection_helpers import HourSelectionHelpers, HourSelectionCalculations
 from ..models.hourselection.cautionhourtype import CautionHourType, VALUES_CONVERSION
 
 MOCKPRICES1 =[0.129, 0.123, 0.077, 0.064, 0.149, 0.172, 1, 2.572, 2.688, 2.677, 2.648, 2.571, 2.561, 2.07, 2.083, 2.459, 2.508, 2.589, 2.647, 2.648, 2.603, 2.588, 1.424, 0.595]

@@ -3,7 +3,7 @@ from ...models.hourselection.cautionhourtype import CautionHourType
 from ...models.hourselection.hourselectionmodels import HourSelectionModel, HourSelectionOptions
 from ...models.hourselection.hourtypelist import HourTypeList
 from .hourselectionservice.hourselectionservice import HourSelectionService
-from .hourselectionservice.hoursselection_helpers import HourSelectionHelpers
+from .hourselectionservice.hoursselection_helpers import convert_none_list
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -15,10 +15,10 @@ class Hoursselection:
             cautionhour_type: str = CautionHourType.SUAVE.value,
             base_mock_hour: int = None
     ):
-        cc = cautionhour_type
+        self.cautionhour_type_enum = CautionHourType.Parse(cautionhour_type)
         self.model = HourSelectionModel(
             options=HourSelectionOptions(
-                cautionhour_type=CautionHourType.get_num_value(cc), 
+                cautionhour_type=CautionHourType.get_num_value(cautionhour_type), 
                 min_price=min_price,
                 top_price= absolute_top_price
                     )
@@ -67,7 +67,7 @@ class Hoursselection:
 
     @prices_tomorrow.setter
     def prices_tomorrow(self, val):
-        self.model.prices_tomorrow = HourSelectionHelpers.convert_none_list(val)
+        self.model.prices_tomorrow = convert_none_list(val)
         if self.model.prices_tomorrow != []:
             self.service._preserve_interim = False
         self.update()

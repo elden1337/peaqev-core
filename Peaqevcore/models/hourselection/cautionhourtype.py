@@ -17,6 +17,13 @@ class CautionHourType(Enum):
         
         return VALUES_CONVERSION[tt]
 
+    @staticmethod
+    def parse(stringtype):
+        try:
+            return CautionHourType[stringtype]
+        except:
+            raise TypeError
+
 VALUES_CONVERSION = {
             CautionHourType.SUAVE.value: 0.75,
             CautionHourType.INTERMEDIATE.value: 0.5,
