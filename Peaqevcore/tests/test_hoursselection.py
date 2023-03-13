@@ -107,7 +107,7 @@ def test_create_dict_error():
 def test_rank_prices_permax():
     hourly = create_dict(MOCKPRICES1)
     norm_hourly = create_dict(normalize_prices(MOCKPRICES1))
-    ret = rank_prices(hourly, norm_hourly)
+    ret = rank_prices(hourly, norm_hourly, CautionHourType.SUAVE)
     for r in ret:
         assert 0 <= ret[r]["permax"] <= 1
 
@@ -696,12 +696,14 @@ def test_230205_cautionhourtypes():
     nonhours = {
         CautionHourType.SUAVE.value: [6, 7, 8, 9, 10, 11,12],
         CautionHourType.INTERMEDIATE.value: [17, 6, 7, 8, 9, 10, 11, 12, 13],
-        CautionHourType.AGGRESSIVE.value: [17, 6, 7, 8, 9, 10, 11, 12, 13]
+        CautionHourType.AGGRESSIVE.value: [17, 6, 7, 8, 9, 10, 11, 12, 13],
+        CautionHourType.SCROOGE.value: [17, 6, 7, 8, 9, 10, 11, 12, 13]
     }
     cautionhours = {
         CautionHourType.SUAVE.value: {4: 0.51, 5: 0.47, 13: 0.29, 14: 0.46, 16: 0.51, 17: 0.41, 18: 0.45, 19: 0.46, 20: 0.51, 21: 0.51, 22: 0.51},
         CautionHourType.INTERMEDIATE.value: {4: 0.46, 5: 0.43, 14: 0.42, 16: 0.46, 18: 0.41, 19: 0.42, 20: 0.46, 21: 0.46, 22: 0.46},
-        CautionHourType.AGGRESSIVE.value: {4: 0.44,5: 0.41, 14: 0.4, 16: 0.44, 18: 0.39, 19: 0.4, 20: 0.44, 21: 0.44, 22: 0.44}
+        CautionHourType.AGGRESSIVE.value: {4: 0.44,5: 0.41, 14: 0.4, 16: 0.44, 18: 0.39, 19: 0.4, 20: 0.44, 21: 0.44, 22: 0.44},
+        CautionHourType.SCROOGE.value: {4: 0.44,5: 0.41, 14: 0.4, 16: 0.44, 18: 0.39, 19: 0.4, 20: 0.44, 21: 0.44, 22: 0.44}
     }
     for c in CautionHourType:
         r = h(cautionhour_type=c, absolute_top_price=3, min_price=0)
