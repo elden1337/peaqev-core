@@ -2,9 +2,9 @@ import logging
 from datetime import datetime
 from typing import Tuple
 import statistics as stat
-from ....models.hourselection.cautionhourtype import CautionHourType
+from ....models.hourselection.cautionhourtype import CautionHourType, MAX_HOURS
 from .hoursselection_helpers import convert_collections, try_remove, create_dict
-from .hourselection_calculations import normalize_prices, rank_prices
+from .hourselection_calculations import normalize_prices, rank_prices, get_offset_dict
 from ....models.hourselection.hourobject import HourObject
 from ....models.hourselection.hourselectionmodels import HourSelectionModel
 from ....models.hourselection.hourtypelist import HourTypeList
@@ -14,7 +14,8 @@ _LOGGER = logging.getLogger(__name__)
 ALLOWANCE_SCHEMA = {
     CautionHourType.get_num_value(CautionHourType.SUAVE): 1.15,
     CautionHourType.get_num_value(CautionHourType.INTERMEDIATE): 1.05,
-    CautionHourType.get_num_value(CautionHourType.AGGRESSIVE): 1
+    CautionHourType.get_num_value(CautionHourType.AGGRESSIVE): 1,
+    CautionHourType.get_num_value(CautionHourType.SCROOGE): 1
 }
 
 class HourSelectionService:
@@ -49,6 +50,7 @@ class HourSelectionService:
                     rank_prices(
                         pricedict, 
                         normalized_pricedict,
+                        self.parent.cautionhour_type_enum,
                         self.parent.model.adjusted_average
                         ), 
                         prices
@@ -61,20 +63,9 @@ class HourSelectionService:
                     )
             else:
                 ret= HourObject(nh=[], ch=[], dyn_ch={},pricedict=pricedict)
-            ret.offset_dict=self._get_offset_dict(normalized_pricedict)
+            ret.offset_dict=get_offset_dict(normalized_pricedict)
             return ret
         return HourObject([],[],{})
-
-    def _get_offset_dict(self, normalized_hourdict: dict):
-        ret = {}
-        _prices = [p-min(normalized_hourdict.values()) for p in normalized_hourdict.values()]
-        average_val = stat.mean(_prices)
-        for i in range(0,24):
-            try:
-                ret[i] = round((_prices[i]/average_val) - 1,2)
-            except:
-                ret[i] = 1
-        return ret
 
     def update_hour_lists(
         self, 
@@ -105,8 +96,10 @@ class HourSelectionService:
                 len(hours.ch) == 0, 
                 len(hours.dyn_ch) == 0
             ]):
-            return HourObject([],[],{},offset_dict=hours.offset_dict,pricedict=hours.pricedict)
-        
+            return HourObject(
+                offset_dict=hours.offset_dict,
+                pricedict=hours.pricedict
+                )
         hours.add_expensive_hours(self.parent.model.options.absolute_top_price)
         hours.remove_cheap_hours(self.parent.model.options.min_price)
         
@@ -128,7 +121,8 @@ class HourSelectionService:
                     float(price_item["permax"]) <= self.parent.model.options.cautionhour_type,
                     float(price_item["val"]) <= (sum(prices)/len(prices))
                 ])
-        second = (self.parent.model.current_peak > 0 and self.parent.model.current_peak*price_item["permax"] > 1) or self.parent.model.current_peak == 0
+        _peak = self.parent.model.current_peak
+        second = (_peak > 0 and _peak*price_item["permax"] > 1) or _peak == 0
         return all([first, second])
 
     def __set_charge_allowance(self, price_input) -> float:

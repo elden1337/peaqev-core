@@ -671,13 +671,15 @@ def test_cautionhourtypes():
     nonhours = {
         CautionHourType.SUAVE.value: [14, 15, 16, 17, 18,20,21],
         CautionHourType.INTERMEDIATE.value: [12, 13, 14, 15, 16, 17,18,20,21,22,23],
-        CautionHourType.AGGRESSIVE.value: [12, 13, 14, 15, 16, 17,18,20,21,22,23]
+        CautionHourType.AGGRESSIVE.value: [12, 13, 14, 15, 16, 17,18,20,21,22,23],
+        CautionHourType.SCROOGE.value: [12, 13, 14, 15, 16, 17,18,20,21,22,23]
     }
 
     cautionhours = {
         CautionHourType.SUAVE.value: {12: 0.38, 13: 0.34, 19:0.54, 22: 0.32, 23: 0.39},
         CautionHourType.INTERMEDIATE.value: {19:0.49},
-        CautionHourType.AGGRESSIVE.value: {19:0.47}
+        CautionHourType.AGGRESSIVE.value: {19:0.47},
+        CautionHourType.SCROOGE.value: {19:0.47}
     }
     for c in CautionHourType:
         r = h(cautionhour_type=c, absolute_top_price=3, min_price=0)
@@ -733,6 +735,27 @@ def test_230208():
     assert r.non_hours == [14,15,16,17,18,19,20,7,8,9,10,11,12]
     r.service._mock_hour = 14
     assert r.non_hours == [14,15,16,17,18,19,20,7,8,9,10,11,12,13]
+
+def test_230313_issue_72():
+    r = h(cautionhour_type=CautionHourType.AGGRESSIVE.value, absolute_top_price=3, min_price=0.0)
+    r.prices = [0.709, 0.557, 0.492, 0.433, 0.48, 0.486, 0.548, 1.106, 1.136, 0.604, 0.445, 0.439, 0.474, 0.481, 0.464, 0.449, 0.45, 0.674, 0.747, 0.695, 0.624, 0.6, 0.492, 0.332]
+    r.prices_tomorrow = [0.137, 0.065, 0.06, 0.035, 0.066, 0.386, 0.61, 0.994, 1.325, 1.164, 1.056, 0.872, 0.762, 0.853, 0.937, 0.856, 1.128, 1.43, 1.489, 1.489, 1.42, 0.913, 0.778, 0.724]
+    r.adjusted_average = 1.44
+    r.update_top_price(1.45)
+    r.service._mock_hour = 14
+    assert r.non_hours == [7,8,9,10]
+    assert r.get_average_kwh_price() == 0.47
+
+def test_230313_issue_72_scrooge():
+    r = h(cautionhour_type=CautionHourType.SCROOGE, absolute_top_price=3, min_price=0.0)
+    r.prices = [0.709, 0.557, 0.492, 0.433, 0.48, 0.486, 0.548, 1.106, 1.136, 0.604, 0.445, 0.439, 0.474, 0.481, 0.464, 0.449, 0.45, 0.674, 0.747, 0.695, 0.624, 0.6, 0.492, 0.332]
+    r.prices_tomorrow = [0.137, 0.065, 0.06, 0.035, 0.066, 0.386, 0.61, 0.994, 1.325, 1.164, 1.056, 0.872, 0.762, 0.853, 0.937, 0.856, 1.128, 1.43, 1.489, 1.489, 1.42, 0.913, 0.778, 0.724]
+    r.adjusted_average = 1.44
+    r.update_top_price(1.45)
+    r.service._mock_hour = 14
+    assert r.non_hours == [17,18,19,20,21,6,7,8,9,10,11,12,13]
+    assert r.get_average_kwh_price() == 0.25
+    
 
 """important, fix this later."""
 # def test_230208_2():

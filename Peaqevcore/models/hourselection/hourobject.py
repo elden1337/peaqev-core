@@ -2,9 +2,9 @@ from dataclasses import dataclass, field
 
 @dataclass
 class HourObject:
-    nh: list
-    ch: list
-    dyn_ch: dict
+    nh: list = field(default_factory=lambda: [])
+    ch: list = field(default_factory=lambda: [])
+    dyn_ch: dict = field(default_factory=lambda: {})
     offset_dict: dict = field(default_factory=lambda: {})
     pricedict: dict = field(default_factory=lambda: {})
 
