@@ -1,6 +1,8 @@
 import pytest
 import statistics as stat
 from ..services.hourselection.hoursselection import Hoursselection as h
+from ..services.hourselection.hourselectionservice.hourselection_calculations import rank_prices, normalize_prices
+from ..services.hourselection.hourselectionservice.hoursselection_helpers import create_dict
 from ..models.hourselection.cautionhourtype import CautionHourType, VALUES_CONVERSION
 
 MOCKPRICES1 =[0.129, 0.123, 0.077, 0.064, 0.149, 0.172, 1, 2.572, 2.688, 2.677, 2.648, 2.571, 2.561, 2.07, 2.083, 2.459, 2.508, 2.589, 2.647, 2.648, 2.603, 2.588, 1.424, 0.595]
@@ -94,28 +96,18 @@ def test_mockprices3_caution_hours():
     assert r.caution_hours == [22,23]
 
 def test_create_dict():
-    r = h()
-    ret = r.service.helpers.create_dict(MOCKPRICES1)
+    ret = create_dict(MOCKPRICES1)
     assert ret[20] == 2.603
     assert len(ret) == 24
 
 def test_create_dict_error():
-    r = h()
     with pytest.raises(ValueError):
-              r.service.helpers.create_dict(MOCKPRICES_SHORT)
-
-# def test_rank_prices():
-#     r = h()
-#     hourly = r._create_dict(MOCKPRICES1)
-#     norm_hourly = r._create_dict(r._normalize_prices(MOCKPRICES1))
-#     ret = r._rank_prices(hourly, norm_hourly)
-#     assert ret == {6: {'permax': 0.37, 'val': 1}, 7: {'permax': 0.96, 'val': 2.572}, 8: {'permax': 1.0, 'val': 2.688}, 9: {'permax': 1.0, 'val': 2.677}, 10: {'permax': 0.99, 'val': 2.648}, 11: {'permax': 0.96, 'val': 2.571}, 12: {'permax': 0.95, 'val': 2.561}, 13: {'permax': 0.77, 'val': 2.07}, 14: {'permax': 0.77, 'val': 2.083}, 15: {'permax': 0.91, 'val': 2.459}, 16: {'permax': 0.93, 'val': 2.508}, 17: {'permax': 0.96, 'val': 2.589}, 18: {'permax': 0.98, 'val': 2.647}, 19: {'permax': 0.99, 'val': 2.648}, 20: {'permax': 0.97, 'val': 2.603}, 21: {'permax': 0.96, 'val': 2.588}, 22: {'permax': 0.53, 'val': 1.424}} == {6: {'permax': 0.37, 'val': 1}, 7: {'permax': 0.96, 'val': 2.572}, 8: {'permax': 1.0, 'val': 2.688}, 9: {'permax': 1.0, 'val': 2.677}, 10: {'permax': 0.99, 'val': 2.648}, 11: {'permax': 0.96, 'val': 2.571}, 12: {'permax': 0.95, 'val': 2.561}, 13: {'permax': 0.77, 'val': 2.07}, 14: {'permax': 0.77, 'val': 2.083}, 15: {'permax': 0.91, 'val': 2.459}, 16: {'permax': 0.93, 'val': 2.508}, 17: {'permax': 0.96, 'val': 2.589}, 18: {'permax': 0.98, 'val': 2.647}, 19: {'permax': 0.99, 'val': 2.648}, 20: {'permax': 0.97, 'val': 2.603}, 21: {'permax': 0.96, 'val': 2.588}, 22: {'permax': 0.53, 'val': 1.424}, 23: {'permax': 0.22, 'val': 0.595}}
+              create_dict(MOCKPRICES_SHORT)
 
 def test_rank_prices_permax():
-    r = h()
-    hourly = r.service.helpers.create_dict(MOCKPRICES1)
-    norm_hourly = r.service.helpers.create_dict(r.service.calc.normalize_prices(MOCKPRICES1))
-    ret = r.service.calc.rank_prices(hourly, norm_hourly)
+    hourly = create_dict(MOCKPRICES1)
+    norm_hourly = create_dict(normalize_prices(MOCKPRICES1))
+    ret = rank_prices(hourly, norm_hourly)
     for r in ret:
         assert 0 <= ret[r]["permax"] <= 1
 

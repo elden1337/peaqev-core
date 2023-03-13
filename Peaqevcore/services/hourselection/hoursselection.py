@@ -15,7 +15,7 @@ class Hoursselection:
             cautionhour_type: str = CautionHourType.SUAVE.value,
             base_mock_hour: int = None
     ):
-        self.cautionhour_type_enum = CautionHourType.Parse(cautionhour_type)
+        #self.cautionhour_type_enum = CautionHourType[cautionhour_type]
         self.model = HourSelectionModel(
             options=HourSelectionOptions(
                 cautionhour_type=CautionHourType.get_num_value(cautionhour_type), 

@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Tuple
 import statistics as stat
 from ....models.hourselection.cautionhourtype import CautionHourType
-from .hoursselection_helpers import convert_collections, try_remove
+from .hoursselection_helpers import convert_collections, try_remove, create_dict
 from .hourselection_calculations import normalize_prices, rank_prices
 from ....models.hourselection.hourobject import HourObject
 from ....models.hourselection.hourselectionmodels import HourSelectionModel
@@ -40,8 +40,8 @@ class HourSelectionService:
     def _update_per_day(self, prices: list) -> HourObject:
         pricedict = {}
         if prices is not None and len(prices) > 1:
-            pricedict = self.helpers.create_dict(prices)
-            normalized_pricedict = self.helpers.create_dict(
+            pricedict = create_dict(prices)
+            normalized_pricedict = create_dict(
                 normalize_prices(prices)
                 )
             if stat.stdev(prices) > 0.05:
