@@ -1,7 +1,8 @@
 import pytest
 import statistics as stat
 from ..services.hourselection.hoursselection import Hoursselection as h
-from ..services.hourselection.hourselectionservice.hoursselection_helpers import HourSelectionHelpers, HourSelectionCalculations
+from ..services.hourselection.hourselectionservice.hourselection_calculations import rank_prices, normalize_prices
+from ..services.hourselection.hourselectionservice.hoursselection_helpers import create_dict
 from ..models.hourselection.cautionhourtype import CautionHourType, VALUES_CONVERSION
 
 MOCKPRICES1 =[0.129, 0.123, 0.077, 0.064, 0.149, 0.172, 1, 2.572, 2.688, 2.677, 2.648, 2.571, 2.561, 2.07, 2.083, 2.459, 2.508, 2.589, 2.647, 2.648, 2.603, 2.588, 1.424, 0.595]
@@ -95,28 +96,18 @@ def test_mockprices3_caution_hours():
     assert r.caution_hours == [22,23]
 
 def test_create_dict():
-    r = h()
-    ret = r.service.helpers.create_dict(MOCKPRICES1)
+    ret = create_dict(MOCKPRICES1)
     assert ret[20] == 2.603
     assert len(ret) == 24
 
 def test_create_dict_error():
-    r = h()
     with pytest.raises(ValueError):
-              r.service.helpers.create_dict(MOCKPRICES_SHORT)
-
-# def test_rank_prices():
-#     r = h()
-#     hourly = r._create_dict(MOCKPRICES1)
-#     norm_hourly = r._create_dict(r._normalize_prices(MOCKPRICES1))
-#     ret = r._rank_prices(hourly, norm_hourly)
-#     assert ret == {6: {'permax': 0.37, 'val': 1}, 7: {'permax': 0.96, 'val': 2.572}, 8: {'permax': 1.0, 'val': 2.688}, 9: {'permax': 1.0, 'val': 2.677}, 10: {'permax': 0.99, 'val': 2.648}, 11: {'permax': 0.96, 'val': 2.571}, 12: {'permax': 0.95, 'val': 2.561}, 13: {'permax': 0.77, 'val': 2.07}, 14: {'permax': 0.77, 'val': 2.083}, 15: {'permax': 0.91, 'val': 2.459}, 16: {'permax': 0.93, 'val': 2.508}, 17: {'permax': 0.96, 'val': 2.589}, 18: {'permax': 0.98, 'val': 2.647}, 19: {'permax': 0.99, 'val': 2.648}, 20: {'permax': 0.97, 'val': 2.603}, 21: {'permax': 0.96, 'val': 2.588}, 22: {'permax': 0.53, 'val': 1.424}} == {6: {'permax': 0.37, 'val': 1}, 7: {'permax': 0.96, 'val': 2.572}, 8: {'permax': 1.0, 'val': 2.688}, 9: {'permax': 1.0, 'val': 2.677}, 10: {'permax': 0.99, 'val': 2.648}, 11: {'permax': 0.96, 'val': 2.571}, 12: {'permax': 0.95, 'val': 2.561}, 13: {'permax': 0.77, 'val': 2.07}, 14: {'permax': 0.77, 'val': 2.083}, 15: {'permax': 0.91, 'val': 2.459}, 16: {'permax': 0.93, 'val': 2.508}, 17: {'permax': 0.96, 'val': 2.589}, 18: {'permax': 0.98, 'val': 2.647}, 19: {'permax': 0.99, 'val': 2.648}, 20: {'permax': 0.97, 'val': 2.603}, 21: {'permax': 0.96, 'val': 2.588}, 22: {'permax': 0.53, 'val': 1.424}, 23: {'permax': 0.22, 'val': 0.595}}
+              create_dict(MOCKPRICES_SHORT)
 
 def test_rank_prices_permax():
-    r = h()
-    hourly = r.service.helpers.create_dict(MOCKPRICES1)
-    norm_hourly = r.service.helpers.create_dict(r.service.calc.normalize_prices(MOCKPRICES1))
-    ret = r.service.calc.rank_prices(hourly, norm_hourly)
+    hourly = create_dict(MOCKPRICES1)
+    norm_hourly = create_dict(normalize_prices(MOCKPRICES1))
+    ret = rank_prices(hourly, norm_hourly, CautionHourType.SUAVE)
     for r in ret:
         assert 0 <= ret[r]["permax"] <= 1
 
@@ -680,13 +671,15 @@ def test_cautionhourtypes():
     nonhours = {
         CautionHourType.SUAVE.value: [14, 15, 16, 17, 18,20,21],
         CautionHourType.INTERMEDIATE.value: [12, 13, 14, 15, 16, 17,18,20,21,22,23],
-        CautionHourType.AGGRESSIVE.value: [12, 13, 14, 15, 16, 17,18,20,21,22,23]
+        CautionHourType.AGGRESSIVE.value: [12, 13, 14, 15, 16, 17,18,20,21,22,23],
+        CautionHourType.SCROOGE.value: [12, 13, 14, 15, 16, 17,18,20,21,22,23]
     }
 
     cautionhours = {
         CautionHourType.SUAVE.value: {12: 0.38, 13: 0.34, 19:0.54, 22: 0.32, 23: 0.39},
         CautionHourType.INTERMEDIATE.value: {19:0.49},
-        CautionHourType.AGGRESSIVE.value: {19:0.47}
+        CautionHourType.AGGRESSIVE.value: {19:0.47},
+        CautionHourType.SCROOGE.value: {19:0.47}
     }
     for c in CautionHourType:
         r = h(cautionhour_type=c, absolute_top_price=3, min_price=0)
@@ -703,12 +696,14 @@ def test_230205_cautionhourtypes():
     nonhours = {
         CautionHourType.SUAVE.value: [6, 7, 8, 9, 10, 11,12],
         CautionHourType.INTERMEDIATE.value: [17, 6, 7, 8, 9, 10, 11, 12, 13],
-        CautionHourType.AGGRESSIVE.value: [17, 6, 7, 8, 9, 10, 11, 12, 13]
+        CautionHourType.AGGRESSIVE.value: [17, 6, 7, 8, 9, 10, 11, 12, 13],
+        CautionHourType.SCROOGE.value: [17, 6, 7, 8, 9, 10, 11, 12, 13]
     }
     cautionhours = {
         CautionHourType.SUAVE.value: {4: 0.51, 5: 0.47, 13: 0.29, 14: 0.46, 16: 0.51, 17: 0.41, 18: 0.45, 19: 0.46, 20: 0.51, 21: 0.51, 22: 0.51},
         CautionHourType.INTERMEDIATE.value: {4: 0.46, 5: 0.43, 14: 0.42, 16: 0.46, 18: 0.41, 19: 0.42, 20: 0.46, 21: 0.46, 22: 0.46},
-        CautionHourType.AGGRESSIVE.value: {4: 0.44,5: 0.41, 14: 0.4, 16: 0.44, 18: 0.39, 19: 0.4, 20: 0.44, 21: 0.44, 22: 0.44}
+        CautionHourType.AGGRESSIVE.value: {4: 0.44,5: 0.41, 14: 0.4, 16: 0.44, 18: 0.39, 19: 0.4, 20: 0.44, 21: 0.44, 22: 0.44},
+        CautionHourType.SCROOGE.value: {4: 0.44,5: 0.41, 14: 0.4, 16: 0.44, 18: 0.39, 19: 0.4, 20: 0.44, 21: 0.44, 22: 0.44}
     }
     for c in CautionHourType:
         r = h(cautionhour_type=c, absolute_top_price=3, min_price=0)
@@ -742,6 +737,27 @@ def test_230208():
     assert r.non_hours == [14,15,16,17,18,19,20,7,8,9,10,11,12]
     r.service._mock_hour = 14
     assert r.non_hours == [14,15,16,17,18,19,20,7,8,9,10,11,12,13]
+
+def test_230313_issue_72():
+    r = h(cautionhour_type=CautionHourType.AGGRESSIVE.value, absolute_top_price=3, min_price=0.0)
+    r.prices = [0.709, 0.557, 0.492, 0.433, 0.48, 0.486, 0.548, 1.106, 1.136, 0.604, 0.445, 0.439, 0.474, 0.481, 0.464, 0.449, 0.45, 0.674, 0.747, 0.695, 0.624, 0.6, 0.492, 0.332]
+    r.prices_tomorrow = [0.137, 0.065, 0.06, 0.035, 0.066, 0.386, 0.61, 0.994, 1.325, 1.164, 1.056, 0.872, 0.762, 0.853, 0.937, 0.856, 1.128, 1.43, 1.489, 1.489, 1.42, 0.913, 0.778, 0.724]
+    r.adjusted_average = 1.44
+    r.update_top_price(1.45)
+    r.service._mock_hour = 14
+    assert r.non_hours == [7,8,9,10]
+    assert r.get_average_kwh_price() == 0.47
+
+def test_230313_issue_72_scrooge():
+    r = h(cautionhour_type=CautionHourType.SCROOGE, absolute_top_price=3, min_price=0.0)
+    r.prices = [0.709, 0.557, 0.492, 0.433, 0.48, 0.486, 0.548, 1.106, 1.136, 0.604, 0.445, 0.439, 0.474, 0.481, 0.464, 0.449, 0.45, 0.674, 0.747, 0.695, 0.624, 0.6, 0.492, 0.332]
+    r.prices_tomorrow = [0.137, 0.065, 0.06, 0.035, 0.066, 0.386, 0.61, 0.994, 1.325, 1.164, 1.056, 0.872, 0.762, 0.853, 0.937, 0.856, 1.128, 1.43, 1.489, 1.489, 1.42, 0.913, 0.778, 0.724]
+    r.adjusted_average = 1.44
+    r.update_top_price(1.45)
+    r.service._mock_hour = 14
+    assert r.non_hours == [17,18,19,20,21,6,7,8,9,10,11,12,13]
+    assert r.get_average_kwh_price() == 0.24
+    
 
 """important, fix this later."""
 # def test_230208_2():

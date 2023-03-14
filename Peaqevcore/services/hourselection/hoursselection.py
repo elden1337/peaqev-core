@@ -3,7 +3,7 @@ from ...models.hourselection.cautionhourtype import CautionHourType
 from ...models.hourselection.hourselectionmodels import HourSelectionModel, HourSelectionOptions
 from ...models.hourselection.hourtypelist import HourTypeList
 from .hourselectionservice.hourselectionservice import HourSelectionService
-from .hourselectionservice.hoursselection_helpers import HourSelectionHelpers
+from .hourselectionservice.hoursselection_helpers import convert_none_list
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -15,10 +15,10 @@ class Hoursselection:
             cautionhour_type: str = CautionHourType.SUAVE.value,
             base_mock_hour: int = None
     ):
-        cc = cautionhour_type
+        self.cautionhour_type_enum = CautionHourType(cautionhour_type)
         self.model = HourSelectionModel(
             options=HourSelectionOptions(
-                cautionhour_type=CautionHourType.get_num_value(cc), 
+                cautionhour_type=CautionHourType.get_num_value(cautionhour_type), 
                 min_price=min_price,
                 top_price= absolute_top_price
                     )
@@ -67,7 +67,7 @@ class Hoursselection:
 
     @prices_tomorrow.setter
     def prices_tomorrow(self, val):
-        self.model.prices_tomorrow = HourSelectionHelpers.convert_none_list(val)
+        self.model.prices_tomorrow = convert_none_list(val)
         if self.model.prices_tomorrow != []:
             self.service._preserve_interim = False
         self.update()
@@ -81,7 +81,13 @@ class Hoursselection:
         self.model.adjusted_average = val
 
     def update_top_price(self, dyn_top_price) -> None: 
-        self.model.options.set_absolute_top_price(dyn_top_price, self.model.options.min_price)
+        self.model.options.set_absolute_top_price(
+            min(
+            dyn_top_price,
+            self.model.options.absolute_top_price
+            ), 
+            self.model.options.min_price
+            )
         self.update()
 
     def update(self, testhour:int = None, caller:str = None) -> None:
