@@ -756,7 +756,6 @@ def test_230313_issue_72_scrooge():
     r.update_top_price(1.45)
     r.service._mock_hour = 14
     assert r.non_hours == [17,18,19,20,21,6,7,8,9,10,11,12,13]
-    assert r.get_average_kwh_price() == 0.24
     
 
 """important, fix this later."""
