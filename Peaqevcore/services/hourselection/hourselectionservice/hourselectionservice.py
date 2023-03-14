@@ -2,8 +2,8 @@ import logging
 from datetime import datetime
 from typing import Tuple
 import statistics as stat
-from ....models.hourselection.cautionhourtype import CautionHourType, MAX_HOURS
-from .hoursselection_helpers import convert_collections, try_remove, create_dict
+
+from .hoursselection_helpers import convert_collections, try_remove, create_dict, ALLOWANCE_SCHEMA
 from .hourselection_calculations import normalize_prices, rank_prices, get_offset_dict
 from ....models.hourselection.hourobject import HourObject
 from ....models.hourselection.hourselectionmodels import HourSelectionModel
@@ -11,12 +11,6 @@ from ....models.hourselection.hourtypelist import HourTypeList
 
 _LOGGER = logging.getLogger(__name__)
 
-ALLOWANCE_SCHEMA = {
-    CautionHourType.get_num_value(CautionHourType.SUAVE): 1.15,
-    CautionHourType.get_num_value(CautionHourType.INTERMEDIATE): 1.05,
-    CautionHourType.get_num_value(CautionHourType.AGGRESSIVE): 1,
-    CautionHourType.get_num_value(CautionHourType.SCROOGE): 1
-}
 
 class HourSelectionService:
     def __init__(self, parent, base_mock_hour: int = None):
@@ -62,6 +56,7 @@ class HourSelectionService:
                     pricedict=pricedict
                     )
             else:
+                """the price curve is too flat to determine hours"""
                 ret= HourObject(nh=[], ch=[], dyn_ch={},pricedict=pricedict)
             ret.offset_dict=get_offset_dict(normalized_pricedict)
             return ret
@@ -107,36 +102,24 @@ class HourSelectionService:
 
     def _determine_hours(self, price_list: dict, prices: list) -> HourObject:
         ret = HourObject([],[],{})
+        ch_type = self.parent.model.options.cautionhour_type
+        peak = self.parent.model.current_peak
         for p in price_list:
-            _permax = self.__set_charge_allowance(price_list[p]["permax"])
-            if self.__should_be_cautionhour(price_list[p], prices):
+            _permax = self.__set_charge_allowance(price_list[p]["permax"], ch_type)
+            if self.__should_be_cautionhour(price_list[p], prices, peak, ch_type):
                 ret.ch.append(p)
                 ret.dyn_ch[p] = round(_permax,2)
             else:
                 ret.nh.append(p)
         return ret
-
-    def __should_be_cautionhour(self, price_item, prices) -> bool:
-        first = any([
-                    float(price_item["permax"]) <= self.parent.model.options.cautionhour_type,
-                    float(price_item["val"]) <= (sum(prices)/len(prices))
-                ])
-        _peak = self.parent.model.current_peak
-        second = (_peak > 0 and _peak*price_item["permax"] > 1) or _peak == 0
-        return all([first, second])
-
-    def __set_charge_allowance(self, price_input) -> float:
-        return round(abs(price_input - 1), 2) * ALLOWANCE_SCHEMA[self.parent.model.options.cautionhour_type]
-        
+    
     def set_hour(self, testhour:int = None) -> int:
         return testhour if testhour is not None else self._mock_hour if self._mock_hour is not None else datetime.now().hour
 
     def _interim_day_update(self, today: HourObject, tomorrow: HourObject) -> Tuple[HourObject, HourObject]:
         """Updates the non- and caution-hours with an adjusted mean of 14h - 13h today-tomorrow to get a more sane nightly curve."""
-
         if len(self.parent.model.prices_tomorrow) < 23:
             return today, tomorrow 
-        
         #hour = self._mock_hour if self._mock_hour is not None else 14
         hour =14
         negative_hour = (24 - hour)*-1
@@ -151,7 +134,21 @@ class HourSelectionService:
         self._preserve_interim = True
         return today, tomorrow
 
-    def _update_interim_lists(self, _range: range, old: HourObject, new: HourObject, index_devidation: int) -> HourObject:
+    @staticmethod
+    def __should_be_cautionhour(price_item, prices, peak, cautionhour_type) -> bool:
+        first = any([
+                    float(price_item["permax"]) <= cautionhour_type,
+                    float(price_item["val"]) <= (sum(prices)/len(prices))
+                ])
+        second = (peak > 0 and peak*price_item["permax"] > 1) or peak == 0
+        return all([first, second])
+
+    @staticmethod
+    def __set_charge_allowance(price_input, cautionhour_type) -> float:
+        return round(abs(price_input - 1), 2) * ALLOWANCE_SCHEMA[cautionhour_type]
+
+    @staticmethod
+    def _update_interim_lists(_range: range, old: HourObject, new: HourObject, index_devidation: int) -> HourObject:
         _new = convert_collections(new, index_devidation)
         for i in _range:
             if i in _new.nh:

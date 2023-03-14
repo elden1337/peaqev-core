@@ -1,9 +1,17 @@
 import statistics as stat
 import logging
 from ....models.hourselection.hourobject import HourObject
+from ....models.hourselection.cautionhourtype import CautionHourType
 
 _LOGGER = logging.getLogger(__name__)
 
+
+ALLOWANCE_SCHEMA = {
+    CautionHourType.get_num_value(CautionHourType.SUAVE): 1.15,
+    CautionHourType.get_num_value(CautionHourType.INTERMEDIATE): 1.05,
+    CautionHourType.get_num_value(CautionHourType.AGGRESSIVE): 1,
+    CautionHourType.get_num_value(CautionHourType.SCROOGE): 1
+}
 
 def create_dict(input: list):
     ret = {}
