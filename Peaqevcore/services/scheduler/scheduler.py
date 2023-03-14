@@ -120,7 +120,7 @@ class SchedulerFacade(Scheduler):
     def check_states(self):
         if not self.scheduler_active and self.schedule_created:
             self.cancel()
-        elif self._hub.chargecontroller.status is ChargeControllerStates.Done.name:
+        elif self._hub.chargecontroller.status_string is ChargeControllerStates.Done.name:
             self.cancel()
 
     @property

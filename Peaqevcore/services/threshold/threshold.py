@@ -12,7 +12,7 @@ class Threshold(ThresholdBase):
     @property
     def allowedcurrent(self) -> int:
         amps = self._setcurrentdict()
-        if self._hub.chargecontroller.status is not ChargeControllerStates.Start.name:
+        if self._hub.chargecontroller.status_string is not ChargeControllerStates.Start.name:
             return min(amps.values())
         return ThresholdBase.allowed_current(
             datetime.now().minute,
