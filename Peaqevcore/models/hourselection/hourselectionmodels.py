@@ -53,6 +53,7 @@ class HourSelectionOptions:
     cautionhour_type: float = 0
     top_price: float = 0
     min_price: float = 0
+    blocknocturnal: bool = False
     absolute_top_price: float = field(init=False)
 
     def __post_init__(self):

@@ -16,7 +16,8 @@ class PriceAwareHours(Hours):
         self._core = core_hours(
             absolute_top_price=self._set_absolute_top_price(hub.options.price.top_price),
             min_price=hub.options.price.min_price,
-            cautionhour_type=self._cautionhour_type_string
+            cautionhour_type=self._cautionhour_type_string, 
+            blocknocturnal=hub.options.blocknocturnal
         )
         self._hass = hub.state_machine
         self._prices = []

@@ -18,8 +18,7 @@ class HourObject:
                 self.dyn_ch.pop(h)    
         return self
 
-    def add_expensive_hours(self, max_price: float = 0):
-        lst = (h for h in self.pricedict if self.pricedict[h] >= max_price)
+    def _add(self, lst: list):
         for h in lst:
             if h not in self.nh:
                 self.nh.append(h)
@@ -28,5 +27,9 @@ class HourObject:
                 if len(self.dyn_ch):
                     if h in self.dyn_ch.keys():
                         self.dyn_ch.pop(h)
+
+    def add_expensive_hours(self, max_price: float = 0):
+        lst = (h for h in self.pricedict if self.pricedict[h] >= max_price)
+        self._add(lst)
         self.nh.sort()
         return self

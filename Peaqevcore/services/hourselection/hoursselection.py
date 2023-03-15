@@ -13,6 +13,7 @@ class Hoursselection:
             absolute_top_price: float = 0,
             min_price: float = 0,
             cautionhour_type: str = CautionHourType.SUAVE.value,
+            blocknocturnal: bool = False,
             base_mock_hour: int = None
     ):
         self.cautionhour_type_enum = CautionHourType(cautionhour_type.lower()) if isinstance(cautionhour_type, str) else cautionhour_type
@@ -20,7 +21,8 @@ class Hoursselection:
             options=HourSelectionOptions(
                 cautionhour_type=CautionHourType.get_num_value(cautionhour_type), 
                 min_price=min_price,
-                top_price= absolute_top_price
+                top_price= absolute_top_price,
+                blocknocturnal= blocknocturnal
                     )
                 )
         self.model.validate()

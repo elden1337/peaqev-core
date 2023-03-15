@@ -28,4 +28,6 @@ class HubOptions:
     cautionhours: List = field(default_factory=lambda: [])
     nonhours: List = field(default_factory=lambda: [])
     fuse_type: str = ""
+    blocknocturnal: bool = False
+    """blocks charging during the night for safety concern reasons."""
 

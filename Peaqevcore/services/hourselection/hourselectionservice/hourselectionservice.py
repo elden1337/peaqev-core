@@ -24,15 +24,16 @@ class HourSelectionService:
             self.parent.model.hours.hours_tomorrow = HourObject([], [], {})
             return
 
-        hours, hours_tomorrow = self._interim_day_update(
-            today=self._update_per_day(prices=self.parent.model.prices_today), 
-            tomorrow=self._update_per_day(prices=self.parent.model.prices_tomorrow)
-            )
+        today=self._update_per_day(prices=self.parent.model.prices_today)
+        tomorrow=self._update_per_day(prices=self.parent.model.prices_tomorrow)
+        
+        hours, hours_tomorrow = self._interim_day_update(today, tomorrow)
+
         self.parent.model.hours.hours_today = self._add_remove_limited_hours(hours)
         self.parent.model.hours.hours_tomorrow = self._add_remove_limited_hours(hours_tomorrow)
         self.update_hour_lists()
 
-    def _update_per_day(self, prices: list) -> HourObject:
+    def _update_per_day(self, prices: list, range_start: int =0) -> HourObject:
         pricedict = {}
         if prices is not None and len(prices) > 1:
             pricedict = create_dict(prices)
@@ -40,15 +41,16 @@ class HourSelectionService:
                 normalize_prices(prices)
                 )
             if stat.stdev(prices) > 0.05:
-                ready_hours = self._determine_hours(
-                    rank_prices(
+                ranked = rank_prices(
                         pricedict, 
                         normalized_pricedict,
                         self.parent.cautionhour_type_enum,
-                        self.parent.model.adjusted_average
-                        ), 
-                        prices
+                        range_start,
+                        self.parent.model.adjusted_average,
+                        self.parent.model.options.blocknocturnal
                         )
+                ready_hours = self._determine_hours(ranked, prices)
+                
                 ret= HourObject(
                     nh=ready_hours.nh, 
                     ch=ready_hours.ch, 
@@ -104,11 +106,12 @@ class HourSelectionService:
         ret = HourObject([],[],{})
         ch_type = self.parent.model.options.cautionhour_type
         peak = self.parent.model.current_peak
-        for p in price_list:
-            _permax = self.__set_charge_allowance(price_list[p]["permax"], ch_type)
-            if self.__should_be_cautionhour(price_list[p], prices, peak, ch_type):
+        for p in price_list:    
+            if price_list[p]["force_non"] is True:
+                ret.nh.append(p)
+            elif self.__should_be_cautionhour(price_list[p], prices, peak, ch_type):
                 ret.ch.append(p)
-                ret.dyn_ch[p] = round(_permax,2)
+                ret.dyn_ch[p] = round(self.__set_charge_allowance(price_list[p]["permax"], ch_type),2)
             else:
                 ret.nh.append(p)
         return ret
@@ -123,11 +126,10 @@ class HourSelectionService:
         #hour = self._mock_hour if self._mock_hour is not None else 14
         hour =14
         negative_hour = (24 - hour)*-1
-
         pricelist = self.parent.model.prices_today[hour::]
         pricelist[len(pricelist):] = self.parent.model.prices_tomorrow[0:hour]
-        new_hours = self._update_per_day(pricelist)
-        
+        new_hours = self._update_per_day(pricelist, hour)
+        print(f"new: {new_hours.nh}")
         today = self._update_interim_lists(range(hour,24), today, new_hours, hour)
         tomorrow = self._update_interim_lists(range(0,hour), tomorrow, new_hours, negative_hour)
 
