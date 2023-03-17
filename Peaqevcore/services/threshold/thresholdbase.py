@@ -4,16 +4,10 @@ from datetime import datetime
 import logging
 from ...models.phases import Phases
 from ...models.const import (
-    CURRENTS_ONEPHASE_1_16, CURRENTS_THREEPHASE_1_16
+    CURRENTS_ONEPHASE_1_16, CURRENTS_THREEPHASE_1_16, CURRENTS_ONEPHASE_1_32, CURRENTS_THREEPHASE_1_32
 )
 
 _LOGGER = logging.getLogger(__name__)
-
-CURRENT_DICT = {
-    Phases.OnePhase: CURRENTS_ONEPHASE_1_16,
-    Phases.ThreePhase: CURRENTS_THREEPHASE_1_16,
-    Phases.Unknown: CURRENTS_THREEPHASE_1_16
-}
 
 
 class ThresholdBase:
@@ -21,10 +15,15 @@ class ThresholdBase:
     def __init__(self, hub):
         self._hub = hub
         self._phases = Phases.Unknown
+        self._currents = {}
 
     @property
     def phases(self) -> str:
         return self._phases.name
+
+    @property
+    def currents(self) -> dict:
+        return self._currents
 
     @property
     def stop(self) -> float:
@@ -48,22 +47,38 @@ class ThresholdBase:
         pass
 
     def _setcurrentdict(self) -> dict:
-    # this one must be done better. Currently cannot accommodate 1-32A single phase for instance.
-        try:
-            divid = int(self._hub.sensors.carpowersensor.value)/int(self._hub.sensors.chargerobject_switch.current)
-            if int(self._hub.sensors.carpowersensor.value) == 0:
-                self._phases = Phases.Unknown
-            elif divid < 300:
-                self._phases = Phases.OnePhase
-            else:
-                self._phases = Phases.ThreePhase
-        except:
-            _LOGGER.debug("Currents-dictionary: could not divide charger amps with charger power. Falling back to legacy-method.")
-            if 0 < int(self._hub.sensors.carpowersensor.value) < 4000:
-                self._phases = Phases.OnePhase
-            else:
-                self._phases = Phases.ThreePhase
-        return CURRENT_DICT[self._phases]
+        """only allow amps if user has set this value high enough"""
+        if self._hub.chargertype.max_amps != 16:
+            _threephase = {k: v for (k, v) in CURRENTS_THREEPHASE_1_32.items() if v <= self._hub.chargertype.max_amps}
+            _onephase = {k: v for (k, v) in CURRENTS_ONEPHASE_1_32.items() if v <= self._hub.chargertype.max_amps}
+        else:
+            _threephase = CURRENTS_THREEPHASE_1_16
+            _onephase = CURRENTS_ONEPHASE_1_16
+        if hasattr(self._hub.sensors, "carpowersensor"):
+            try:
+                divid = int(self._hub.sensors.carpowersensor.value)/int(self._hub.sensors.chargerobject_switch.current)
+                if int(self._hub.sensors.carpowersensor.value) == 0:
+                    self._phases = Phases.Unknown
+                    ret = _threephase
+                elif divid < 300:
+                    self._phases = Phases.OnePhase
+                    ret = _onephase
+                else:
+                    self._phases = Phases.ThreePhase
+                    ret = _threephase
+            except:
+                _LOGGER.debug("Currents-dictionary: could not divide charger amps with charger power. Falling back to legacy-method.")
+                if 0 < int(self._hub.sensors.carpowersensor.value) < 4000:
+                    self._phases = Phases.OnePhase
+                    ret = _onephase
+                else:
+                    self._phases = Phases.ThreePhase
+                    ret = _threephase
+        else:
+            self._phases = Phases.ThreePhase
+            ret = _threephase
+        self._currents = ret
+        return ret
 
     @staticmethod
     def _stop(
@@ -101,7 +116,8 @@ class ThresholdBase:
             currents_dict: dict,
             total_energy: float,
             peak: float,
-            is_quarterly:bool=False
+            is_quarterly:bool=False,
+            power_canary_amp: int = -1
             ) -> int:
         minute = _convert_quarterly_minutes(now_min, is_quarterly)
         ret = ThresholdBase.BASECURRENT
@@ -111,5 +127,5 @@ class ThresholdBase:
         for key, value in currents.items():
             if ((((moving_avg + key) / 60) * (60 - minute) + total_energy * 1000) / 1000) < peak:
                 ret = value
-                return ret
-        return ret
+                break
+        return min(ret, power_canary_amp) if power_canary_amp > -1 else ret

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
-from decimal import DivisionByZero
 import logging
+import time
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -66,7 +66,7 @@ class EnergyWeekly:
             return 0.0
 
     def unpack(self, incoming: dict) -> dict[int, Day]:
-        if isinstance(incoming, dict) and len(incoming) > 0:
+        if isinstance(incoming, dict) and len(incoming):
             model = {}
             for i in range(0,7):
                 if i in incoming.keys():
@@ -78,10 +78,11 @@ class EnergyWeekly:
         else: 
             return self.set_init_model()
 
-    def update(self, charge:float):
-        if charge > 0:
-            self.model[datetime.now().weekday()].charge += charge
-            self.model[datetime.now().weekday()].sessions += 1
+    def update(self, _charge:float, mock_time: int = None):
+        timer = mock_time if mock_time is not None else time.time()
+        if _charge > 0:
+            self.model[datetime.fromtimestamp(timer).weekday()].charge += _charge
+            self.model[datetime.fromtimestamp(timer).weekday()].sessions += 1
 
     def average_for_day(self, day: int) -> float:
         try:

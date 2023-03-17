@@ -18,7 +18,7 @@ class PeaksModel:
                 tkeys = pp.split("h")
                 ppkey = (int(tkeys[0]), int(tkeys[1]))
                 ppdict[ppkey] = dict_data.get("p").get(pp)
-            if len(self._p) > 0:
+            if len(self._p):
                 self._p = dict(self._p.items() | ppdict.items())
                 print(f"new existing: {self._p}")
             else: 

@@ -1,3 +1,5 @@
+<img src="https://raw.githubusercontent.com/creativecommons/cc-assets/main/license_badges/big/by_nc_nd.svg" width="90">
+
 [![CodeQL](https://github.com/elden1337/peaqev-core/actions/workflows/codeql.yml/badge.svg)](https://github.com/elden1337/peaqev-core/actions/workflows/codeql.yml) [![Python application](https://github.com/elden1337/peaqev-core/actions/workflows/python-app.yml/badge.svg)](https://github.com/elden1337/peaqev-core/actions/workflows/python-app.yml) 
 [![Downloads](https://img.shields.io/pypi/dm/peaqevcore.svg)](https://pypi.org/project/peaqevcore/)
 [![Paypal](https://img.shields.io/badge/Sponsor-PayPal-orange.svg)](https://www.paypal.com/donate/?hosted_button_id=GLGW8QAAQC2FG)

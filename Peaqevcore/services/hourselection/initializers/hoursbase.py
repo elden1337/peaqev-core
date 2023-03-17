@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 from abc import abstractmethod
-from .const import NON_HOUR, CAUTION_HOUR, CHARGING_PERMITTED
+from ..const import NON_HOUR, CAUTION_HOUR, CHARGING_PERMITTED
 
 class Hours:
     def __init__(
@@ -61,6 +61,10 @@ class Hours:
     def update_nordpool(self) -> None:
         pass
 
+    @abstractmethod
+    def update_top_price(self, dyn_top_price) -> None: 
+        pass
+
     @property
     @abstractmethod
     def dynamic_caution_hours(self) -> dict:
@@ -69,4 +73,54 @@ class Hours:
     @property
     @abstractmethod
     def options(self):
+        pass
+
+    @property
+    @abstractmethod
+    def offsets(self) -> dict:
+        pass
+
+    @property
+    @abstractmethod
+    def prices(self) -> list:
+        pass
+
+    @prices.setter
+    @abstractmethod
+    def prices(self, val):
+        pass
+
+    @property
+    @abstractmethod
+    def prices_tomorrow(self) -> list:
+        pass
+
+    @prices_tomorrow.setter
+    @abstractmethod
+    def prices_tomorrow(self, val):
+        pass
+
+    @property
+    @abstractmethod
+    def absolute_top_price(self):
+        pass
+
+    @property
+    @abstractmethod
+    def min_price(self):
+        pass
+
+    @property
+    @abstractmethod
+    def cautionhour_type_string(self) -> str:
+        pass
+
+    @property
+    @abstractmethod
+    def adjusted_average(self) -> float:
+        pass
+
+    @adjusted_average.setter
+    @abstractmethod
+    def adjusted_average(self, val):
         pass

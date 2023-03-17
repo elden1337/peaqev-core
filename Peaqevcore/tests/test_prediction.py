@@ -124,3 +124,13 @@ def test_prediction_percentage_neg_energy_and_poweravg():
        retperc = p._predicted_percentage_of_peak(2, ret)
 
        assert retperc >= 0
+
+def test_prediction():
+       ret = p._predicted_energy(
+       now_min=48,
+       now_sec=0,
+       power_avg=0,
+       total_hourly_energy=0.25
+       )
+
+       assert ret == 0.25

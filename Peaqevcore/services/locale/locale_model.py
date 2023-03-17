@@ -1,25 +1,20 @@
 from dataclasses import dataclass, field
 from datetime import datetime
+from ...models.locale.enums.querytype import QueryType
+from ...models.locale.enums.time_periods import TimePeriods
+from ..locale.time_pattern import TimePattern
+from ...models.locale.price.locale_price import LocalePrice
+from .querytypes.querytypes import LocaleQuery
 
-from ..locale.free_charge import FreeChargePattern
-from ...models.locale.price import LocalePrice
-from .querytypes.const import (
-HOURLY,
-QUARTER_HOURLY
-)
-from .querytypes.querytypes import(
-LocaleQuery
-)
 
 @dataclass(frozen=True)
 class Locale_Type:
-    observed_peak: str
-    charged_peak: str
+    observed_peak: QueryType
+    charged_peak: QueryType
     query_model: LocaleQuery
     price: LocalePrice = None
-    free_charge_pattern: FreeChargePattern = None
-    peak_cycle: str = HOURLY
-    #converted: bool = False #transition key to remove sql-dependency
+    free_charge_pattern: TimePattern = None
+    peak_cycle: TimePeriods = TimePeriods.Hourly
     is_quarterly: bool = field(init=False, repr=False)
     
 
@@ -27,10 +22,7 @@ class Locale_Type:
         if self.free_charge_pattern is None:
             return False
         now = datetime.now() if mockdt is datetime.min else mockdt
-        return self.free_charge_pattern.free_charge(now)
+        return self.free_charge_pattern.valid(now)
 
     def is_quarterly(self) -> bool:
-        return self.peak_cycle == QUARTER_HOURLY
-
-
-
+        return self.peak_cycle == TimePeriods.QuarterHourly

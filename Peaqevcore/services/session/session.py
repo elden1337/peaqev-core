@@ -29,13 +29,14 @@ class SessionPrice:
     def total_energy(self) -> float:
         return round(self.get_status()["energy"]["value"], 3)
 
-    def reset(self):
+    def reset(self): #add inputparams here
+        #push a heartbeat to the api
         self.__init__(self.average_data.export)
 
     def terminate(self, mock_time: float=None):
-        _LOGGER.debug(f"Called terminate on session_price. Trying to add {self.total_energy} to statistics.")
-        self.average_data.update(self.total_energy)
         self.update_power_reading(0, mock_time)
+        _LOGGER.debug(f"Called terminate on session_price. Trying to add {self.total_energy} to statistics.")
+        self.average_data.update(self.total_energy, mock_time)
         self.get_status()
 
     def set_status(self) -> None:
@@ -126,5 +127,5 @@ class Session:
         return self.core.energy_weekly_dict
 
     def update_session_pricing(self):
-        if self._charger._params.session_active is False:
+        if self._charger.params.session_active is False:
             self.core.terminate()

@@ -12,17 +12,19 @@ class Prediction:
         return Prediction._predicted_energy(
             datetime.now().minute,
             datetime.now().second,
-            self._hub.sensors.powersensormovingaverage.value if self._hub.sensors.powersensormovingaverage.value is not None else 0,
+            self._hub.sensors.powersensormovingaverage.value if hasattr(self._hub.sensors, "powersensormovingaverage") else 0,
             self._hub.sensors.totalhourlyenergy.value,
             self._hub.sensors.locale.data.is_quarterly(self._hub.sensors.locale.data)
         )
 
     @property
     def predictedpercentageofpeak(self) -> float:
-        return Prediction._predicted_percentage_of_peak(
-            self._hub.sensors.current_peak.value,
-            self.predictedenergy
-        )
+        if hasattr(self._hub.sensors, "current_peak"):
+            return Prediction._predicted_percentage_of_peak(
+                self._hub.sensors.current_peak.value,
+                self.predictedenergy
+            )
+        return 0.0
 
     @staticmethod
     def _predicted_energy(

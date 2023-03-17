@@ -1,6 +1,6 @@
 from enum import Enum
 
-class CHARGERSTATES(Enum):
+class ChargeControllerStates(Enum):
     Idle = "Idle"
     Connected = "Connected"
     Start = "Start"

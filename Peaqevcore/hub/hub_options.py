@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Dict
+from typing import List
 
 @dataclass
 class Price:
@@ -7,6 +7,7 @@ class Price:
     min_price: float = 0.0
     top_price: float = 0.0
     cautionhour_type: str = ""
+    dynamic_top_price: bool = False
 
 @dataclass
 class Charger:
@@ -26,4 +27,7 @@ class HubOptions:
     startpeaks: dict = field(default_factory=dict)
     cautionhours: List = field(default_factory=lambda: [])
     nonhours: List = field(default_factory=lambda: [])
+    fuse_type: str = ""
+    blocknocturnal: bool = False
+    """blocks charging during the night for safety concern reasons."""
 

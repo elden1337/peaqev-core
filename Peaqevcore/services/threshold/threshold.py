@@ -1,6 +1,6 @@
 from datetime import datetime
 #from ...hub.hub import HubBase
-from ...models.chargerstates import CHARGERSTATES
+from ...models.chargecontroller_states import ChargeControllerStates
 from .thresholdbase import ThresholdBase
 
 
@@ -12,7 +12,7 @@ class Threshold(ThresholdBase):
     @property
     def allowedcurrent(self) -> int:
         amps = self._setcurrentdict()
-        if self._hub.chargecontroller.status is not CHARGERSTATES.Start.name:
+        if self._hub.chargecontroller.status_string is not ChargeControllerStates.Start.name:
             return min(amps.values())
         return ThresholdBase.allowed_current(
             datetime.now().minute,
@@ -22,5 +22,6 @@ class Threshold(ThresholdBase):
             amps,
             self._hub.sensors.totalhourlyenergy.value,
             self._hub.current_peak_dynamic,
-            self._hub.sensors.locale.data.is_quarterly(self._hub.sensors.locale.data)
+            self._hub.sensors.locale.data.is_quarterly(self._hub.sensors.locale.data),
+            self._hub.power_canary.max_current_amp
         )

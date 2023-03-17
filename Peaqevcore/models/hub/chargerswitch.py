@@ -44,7 +44,7 @@ class ChargerSwitch(HubMember):
             pass
 
     def updatecurrent(self):
-        if self._hubdata.chargertype.charger.options.charger_is_outlet is True:
+        if self._hubdata.chargertype.options.charger_is_outlet is True:
             pass
         elif self._ampmeter_is_attribute is True:
             ret = self._hass.states.get(self.entity)
