@@ -1,17 +1,10 @@
 import statistics as stat
 import logging
-from ....models.hourselection.hourobject import HourObject
-from ....models.hourselection.cautionhourtype import CautionHourType
+from ....models.hourselection.hourobjects.hourobject import HourObject
+
 
 _LOGGER = logging.getLogger(__name__)
 
-
-ALLOWANCE_SCHEMA = {
-    CautionHourType.get_num_value(CautionHourType.SUAVE): 1.15,
-    CautionHourType.get_num_value(CautionHourType.INTERMEDIATE): 1.05,
-    CautionHourType.get_num_value(CautionHourType.AGGRESSIVE): 1,
-    CautionHourType.get_num_value(CautionHourType.SCROOGE): 1
-}
 
 def create_dict(input: list):
     ret = {}
@@ -39,7 +32,6 @@ def convert_none_list(lst: any) -> list:
         return lst
     except:
         return _make_array_from_empty(lst)
-
 
 
 def _try_parse(input:str, parsetype:type):

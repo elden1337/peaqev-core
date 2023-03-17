@@ -67,23 +67,26 @@ def _cap_pricelist_available_hours(cautions: list, normalized_hourdict:dict, cau
     ret = {c: False for c in cautions}
     _demand = 24 - MAX_HOURS.get(cautionhour_type)
     hours_sorted = [k for k, v in sorted(normalized_hourdict.items(), key=lambda item: item[1])]
+    hours_ranged = _transform_range(range_start, hours_sorted)
     iterations = 0
-
+    print(f"demand: {_demand}")
+    print(f"hours sorted: {hours_sorted}")
+    print(f"hours ranged: {hours_ranged}")
     # try:
-    while len(cautions) < _demand and iterations < len(hours_sorted)*2:
+    while len(cautions) < _demand and iterations < len(hours_ranged)*2:
         iterations+=1
         idx = 0
         if len(cautions) > 0:
-            idx = hours_sorted.index(cautions[-1])
+            idx = hours_ranged.index(cautions[-1])
         
-        if idx <= len(hours_sorted) -1:
+        if idx <= len(hours_ranged) -1:
             try:
-                while idx+1 < len(hours_sorted):
+                while idx+1 < len(hours_ranged):
                     idx += 1
-                    next = hours_sorted[idx]
+                    next = hours_ranged[idx]
                     if next not in cautions:
                         cautions.append(next)
-                        print(f"adding {next}")
+                        #print(f"adding {next}")
                         ret[next] = True
                         break
             except IndexError as e:
@@ -92,10 +95,10 @@ def _cap_pricelist_available_hours(cautions: list, normalized_hourdict:dict, cau
             try:
                 while idx-1 >= 0:
                     idx -= 1
-                    prev = hours_sorted[idx]
+                    prev = hours_ranged[idx]
                     if prev not in cautions:
                         cautions.append(prev)
-                        print(f"adding {prev}")
+                        #print(f"adding {prev}")
                         ret[prev] = True
                         break
             except IndexError as e:
@@ -119,18 +122,21 @@ def _sort_by_key(input: dict) -> dict:
 
 def get_nocturnal_stop(blocknocturnal: bool = False, range_start: int = 0) -> list:
     _base = [23,0,1,2,3,4,5,6]
-    print(range_start)
     if blocknocturnal:
-        if range_start == 0:
-            return _base
-        ret = []
-        for b in _base:
-            if b >= range_start:
-                ret.append(b-range_start)
-            else:
-                ret.append(24-range_start+b)
-        return ret
+        return _transform_range(range_start, _base)
     return []
+
+
+def _transform_range(range_start, base):
+    if range_start == 0:
+            return base
+    ret = []
+    for b in base:
+        if b >= range_start:
+            ret.append(b-range_start)
+        else:
+            ret.append(24-range_start+b)
+    return ret
 
 def _discard_excessive_hours(hours: dict):
     """There should always be at least four regular hours before absolute_top_price kicks in."""
@@ -138,3 +144,23 @@ def _discard_excessive_hours(hours: dict):
         to_pop = dict(sorted(hours.items(), key=lambda item: item[1]['val']))    
         hours.pop(list(to_pop.keys())[0])
     return hours
+
+
+def should_be_cautionhour(price_item, prices, peak, cautionhour_type) -> bool:
+    first = any([
+                float(price_item["permax"]) <= cautionhour_type,
+                float(price_item["val"]) <= (sum(prices)/len(prices))
+            ])
+    second = (peak > 0 and peak*price_item["permax"] > 1) or peak == 0
+    return all([first, second])
+
+
+def set_charge_allowance(price_input, cautionhour_type) -> float:
+    return round(abs(price_input - 1), 2) * ALLOWANCE_SCHEMA[cautionhour_type]
+
+ALLOWANCE_SCHEMA = {
+    CautionHourType.get_num_value(CautionHourType.SUAVE): 1.15,
+    CautionHourType.get_num_value(CautionHourType.INTERMEDIATE): 1.05,
+    CautionHourType.get_num_value(CautionHourType.AGGRESSIVE): 1,
+    CautionHourType.get_num_value(CautionHourType.SCROOGE): 1
+}

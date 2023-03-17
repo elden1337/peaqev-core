@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from typing import List, Dict
-from .hourobject import HourObject
+from .hourobjects.hourobject import HourObject
 import logging
 
 _LOGGER = logging.getLogger(__name__)
@@ -14,6 +14,12 @@ class HoursModel:
     hours_today: HourObject = field(default_factory=lambda : HourObject([],[],dict()))
     hours_tomorrow: HourObject = field(default_factory=lambda : HourObject([],[],dict()))
     offset_dict: Dict[Dict[str,float], Dict[str, float]] = field(default_factory=lambda: {})
+
+    def update_all(self, hour:int) -> None:
+        self.update_non_hours(hour)
+        self.update_caution_hours(hour)
+        self.update_dynanmic_caution_hours(hour)
+        self.update_offset_dict()
 
     def update_non_hours(
         self, 

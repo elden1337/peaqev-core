@@ -3,13 +3,43 @@ from datetime import datetime
 from typing import Tuple
 import statistics as stat
 
-from .hoursselection_helpers import convert_collections, try_remove, create_dict, ALLOWANCE_SCHEMA
-from .hourselection_calculations import normalize_prices, rank_prices, get_offset_dict
-from ....models.hourselection.hourobject import HourObject
+from .hoursselection_helpers import create_dict
+from .hourselection_calculations import normalize_prices, rank_prices, get_offset_dict, should_be_cautionhour, set_charge_allowance
+from ....models.hourselection.hourobjects.hourobject import HourObject
+from ....models.hourselection.hourobjects.hourobject_helpers import update_interim_lists
 from ....models.hourselection.hourselectionmodels import HourSelectionModel
+
 from ....models.hourselection.hourtypelist import HourTypeList
 
 _LOGGER = logging.getLogger(__name__)
+
+import time
+
+class HourselectionService2:
+    def __init__(self, parent, base_mock_hour: int = None):
+        self._latest_update = time.time()
+        self.parent = parent
+        self._mock_hour = base_mock_hour
+        self._preserve_interim: bool = False
+
+    def get_prices(self):
+        pass
+
+    def rank_prices(self, prices):
+        pass
+
+    def check_boundaries(self):
+        #min max prices
+        #cautiontype
+        #cautiontype-maxhrs?
+        pass
+
+    def set_models(self):
+        #non
+        #caution
+        #offsets
+        pass
+
 
 
 class HourSelectionService:
@@ -64,26 +94,17 @@ class HourSelectionService:
             return ret
         return HourObject([],[],{})
 
-    def update_hour_lists(
-        self, 
-        listtype:HourTypeList = None,
-        ) -> None:
+    def update_hour_lists(self, listtype:HourTypeList = None) -> None:
         hour = self.set_hour()
-        if listtype is not None:
-            match listtype:
-                case HourTypeList.NonHour:
-                    self.parent.model.hours.update_non_hours(hour)
-                case HourTypeList.CautionHour:
-                    self.parent.model.hours.update_caution_hours(hour)
-                case HourTypeList.DynCautionHour:
-                    self.parent.model.hours.update_dynanmic_caution_hours(hour)   
-                case _:
-                    pass
-        else:
-            self.parent.model.hours.update_non_hours(hour)
-            self.parent.model.hours.update_caution_hours(hour)
-            self.parent.model.hours.update_dynanmic_caution_hours(hour)
-            self.parent.model.hours.update_offset_dict()
+        match listtype:
+            case HourTypeList.NonHour:
+                self.parent.model.hours.update_non_hours(hour)
+            case HourTypeList.CautionHour:
+                self.parent.model.hours.update_caution_hours(hour)
+            case HourTypeList.DynCautionHour:
+                self.parent.model.hours.update_dynanmic_caution_hours(hour)   
+            case _:
+                self.parent.model.hours.update_all(hour)
 
     def _add_remove_limited_hours(self, hours: HourObject) -> HourObject:
         """Removes cheap hours and adds expensive hours set by user limitation"""
@@ -110,9 +131,9 @@ class HourSelectionService:
             for p in price_list:    
                 if price_list[p]["force_non"] is True:
                     ret.nh.append(p)
-                elif self.__should_be_cautionhour(price_list[p], prices, peak, ch_type):
+                elif should_be_cautionhour(price_list[p], prices, peak, ch_type):
                     ret.ch.append(p)
-                    ret.dyn_ch[p] = round(self.__set_charge_allowance(price_list[p]["permax"], ch_type),2)
+                    ret.dyn_ch[p] = round(set_charge_allowance(price_list[p]["permax"], ch_type),2)
                 else:
                     ret.nh.append(p)
         except IndexError as e:
@@ -132,56 +153,9 @@ class HourSelectionService:
         pricelist = self.parent.model.prices_today[hour::]
         pricelist[len(pricelist):] = self.parent.model.prices_tomorrow[0:hour]
         new_hours = self._update_per_day(pricelist, hour)
-        print(f"new: {new_hours.nh}")
-        today = self._update_interim_lists(range(hour,24), today, new_hours, hour)
-        tomorrow = self._update_interim_lists(range(0,hour), tomorrow, new_hours, negative_hour)
+        #print(f"new: {new_hours.nh}")
+        today = update_interim_lists(range(hour,24), today, new_hours, hour)
+        tomorrow = update_interim_lists(range(0,hour), tomorrow, new_hours, negative_hour)
 
         self._preserve_interim = True
         return today, tomorrow
-
-    @staticmethod
-    def __should_be_cautionhour(price_item, prices, peak, cautionhour_type) -> bool:
-        first = any([
-                    float(price_item["permax"]) <= cautionhour_type,
-                    float(price_item["val"]) <= (sum(prices)/len(prices))
-                ])
-        second = (peak > 0 and peak*price_item["permax"] > 1) or peak == 0
-        return all([first, second])
-
-    @staticmethod
-    def __set_charge_allowance(price_input, cautionhour_type) -> float:
-        return round(abs(price_input - 1), 2) * ALLOWANCE_SCHEMA[cautionhour_type]
-
-    @staticmethod
-    def _update_interim_lists(_range: range, old: HourObject, new: HourObject, index_devidation: int) -> HourObject:
-        _new = convert_collections(new, index_devidation)
-        try:
-            for i in _range:
-                if i in _new.nh:
-                    if i not in old.nh:
-                        old.nh.append(i)
-                        old.ch = try_remove(i, old.ch)
-                        old.dyn_ch = try_remove(i, old.dyn_ch)
-                elif i in _new.ch:
-                    if i not in old.ch:
-                        old.ch.append(i)
-                        old.dyn_ch[i] = _new.dyn_ch[i]
-                        old.nh = try_remove(i, old.nh)
-                else:
-                    old.nh = try_remove(i, old.nh)
-                    old.ch = try_remove(i, old.ch)
-                    old.dyn_ch = try_remove(i, old.dyn_ch)
-                old.nh.sort()
-                old.ch.sort()
-                old.dyn_ch = dict(sorted(old.dyn_ch.items()))
-        except IndexError:
-            raise IndexError("Error on updating interim lists.")
-        
-        for r in _new.offset_dict.keys():
-            old.offset_dict[r] = _new.offset_dict[r]
-            old.pricedict[r] = _new.pricedict[r]
-        return old
-
-    
-
-    

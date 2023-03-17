@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 
+
 @dataclass
 class HourObject:
     nh: list = field(default_factory=lambda: [])

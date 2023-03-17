@@ -150,26 +150,3 @@ class Hoursselection:
                     _looper_price(h, True)
         return ret
 
-# import time
-
-# class Hourselection2:
-#     def __init__(self):
-#         self._latest_update = time.time()
-
-#     def get_prices(self):
-#         pass
-
-#     def rank_prices(self, prices):
-#         pass
-
-#     def check_boundaries(self):
-#         #min max prices
-#         #cautiontype
-#         #cautiontype-maxhrs?
-#         pass
-
-#     def set_models(self):
-#         #non
-#         #caution
-#         #offsets
-#         pass
