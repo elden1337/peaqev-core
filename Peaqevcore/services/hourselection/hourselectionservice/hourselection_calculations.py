@@ -1,5 +1,9 @@
 from statistics import mean
+import logging
 from ....models.hourselection.cautionhourtype import CautionHourType, MAX_HOURS
+
+_LOGGER = logging.getLogger(__name__)
+
 
 def normalize_prices(prices:list) -> list:
     min_price = min(prices)
@@ -44,12 +48,16 @@ def rank_prices(
     maxval = max(hourdict.values())
     ret = {}
     
-    for k, v in cautions_dict.items():
-        ret[k] = {
-            "val": hourdict[k], 
-            "permax": round(hourdict[k] / maxval,2), 
-            "force_non": v
-            }
+    try:
+        for k, v in cautions_dict.items():
+            ret[k] = {
+                "val": hourdict[k], 
+                "permax": round(hourdict[k] / maxval,2), 
+                "force_non": v
+                }
+    except IndexError as e:
+        _LOGGER.error(f"Error on creating the cautions_dict: {e}")
+
     if blocknocturnal:
         return ret
     else:
@@ -61,29 +69,47 @@ def _cap_pricelist_available_hours(cautions: list, normalized_hourdict:dict, cau
     hours_sorted = [k for k, v in sorted(normalized_hourdict.items(), key=lambda item: item[1])]
     iterations = 0
 
+    # try:
     while len(cautions) < _demand and iterations < len(hours_sorted)*2:
         iterations+=1
-        idx = hours_sorted.index(cautions[-1])
+        idx = 0
+        if len(cautions) > 0:
+            idx = hours_sorted.index(cautions[-1])
+        
         if idx <= len(hours_sorted) -1:
-            while idx+1 < len(hours_sorted):
-                idx += 1
-                next = hours_sorted[idx]
-                if next not in cautions:
-                    cautions.append(next)
-                    ret[next] = True
-                    break
+            try:
+                while idx+1 < len(hours_sorted):
+                    idx += 1
+                    next = hours_sorted[idx]
+                    if next not in cautions:
+                        cautions.append(next)
+                        print(f"adding {next}")
+                        ret[next] = True
+                        break
+            except IndexError as e:
+                raise IndexError(f"error on first. idx:{idx}")
         if idx >= 0:
-            while idx-1 >= 0:
-                idx -= 1
-                prev = hours_sorted[idx]
-                if prev not in cautions:
-                    cautions.append(prev)
-                    ret[prev] = True
-                    break
+            try:
+                while idx-1 >= 0:
+                    idx -= 1
+                    prev = hours_sorted[idx]
+                    if prev not in cautions:
+                        cautions.append(prev)
+                        print(f"adding {prev}")
+                        ret[prev] = True
+                        break
+            except IndexError as e:
+                raise IndexError(f"error on second. idx:{idx}")
+    # except IndexError as e:
+    #     raise IndexError("error on capping pricelists")
 
-    for i in get_nocturnal_stop(blocknocturnal, range_start):
-        if i not in cautions:
-            ret[i] = True
+    try:
+        for i in get_nocturnal_stop(blocknocturnal, range_start):
+            if i not in cautions:
+                ret[i] = True
+    except IndexError as e:
+        _LOGGER.error(f"error on looping nocturnal stop: {e}")
+
     return _sort_by_key(ret)
 
 def _sort_by_key(input: dict) -> dict:

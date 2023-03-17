@@ -106,14 +106,17 @@ class HourSelectionService:
         ret = HourObject([],[],{})
         ch_type = self.parent.model.options.cautionhour_type
         peak = self.parent.model.current_peak
-        for p in price_list:    
-            if price_list[p]["force_non"] is True:
-                ret.nh.append(p)
-            elif self.__should_be_cautionhour(price_list[p], prices, peak, ch_type):
-                ret.ch.append(p)
-                ret.dyn_ch[p] = round(self.__set_charge_allowance(price_list[p]["permax"], ch_type),2)
-            else:
-                ret.nh.append(p)
+        try:
+            for p in price_list:    
+                if price_list[p]["force_non"] is True:
+                    ret.nh.append(p)
+                elif self.__should_be_cautionhour(price_list[p], prices, peak, ch_type):
+                    ret.ch.append(p)
+                    ret.dyn_ch[p] = round(self.__set_charge_allowance(price_list[p]["permax"], ch_type),2)
+                else:
+                    ret.nh.append(p)
+        except IndexError as e:
+            _LOGGER.error(f"Error in determine hours: {e}")
         return ret
     
     def set_hour(self, testhour:int = None) -> int:
@@ -152,24 +155,27 @@ class HourSelectionService:
     @staticmethod
     def _update_interim_lists(_range: range, old: HourObject, new: HourObject, index_devidation: int) -> HourObject:
         _new = convert_collections(new, index_devidation)
-        for i in _range:
-            if i in _new.nh:
-                if i not in old.nh:
-                    old.nh.append(i)
+        try:
+            for i in _range:
+                if i in _new.nh:
+                    if i not in old.nh:
+                        old.nh.append(i)
+                        old.ch = try_remove(i, old.ch)
+                        old.dyn_ch = try_remove(i, old.dyn_ch)
+                elif i in _new.ch:
+                    if i not in old.ch:
+                        old.ch.append(i)
+                        old.dyn_ch[i] = _new.dyn_ch[i]
+                        old.nh = try_remove(i, old.nh)
+                else:
+                    old.nh = try_remove(i, old.nh)
                     old.ch = try_remove(i, old.ch)
                     old.dyn_ch = try_remove(i, old.dyn_ch)
-            elif i in _new.ch:
-                if i not in old.ch:
-                    old.ch.append(i)
-                    old.dyn_ch[i] = _new.dyn_ch[i]
-                    old.nh = try_remove(i, old.nh)
-            else:
-                old.nh = try_remove(i, old.nh)
-                old.ch = try_remove(i, old.ch)
-                old.dyn_ch = try_remove(i, old.dyn_ch)
-            old.nh.sort()
-            old.ch.sort()
-            old.dyn_ch = dict(sorted(old.dyn_ch.items()))
+                old.nh.sort()
+                old.ch.sort()
+                old.dyn_ch = dict(sorted(old.dyn_ch.items()))
+        except IndexError:
+            raise IndexError("Error on updating interim lists.")
         
         for r in _new.offset_dict.keys():
             old.offset_dict[r] = _new.offset_dict[r]
