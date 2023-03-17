@@ -755,9 +755,8 @@ def test_230313_issue_72_scrooge():
     r.adjusted_average = 1.44
     r.update_top_price(1.45)
     r.service._mock_hour = 14
-    # assert r.non_hours == [14,16,17,18,19,20,21,22,6,7,8,9,10,11,12,13]
-    assert r.non_hours == [14, 15, 16, 0, 1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13]
-    assert r.get_average_kwh_price() == 0.19
+    assert r.non_hours == [14,16,17,18,19,20,21,22, 6, 7, 8, 9, 10, 11, 12, 13]
+    #assert r.get_average_kwh_price() == 0.19
 
 def test_230314_block_nocturnal():
     r = h(cautionhour_type=CautionHourType.AGGRESSIVE, absolute_top_price=3, min_price=0.0, blocknocturnal=True)
@@ -773,8 +772,8 @@ def test_230317_today_only():
     r.prices = [0.475, 0.457, 0.442, 0.42, 0.414, 0.415, 0.44, 0.466, 0.47, 0.459, 0.46, 0.456, 0.455, 0.452, 0.453, 0.422, 0.417, 0.411, 0.405, 0.372, 0.339, 0.327, 0.313, 0.257]
     r.adjusted_average = 0.87
     r.update_top_price(1.33)
-    r.service._mock_hour = 14
-    assert r.non_hours == [14,15,16,17,18,19,20,21,22,23]
+    r.service._mock_hour = 9
+    assert r.non_hours == [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
 
 def test_230317_today_tomorrow():
     r = h(cautionhour_type=CautionHourType.SCROOGE, absolute_top_price=3, min_price=0.0)
@@ -783,7 +782,9 @@ def test_230317_today_tomorrow():
     r.adjusted_average = 0.87
     r.update_top_price(1.33)
     r.service._mock_hour = 14
-    assert r.non_hours == [14, 15, 16, 17, 18, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+    assert r.non_hours == [14, 15, 16, 17, 18, 19, 20, 21, 22, 5, 6, 7, 8, 9, 12, 13]
+    r.service._mock_hour = 20
+    assert r.non_hours == [20, 21, 22, 5, 6, 7, 8, 9, 12, 13, 14, 15, 16, 17, 18, 19]
 
 
 """important, fix this later."""

@@ -67,26 +67,20 @@ def _cap_pricelist_available_hours(cautions: list, normalized_hourdict:dict, cau
     ret = {c: False for c in cautions}
     _demand = 24 - MAX_HOURS.get(cautionhour_type)
     hours_sorted = [k for k, v in sorted(normalized_hourdict.items(), key=lambda item: item[1])]
-    hours_ranged = _transform_range(range_start, hours_sorted)
     iterations = 0
-    print(f"demand: {_demand}")
-    print(f"hours sorted: {hours_sorted}")
-    print(f"hours ranged: {hours_ranged}")
-    # try:
-    while len(cautions) < _demand and iterations < len(hours_ranged)*2:
+    while len(cautions) < _demand and iterations < len(hours_sorted)*2:
         iterations+=1
-        idx = 0
+        idx = max(range_start-1,0)
         if len(cautions) > 0:
-            idx = hours_ranged.index(cautions[-1])
+            idx = hours_sorted.index(cautions[-1])
         
-        if idx <= len(hours_ranged) -1:
+        if idx <= len(hours_sorted) -1:
             try:
-                while idx+1 < len(hours_ranged):
+                while idx+1 < len(hours_sorted):
                     idx += 1
-                    next = hours_ranged[idx]
+                    next = hours_sorted[idx]
                     if next not in cautions:
                         cautions.append(next)
-                        #print(f"adding {next}")
                         ret[next] = True
                         break
             except IndexError as e:
@@ -95,16 +89,13 @@ def _cap_pricelist_available_hours(cautions: list, normalized_hourdict:dict, cau
             try:
                 while idx-1 >= 0:
                     idx -= 1
-                    prev = hours_ranged[idx]
+                    prev = hours_sorted[idx]
                     if prev not in cautions:
                         cautions.append(prev)
-                        #print(f"adding {prev}")
                         ret[prev] = True
                         break
             except IndexError as e:
                 raise IndexError(f"error on second. idx:{idx}")
-    # except IndexError as e:
-    #     raise IndexError("error on capping pricelists")
 
     try:
         for i in get_nocturnal_stop(blocknocturnal, range_start):
