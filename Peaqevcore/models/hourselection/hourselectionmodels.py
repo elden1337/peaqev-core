@@ -67,9 +67,9 @@ class HourSelectionOptions:
 
     def set_absolute_top_price(self, top, min) -> None:
         if not self.validate_top_min_prices(top, min):
+            _LOGGER.warning(f"Setting top-price and min-price to zero because of min-price being larger than top-price. Please fix in options. top:{top} min:{min}")
             top = 0
             HourSelectionOptions.min_price = 0
-            _LOGGER.warning(f"Setting top-price and min-price to zero because of min-price being larger than top-price. Please fix in options. top:{top} min:{min}")
         if top is None:
             self.absolute_top_price = float("inf")
         elif top <= 0:
