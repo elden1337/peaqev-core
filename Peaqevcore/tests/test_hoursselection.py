@@ -789,6 +789,16 @@ def test_230317_today_tomorrow():
     assert r.caution_hours == []
     assert r.dynamic_caution_hours == {}
 
+def test_230318_today_tomorrow():
+    r = h(cautionhour_type=CautionHourType.SCROOGE, absolute_top_price=3, min_price=0.0)
+    r.prices = [0.057, 0.057, 0.057, 0.139, 0.241, 0.294, 0.301, 0.321, 0.401, 0.417, 0.457, 0.458, 0.453, 0.446, 0.425, 0.438, 0.467, 0.768, 1.353, 0.769, 0.485, 0.488, 0.472, 0.465]
+    r.prices_tomorrow = [0.505, 0.517, 0.544, 0.558, 0.588, 0.613, 0.637, 0.689, 0.84, 1.067, 1.014, 0.939, 0.77, 0.63, 0.699, 0.77, 1.106, 1.383, 1.399, 0.749, 0.469, 0.442, 0.396, 0.349]
+    r.adjusted_average = 0.77
+    r.update_top_price(1.28)
+    r.service._mock_hour = 13
+    assert r.non_hours == [13, 17, 18, 19, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12]
+
+
 
 """important, fix this later."""
 # def test_230208_2():
