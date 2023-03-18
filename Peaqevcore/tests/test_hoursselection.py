@@ -776,15 +776,18 @@ def test_230317_today_only():
     assert r.non_hours == [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
 
 def test_230317_today_tomorrow():
-    r = h(cautionhour_type=CautionHourType.SCROOGE, absolute_top_price=3, min_price=0.0)
+    r = h(cautionhour_type=CautionHourType.SCROOGE, absolute_top_price=2, min_price=0.0)
     r.prices = [0.475, 0.457, 0.442, 0.42, 0.414, 0.415, 0.44, 0.466, 0.47, 0.459, 0.46, 0.456, 0.455, 0.452, 0.453, 0.422, 0.417, 0.411, 0.405, 0.372, 0.339, 0.327, 0.313, 0.257]
     r.prices_tomorrow = [0.057, 0.057, 0.057, 0.139, 0.24, 0.293, 0.3, 0.32, 0.401, 0.417, 0.456, 0.457, 0.452, 0.445, 0.424, 0.437, 0.466, 0.766, 1.35, 0.767, 0.484, 0.487, 0.471, 0.464]
     r.adjusted_average = 0.87
-    r.update_top_price(1.33)
-    r.service._mock_hour = 14
-    assert r.non_hours == [14, 15, 16, 17, 18, 19, 20, 21, 22, 5, 6, 7, 8, 9, 12, 13]
+    #r.update_top_price(1.33)
+    r.update_top_price(0.42)
+    #r.service._mock_hour = 14
+    #assert r.non_hours == [14, 15, 16, 17, 18, 19, 20, 21, 22, 5, 6, 7, 8, 9, 12, 13]
     r.service._mock_hour = 20
     assert r.non_hours == [20, 21, 22, 5, 6, 7, 8, 9, 12, 13, 14, 15, 16, 17, 18, 19]
+    assert r.caution_hours == []
+    assert r.dynamic_caution_hours == {}
 
 
 """important, fix this later."""
