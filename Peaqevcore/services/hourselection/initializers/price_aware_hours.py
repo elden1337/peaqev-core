@@ -45,7 +45,7 @@ class PriceAwareHours(Hours):
 
     @property
     def absolute_top_price(self):
-        return self._core.options.absolute_top_price
+        return self._core.model.options.absolute_top_price
 
     @property
     def min_price(self):
