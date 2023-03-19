@@ -672,14 +672,14 @@ def test_cautionhourtypes():
         CautionHourType.SUAVE.value: [14, 15, 16, 17, 18,20,21],
         CautionHourType.INTERMEDIATE.value: [12, 13, 14, 15, 16, 17,18,20,21,22,23],
         CautionHourType.AGGRESSIVE.value: [12, 13, 14, 15, 16, 17,18,20,21,22,23],
-        CautionHourType.SCROOGE.value: [12, 13, 14, 15, 16, 17,18,20,21,22,23]
+        CautionHourType.SCROOGE.value: [12, 13, 14, 15, 16, 17,18,19,20,21,22,23]
     }
 
     cautionhours = {
         CautionHourType.SUAVE.value: {12: 0.38, 13: 0.34, 19:0.54, 22: 0.32, 23: 0.39},
         CautionHourType.INTERMEDIATE.value: {19:0.49},
         CautionHourType.AGGRESSIVE.value: {19:0.47},
-        CautionHourType.SCROOGE.value: {19:0.47}
+        CautionHourType.SCROOGE.value: {}
     }
     for c in CautionHourType:
         r = h(cautionhour_type=c, absolute_top_price=3, min_price=0)
@@ -697,13 +697,13 @@ def test_230205_cautionhourtypes():
         CautionHourType.SUAVE.value: [6, 7, 8, 9, 10, 11,12],
         CautionHourType.INTERMEDIATE.value: [17, 6, 7, 8, 9, 10, 11, 12, 13],
         CautionHourType.AGGRESSIVE.value: [17, 6, 7, 8, 9, 10, 11, 12, 13],
-        CautionHourType.SCROOGE.value: [17, 6, 7, 8, 9, 10, 11, 12, 13]
+        CautionHourType.SCROOGE.value: [16, 17, 18, 19, 20, 21, 22, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
     }
     cautionhours = {
         CautionHourType.SUAVE.value: {4: 0.51, 5: 0.47, 13: 0.29, 14: 0.46, 16: 0.51, 17: 0.41, 18: 0.45, 19: 0.46, 20: 0.51, 21: 0.51, 22: 0.51},
         CautionHourType.INTERMEDIATE.value: {4: 0.46, 5: 0.43, 14: 0.42, 16: 0.46, 18: 0.41, 19: 0.42, 20: 0.46, 21: 0.46, 22: 0.46},
         CautionHourType.AGGRESSIVE.value: {4: 0.44,5: 0.41, 14: 0.4, 16: 0.44, 18: 0.39, 19: 0.4, 20: 0.44, 21: 0.44, 22: 0.44},
-        CautionHourType.SCROOGE.value: {4: 0.44,5: 0.41, 14: 0.4, 16: 0.44, 18: 0.39, 19: 0.4, 20: 0.44, 21: 0.44, 22: 0.44}
+        CautionHourType.SCROOGE.value: {}
     }
     for c in CautionHourType:
         r = h(cautionhour_type=c, absolute_top_price=3, min_price=0)
@@ -780,10 +780,9 @@ def test_230317_today_tomorrow():
     r.prices = [0.475, 0.457, 0.442, 0.42, 0.414, 0.415, 0.44, 0.466, 0.47, 0.459, 0.46, 0.456, 0.455, 0.452, 0.453, 0.422, 0.417, 0.411, 0.405, 0.372, 0.339, 0.327, 0.313, 0.257]
     r.prices_tomorrow = [0.057, 0.057, 0.057, 0.139, 0.24, 0.293, 0.3, 0.32, 0.401, 0.417, 0.456, 0.457, 0.452, 0.445, 0.424, 0.437, 0.466, 0.766, 1.35, 0.767, 0.484, 0.487, 0.471, 0.464]
     r.adjusted_average = 0.87
-    #r.update_top_price(1.33)
-    r.update_top_price(0.42)
-    #r.service._mock_hour = 14
-    #assert r.non_hours == [14, 15, 16, 17, 18, 19, 20, 21, 22, 5, 6, 7, 8, 9, 12, 13]
+    r.update_top_price(1.33)
+    r.service._mock_hour = 14
+    assert r.non_hours == [14, 15, 16, 17, 18, 19, 20, 21, 22, 5, 6, 7, 8, 9, 12, 13]
     r.service._mock_hour = 20
     assert r.non_hours == [20, 21, 22, 5, 6, 7, 8, 9, 12, 13, 14, 15, 16, 17, 18, 19]
     assert r.caution_hours == []
@@ -796,7 +795,17 @@ def test_230318_today_tomorrow():
     r.adjusted_average = 0.77
     r.update_top_price(1.28)
     r.service._mock_hour = 13
-    assert r.non_hours == [13, 17, 18, 19, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12]
+    assert r.non_hours == [13, 17, 18, 19, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+
+def test_230319_today_tomorrow_scrooge():
+    r = h(cautionhour_type=CautionHourType.SCROOGE, absolute_top_price=3, min_price=0.0)
+    r.prices = [0.505, 0.517, 0.544, 0.558, 0.588, 0.613, 0.637, 0.689, 0.84, 1.067, 1.014, 0.939, 0.77, 0.63, 0.699, 0.77, 1.106, 1.383, 1.399, 0.749, 0.469, 0.442, 0.396, 0.349]
+    r.prices_tomorrow = [0.363, 0.361, 0.369, 0.402, 0.469, 0.546, 0.574, 1.445, 1.461, 1.45, 1.446, 1.419, 1.355, 1.333, 1.333, 1.355, 1.393, 1.467, 1.523, 1.684, 1.512, 1.498, 1.448, 1.107]
+    r.adjusted_average = 0.8
+    r.update_top_price(1.25)
+    r.service._mock_hour = 14
+    assert r.non_hours == [14,15,16,17,18,19,4,5,6,7,8,9,10,11,12,13]
+    assert r.caution_hours == []
 
 
 

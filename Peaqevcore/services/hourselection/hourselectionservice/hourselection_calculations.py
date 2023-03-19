@@ -64,8 +64,8 @@ def rank_prices(
         return _discard_excessive_hours(ret)
 
 def _cap_pricelist_available_hours(cautions: list, normalized_hourdict:dict, cautionhour_type: CautionHourType, blocknocturnal:bool, range_start: int) -> dict:
-    ret = {c: False for c in cautions}
     _demand = 24 - MAX_HOURS.get(cautionhour_type)
+    ret = {c: False for c in cautions} if _demand == 0 else {c: True for c in cautions}
     hours_sorted = [k for k, v in sorted(normalized_hourdict.items(), key=lambda item: item[1])]
     iterations = 0
     while len(cautions) < _demand and iterations < len(hours_sorted)*2:
