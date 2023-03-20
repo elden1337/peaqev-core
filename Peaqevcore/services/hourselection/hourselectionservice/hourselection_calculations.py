@@ -21,7 +21,7 @@ def get_offset_dict(normalized_hourdict: dict):
         ret = {}
         _prices = [p-min(normalized_hourdict.values()) for p in normalized_hourdict.values()]
         average_val = mean(_prices)
-        for i in range(0,24):
+        for i in range(0,len(_prices)):
             try:
                 ret[i] = round((_prices[i]/average_val) - 1,2)
             except:
@@ -64,7 +64,7 @@ def rank_prices(
         return _discard_excessive_hours(ret)
 
 def _cap_pricelist_available_hours(cautions: list, normalized_hourdict:dict, cautionhour_type: CautionHourType, blocknocturnal:bool, range_start: int) -> dict:
-    _demand = 24 - MAX_HOURS.get(cautionhour_type)
+    _demand = max(len(normalized_hourdict.keys()) - MAX_HOURS.get(cautionhour_type),0)
     ret = {c: False for c in cautions} if _demand == 0 else {c: True for c in cautions}
     hours_sorted = [k for k, v in sorted(normalized_hourdict.items(), key=lambda item: item[1])]
     iterations = 0
@@ -128,6 +128,7 @@ def _transform_range(range_start, base):
         else:
             ret.append(24-range_start+b)
     return ret
+
 
 def _discard_excessive_hours(hours: dict):
     """There should always be at least four regular hours before absolute_top_price kicks in."""

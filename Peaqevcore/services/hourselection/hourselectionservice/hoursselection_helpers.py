@@ -59,21 +59,6 @@ def _make_array_from_empty(input: str) -> list:
             _LOGGER.warning("Unable to create empty list for prices.")
             pass
     return []
-
-def convert_collections(new: HourObject, index_deviation: int) -> HourObject:
-    """Converts the hourobject-collections to interim days, based on the index-deviation provided."""
-    def _chop_list(lst: list):
-        return [n+index_deviation for n in lst if 0 <= n+index_deviation < 24]
-    def _chop_dict(dct: dict):
-        return {key+index_deviation:value for (key,value) in dct.items() if 0 <= key+index_deviation < 24}
-    ret = HourObject([], [], {})
-    ret.nh = _chop_list(new.nh)
-    ret.ch = _chop_list(new.ch)
-    ret.dyn_ch = _chop_dict(new.dyn_ch)
-    ret.offset_dict = _chop_dict(new.offset_dict)
-    ret.pricedict = _chop_dict(new.pricedict)
-    return ret
-
     
 def try_remove(value, collection: list|dict):
     if isinstance(collection, dict):

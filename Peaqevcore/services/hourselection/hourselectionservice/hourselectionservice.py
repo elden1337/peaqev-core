@@ -13,34 +13,32 @@ from ....models.hourselection.hourtypelist import HourTypeList
 
 _LOGGER = logging.getLogger(__name__)
 
-import time
+# import time
 
-class HourselectionService2:
-    def __init__(self, parent, base_mock_hour: int = None):
-        self._latest_update = time.time()
-        self.parent = parent
-        self._mock_hour = base_mock_hour
-        self._preserve_interim: bool = False
+# class HourselectionService2:
+#     def __init__(self, parent, base_mock_hour: int = None):
+#         self._latest_update = time.time()
+#         self.parent = parent
+#         self._mock_hour = base_mock_hour
+#         self._preserve_interim: bool = False
 
-    def get_prices(self):
-        pass
+#     def get_prices(self):
+#         pass
 
-    def rank_prices(self, prices):
-        pass
+#     def rank_prices(self, prices):
+#         pass
 
-    def check_boundaries(self):
-        #min max prices
-        #cautiontype
-        #cautiontype-maxhrs?
-        pass
+#     def check_boundaries(self):
+#         #min max prices
+#         #cautiontype
+#         #cautiontype-maxhrs?
+#         pass
 
-    def set_models(self):
-        #non
-        #caution
-        #offsets
-        pass
-
-
+#     def set_models(self):
+#         #non
+#         #caution
+#         #offsets
+#         pass
 
 class HourSelectionService:
     def __init__(self, parent, base_mock_hour: int = None):
@@ -147,14 +145,14 @@ class HourSelectionService:
         """Updates the non- and caution-hours with an adjusted mean of 14h - 13h today-tomorrow to get a more sane nightly curve."""
         if len(self.parent.model.prices_tomorrow) < 23:
             return today, tomorrow 
-        #hour = self._mock_hour if self._mock_hour is not None else 14
-        hour =14
-        negative_hour = (24 - hour)*-1
+        
+        hour =len(self.parent.prices)-10
+        negative_hour = (len(self.parent.prices) - hour)*-1
         pricelist = self.parent.model.prices_today[hour::]
         pricelist[len(pricelist):] = self.parent.model.prices_tomorrow[0:hour]
         new_hours = self._update_per_day(pricelist, hour)
-        #print(f"new: {new_hours.nh}")
-        today = update_interim_lists(range(hour,24), today, new_hours, hour)
+        
+        today = update_interim_lists(range(hour,len(self.parent.prices)), today, new_hours, hour)
         tomorrow = update_interim_lists(range(0,hour), tomorrow, new_hours, negative_hour)
 
         self._preserve_interim = True

@@ -2,7 +2,8 @@ from ....services.hourselection.hourselectionservice.hoursselection_helpers impo
 from .hourobject import HourObject
 
 def update_interim_lists(_range: range, old: HourObject, new, index_devidation: int):
-        _new = convert_collections(new, index_devidation)
+        _new = _convert_collections(new, index_devidation)
+        print(_new)
         try:
             for i in _range:
                 if i in _new.nh:
@@ -31,19 +32,20 @@ def update_interim_lists(_range: range, old: HourObject, new, index_devidation: 
         return old
     
     
-def convert_collections(new: HourObject, index_deviation: int) -> HourObject:
+def _convert_collections(new: HourObject, index_deviation: int) -> HourObject:
     """Converts the hourobject-collections to interim days, based on the index-deviation provided."""
+    total_length = len(new.pricedict.keys())
     ret = HourObject([], [], {})
-    ret.nh = _chop_list(new.nh, index_deviation)
-    ret.ch = _chop_list(new.ch, index_deviation)
-    ret.dyn_ch = _chop_dict(new.dyn_ch, index_deviation)
-    ret.offset_dict = _chop_dict(new.offset_dict, index_deviation)
-    ret.pricedict = _chop_dict(new.pricedict, index_deviation)
+    ret.nh = _chop_list(new.nh, index_deviation,total_length)
+    ret.ch = _chop_list(new.ch, index_deviation, total_length)
+    ret.dyn_ch = _chop_dict(new.dyn_ch, index_deviation, total_length)
+    ret.offset_dict = _chop_dict(new.offset_dict, index_deviation, total_length)
+    ret.pricedict = _chop_dict(new.pricedict, index_deviation, total_length)
     return ret
 
 
-def _chop_list(lst: list, index_deviation:int):
-        return [n+index_deviation for n in lst if 0 <= n+index_deviation < 24]
+def _chop_list(lst: list, index_deviation:int, total_length:int = 24):
+        return [n+index_deviation for n in lst if 0 <= n+index_deviation < total_length]
 
-def _chop_dict(dct: dict, index_deviation: int):
-    return {key+index_deviation:value for (key,value) in dct.items() if 0 <= key+index_deviation < 24}
+def _chop_dict(dct: dict, index_deviation: int, total_length: int = 24):
+    return {key+index_deviation:value for (key,value) in dct.items() if 0 <= key+index_deviation < total_length}
