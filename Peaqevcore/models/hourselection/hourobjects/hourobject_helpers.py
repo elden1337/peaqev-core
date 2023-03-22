@@ -3,7 +3,6 @@ from .hourobject import HourObject
 
 def update_interim_lists(_range: range, old: HourObject, new, index_devidation: int):
         _new = _convert_collections(new, index_devidation)
-        print(_new)
         try:
             for i in _range:
                 if i in _new.nh:

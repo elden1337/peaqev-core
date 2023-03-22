@@ -28,7 +28,7 @@ def get_offset_dict(normalized_hourdict: dict):
                 ret[i] = 1
         return ret
 
-def rank_prices(
+def create_cautions(
         hourdict: dict, 
         normalized_hourdict: dict, 
         cautionhour_type: CautionHourType, 

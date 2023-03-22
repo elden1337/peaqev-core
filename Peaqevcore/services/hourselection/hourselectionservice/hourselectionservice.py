@@ -4,7 +4,7 @@ from typing import Tuple
 import statistics as stat
 
 from .hoursselection_helpers import create_dict
-from .hourselection_calculations import normalize_prices, rank_prices, get_offset_dict, should_be_cautionhour, set_charge_allowance
+from .hourselection_calculations import normalize_prices, create_cautions, get_offset_dict, should_be_cautionhour, set_charge_allowance
 from ....models.hourselection.hourobjects.hourobject import HourObject
 from ....models.hourselection.hourobjects.hourobject_helpers import update_interim_lists
 from ....models.hourselection.hourselectionmodels import HourSelectionModel
@@ -13,48 +13,23 @@ from ....models.hourselection.hourtypelist import HourTypeList
 
 _LOGGER = logging.getLogger(__name__)
 
-# import time
-
-# class HourselectionService2:
-#     def __init__(self, parent, base_mock_hour: int = None):
-#         self._latest_update = time.time()
-#         self.parent = parent
-#         self._mock_hour = base_mock_hour
-#         self._preserve_interim: bool = False
-
-#     def get_prices(self):
-#         pass
-
-#     def rank_prices(self, prices):
-#         pass
-
-#     def check_boundaries(self):
-#         #min max prices
-#         #cautiontype
-#         #cautiontype-maxhrs?
-#         pass
-
-#     def set_models(self):
-#         #non
-#         #caution
-#         #offsets
-#         pass
 
 class HourSelectionService:
     def __init__(self, parent, base_mock_hour: int = None):
         self.parent = parent
         self._mock_hour = base_mock_hour
-        self._preserve_interim: bool = False
+        self.preserve_interim: bool = False
 
-    def update(self, caller: str = None) -> None:
-        if self._preserve_interim and caller == "today":
+    def update(self) -> None:
+        if all([len(self.parent.model.prices_today) == 0, len(self.parent.model.prices_tomorrow) == 0]):
+            return
+        if self.preserve_interim:
             self.parent.model.hours.hours_today = self.parent.model.hours.hours_tomorrow
             self.parent.model.hours.hours_tomorrow = HourObject([], [], {})
             return
-
+        
         today=self._update_per_day(prices=self.parent.model.prices_today)
         tomorrow=self._update_per_day(prices=self.parent.model.prices_tomorrow)
-        
         hours, hours_tomorrow = self._interim_day_update(today, tomorrow)
 
         self.parent.model.hours.hours_today = self._add_remove_limited_hours(hours)
@@ -69,7 +44,7 @@ class HourSelectionService:
                 normalize_prices(prices)
                 )
             if stat.stdev(prices) > 0.05:
-                ranked = rank_prices(
+                ranked = create_cautions(
                         pricedict, 
                         normalized_pricedict,
                         self.parent.cautionhour_type_enum,
@@ -78,7 +53,6 @@ class HourSelectionService:
                         self.parent.model.options.blocknocturnal
                         )
                 ready_hours = self._determine_hours(ranked, prices)
-                
                 ret= HourObject(
                     nh=ready_hours.nh, 
                     ch=ready_hours.ch, 
@@ -155,5 +129,5 @@ class HourSelectionService:
         today = update_interim_lists(range(hour,len(self.parent.prices)), today, new_hours, hour)
         tomorrow = update_interim_lists(range(0,hour), tomorrow, new_hours, negative_hour)
 
-        self._preserve_interim = True
+        self.preserve_interim = True
         return today, tomorrow

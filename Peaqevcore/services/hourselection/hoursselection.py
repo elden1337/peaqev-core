@@ -56,8 +56,6 @@ class Hoursselection:
         self.model.prices_today = val
         if self.prices == self.prices_tomorrow:
             self.prices_tomorrow = []
-        else:
-            self.update(caller="today")
 
     @property
     def prices_tomorrow(self) -> list:
@@ -67,8 +65,7 @@ class Hoursselection:
     def prices_tomorrow(self, val):
         self.model.prices_tomorrow = convert_none_list(val)
         if self.model.prices_tomorrow != []:
-            self.service._preserve_interim = False
-        self.update()
+            self.service.preserve_interim = False
 
     @property
     def adjusted_average(self):
@@ -76,7 +73,9 @@ class Hoursselection:
 
     @adjusted_average.setter
     def adjusted_average(self, val):
-        self.model.adjusted_average = val
+        if val != self.model.adjusted_average:
+            self.model.adjusted_average = val        
+            self.update_prices(self.prices, self.prices_tomorrow)
 
     def update_top_price(self, dyn_top_price) -> None: 
         self.model.options.set_absolute_top_price(
@@ -86,12 +85,12 @@ class Hoursselection:
             ), 
             self.model.options.min_price
             )
-        self.update()
+        self.update_prices(self.prices, self.prices_tomorrow)
 
-    def update(self, testhour:int = None, caller:str = None) -> None:
-        if testhour is not None:
-            self.service._mock_hour = testhour
-        self.service.update(caller)
+    def update_prices(self, prices:dict = [], prices_tomorrow:dict=[]):
+        self.prices = prices
+        self.prices_tomorrow = prices_tomorrow
+        self.service.update()
 
     def get_average_kwh_price(self):
         ret = self._get_charge_or_price()
