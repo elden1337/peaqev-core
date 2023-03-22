@@ -26,6 +26,7 @@ class HourSelectionService:
         if self.preserve_interim:
             self.parent.model.hours.hours_today = self.parent.model.hours.hours_tomorrow
             self.parent.model.hours.hours_tomorrow = HourObject([], [], {})
+            self.preserve_interim = False
             return
         
         today=self._update_per_day(prices=self.parent.model.prices_today)
@@ -118,6 +119,7 @@ class HourSelectionService:
     def _interim_day_update(self, today: HourObject, tomorrow: HourObject) -> Tuple[HourObject, HourObject]:
         """Updates the non- and caution-hours with an adjusted mean of 14h - 13h today-tomorrow to get a more sane nightly curve."""
         if len(self.parent.model.prices_tomorrow) < 23:
+            self.preserve_interim = False
             return today, tomorrow 
         
         hour =len(self.parent.prices)-10
@@ -128,6 +130,5 @@ class HourSelectionService:
         
         today = update_interim_lists(range(hour,len(self.parent.prices)), today, new_hours, hour)
         tomorrow = update_interim_lists(range(0,hour), tomorrow, new_hours, negative_hour)
-
         self.preserve_interim = True
         return today, tomorrow

@@ -103,7 +103,8 @@ def _cap_pricelist_available_hours(cautions: list, normalized_hourdict:dict, cau
                 ret[i] = True
     except IndexError as e:
         _LOGGER.error(f"error on looping nocturnal stop: {e}")
-
+    if _demand > 0:
+        print(f"{cautionhour_type}: {ret}")
     return _sort_by_key(ret)
 
 def _sort_by_key(input: dict) -> dict:
