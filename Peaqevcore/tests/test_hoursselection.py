@@ -318,7 +318,6 @@ def test_over_midnight():
     prices_tomorrow = []
     r.update_prices(prices, prices_tomorrow)
     r.service._mock_hour = 2
-    assert r.service.preserve_interim == True
     assert r.non_hours == [7,8,9]
 
 def test_very_high_prices():
@@ -719,7 +718,7 @@ def test_cautionhourtypes():
     
 def test_230205_cautionhourtypes():
     nonhours = {
-        CautionHourType.SUAVE.value: [6, 7, 8, 9, 10, 11,12],
+        CautionHourType.SUAVE.value: [6, 7, 8, 9, 10, 11, 12],
         CautionHourType.INTERMEDIATE.value: [17, 6, 7, 8, 9, 10, 11, 12, 13],
         CautionHourType.AGGRESSIVE.value: [17, 6, 7, 8, 9, 10, 11, 12, 13],
         CautionHourType.SCROOGE.value: [15, 16, 17, 18, 19, 20, 21, 22, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
@@ -735,11 +734,12 @@ def test_230205_cautionhourtypes():
         assert r.model.options.cautionhour_type == VALUES_CONVERSION[c.value]
         prices = [0.711, 0.519, 0.494, 0.474, 0.458, 0.453, 0.457, 0.484, 0.996, 1.54, 1.544, 1.523, 1.493, 1.475, 1.513, 1.603, 1.707, 1.95, 1.846, 1.812, 1.714, 1.706, 1.706, 1.055]
         prices_tomorrow = [1.497, 1.208, 1.125, 1.28, 1.707, 1.796, 2.499, 2.854, 3.035, 2.854, 2.633, 2.558, 2.4, 2.266, 1.829, 2.06, 2.503, 2.739, 2.252, 1.783, 1.713, 1.206, 0.803, 0.586]
-        r.update_prices(prices, prices_tomorrow)
         r.adjusted_average = 1.38
+        r.update_prices(prices, prices_tomorrow)
         r.service._mock_hour = 15
         assert r.non_hours == nonhours[c.value]
         assert r.dynamic_caution_hours == cautionhours[c.value]
+        del r
 
 def test_230205_interimday():
     r = h(cautionhour_type=CautionHourType.INTERMEDIATE.value, absolute_top_price=3, min_price=0)
@@ -748,11 +748,11 @@ def test_230205_interimday():
     r.update_prices(prices, prices_tomorrow)
     r.adjusted_average = 1.38
     r.service._mock_hour = 13
-    assert r.non_hours == [13, 17, 6, 7, 8, 9,10,11,12]
-    assert r.caution_hours == [14, 15, 16, 18, 19, 20, 21, 22, 4, 5]
+    assert r.non_hours == [13, 15, 16, 17, 18]
+    assert r.caution_hours == [14, 19,20]
     r.service._mock_hour = 14
-    assert r.non_hours == [17, 6, 7, 8, 9,10,11,12,13]
-    assert r.caution_hours == [14, 15, 16, 18, 19, 20, 21, 22, 4, 5]
+    assert r.non_hours == [15,16,17,18]
+    assert r.caution_hours == [14, 19,20]
         
 
 def test_230208():
@@ -840,6 +840,26 @@ def test_230319_today_tomorrow_scrooge():
     r.update_prices(prices, prices_tomorrow)
     assert r.non_hours == [14,15,16,17,18,19,4,5,6,7,8,9,10,11,12,13]
     assert r.caution_hours == []
+
+def test_230322_over_night_scrooge():
+    r = h(cautionhour_type=CautionHourType.SCROOGE, absolute_top_price=3, min_price=0.0)
+    prices = [0.505, 0.517, 0.544, 0.558, 0.588, 0.613, 0.637, 0.689, 0.84, 1.067, 1.014, 0.939, 0.77, 0.63, 0.699, 0.77, 1.106, 1.383, 1.399, 0.749, 0.469, 0.442, 0.396, 0.349]
+    prices_tomorrow = [0.363, 0.361, 0.369, 0.402, 0.469, 0.546, 0.574, 1.445, 1.461, 1.45, 1.446, 1.419, 1.355, 1.333, 1.333, 1.355, 1.393, 1.467, 1.523, 1.684, 1.512, 1.498, 1.448, 1.107]
+    r.adjusted_average = 0.8
+    r.update_top_price(1.25)
+    r.service._mock_hour = 14
+    r.update_prices(prices, prices_tomorrow)
+    assert r.non_hours == [14,15,16,17,18,19,4,5,6,7,8,9,10,11,12,13]
+    r.service._mock_hour = 0
+    assert r.service.preserve_interim is True
+    r.update_prices(prices_tomorrow)    
+    assert r.non_hours == [4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
+    assert r.service.preserve_interim is False
+    # r.service._mock_hour = 13
+    # prices2 = [0.057, 0.057, 0.057, 0.139, 0.241, 0.294, 0.301, 0.321, 0.401, 0.417, 0.457, 0.458, 0.453, 0.446, 0.425, 0.438, 0.467, 0.768, 1.353, 0.769, 0.485, 0.488, 0.472, 0.465]
+    # r.update_prices(prices_tomorrow, prices2)
+    # assert r.service.preserve_interim is True
+    # assert r.non_hours == [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 8, 9, 10, 11, 12]
 
 
 

@@ -70,6 +70,10 @@ class Hours:
     def dynamic_caution_hours(self) -> dict:
         pass
 
+    @abstractmethod
+    def update_prices(self, prices:dict = [], prices_tomorrow:dict=[]) -> None:
+        pass
+
     @property
     @abstractmethod
     def options(self):
