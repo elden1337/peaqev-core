@@ -45,20 +45,25 @@ class ChargerSwitch(HubMember):
 
     def updatecurrent(self):
         if self._hubdata.chargertype.options.charger_is_outlet is True:
-            pass
-        elif self._ampmeter_is_attribute is True:
-            ret = self._hass.states.get(self.entity)
-            if ret is not None:
-                ret_attr = str(ret.attributes.get(self._current_attr_name))
-                self.current = ret_attr
-            else:
-                self._log_warning_once()
-        else:
-            ret = self._hass.states.get(self._current_attr_name)
-            if ret is not None:
-                self.current = ret.state
-            else:
-                self._log_warning_once()
+            return
+        try:
+            self.current = self._get_sensor_from_hass(self._current_attr_name)
+        except:
+            self._log_warning_once()
+
+        # elif self._ampmeter_is_attribute is True:
+        #     ret = self._hass.states.get(self.entity)
+        #     if ret is not None:
+        #         ret_attr = str(ret.attributes.get(self._current_attr_name))
+        #         self.current = ret_attr
+        #     else:
+        #         self._log_warning_once()
+        # else:
+        #     ret = self._hass.states.get(self._current_attr_name)
+        #     if ret is not None:
+        #         self.current = ret.state
+        #     else:
+        #         self._log_warning_once()
 
     HASLOGGED_INITWARN = False
     def _log_warning_once(self):

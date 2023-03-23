@@ -13,13 +13,15 @@ class HubMember:
         listenerentity = None, 
         initval = None, 
         name = None, 
-        init_override:bool = False
+        init_override:bool = False,
+        hass = None
         ):
         self._value = initval
         self._type = data_type
         self._listenerentity, self._listenerattribute = self._set_listeners(listenerentity)
         self.name = name
         self.id = nametoid(self.name) if self.name is not None else None
+        self.hass = hass
         self.warned_not_initialized = False
         self._is_initialized = init_override
 
@@ -97,3 +99,16 @@ class HubMember:
                 self._value = False
         elif  self._type is str:
             self._value = str(value)
+
+    def _get_sensor_from_hass(self, sensor:str):
+        if self.hass is not None:
+            _sensor = sensor.split('|')
+            if len(_sensor) == 2:
+                ret = self.hass.states.get(_sensor[0])
+                if ret:
+                    ret_attr = str(ret.attributes.get(_sensor[1]))
+                    return ret_attr
+            elif len(_sensor) == 1:
+                ret = self.hass.states.get(_sensor[0])
+                if ret:
+                    return ret
