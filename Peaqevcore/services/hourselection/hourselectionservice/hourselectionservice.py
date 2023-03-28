@@ -24,18 +24,20 @@ class HourSelectionService:
         if all([len(self.parent.model.prices_today) == 0, len(self.parent.model.prices_tomorrow) == 0]):
             return
         if self.preserve_interim:
-            self.parent.model.hours.hours_today = self.parent.model.hours.hours_tomorrow
-            self.parent.model.hours.hours_tomorrow = HourObject([], [], {})
-            self.preserve_interim = False
-            return
-        
-        today=self._update_per_day(prices=self.parent.model.prices_today)
-        tomorrow=self._update_per_day(prices=self.parent.model.prices_tomorrow)
-        hours, hours_tomorrow = self._interim_day_update(today, tomorrow)
+            #if 0 <= self.set_hour() >= 12: 
+                self.parent.model.hours.hours_today = self.parent.model.hours.hours_tomorrow
+                self.parent.model.hours.hours_tomorrow = HourObject([], [], {})
+                self.parent.model.hours.offset_dict["today"] = self.parent.model.hours.offset_dict.get("tomorrow", {})
+                self.parent.model.hours.offset_dict["tomorrow"] = {}
+                self.preserve_interim = False
+        else:
+            today=self._update_per_day(prices=self.parent.model.prices_today)
+            tomorrow=self._update_per_day(prices=self.parent.model.prices_tomorrow)
+            hours, hours_tomorrow = self._interim_day_update(today, tomorrow)
 
-        self.parent.model.hours.hours_today = self._add_remove_limited_hours(hours)
-        self.parent.model.hours.hours_tomorrow = self._add_remove_limited_hours(hours_tomorrow)
-        self.update_hour_lists()
+            self.parent.model.hours.hours_today = self._add_remove_limited_hours(hours)
+            self.parent.model.hours.hours_tomorrow = self._add_remove_limited_hours(hours_tomorrow)
+            self.update_hour_lists()
 
     def _update_per_day(self, prices: list, range_start: int =0) -> HourObject:
         pricedict = {}
