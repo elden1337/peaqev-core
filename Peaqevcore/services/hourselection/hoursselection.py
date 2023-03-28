@@ -63,7 +63,15 @@ class Hoursselection:
 
     @prices_tomorrow.setter
     def prices_tomorrow(self, val):
-        self.model.prices_tomorrow = convert_none_list(val)
+        ret = convert_none_list(val)
+        if all([
+            self.service.preserve_interim,
+            ret is not None,
+            ret != self.model.prices_tomorrow,
+            len(ret) > 1
+            ]):
+            self.service.preserve_interim = False
+        self.model.prices_tomorrow = ret
 
     @property
     def adjusted_average(self):

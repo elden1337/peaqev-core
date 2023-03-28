@@ -748,11 +748,11 @@ def test_230205_interimday():
     r.update_prices(prices, prices_tomorrow)
     r.adjusted_average = 1.38
     r.service._mock_hour = r.service.set_hour(13)
-    assert r.non_hours == [13, 15, 16, 17, 18]
-    assert r.caution_hours == [14, 19,20]
+    assert r.non_hours == [13, 17,6,7,8,9,10,11,12]
+    assert r.caution_hours == [14, 15, 16, 18, 19, 20, 21, 22, 4, 5]
     r.service._mock_hour = r.service.set_hour(14)
-    assert r.non_hours == [15,16,17,18]
-    assert r.caution_hours == [14, 19,20]
+    assert r.non_hours == [17, 6, 7, 8, 9, 10, 11, 12, 13]
+    assert r.caution_hours == [14, 15, 16, 18, 19, 20, 21, 22, 4, 5]
         
 
 def test_230208():
@@ -852,16 +852,13 @@ def test_230322_over_night_scrooge():
     assert r.non_hours == [14,15,16,17,18,19,4,5,6,7,8,9,10,11,12,13]
     r.service._mock_hour = r.service.set_hour(0)
     assert r.service.preserve_interim is True
-    r.update_prices(prices_tomorrow)    
-    assert r.non_hours == [4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
-    assert r.service.preserve_interim is False
-    # r.service._mock_hour = r.service.set_hour(13)
-    # prices2 = [0.057, 0.057, 0.057, 0.139, 0.241, 0.294, 0.301, 0.321, 0.401, 0.417, 0.457, 0.458, 0.453, 0.446, 0.425, 0.438, 0.467, 0.768, 1.353, 0.769, 0.485, 0.488, 0.472, 0.465]
-    # r.update_prices(prices_tomorrow, prices2)
-    # assert r.service.preserve_interim is True
-    # assert r.non_hours == [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 8, 9, 10, 11, 12]
-
-
+    r.update_prices(prices_tomorrow)   #new day, setting tomorrows prices as today.
+    _non_hours = r.non_hours 
+    assert _non_hours == [4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
+    assert r.service.preserve_interim is True
+    r.update_prices(prices_tomorrow, prices)
+    assert r.service.preserve_interim is True
+    assert r.non_hours != _non_hours
 
 """important, fix this later."""
 # def test_230208_2():

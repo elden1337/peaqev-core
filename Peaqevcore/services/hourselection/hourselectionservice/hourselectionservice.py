@@ -23,13 +23,8 @@ class HourSelectionService:
     def update(self) -> None:
         if all([len(self.parent.model.prices_today) == 0, len(self.parent.model.prices_tomorrow) == 0]):
             return
-        if self.preserve_interim:
-            #if 0 <= self.set_hour() >= 12: 
-                self.parent.model.hours.hours_today = self.parent.model.hours.hours_tomorrow
-                self.parent.model.hours.hours_tomorrow = HourObject([], [], {})
-                self.parent.model.hours.offset_dict["today"] = self.parent.model.hours.offset_dict.get("tomorrow", {})
-                self.parent.model.hours.offset_dict["tomorrow"] = {}
-                self.preserve_interim = False
+        if self.preserve_interim: 
+            self._change_midnight_data()    
         else:
             today=self._update_per_day(prices=self.parent.model.prices_today)
             tomorrow=self._update_per_day(prices=self.parent.model.prices_tomorrow)
@@ -38,6 +33,16 @@ class HourSelectionService:
             self.parent.model.hours.hours_today = self._add_remove_limited_hours(hours)
             self.parent.model.hours.hours_tomorrow = self._add_remove_limited_hours(hours_tomorrow)
             self.update_hour_lists()
+
+    def _change_midnight_data(self) -> None:
+        if self.parent.model.prices_tomorrow == []:
+            self.parent.model.hours.hours_today = self.parent.model.hours.hours_tomorrow
+            self.parent.model.hours.hours_tomorrow = HourObject([], [], {})
+            self.parent.model.hours.offset_dict["today"] = self.parent.model.hours.offset_dict.get("tomorrow", {})
+            self.parent.model.hours.offset_dict["tomorrow"] = {}
+        else:
+            self.preserve_interim = False
+            self.update()
 
     def _update_per_day(self, prices: list, range_start: int =0) -> HourObject:
         pricedict = {}
