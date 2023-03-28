@@ -34,17 +34,17 @@ class Hoursselection:
 
     @property
     def non_hours(self) -> list:
-        self.service.update_hour_lists(listtype=HourTypeList.NonHour)
+        self.model.hours.update_hour_lists(listtype=HourTypeList.NonHour, hour=self.service.set_hour())
         return self.model.hours.non_hours
 
     @property
     def caution_hours(self) -> list:
-        self.service.update_hour_lists(listtype=HourTypeList.CautionHour)
+        self.model.hours.update_hour_lists(listtype=HourTypeList.CautionHour, hour=self.service.set_hour())
         return self.model.hours.caution_hours
 
     @property
     def dynamic_caution_hours(self) -> dict:
-        self.service.update_hour_lists(listtype=HourTypeList.DynCautionHour)
+        self.model.hours.update_hour_lists(listtype=HourTypeList.DynCautionHour, hour=self.service.set_hour())
         return self.model.hours.dynamic_caution_hours
 
     @property

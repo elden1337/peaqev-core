@@ -32,7 +32,7 @@ class HourSelectionService:
 
             self.parent.model.hours.hours_today = self._add_remove_limited_hours(hours)
             self.parent.model.hours.hours_tomorrow = self._add_remove_limited_hours(hours_tomorrow)
-            self.update_hour_lists()
+            self.parent.model.hours.update_hour_lists(hour=self.set_hour())
 
     def _change_midnight_data(self) -> None:
         if self.parent.model.prices_tomorrow == []:
@@ -73,18 +73,6 @@ class HourSelectionService:
             ret.offset_dict=get_offset_dict(normalized_pricedict)
             return ret
         return HourObject([],[],{})
-
-    def update_hour_lists(self, listtype:HourTypeList = None) -> None:
-        hour = self.set_hour()
-        match listtype:
-            case HourTypeList.NonHour:
-                self.parent.model.hours.update_non_hours(hour)
-            case HourTypeList.CautionHour:
-                self.parent.model.hours.update_caution_hours(hour)
-            case HourTypeList.DynCautionHour:
-                self.parent.model.hours.update_dynanmic_caution_hours(hour)   
-            case _:
-                self.parent.model.hours.update_all(hour)
 
     def _add_remove_limited_hours(self, hours: HourObject) -> HourObject:
         """Removes cheap hours and adds expensive hours set by user limitation"""

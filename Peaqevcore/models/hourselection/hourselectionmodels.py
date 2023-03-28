@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List, Dict
 from .hourobjects.hourobject import HourObject
+from .hourtypelist import HourTypeList
 import logging
 
 _LOGGER = logging.getLogger(__name__)
@@ -53,6 +54,17 @@ class HoursModel:
         ret['today'] = self.hours_today.offset_dict
         ret['tomorrow'] = self.hours_tomorrow.offset_dict
         self.offset_dict = ret
+
+    def update_hour_lists(self, hour:int, listtype:HourTypeList = None) -> None:
+        match listtype:
+            case HourTypeList.NonHour:
+                self.update_non_hours(hour)
+            case HourTypeList.CautionHour:
+                self.update_caution_hours(hour)
+            case HourTypeList.DynCautionHour:
+                self.update_dynanmic_caution_hours(hour)   
+            case _:
+                self.update_all(hour)
 
 @dataclass(frozen=False)
 class HourSelectionOptions:
