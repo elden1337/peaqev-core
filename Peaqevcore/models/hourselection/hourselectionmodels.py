@@ -22,28 +22,19 @@ class HoursModel:
         self.update_dynanmic_caution_hours(hour)
         self.update_offset_dict()
 
-    def update_non_hours(
-        self, 
-        hour:int
-        ) -> None:
+    def update_non_hours(self,hour:int) -> None:
         ret = []
         ret.extend(h for h in self.hours_today.nh if h >= hour)
         ret.extend(h for h in self.hours_tomorrow.nh if h < hour)
         self.non_hours = ret
     
-    def update_caution_hours(
-        self, 
-        hour:int
-        ) -> None:
+    def update_caution_hours(self, hour:int) -> None:
         ret = []
         ret.extend(h for h in self.hours_today.ch if h >= hour)
         ret.extend(h for h in self.hours_tomorrow.ch if h < hour)
         self.caution_hours = ret
 
-    def update_dynanmic_caution_hours(
-        self, 
-        hour:int
-        ) -> None:
+    def update_dynanmic_caution_hours(self, hour:int) -> None:
         ret = {}
         ret.update({k: v for k, v in self.hours_today.dyn_ch.items() if k >= hour and k not in self.hours_today.nh})
         ret.update({k: v for k, v in self.hours_tomorrow.dyn_ch.items() if k < hour and k not in self.hours_tomorrow.nh})
