@@ -1,7 +1,7 @@
 from enum import Enum
 
 class TimePeriods(Enum):
-    QuarterHourly = "quarterhourly"
+    QuarterHourly = "quarter-hourly"
     Hourly = "hourly"
     Daily = "daily"
     Weekly = "weekly"
