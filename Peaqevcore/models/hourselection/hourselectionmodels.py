@@ -46,6 +46,13 @@ class HoursModel:
         ret['tomorrow'] = self.hours_tomorrow.offset_dict
         self.offset_dict = ret
 
+    def touch_midnight(self) -> bool:
+        self.hours_today = self.hours_tomorrow
+        self.hours_tomorrow = HourObject([], [], {})
+        self.offset_dict["today"] = self.offset_dict.get("tomorrow", {})
+        self.offset_dict["tomorrow"] = {}
+        return True
+
     def update_hour_lists(self, hour:int, listtype:HourTypeList = None) -> None:
         match listtype:
             case HourTypeList.NonHour:

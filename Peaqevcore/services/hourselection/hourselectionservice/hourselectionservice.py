@@ -39,11 +39,11 @@ class HourSelectionService:
     def _change_midnight_data(self) -> None:        
         if self.parent.model.prices_tomorrow == []:
             if not self._midnight_touched:
-                self.parent.model.hours.hours_today = self.parent.model.hours.hours_tomorrow
-                self.parent.model.hours.hours_tomorrow = HourObject([], [], {})
-                self.parent.model.hours.offset_dict["today"] = self.parent.model.hours.offset_dict.get("tomorrow", {})
-                self.parent.model.hours.offset_dict["tomorrow"] = {}
-                self._midnight_touched = True
+                self._midnight_touched = self.parent.model.hours.touch_midnight()
+                # self.parent.model.hours.hours_today = self.parent.model.hours.hours_tomorrow
+                # self.parent.model.hours.hours_tomorrow = HourObject([], [], {})
+                # self.parent.model.hours.offset_dict["today"] = self.parent.model.hours.offset_dict.get("tomorrow", {})
+                # self.parent.model.hours.offset_dict["tomorrow"] = {}
         else:
             self.preserve_interim = False
             self.update()
