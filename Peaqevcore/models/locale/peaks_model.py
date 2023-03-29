@@ -26,6 +26,23 @@ class PeaksModel:
             self._m = dict_data.get("m")
             self.is_dirty = True
 
+    async def async_set_init_dict(self, dict_data:Dict, dt=datetime.now()) -> None:
+        ppdict = dict()
+        if dt.month != self.m:
+            self.reset()
+        else:
+            for pp in dict_data.get("p"):
+                tkeys = pp.split("h")
+                ppkey = (int(tkeys[0]), int(tkeys[1]))
+                ppdict[ppkey] = dict_data.get("p").get(pp)
+            if len(self._p):
+                self._p = dict(self._p.items() | ppdict.items())
+                print(f"new existing: {self._p}")
+            else: 
+                self._p = ppdict
+            self._m = dict_data.get("m")
+            self.is_dirty = True
+
     @property
     def p(self) -> dict:
         return self._p
