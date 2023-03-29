@@ -852,9 +852,17 @@ def test_230322_over_night_scrooge():
     assert r.non_hours == [14,15,16,17,18,19,4,5,6,7,8,9,10,11,12,13]
     r.service._mock_hour = r.service.set_hour(0)
     assert r.service.preserve_interim is True
-    r.update_prices(prices_tomorrow)   #new day, setting tomorrows prices as today.
+    r.update_prices(prices_tomorrow)
     _non_hours = r.non_hours 
+    assert len(r.offsets.get('today')) == 24
+    assert len(r.offsets.get('tomorrow')) == 0
     assert _non_hours == [4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
+    r.service._mock_hour = r.service.set_hour(1)
+    #nothing should change here.
+    r.update_prices(prices_tomorrow, [])
+    assert r.non_hours == _non_hours
+    assert len(r.offsets.get('today')) == 24
+    assert len(r.offsets.get('tomorrow')) == 0
     assert r.service.preserve_interim is True
     r.update_prices(prices_tomorrow, prices)
     assert r.service.preserve_interim is True

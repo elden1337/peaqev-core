@@ -19,13 +19,15 @@ class HourSelectionService:
         self.parent = parent
         self._mock_hour = base_mock_hour
         self.preserve_interim: bool = False
+        self._midnight_touched: bool = False
 
     def update(self) -> None:
         if all([len(self.parent.model.prices_today) == 0, len(self.parent.model.prices_tomorrow) == 0]):
             return
         if self.preserve_interim: 
-            self._change_midnight_data()    
+            self._change_midnight_data()  
         else:
+            self._midnight_touched = False
             today=self._update_per_day(prices=self.parent.model.prices_today)
             tomorrow=self._update_per_day(prices=self.parent.model.prices_tomorrow)
             hours, hours_tomorrow = self._interim_day_update(today, tomorrow)
@@ -34,12 +36,14 @@ class HourSelectionService:
             self.parent.model.hours.hours_tomorrow = self._add_remove_limited_hours(hours_tomorrow)
             self.parent.model.hours.update_hour_lists(hour=self.set_hour())
 
-    def _change_midnight_data(self) -> None:
+    def _change_midnight_data(self) -> None:        
         if self.parent.model.prices_tomorrow == []:
-            self.parent.model.hours.hours_today = self.parent.model.hours.hours_tomorrow
-            self.parent.model.hours.hours_tomorrow = HourObject([], [], {})
-            self.parent.model.hours.offset_dict["today"] = self.parent.model.hours.offset_dict.get("tomorrow", {})
-            self.parent.model.hours.offset_dict["tomorrow"] = {}
+            if not self._midnight_touched:
+                self.parent.model.hours.hours_today = self.parent.model.hours.hours_tomorrow
+                self.parent.model.hours.hours_tomorrow = HourObject([], [], {})
+                self.parent.model.hours.offset_dict["today"] = self.parent.model.hours.offset_dict.get("tomorrow", {})
+                self.parent.model.hours.offset_dict["tomorrow"] = {}
+                self._midnight_touched = True
         else:
             self.preserve_interim = False
             self.update()
