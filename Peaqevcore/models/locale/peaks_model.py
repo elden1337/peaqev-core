@@ -6,12 +6,12 @@ from typing import Dict
 @dataclass
 class PeaksModel:
     _peaks_dict: dict
-    _m: int = 0
+    _month: int = 0
     _is_dirty: bool = False
 
     def set_init_dict(self, dict_data:Dict, dt=datetime.now()) -> None:
         ppdict = {}
-        if dt.month != self.month:
+        if dt.month != self.m:
             self.reset()
         else:
             for pp in dict_data.get("p"):
@@ -27,7 +27,7 @@ class PeaksModel:
 
     async def async_set_init_dict(self, dict_data:Dict, dt=datetime.now()) -> bool:
         ppdict = {}
-        if dt.month != self.month:
+        if dt.month != self.m:
             await self.async_reset()
         else:
             for pp in dict_data.get("p"):
@@ -63,7 +63,7 @@ class PeaksModel:
     def export_peaks(self) -> dict:
         return {
             "m": self._month,
-            "p": {[(f"{pp[0]}h{pp[1]}", self._peaks_dict.get(pp)) for pp in self._peaks_dict]}
+            "p": dict([(f"{pp[0]}h{pp[1]}", self._peaks_dict.get(pp)) for pp in self._peaks_dict])
         }
 
     @property
