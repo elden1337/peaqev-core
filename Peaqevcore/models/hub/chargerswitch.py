@@ -20,7 +20,7 @@ class ChargerSwitch(HubMember):
         self._value = initval
         self._current = None
         self._current_attr_name = currentname
-        super().__init__(data_type=data_type, listenerentity=listenerentity, init_override=init_override, initval=initval)
+        super().__init__(data_type=data_type, listenerentity=listenerentity, init_override=init_override, initval=initval, hass=hass)
 
     @property
     def is_initialized(self) -> bool:
