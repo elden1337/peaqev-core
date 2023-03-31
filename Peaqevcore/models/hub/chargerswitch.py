@@ -12,7 +12,6 @@ class ChargerSwitch(HubMember):
             listenerentity,
             initval,
             currentname: str,
-            ampmeter_is_attribute: bool,
             hubdata=None,
             init_override:bool = False
     ):
@@ -21,7 +20,6 @@ class ChargerSwitch(HubMember):
         self._value = initval
         self._current = None
         self._current_attr_name = currentname
-        self._ampmeter_is_attribute = ampmeter_is_attribute
         super().__init__(data_type=data_type, listenerentity=listenerentity, init_override=init_override, initval=initval)
 
     @property
@@ -50,20 +48,6 @@ class ChargerSwitch(HubMember):
             self.current = self._get_sensor_from_hass(self._current_attr_name)
         except:
             self._log_warning_once()
-
-        # elif self._ampmeter_is_attribute is True:
-        #     ret = self._hass.states.get(self.entity)
-        #     if ret is not None:
-        #         ret_attr = str(ret.attributes.get(self._current_attr_name))
-        #         self.current = ret_attr
-        #     else:
-        #         self._log_warning_once()
-        # else:
-        #     ret = self._hass.states.get(self._current_attr_name)
-        #     if ret is not None:
-        #         self.current = ret.state
-        #     else:
-        #         self._log_warning_once()
 
     HASLOGGED_INITWARN = False
     def _log_warning_once(self):

@@ -88,7 +88,6 @@ class IHubSensors:
                 listenerentity=self.chargertype.entities.powerswitch,
                 initval=False,
                 currentname=self.chargertype.entities.ampmeter,
-                ampmeter_is_attribute=self.chargertype.options.ampmeter_is_attribute,
                 hubdata=self,
                 init_override=True
             )
@@ -113,7 +112,6 @@ class IHubSensors:
                 listenerentity=self.chargertype.entities.powerswitch,
                 initval=False,
                 currentname=self.chargertype.entities.ampmeter,
-                ampmeter_is_attribute=self.chargertype.options.ampmeter_is_attribute,
                 hubdata=self
             )
         self.totalhourlyenergy = HubMember(
