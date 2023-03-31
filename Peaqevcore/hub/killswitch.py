@@ -38,12 +38,19 @@ class KillSwitch:
             self._grace_period = True
             self._grace_period_start = time.time()
 
-    @property
     def update(self):
         self._last_update = time.time()
         self._grace_period = False
         self._is_dead = False
         self._grace_period_start = 0
+
+    async def async_update(self):
+        self._last_update = time.time()
+        self._grace_period = False
+        self._is_dead = False
+        self._grace_period_start = 0
+
+    
 
 
 # k = KillSwitch("magnus_sensor", 3, 6)

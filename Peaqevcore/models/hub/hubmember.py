@@ -100,7 +100,20 @@ class HubMember:
         elif  self._type is str:
             self._value = str(value)
 
-    def _get_sensor_from_hass(self, sensor:str):
+    def get_sensor_from_hass(self, sensor:str):
+        if self.hass is not None:
+            _sensor = sensor.split('|')
+            if len(_sensor) == 2:
+                ret = self.hass.states.get(_sensor[0])
+                if ret:
+                    ret_attr = str(ret.attributes.get(_sensor[1]))
+                    return ret_attr
+            elif len(_sensor) == 1:
+                ret = self.hass.states.get(_sensor[0])
+                if ret:
+                    return ret
+
+    async def async_get_sensor_from_hass(self, sensor:str):
         if self.hass is not None:
             _sensor = sensor.split('|')
             if len(_sensor) == 2:

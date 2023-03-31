@@ -45,12 +45,21 @@ class ChargerSwitch(HubMember):
         if self._hubdata.chargertype.options.charger_is_outlet is True:
             return
         try:
-            self.current = self._get_sensor_from_hass(self._current_attr_name)
+            self.current = self.get_sensor_from_hass(self._current_attr_name)
         except:
-            self._log_warning_once()
+            pass
+
+    async def async_updatecurrent(self):
+        if self._hubdata.chargertype.options.charger_is_outlet is True:
+            return
+        try:
+            self.current = await self.async_get_sensor_from_hass(self._current_attr_name)
+            return self.current
+        except:
+           await self.async_log_warning_once()
 
     HASLOGGED_INITWARN = False
-    def _log_warning_once(self):
+    async def async_log_warning_once(self):
         if not self.HASLOGGED_INITWARN:
             _LOGGER.warning("Chargerobject state was None while getting current. "
                 "Updatecurrent will still process but you may see a missmatch in frontend.")

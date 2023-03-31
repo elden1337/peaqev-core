@@ -106,6 +106,11 @@ class SchedulerFacade(Scheduler):
             self.create(charge_amount, departure_time, schedule_starttime, override_settings)
         self.schedule_created = True
 
+    async def async_create_schedule(self, charge_amount: float, departure_time: datetime, schedule_starttime: datetime, override_settings: bool = False):
+        if not self.scheduler_active:
+            await self.hub.state_machine.async_add_executor_job(self.create,charge_amount, departure_time, schedule_starttime, override_settings)
+        self.schedule_created = True
+
     def update(self):
         self._update(
             avg24=self._hub.sensors.powersensormovingaverage24.value,
@@ -116,8 +121,21 @@ class SchedulerFacade(Scheduler):
         )
         self.check_states()
 
+    async def async_update(self):
+        await self.hub.state_machine.async_add_executor_job(self._update, 
+                                                            self._hub.sensors.powersensormovingaverage24.value,
+                                                            self._hub.current_peak_dynamic,
+                                                            self._hub.charger.session.session_energy,
+                                                            self._hub.hours.prices,
+                                                            self._hub.hours.prices_tomorrow)
+        await self.async_check_states()
+
     def cancel(self):
         self._cancel()
+        self.schedule_created = False
+
+    async def async_cancel(self):
+        await self.hub.state_machine.async_add_executor_job(self._cancel)
         self.schedule_created = False
 
     def check_states(self):
