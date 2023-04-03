@@ -1,8 +1,8 @@
+import logging
 from dataclasses import dataclass, field
 from typing import List, Dict
 from .hourobjects.hourobject import HourObject
 from .hourtypelist import HourTypeList
-import logging
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -63,57 +63,3 @@ class HoursModel:
                 self.update_dynanmic_caution_hours(hour)   
             case _:
                 self.update_all(hour)
-
-@dataclass(frozen=False)
-class HourSelectionOptions:
-    cautionhour_type: float = 0
-    top_price: float = 0
-    min_price: float = 0
-    blocknocturnal: bool = False
-    absolute_top_price: float = field(init=False)
-
-    def __post_init__(self):
-        self.set_absolute_top_price(self.top_price, self.min_price)
-
-    def set_absolute_top_price(self, top, min) -> None:
-        if not self.validate_top_min_prices(top, min):
-            _LOGGER.warning(f"Setting top-price and min-price to zero because of min-price being larger than top-price. Please fix in options. top:{top} min:{min}")
-            top = 0
-            HourSelectionOptions.min_price = 0
-        if top is None:
-            self.absolute_top_price = float("inf")
-        elif top <= 0:
-            self.absolute_top_price = float("inf")
-        else:
-            self.absolute_top_price = float(top)
-
-    def validate_top_min_prices(self, top, min) -> bool:
-        if any(
-            [top == 0, min == 0]
-        ):  
-            return True
-        return top > min
-        
-
-@dataclass(frozen=False)
-class HourSelectionModel:
-    prices_today: List[float] = field(default_factory=lambda : [])
-    prices_tomorrow: List[float] = field(default_factory=lambda : [])
-    adjusted_average: float = None
-    current_peak: float = 0.0
-    hours: HoursModel = HoursModel()
-    options: HourSelectionOptions = HourSelectionOptions
-
-    def __post_init__(self):
-        self.validate()
-
-    def validate(self):
-        assert 0 < self.options.cautionhour_type <= 1
-        assert isinstance(self.prices_today, list)
-        assert isinstance(self.prices_tomorrow, list)
-
-        if isinstance(self.adjusted_average, (int, float)):
-            assert self.adjusted_average >= 0
-        else:
-            assert self.adjusted_average is None
-        

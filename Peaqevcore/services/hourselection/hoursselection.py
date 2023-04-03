@@ -1,6 +1,7 @@
 import logging
 from ...models.hourselection.cautionhourtype import CautionHourType
-from ...models.hourselection.hourselectionmodels import HourSelectionModel, HourSelectionOptions
+from ...models.hourselection.hourselection_model import HourSelectionModel
+from ...models.hourselection.hourselection_options import HourSelectionOptions
 from ...models.hourselection.hourtypelist import HourTypeList
 from .hourselectionservice.hourselectionservice import HourSelectionService
 from .hourselectionservice.hoursselection_helpers import convert_none_list
@@ -83,14 +84,8 @@ class Hoursselection:
             self.model.adjusted_average = val        
             self.update_prices(self.prices, self.prices_tomorrow)
 
-    def update_top_price(self, dyn_top_price) -> None: 
-        self.model.options.set_absolute_top_price(
-            min(
-            dyn_top_price,
-            self.model.options.absolute_top_price
-            ), 
-            self.model.options.min_price
-            )
+    def update_top_price(self, dyn_top_price=None) -> None:
+        self.model.options.set_absolute_top_price(dyn_top_price)
         self.update_prices(self.prices, self.prices_tomorrow)
 
     def update_prices(self, prices:dict = [], prices_tomorrow:dict=[]):

@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from datetime import datetime, time, timedelta
-from ...models.hourselection.hourselectionmodels import HourSelectionOptions
+from ...models.hourselection.hourselection_options import HourSelectionOptions
 
 
 @dataclass

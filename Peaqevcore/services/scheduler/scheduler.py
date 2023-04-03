@@ -1,6 +1,6 @@
 from datetime import datetime, date, time
 import math
-from ...models.hourselection.hourselectionmodels import HourSelectionOptions
+from ...models.hourselection.hourselection_options import HourSelectionOptions
 from .schedule_session import ScheduleSession
 from ...models.chargecontroller_states import ChargeControllerStates
 
