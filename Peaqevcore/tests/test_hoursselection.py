@@ -884,6 +884,7 @@ async def test_230322_over_night_scrooge():
     assert r.service.preserve_interim is True
     assert r.non_hours != _non_hours
 
+
 """important, fix this later."""
 # def test_230208_2():
 #     r = h(cautionhour_type=CautionHourType.AGGRESSIVE.value, absolute_top_price=3, min_price=0.0)

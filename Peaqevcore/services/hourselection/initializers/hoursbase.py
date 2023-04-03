@@ -2,8 +2,11 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from abc import abstractmethod
 from ..const import NON_HOUR, CAUTION_HOUR, CHARGING_PERMITTED
+from ...timer.timer import Timer
 
 class Hours:
+    _timer: Timer
+
     def __init__(
             self,
             price_aware: bool,
@@ -26,6 +29,10 @@ class Hours:
     @property
     def price_aware(self) -> bool:
         return self._price_aware
+
+    @property
+    def timer(self) -> Timer:
+        return self._timer
 
     @property
     @abstractmethod

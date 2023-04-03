@@ -2,6 +2,7 @@ import logging
 from .hoursbase import Hours
 from ..hoursselection import Hoursselection as core_hours
 from ....models.hourselection.cautionhourtype import CautionHourType
+from ...timer.timer import Timer
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -11,6 +12,7 @@ class PriceAwareHours(Hours):
             hub
     ):
         self._hub = hub
+        self._timer = Timer()
         self._cautionhour_type = CautionHourType.get_num_value(hub.options.price.cautionhour_type)
         self._cautionhour_type_string = hub.options.price.cautionhour_type
         self._core = core_hours(
