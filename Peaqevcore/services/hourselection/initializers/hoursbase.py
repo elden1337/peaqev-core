@@ -3,9 +3,11 @@ from datetime import datetime
 from abc import abstractmethod
 from ..const import NON_HOUR, CAUTION_HOUR, CHARGING_PERMITTED
 from ...timer.timer import Timer
+from ...scheduler.scheduler import Scheduler
 
 class Hours:
     _timer: Timer
+    _scheduler: Scheduler
 
     def __init__(
             self,
@@ -33,6 +35,10 @@ class Hours:
     @property
     def timer(self) -> Timer:
         return self._timer
+
+    @property
+    def scheduler(self) -> Scheduler:
+        return self._scheduler
 
     @property
     @abstractmethod
