@@ -7,9 +7,7 @@ from .hoursselection_helpers import create_dict
 from .hourselection_calculations import normalize_prices, create_cautions, get_offset_dict, should_be_cautionhour, set_charge_allowance
 from ....models.hourselection.hourobjects.hourobject import HourObject
 from ....models.hourselection.hourobjects.hourobject_helpers import update_interim_lists
-from ....models.hourselection.hourselectionmodels import HourSelectionModel
-
-from ....models.hourselection.hourtypelist import HourTypeList
+from ....models.hourselection.day_types import DayTypes
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -28,8 +26,8 @@ class HourSelectionService:
             self._change_midnight_data()  
         else:
             self._midnight_touched = False
-            today=self._update_per_day(prices=self.parent.model.prices_today)
-            tomorrow=self._update_per_day(prices=self.parent.model.prices_tomorrow)
+            today=self._update_per_day(prices=self.parent.model.prices_today, day_type=DayTypes.Today)
+            tomorrow=self._update_per_day(prices=self.parent.model.prices_tomorrow, day_type=DayTypes.Tomorrow)
             hours, hours_tomorrow = self._interim_day_update(today, tomorrow)
 
             self.parent.model.hours.hours_today = self._add_remove_limited_hours(hours)
@@ -40,15 +38,12 @@ class HourSelectionService:
         if self.parent.model.prices_tomorrow == []:
             if not self._midnight_touched:
                 self._midnight_touched = self.parent.model.hours.touch_midnight()
-                # self.parent.model.hours.hours_today = self.parent.model.hours.hours_tomorrow
-                # self.parent.model.hours.hours_tomorrow = HourObject([], [], {})
-                # self.parent.model.hours.offset_dict["today"] = self.parent.model.hours.offset_dict.get("tomorrow", {})
-                # self.parent.model.hours.offset_dict["tomorrow"] = {}
         else:
             self.preserve_interim = False
             self.update()
 
-    def _update_per_day(self, prices: list, range_start: int =0) -> HourObject:
+    def _update_per_day(self, prices: list, day_type: DayTypes, range_start: int =0) -> HourObject:
+        _LOGGER.debug(f"Updating {day_type.name}")
         pricedict = {}
         if prices is not None and len(prices) > 1:
             pricedict = create_dict(prices)
@@ -128,7 +123,7 @@ class HourSelectionService:
         negative_hour = (len(self.parent.prices) - hour)*-1
         pricelist = self.parent.model.prices_today[hour::]
         pricelist[len(pricelist):] = self.parent.model.prices_tomorrow[0:hour]
-        new_hours = self._update_per_day(pricelist, hour)
+        new_hours = self._update_per_day(prices=pricelist, range_start=hour, day_type=DayTypes.Interim)
         
         today = update_interim_lists(range(hour,len(self.parent.prices)), today, new_hours, hour)
         tomorrow = update_interim_lists(range(0,hour), tomorrow, new_hours, negative_hour)

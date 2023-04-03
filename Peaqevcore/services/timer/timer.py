@@ -18,12 +18,11 @@ class Timer:
             _dt = f"{self.expire.hour}:{self.expire.minute}"
         return f"Nonhours ignored until {_dt}"
 
-    def update(self, value_in_hours:int=DEFAULT_OVERRIDE):
+    async def async_update(self, value_in_hours:int=DEFAULT_OVERRIDE):
         if not self.is_override:
             self.expire = datetime.now()
         try:
             assert isinstance(value_in_hours, int)
         except AssertionError as a:
             return
-        value_in_seconds = value_in_hours * 3600
-        self.expire += timedelta(seconds=value_in_seconds)
+        self.expire += timedelta(seconds=value_in_hours * 3600)
