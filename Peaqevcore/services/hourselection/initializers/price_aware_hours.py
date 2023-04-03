@@ -90,9 +90,9 @@ class PriceAwareHours(Hours):
                 return True
         return False
 
-    def update_top_price(self, dyn_top_price) -> None: 
+    async def async_update_top_price(self, dyn_top_price) -> None: 
         if self._hub.options.price.dynamic_top_price:
-            self._core.update_top_price(dyn_top_price)
+            await self._core.async_update_top_price(dyn_top_price)
     
     def update_prices(self, prices:dict = [], prices_tomorrow:dict=[]) -> None:
         self._core.update_prices(prices, prices_tomorrow)

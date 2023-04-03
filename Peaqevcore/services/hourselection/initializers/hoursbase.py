@@ -62,7 +62,7 @@ class Hours:
         pass
 
     @abstractmethod
-    def update_top_price(self, dyn_top_price) -> None: 
+    async def async_update_top_price(self, dyn_top_price) -> None: 
         pass
 
     @property

@@ -84,8 +84,8 @@ class Hoursselection:
             self.model.adjusted_average = val        
             self.update_prices(self.prices, self.prices_tomorrow)
 
-    def update_top_price(self, dyn_top_price=None) -> None:
-        self.model.options.set_absolute_top_price(dyn_top_price)
+    async def async_update_top_price(self, dyn_top_price=None) -> None:
+        await self.model.options.async_set_absolute_top_price(dyn_top_price)
         self.update_prices(self.prices, self.prices_tomorrow)
 
     def update_prices(self, prices:dict = [], prices_tomorrow:dict=[]):
