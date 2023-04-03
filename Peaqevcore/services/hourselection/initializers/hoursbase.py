@@ -128,3 +128,12 @@ class Hours:
     @abstractmethod
     def adjusted_average(self, val):
         pass
+
+    @abstractmethod
+    async def async_get_average_kwh_price(self):
+        pass
+
+    @abstractmethod
+    async def async_get_total_charge(self):
+        pass
+    

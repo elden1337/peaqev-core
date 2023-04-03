@@ -97,20 +97,20 @@ class PriceAwareHours(Hours):
     def update_prices(self, prices:dict = [], prices_tomorrow:dict=[]) -> None:
         self._core.update_prices(prices, prices_tomorrow)
 
-    def get_average_kwh_price(self):
+    async def async_get_average_kwh_price(self):
         if self._is_initialized:
             try:
-                return self._core.get_average_kwh_price()
+                return await self._core.async_get_average_kwh_price()
             except ZeroDivisionError as e:
                 _LOGGER.warning(f"get_average_kwh_price could not be calculated: {e}")
             return 0
         _LOGGER.debug("get avg kwh price, not initialized")
         return "-"
 
-    def get_total_charge(self):
+    async def async_get_total_charge(self):
         if self._is_initialized:
             try:
-                return self._core.get_total_charge(self._hub.sensors.current_peak.value)
+                return await self._core.async_get_total_charge(self._hub.sensors.current_peak.value)
             except ZeroDivisionError as e:
                 _LOGGER.warning(f"get_total_charge could not be calculated: {e}")
             return 0
