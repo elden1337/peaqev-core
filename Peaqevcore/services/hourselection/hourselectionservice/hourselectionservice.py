@@ -114,6 +114,9 @@ class HourSelectionService:
     
     def set_hour(self, testhour:int = None) -> int:
         return testhour if testhour is not None else self._mock_hour if self._mock_hour is not None else datetime.now().hour
+    
+    async def async_set_hour(self, testhour:int = None) -> int:
+        return testhour if testhour is not None else self._mock_hour if self._mock_hour is not None else datetime.now().hour
 
     def _interim_day_update(self, today: HourObject, tomorrow: HourObject) -> Tuple[HourObject, HourObject]:
         """Updates the non- and caution-hours with an adjusted mean of 14h - 13h today-tomorrow to get a more sane nightly curve."""

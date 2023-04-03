@@ -98,24 +98,24 @@ class Hoursselection:
         self.prices_tomorrow = prices_tomorrow
         self.service.update()
 
-    def get_average_kwh_price(self):
-        ret = self._get_charge_or_price()
+    async def async_get_average_kwh_price(self):
+        ret = await self.async_get_charge_or_price()
         try:
             return round(sum(ret.values())/len(ret),2)
         except ZeroDivisionError as e:
                 _LOGGER.warning(f"get_average_kwh_price_core could not be calculated: {e}")
         return 0
         
-    def get_total_charge(self, currentpeak:float) -> float:
+    async def async_get_total_charge(self, currentpeak:float) -> float:
         self.model.current_peak = currentpeak
-        ret = self._get_charge_or_price(True)
+        ret = await self.async_get_charge_or_price(True)
         return round(sum(ret.values()),1)
 
-    def _get_charge_or_price(self, charge:bool = False) -> dict:
-        hour = self.service.set_hour()
+    async def async_get_charge_or_price(self, charge:bool = False) -> dict:
+        hour = await self.service.async_set_hour()
         ret = {}
 
-        def _looper_charge(h:int):
+        async def async_looper_charge(h:int):
             if h in self.model.hours.dynamic_caution_hours:
                     ret[h] = self.model.hours.dynamic_caution_hours[h] * self.model.current_peak
             elif h in self.model.hours.non_hours:
@@ -123,7 +123,7 @@ class Hoursselection:
             else:
                 ret[h] = self.model.current_peak
 
-        def _looper_price(h:int, tomorrow_active:bool):
+        async def async_looper_price(h:int, tomorrow_active:bool):
             if h in self.model.hours.dynamic_caution_hours:
                     if tomorrow_active:
                         if h < hour and len(self.prices_tomorrow):
@@ -139,15 +139,15 @@ class Hoursselection:
         if self.prices_tomorrow is None or len(self.prices_tomorrow) < 1:
             for h in range(hour,24):
                 if charge:
-                    _looper_charge(h)
+                    await async_looper_charge(h)
                 else:
-                    _looper_price(h, False)
+                    await async_looper_price(h, False)
         else:
             for h in range(hour,(hour+24)):
                 h = h-24 if h > 23 else h
                 if charge:
-                    _looper_charge(h)
+                    await async_looper_charge(h)
                 else:
-                    _looper_price(h, True)
+                    await async_looper_price(h, True)
         return ret
 

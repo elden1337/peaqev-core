@@ -197,39 +197,43 @@ def test_dynamic_cautionhours_very_low_peaqstdev():
     assert list(r.dynamic_caution_hours.keys()) == r.caution_hours
     assert len(r.non_hours) + len(r.dynamic_caution_hours) < 24
     
-def test_total_charge_just_today():
+@pytest.mark.asyncio
+async def test_total_charge_just_today():
     MOCKHOUR = 0
     r = h(cautionhour_type=CautionHourType.SUAVE,base_mock_hour=MOCKHOUR)
     prices = MOCKPRICES1
     r.update_prices(prices)
     r.service._mock_hour = r.service.set_hour(MOCKHOUR)
-    assert r.get_total_charge(2) == 17.1
+    assert await r.async_get_total_charge(2) == 17.1
 
-def test_total_charge_today_tomorrow():
+@pytest.mark.asyncio
+async def test_total_charge_today_tomorrow():
     MOCKHOUR = 18
     r = h(cautionhour_type=CautionHourType.SUAVE, base_mock_hour=MOCKHOUR)
     prices = MOCKPRICES1
     prices_tomorrow = MOCKPRICES2
     r.update_prices(prices, prices_tomorrow)
     r.service._mock_hour = r.service.set_hour(MOCKHOUR)
-    assert r.get_total_charge(2) == 37.2
+    assert await r.async_get_total_charge(2) == 37.2
 
-def test_average_kwh_price_just_today():
+@pytest.mark.asyncio
+async def test_average_kwh_price_just_today():
     r = h(cautionhour_type=CautionHourType.SUAVE)
     MOCKHOUR = 0
     prices = MOCKPRICES1
     r.service._mock_hour = r.service.set_hour(MOCKHOUR)
     r.update_prices(prices)
-    assert r.get_average_kwh_price() == 0.34
+    assert await r.async_get_average_kwh_price() == 0.34
 
-def test_average_kwh_price_today_tomorrow():
+@pytest.mark.asyncio
+async def test_average_kwh_price_today_tomorrow():
     MOCKHOUR = 18
     r = h(cautionhour_type=CautionHourType.SUAVE)
     prices = MOCKPRICES1
     prices_tomorrow = MOCKPRICES2
     r.service._mock_hour = r.service.set_hour(MOCKHOUR)
     r.update_prices(prices, prices_tomorrow)
-    assert r.get_average_kwh_price() == 0.61
+    assert await r.async_get_average_kwh_price() == 0.61
 
 def test_cheap_today_expensive_tomorrow():
     MOCKHOUR = 14
@@ -588,7 +592,8 @@ def test_not_too_shallow_caution_hours():
     assert len(val) == 0
     assert len(val2) == 0
 
-def test_charge_below_average_today_only():
+@pytest.mark.asyncio
+async def test_charge_below_average_today_only():
     r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=0, min_price=0)
     r.service._mock_hour = r.service.set_hour(0)
     _avg = 0
@@ -597,25 +602,28 @@ def test_charge_below_average_today_only():
         prices = price
         r.update_prices(prices)
         _avg = stat.mean(price)
-        tests[_avg] = r.get_average_kwh_price()
-        assert 0 < r.get_average_kwh_price() < _avg
+        tests[_avg] = await r.async_get_average_kwh_price()
+        assert 0 < await r.async_get_average_kwh_price() < _avg
 
-def test_charge_price_fixed_today_only():
+@pytest.mark.asyncio
+async def test_charge_price_fixed_today_only():
     r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=0, min_price=0)
     r.service._mock_hour = r.service.set_hour(0)
     prices = [1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2]
     r.update_prices(prices)
-    assert r.get_average_kwh_price() == 1
+    assert await r.async_get_average_kwh_price() == 1
 
-def test_charge_price_fixed_today_only():
+@pytest.mark.asyncio
+async def test_charge_price_fixed_today_only():
     r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=0, min_price=0)
     r.service._mock_hour = r.service.set_hour(13)
     prices = [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1]
     prices_tomorrow = [1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]
     r.update_prices(prices, prices_tomorrow)
-    assert r.get_average_kwh_price() == 1
+    assert await r.async_get_average_kwh_price() == 1
     
-def test_charge_below_average_today_and_tomorrow():
+@pytest.mark.asyncio
+async def test_charge_below_average_today_and_tomorrow():
     r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=0, min_price=0)
     r.service._mock_hour = r.service.set_hour(14)
     _avg = 0
@@ -628,8 +636,8 @@ def test_charge_below_average_today_and_tomorrow():
             r.update_prices(prices, prices_tomorrow)
             total = price[14::] + price2[0:14]
             _avg = round(stat.mean(total),2)
-            assert 0 < r.get_average_kwh_price() < _avg
-            print(f"{_avg}; {r.get_average_kwh_price()}; {round((r.get_average_kwh_price()/_avg)-1,2)}")
+            assert 0 < await r.async_get_average_kwh_price() < _avg
+            print(f"{_avg}; {await r.async_get_average_kwh_price()}; {round((await r.async_get_average_kwh_price()/_avg)-1,2)}")
     #assert 1 < 0
 
 def test_charge_below_average_today_and_tomorrow_compare_to_mediancharge():
@@ -646,8 +654,8 @@ def test_charge_below_average_today_and_tomorrow_compare_to_mediancharge():
             total = price[14::] + price2[0:14]
             legacy_charge = stat.mean([h for h in price[14::] if h < stat.mean(price)] + [h for h in price2[0:14:] if h < stat.mean(price2)])
             _avg = round(stat.mean(total),2)
-            #assert r.get_average_kwh_price() <= round(legacy_charge,1)
-            #print(f"{_avg}; {r.get_average_kwh_price()}; {legacy_charge}")
+            #assert await r.async_get_average_kwh_price() <= round(legacy_charge,1)
+            #print(f"{_avg}; {await r.async_get_average_kwh_price()}; {legacy_charge}")
     #assert 1 < 0
 
 def test_charge_below_average_today_only_compare_to_mediancharge():
@@ -659,8 +667,8 @@ def test_charge_below_average_today_only_compare_to_mediancharge():
         r.update_prices(prices)
         legacy_charge = stat.mean([h for h in price if h < stat.mean(price)])
         _avg = round(stat.mean(price),2)
-        #assert r.get_average_kwh_price() < legacy_charge
-        #print(f"{_avg}; {r.get_average_kwh_price()}; {legacy_charge}; lenpeaq:{24-len(r.non_hours)-len(r.caution_hours)}; lenlegacy:{len([h for h in price if h < stat.mean(price)])}")
+        #assert await r.async_get_average_kwh_price() < legacy_charge
+        #print(f"{_avg}; {await r.async_get_average_kwh_price()}; {legacy_charge}; lenpeaq:{24-len(r.non_hours)-len(r.caution_hours)}; lenlegacy:{len([h for h in price if h < stat.mean(price)])}")
     #assert 1 < 0
     
 def test_weird_pricelist():
@@ -765,7 +773,8 @@ def test_230208():
     r.service._mock_hour = r.service.set_hour(14)
     assert r.non_hours == [14,15,16,17,18,19,20,7,8,9,10,11,12,13]
 
-def test_230313_issue_72():
+@pytest.mark.asyncio
+async def test_230313_issue_72():
     r = h(cautionhour_type=CautionHourType.AGGRESSIVE.value, absolute_top_price=3, min_price=0.0)
     prices = [0.709, 0.557, 0.492, 0.433, 0.48, 0.486, 0.548, 1.106, 1.136, 0.604, 0.445, 0.439, 0.474, 0.481, 0.464, 0.449, 0.45, 0.674, 0.747, 0.695, 0.624, 0.6, 0.492, 0.332]
     prices_tomorrow = [0.137, 0.065, 0.06, 0.035, 0.066, 0.386, 0.61, 0.994, 1.325, 1.164, 1.056, 0.872, 0.762, 0.853, 0.937, 0.856, 1.128, 1.43, 1.489, 1.489, 1.42, 0.913, 0.778, 0.724]
@@ -774,7 +783,7 @@ def test_230313_issue_72():
     r.update_top_price(1.45)
     r.service._mock_hour = r.service.set_hour(14)
     assert r.non_hours == [7,8,9,10]
-    assert r.get_average_kwh_price() == 0.47
+    assert await r.async_get_average_kwh_price() == 0.47
 
 def test_230313_issue_72_scrooge():
     r = h(cautionhour_type=CautionHourType.SCROOGE, absolute_top_price=3, min_price=0.0)
@@ -785,7 +794,7 @@ def test_230313_issue_72_scrooge():
     r.update_top_price(1.45)
     r.service._mock_hour = r.service.set_hour(14)
     assert r.non_hours == [14,16,17,18,19,20,21,22, 6, 7, 8, 9, 10, 11, 12, 13]
-    #assert r.get_average_kwh_price() == 0.19
+    #assert await r.async_get_average_kwh_price() == 0.19
 
 def test_230314_block_nocturnal():
     r = h(cautionhour_type=CautionHourType.AGGRESSIVE, absolute_top_price=3, min_price=0.0, blocknocturnal=True)
