@@ -16,6 +16,7 @@ class HourSelectionService:
     def __init__(self, parent, base_mock_hour: int = None):
         self.parent = parent
         self._mock_hour = base_mock_hour
+        self._mock_day:int = None
         self.preserve_interim: bool = False
         self._midnight_touched: bool = False
 
@@ -30,8 +31,8 @@ class HourSelectionService:
             tomorrow=self._update_per_day(prices=self.parent.model.prices_tomorrow, day_type=DayTypes.Tomorrow)
             hours, hours_tomorrow = self._interim_day_update(today, tomorrow)
 
-            self.parent.model.hours.hours_today = self._add_remove_limited_hours(hours)
-            self.parent.model.hours.hours_tomorrow = self._add_remove_limited_hours(hours_tomorrow)
+            self.parent.model.hours.hours_today = self._add_remove_limited_hours(hours, day_type=DayTypes.Today)
+            self.parent.model.hours.hours_tomorrow = self._add_remove_limited_hours(hours_tomorrow, day_type=DayTypes.Tomorrow)
             self.parent.model.hours.update_hour_lists(hour=self.set_hour())
 
     def _change_midnight_data(self) -> None:        
@@ -73,7 +74,7 @@ class HourSelectionService:
             return ret
         return HourObject([],[],{})
 
-    def _add_remove_limited_hours(self, hours: HourObject) -> HourObject:
+    def _add_remove_limited_hours(self, hours: HourObject, day_type:DayTypes) -> HourObject:
         """Removes cheap hours and adds expensive hours set by user limitation"""
         if hours is None or all(
             [
@@ -85,9 +86,13 @@ class HourSelectionService:
                 offset_dict=hours.offset_dict,
                 pricedict=hours.pricedict
                 )
-        hours.add_expensive_hours(self.parent.model.options.absolute_top_price)
+        match day_type:
+            case DayTypes.Today | DayTypes.Interim:
+                hours.add_expensive_hours(self.parent.model.options.absolute_top_price)
+            case DayTypes.Tomorrow:
+                _top = self.parent.model.options.add_tomorrow_to_top_price(self.parent.prices_tomorrow, self._mock_day)
+                hours.add_expensive_hours(_top)     
         hours.remove_cheap_hours(self.parent.model.options.min_price)
-        
         return hours
 
     def _determine_hours(self, price_list: dict, prices: list) -> HourObject:
@@ -112,6 +117,9 @@ class HourSelectionService:
     
     async def async_set_hour(self, testhour:int = None) -> int:
         return testhour if testhour is not None else self._mock_hour if self._mock_hour is not None else datetime.now().hour
+    
+    async def async_set_day(self, day:int = None):
+        self._mock_day = day if day is not None else datetime.now().day
 
     def _interim_day_update(self, today: HourObject, tomorrow: HourObject) -> Tuple[HourObject, HourObject]:
         """Updates the non- and caution-hours with an adjusted mean of 14h - 13h today-tomorrow to get a more sane nightly curve."""

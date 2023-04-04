@@ -4,6 +4,7 @@ from ..services.hourselection.hoursselection import Hoursselection as h
 from ..services.hourselection.hourselectionservice.hourselection_calculations import create_cautions, normalize_prices
 from ..services.hourselection.hourselectionservice.hoursselection_helpers import create_dict
 from ..models.hourselection.cautionhourtype import CautionHourType, VALUES_CONVERSION
+from ..models.hourselection.topprice_type import TopPriceType
 
 MOCKPRICES1 =[0.129, 0.123, 0.077, 0.064, 0.149, 0.172, 1, 2.572, 2.688, 2.677, 2.648, 2.571, 2.561, 2.07, 2.083, 2.459, 2.508, 2.589, 2.647, 2.648, 2.603, 2.588, 1.424, 0.595]
 MOCKPRICES2 =[0.392, 0.408, 0.418, 0.434, 0.408, 0.421, 0.45, 0.843, 0.904, 1.013, 0.939, 0.915, 0.703, 0.445, 0.439, 0.566, 0.913, 1.4, 2.068, 2.182, 1.541, 2.102, 1.625, 1.063]
@@ -883,6 +884,65 @@ async def test_230322_over_night_scrooge():
     r.update_prices(prices_tomorrow, prices)
     assert r.service.preserve_interim is True
     assert r.non_hours != _non_hours
+
+
+@pytest.mark.asyncio
+async def test_adjust_tomorrows_top_price_1():
+    r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=3, min_price=0.0)
+    prices = [0.505, 0.517, 0.544, 0.558, 0.588, 0.613, 0.637, 0.689, 0.84, 1.067, 1.014, 0.939, 0.77, 0.63, 0.699, 0.77, 1.106, 1.383, 1.399, 0.749, 0.469, 0.442, 0.396, 0.349]
+    prices_tomorrow = [0.363, 0.361, 0.369, 0.402, 0.469, 0.546, 0.574, 1.445, 1.461, 1.45, 1.446, 1.419, 1.355, 1.333, 1.333, 1.355, 1.393, 1.467, 1.523, 1.684, 1.512, 1.498, 1.448, 1.107]
+    r.adjusted_average = 0.8
+    await r.service.async_set_day(1)
+    assert r.model.options.top_price_type == TopPriceType.Absolute
+    await r.async_update_top_price(0.4)
+    assert r.model.options.top_price_type == TopPriceType.Dynamic
+    r.service._mock_hour = r.service.set_hour(14)
+    r.update_prices(prices, prices_tomorrow)
+    assert len(r.non_hours) == 15
+
+@pytest.mark.asyncio
+async def test_adjust_tomorrows_top_price_5():
+    r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=3, min_price=0.0)
+    prices = [0.505, 0.517, 0.544, 0.558, 0.588, 0.613, 0.637, 0.689, 0.84, 1.067, 1.014, 0.939, 0.77, 0.63, 0.699, 0.77, 1.106, 1.383, 1.399, 0.749, 0.469, 0.442, 0.396, 0.349]
+    prices_tomorrow = [0.363, 0.361, 0.369, 0.402, 0.469, 0.546, 0.574, 1.445, 1.461, 1.45, 1.446, 1.419, 1.355, 1.333, 1.333, 1.355, 1.393, 1.467, 1.523, 1.684, 1.512, 1.498, 1.448, 1.107]
+    r.adjusted_average = 0.8
+    await r.service.async_set_day(5)
+    assert r.model.options.top_price_type == TopPriceType.Absolute
+    await r.async_update_top_price(0.4)
+    assert r.model.options.top_price_type == TopPriceType.Dynamic
+    r.service._mock_hour = r.service.set_hour(14)
+    r.update_prices(prices, prices_tomorrow)
+    assert len(r.non_hours) == 17
+
+@pytest.mark.asyncio
+async def test_adjust_tomorrows_top_price_10():
+    r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=10, min_price=0.0)
+    prices = [0.505, 0.517, 0.544, 0.558, 0.588, 0.613, 0.637, 0.689, 0.84, 1.067, 1.014, 0.939, 0.77, 0.63, 0.699, 0.77, 1.106, 1.383, 1.399, 0.749, 0.469, 0.442, 0.396, 0.349]
+    prices_tomorrow = [0.363, 0.361, 0.369, 0.402, 0.469, 0.546, 0.574, 1.445, 1.461, 1.45, 1.446, 1.419, 1.355, 1.333, 1.333, 1.355, 1.393, 1.467, 1.523, 1.684, 1.512, 1.498, 1.448, 1.107]
+    r.adjusted_average = 0.8
+    await r.service.async_set_day(10)
+    assert r.model.options.top_price_type == TopPriceType.Absolute
+    await r.async_update_top_price(0.6)
+    assert r.model.options.top_price_type == TopPriceType.Dynamic
+    r.service._mock_hour = r.service.set_hour(14)
+    r.update_prices(prices, prices_tomorrow)
+    assert len(r.non_hours) == 13
+
+
+@pytest.mark.asyncio
+async def test_adjust_tomorrows_top_price_15():
+    r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=3, min_price=0.0)
+    prices = [0.505, 0.517, 0.544, 0.558, 0.588, 0.613, 0.637, 0.689, 0.84, 1.067, 1.014, 0.939, 0.77, 0.63, 0.699, 0.77, 1.106, 1.383, 1.399, 0.749, 0.469, 0.442, 0.396, 0.349]
+    prices_tomorrow = [0.363, 0.361, 0.369, 0.402, 0.469, 0.546, 0.574, 1.445, 1.461, 1.45, 1.446, 1.419, 1.355, 1.333, 1.333, 1.355, 1.393, 1.467, 1.523, 1.684, 1.512, 1.498, 1.448, 1.107]
+    r.adjusted_average = 0.8
+    await r.service.async_set_day(15)
+    assert r.model.options.top_price_type == TopPriceType.Absolute
+    await r.async_update_top_price(0.4)
+    assert r.model.options.top_price_type == TopPriceType.Dynamic
+    r.service._mock_hour = r.service.set_hour(14)
+    r.update_prices(prices, prices_tomorrow)
+    assert len(r.non_hours) == 18
+    
 
 
 """important, fix this later."""

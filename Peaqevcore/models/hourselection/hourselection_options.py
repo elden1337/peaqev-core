@@ -4,6 +4,8 @@ from .topprice_type import TopPriceType
 
 _LOGGER = logging.getLogger(__name__)
 
+from datetime import datetime
+from statistics import mean
 
 @dataclass(frozen=False)
 class HourSelectionOptions:
@@ -44,6 +46,16 @@ class HourSelectionOptions:
         ):  
             return True
         return top > min
+    
+    def add_tomorrow_to_top_price(self, prices_tomorrow:list, mock_day:int = None) -> float:
+        _day = mock_day or datetime.now().day
+        if self.top_price_type != TopPriceType.Dynamic:
+            return self.absolute_top_price
+        _current_sum = self.absolute_top_price * _day
+        _current_sum += mean(prices_tomorrow)
+        ret= _current_sum / (_day + 1)
+        print(self.absolute_top_price, ret)
+        return ret
 
     async def async_set_absolute_top_price(self, monthly_avg_top:float=None) -> None:
         _min = self.min_price
