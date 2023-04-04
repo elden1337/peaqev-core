@@ -898,7 +898,7 @@ async def test_adjust_tomorrows_top_price_1():
     assert r.model.options.top_price_type == TopPriceType.Dynamic
     r.service._mock_hour = r.service.set_hour(14)
     r.update_prices(prices, prices_tomorrow)
-    assert len(r.non_hours) == 15
+    assert len(r.non_hours) == 19
 
 @pytest.mark.asyncio
 async def test_adjust_tomorrows_top_price_5():
@@ -912,7 +912,7 @@ async def test_adjust_tomorrows_top_price_5():
     assert r.model.options.top_price_type == TopPriceType.Dynamic
     r.service._mock_hour = r.service.set_hour(14)
     r.update_prices(prices, prices_tomorrow)
-    assert len(r.non_hours) == 17
+    assert len(r.non_hours) == 19
 
 @pytest.mark.asyncio
 async def test_adjust_tomorrows_top_price_10():
@@ -931,19 +931,31 @@ async def test_adjust_tomorrows_top_price_10():
 
 @pytest.mark.asyncio
 async def test_adjust_tomorrows_top_price_15():
-    r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=3, min_price=0.0)
+    r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=30, min_price=0.0)
     prices = [0.505, 0.517, 0.544, 0.558, 0.588, 0.613, 0.637, 0.689, 0.84, 1.067, 1.014, 0.939, 0.77, 0.63, 0.699, 0.77, 1.106, 1.383, 1.399, 0.749, 0.469, 0.442, 0.396, 0.349]
     prices_tomorrow = [0.363, 0.361, 0.369, 0.402, 0.469, 0.546, 0.574, 1.445, 1.461, 1.45, 1.446, 1.419, 1.355, 1.333, 1.333, 1.355, 1.393, 1.467, 1.523, 1.684, 1.512, 1.498, 1.448, 1.107]
     r.adjusted_average = 0.8
     await r.service.async_set_day(15)
     assert r.model.options.top_price_type == TopPriceType.Absolute
-    await r.async_update_top_price(0.4)
+    await r.async_update_top_price(4)
     assert r.model.options.top_price_type == TopPriceType.Dynamic
     r.service._mock_hour = r.service.set_hour(14)
     r.update_prices(prices, prices_tomorrow)
-    assert len(r.non_hours) == 18
+    assert len(r.non_hours) == 10
     
-
+@pytest.mark.asyncio
+async def test_adjust_tomorrows_top_price_25():
+    r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=30, min_price=0.0)
+    prices = [0.505, 0.517, 0.544, 0.558, 0.588, 0.613, 0.637, 0.689, 0.84, 1.067, 1.014, 0.939, 0.77, 0.63, 0.699, 0.77, 1.106, 1.383, 1.399, 0.749, 0.469, 0.442, 0.396, 0.349]
+    prices_tomorrow = [0.363, 0.361, 0.369, 0.402, 0.469, 0.546, 0.574, 1.445, 1.461, 1.45, 1.446, 1.419, 1.355, 1.333, 1.333, 1.355, 1.393, 1.467, 1.523, 1.684, 1.512, 1.498, 1.448, 1.107]
+    r.adjusted_average = 0.8
+    await r.service.async_set_day(29)
+    assert r.model.options.top_price_type == TopPriceType.Absolute
+    await r.async_update_top_price(0.7)
+    assert r.model.options.top_price_type == TopPriceType.Dynamic
+    r.service._mock_hour = r.service.set_hour(14)
+    r.update_prices(prices, prices_tomorrow)
+    assert len(r.non_hours) == 12
 
 """important, fix this later."""
 # def test_230208_2():
