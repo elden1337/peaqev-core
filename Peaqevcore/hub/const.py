@@ -1,1 +1,0 @@
-HOURLY = "hourly"

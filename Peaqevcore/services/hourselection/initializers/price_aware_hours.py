@@ -3,7 +3,7 @@ from .hoursbase import Hours
 from ..hoursselection import Hoursselection as core_hours
 from ....models.hourselection.cautionhourtype import CautionHourType
 from ...timer.timer import Timer
-from ...scheduler.scheduler import Scheduler
+from ...scheduler.scheduler import SchedulerFacade
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ class PriceAwareHours(Hours):
         )
         self._hass = hub.state_machine
         self._prices = []
-        self._scheduler = Scheduler(hub=self._hub, options=self.options)
+        self._scheduler = SchedulerFacade(hub=self._hub, options=self.options)
         super().__init__(price_aware=True)
 
     @property

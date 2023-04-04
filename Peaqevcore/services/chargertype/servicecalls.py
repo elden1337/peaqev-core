@@ -31,7 +31,7 @@ class ServiceCalls:
         ret = {DOMAIN: self.domain}
         calltype = self._get_call_type(call)
         ret[call] = calltype.call
-        ret["params"] = calltype.params
+        ret[PARAMS] = calltype.params
         if call is CallTypes.UpdateCurrent:
             if self.options.allowupdatecurrent is True:
                 ret[PARAMS] = self.update_current.params

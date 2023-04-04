@@ -14,14 +14,14 @@ class KillSwitch:
         self._update_interval: int = update_interval
         self._grace_interval: int = grace_interval
         self._bound_sensor: str = sensor
-        self._last_update: int = time.time()
+        self._last_update: float = time.time()
         self._grace_period: bool = False
         self._grace_period_start: int = 0
         self._is_dead: bool = False
 
     @property
     def total_timer(self) -> int:
-        return sum(self._update_interval, self._grace_interval)
+        return sum([self._update_interval, self._grace_interval])
 
     @property
     def is_dead(self) -> bool:

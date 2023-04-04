@@ -113,11 +113,11 @@ class SchedulerFacade(Scheduler):
 
     def update(self):
         self._update(
-            avg24=self._hub.sensors.powersensormovingaverage24.value,
-            peak=self._hub.current_peak_dynamic,
-            charged_amount=self._hub.charger.session.session_energy,
-            prices=self._hub.hours.prices,
-            prices_tomorrow=self._hub.hours.prices_tomorrow
+            avg24=self._hub.sensors.powersensormovingaverage24.value, #todo: refactor
+            peak=self._hub.current_peak_dynamic, #todo: refactor
+            charged_amount=self._hub.chargecontroller.charger.session.session_energy, #todo: refactor
+            prices=self._hub.hours.prices, #todo: refactor
+            prices_tomorrow=self._hub.hours.prices_tomorrow #todo: refactor
         )
         self.check_states()
 
@@ -125,7 +125,7 @@ class SchedulerFacade(Scheduler):
         await self.hub.state_machine.async_add_executor_job(self._update, 
                                                             self._hub.sensors.powersensormovingaverage24.value,
                                                             self._hub.current_peak_dynamic,
-                                                            self._hub.charger.session.session_energy,
+                                                            self._hub.chargecontroller.charger.session.session_energy,
                                                             self._hub.hours.prices,
                                                             self._hub.hours.prices_tomorrow)
         await self.async_check_states()
