@@ -1,3 +1,9 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..hoursselection import Hoursselection
+
 import logging
 from datetime import datetime
 from typing import Tuple
@@ -13,7 +19,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class HourSelectionService:
-    def __init__(self, parent, base_mock_hour: int = None):
+    def __init__(self, parent: Hoursselection, base_mock_hour: int = None):
         self.parent = parent
         self._mock_hour = base_mock_hour
         self._mock_day:int = None
