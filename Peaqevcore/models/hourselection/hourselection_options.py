@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass, field
 from .topprice_type import TopPriceType
-from .set_top_price import set_absolute_top_price, add_tomorrow, async_validate_top_min_prices
+from .set_top_price import set_absolute_top_price, async_add_tomorrow, async_validate_top_min_prices
 _LOGGER = logging.getLogger(__name__)
 
 from datetime import datetime
@@ -24,14 +24,14 @@ class HourSelectionOptions:
         self.fixed_top_price = self.top_price
         self.absolute_top_price, self.top_price_type, self.min_price = set_absolute_top_price(self.min_price, self.top_price)
 
-    def add_tomorrow_to_top_price(self, prices_tomorrow:list, mock_day:int = None) -> float: #move to separate file
+    async def async_add_tomorrow_to_top_price(self, prices_tomorrow:list, mock_day:int = None) -> float: #move to separate file
         _day = mock_day or datetime.now().day
         if _day + 1 > monthrange(datetime.now().year, datetime.now().month)[1]:
             """tomorrow is a new month so those prices should be calculated separately"""
             return mean(prices_tomorrow)
         if self.top_price_type != TopPriceType.Dynamic:
             return self.absolute_top_price
-        return min(add_tomorrow(_day, prices_tomorrow, self.absolute_top_price), self.absolute_top_price)
+        return min(await async_add_tomorrow(_day, prices_tomorrow, self.absolute_top_price), self.absolute_top_price)
     
     async def async_set_absolute_top_price(self, monthly_avg_top:float=None) -> None:
         _min = self.min_price

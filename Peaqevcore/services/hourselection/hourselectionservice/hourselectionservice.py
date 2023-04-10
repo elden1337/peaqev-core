@@ -9,10 +9,10 @@ from datetime import datetime
 from typing import Tuple
 import statistics as stat
 
-from .hoursselection_helpers import create_dict, async_create_dict
-from .hourselection_calculations import normalize_prices, create_cautions, get_offset_dict, should_be_cautionhour, set_charge_allowance, async_normalize_prices, async_create_cautions, async_get_offset_dict, async_should_be_cautionhour, async_set_charge_allowance
+from .hoursselection_helpers import async_create_dict
+from .hourselection_calculations import async_normalize_prices, async_create_cautions, async_get_offset_dict, async_should_be_cautionhour, async_set_charge_allowance
 from ....models.hourselection.hourobjects.hourobject import HourObject
-from ....models.hourselection.hourobjects.hourobject_helpers import update_interim_lists, async_update_interim_lists
+from ....models.hourselection.hourobjects.hourobject_helpers import async_update_interim_lists
 from ....models.hourselection.day_types import DayTypes
 
 _LOGGER = logging.getLogger(__name__)
@@ -40,7 +40,7 @@ class HourSelectionService:
             self.parent.model.hours.hours_today = await self.async_add_remove_limited_hours(hours, day_type=DayTypes.Today)
             self.parent.model.hours.hours_tomorrow = await self.async_add_remove_limited_hours(hours_tomorrow, day_type=DayTypes.Tomorrow)
             hour = await self.async_set_hour()
-            await self.parent.model.hours.update_hour_lists(hour=hour)
+            await self.parent.model.hours.async_update_hour_lists(hour=hour)
 
     async def async_change_midnight_data(self) -> None:        
         if self.parent.model.prices_tomorrow == []:

@@ -35,17 +35,17 @@ class Hoursselection:
 
     @property
     def non_hours(self) -> list:
-        self.model.hours.update_hour_lists(listtype=HourTypeList.NonHour, hour=self.service.set_hour())
+        self.model.hours.update_hour_list(listtype=HourTypeList.NonHour, hour=self.service.set_hour())
         return self.model.hours.non_hours
 
     @property
     def caution_hours(self) -> list:
-        self.model.hours.update_hour_lists(listtype=HourTypeList.CautionHour, hour=self.service.set_hour())
+        self.model.hours.update_hour_list(listtype=HourTypeList.CautionHour, hour=self.service.set_hour())
         return self.model.hours.caution_hours
 
     @property
     def dynamic_caution_hours(self) -> dict:
-        self.model.hours.update_hour_lists(listtype=HourTypeList.DynCautionHour, hour=self.service.set_hour())
+        self.model.hours.update_hour_list(listtype=HourTypeList.DynCautionHour, hour=self.service.set_hour())
         return self.model.hours.dynamic_caution_hours
 
     @property
@@ -82,16 +82,19 @@ class Hoursselection:
     def adjusted_average(self, val):
         if val != self.model.adjusted_average:
             self.model.adjusted_average = val        
-            self.update_prices(self.prices, self.prices_tomorrow)
+
+    async def async_update_adjusted_average(self, val):
+        self.adjusted_average = val
+        await self.async_update_prices(self.prices, self.prices_tomorrow)
 
     async def async_update_top_price(self, dyn_top_price=None) -> None:
         await self.model.options.async_set_absolute_top_price(dyn_top_price)
-        self.update_prices(self.prices, self.prices_tomorrow)
+        await self.async_update_prices(self.prices, self.prices_tomorrow)
 
-    def update_prices(self, prices:dict = [], prices_tomorrow:dict=[]):
+    async def async_update_prices(self, prices:dict = [], prices_tomorrow:dict=[]):
         self.prices = prices
         self.prices_tomorrow = prices_tomorrow
-        self.service.update()
+        await self.service.async_update()
 
     async def async_get_average_kwh_price(self):
         ret = await self.async_get_charge_or_price()
