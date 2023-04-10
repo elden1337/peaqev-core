@@ -5,7 +5,7 @@ from ....models.hourselection.cautionhourtype import CautionHourType, MAX_HOURS
 _LOGGER = logging.getLogger(__name__)
 
 
-def normalize_prices(prices:list) -> list:
+async def async_normalize_prices(prices:list) -> list:
     min_price = min(prices)
     c = 0
     if min_price <= 0:
@@ -17,7 +17,7 @@ def normalize_prices(prices:list) -> list:
         ret.append(round(pp-divider,3))
     return ret
 
-def get_offset_dict(normalized_hourdict: dict):
+async def async_get_offset_dict(normalized_hourdict: dict):
         ret = {}
         _prices = [p-min(normalized_hourdict.values()) for p in normalized_hourdict.values()]
         average_val = mean(_prices)
@@ -28,7 +28,7 @@ def get_offset_dict(normalized_hourdict: dict):
                 ret[i] = 1
         return ret
 
-def create_cautions(
+async def async_create_cautions(
         hourdict: dict, 
         normalized_hourdict: dict, 
         cautionhour_type: CautionHourType, 
@@ -44,7 +44,7 @@ def create_cautions(
 
     adj_average_norm = _adj_avg * (mean(normalized_hourdict.values())/mean(hourdict.values()))
     cautions = [h for h in normalized_hourdict if normalized_hourdict[h] > (adj_average_norm * 0.7)]
-    cautions_dict = _cap_pricelist_available_hours(cautions, normalized_hourdict, cautionhour_type, blocknocturnal, range_start)
+    cautions_dict = await async_cap_pricelist_available_hours(cautions, normalized_hourdict, cautionhour_type, blocknocturnal, range_start)
     maxval = max(hourdict.values())
     ret = {}
     
@@ -61,9 +61,9 @@ def create_cautions(
     if blocknocturnal:
         return ret
     else:
-        return _discard_excessive_hours(ret)
+        return await async_discard_excessive_hours(ret)
 
-def _cap_pricelist_available_hours(cautions: list, normalized_hourdict:dict, cautionhour_type: CautionHourType, blocknocturnal:bool, range_start: int) -> dict:
+async def async_cap_pricelist_available_hours(cautions: list, normalized_hourdict:dict, cautionhour_type: CautionHourType, blocknocturnal:bool, range_start: int) -> dict:
     _demand = max(len(normalized_hourdict.keys()) - MAX_HOURS.get(cautionhour_type),0)
     ret = {c: False for c in cautions} if _demand == 0 else {c: True for c in cautions}
     hours_sorted = [k for k, v in sorted(normalized_hourdict.items(), key=lambda item: item[1])]
@@ -98,26 +98,26 @@ def _cap_pricelist_available_hours(cautions: list, normalized_hourdict:dict, cau
                 raise IndexError(f"error on second. idx:{idx}")
 
     try:
-        for i in get_nocturnal_stop(blocknocturnal, range_start):
+        for i in await async_get_nocturnal_stop(blocknocturnal, range_start):
             if i not in cautions:
                 ret[i] = True
     except IndexError as e:
         _LOGGER.error(f"error on looping nocturnal stop: {e}")
-    return _sort_by_key(ret)
+    return await async_sort_by_key(ret)
 
-def _sort_by_key(input: dict) -> dict:
+async def async_sort_by_key(input: dict) -> dict:
     _keys = list(input.keys())
     _keys.sort()
     return {i: input[i] for i in _keys}
 
-def get_nocturnal_stop(blocknocturnal: bool = False, range_start: int = 0) -> list:
+async def async_get_nocturnal_stop(blocknocturnal: bool = False, range_start: int = 0) -> list:
     _base = [23,0,1,2,3,4,5,6]
     if blocknocturnal:
-        return _transform_range(range_start, _base)
+        return await async_transform_range(range_start, _base)
     return []
 
 
-def _transform_range(range_start, base):
+async def async_transform_range(range_start, base):
     if range_start == 0:
             return base
     ret = []
@@ -129,7 +129,7 @@ def _transform_range(range_start, base):
     return ret
 
 
-def _discard_excessive_hours(hours: dict):
+async def async_discard_excessive_hours(hours: dict):
     """There should always be at least four regular hours before absolute_top_price kicks in."""
     while len(hours) >= 20:
         to_pop = dict(sorted(hours.items(), key=lambda item: item[1]['val']))    
@@ -137,7 +137,7 @@ def _discard_excessive_hours(hours: dict):
     return hours
 
 
-def should_be_cautionhour(price_item, prices, peak, cautionhour_type) -> bool:
+async def async_should_be_cautionhour(price_item, prices, peak, cautionhour_type) -> bool:
     first = any([
                 float(price_item["permax"]) <= cautionhour_type,
                 float(price_item["val"]) <= (sum(prices)/len(prices))
@@ -146,7 +146,7 @@ def should_be_cautionhour(price_item, prices, peak, cautionhour_type) -> bool:
     return all([first, second])
 
 
-def set_charge_allowance(price_input, cautionhour_type) -> float:
+async def async_set_charge_allowance(price_input, cautionhour_type) -> float:
     return round(abs(price_input - 1), 2) * ALLOWANCE_SCHEMA[cautionhour_type]
 
 ALLOWANCE_SCHEMA = {

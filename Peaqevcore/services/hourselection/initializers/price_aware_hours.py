@@ -3,7 +3,7 @@ from .hoursbase import Hours
 from ..hoursselection import Hoursselection as core_hours
 from ....models.hourselection.cautionhourtype import CautionHourType
 from ...timer.timer import Timer
-from ...scheduler.scheduler import SchedulerFacade
+from ...scheduler.scheduler_facade import SchedulerFacade
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -100,6 +100,9 @@ class PriceAwareHours(Hours):
     
     def update_prices(self, prices:dict = [], prices_tomorrow:dict=[]) -> None:
         self._core.update_prices(prices, prices_tomorrow)
+
+    async def async_update_adjusted_average(self, val):
+        await self._core.async_update_adjusted_average(val)
 
     async def async_get_average_kwh_price(self):
         if self._is_initialized:

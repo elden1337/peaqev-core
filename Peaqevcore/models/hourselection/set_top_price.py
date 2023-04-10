@@ -32,9 +32,9 @@ async def async_validate_top_min_prices(top, min) -> bool:
             return True
         return top > min
 
-def add_tomorrow(_day: int, prices_tomorrow: list, absolute_top_price: float) -> float:
+async def async_add_tomorrow(_day: int, prices_tomorrow: list, absolute_top_price: float) -> float:
         _current_sum = absolute_top_price * _day
         _current_sum += mean(prices_tomorrow)
         ret= _current_sum / (_day + 1)
-        print(absolute_top_price, ret)
+        #print(absolute_top_price, ret)
         return ret

@@ -9,7 +9,7 @@ class HourObject:
     offset_dict: dict = field(default_factory=lambda: {})
     pricedict: dict = field(default_factory=lambda: {})
 
-    def remove_cheap_hours(self, min_price:float = 0):
+    async def async_remove_cheap_hours(self, min_price:float = 0):
         lst = (h for h in self.pricedict if self.pricedict[h] < min_price)
         for h in lst:
             if h in self.nh:
@@ -19,7 +19,7 @@ class HourObject:
                 self.dyn_ch.pop(h)    
         return self
 
-    def _add(self, lst: list):
+    async def async_add(self, lst: list):
         for h in lst:
             if h not in self.nh:
                 self.nh.append(h)
@@ -29,8 +29,8 @@ class HourObject:
                     if h in self.dyn_ch.keys():
                         self.dyn_ch.pop(h)
 
-    def add_expensive_hours(self, max_price: float = 0):
+    async def async_add_expensive_hours(self, max_price: float = 0):
         lst = (h for h in self.pricedict if self.pricedict[h] >= max_price)
-        self._add(lst)
+        await self.async_add(lst)
         self.nh.sort()
         return self

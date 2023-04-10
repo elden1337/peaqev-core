@@ -6,7 +6,7 @@ from ....models.hourselection.hourobjects.hourobject import HourObject
 _LOGGER = logging.getLogger(__name__)
 
 
-def create_dict(input: list):
+async def async_create_dict(input: list):
     ret = {}
     for idx, val in enumerate(input):
         ret[idx] = val
@@ -15,7 +15,7 @@ def create_dict(input: list):
     elif len(ret) == 25:
         _LOGGER.debug(f"Looks like we are heading into DST. re-parsing hours")
         input.pop(2)
-        return create_dict(input)
+        return await async_create_dict(input)
     else:
         _LOGGER.exception(f"Could not create dictionary from pricelist: {input} with len {len(ret)}.")
         raise ValueError
@@ -60,7 +60,7 @@ def _make_array_from_empty(input: str) -> list:
             pass
     return []
     
-def try_remove(value, collection: list|dict):
+async def async_try_remove(value, collection: list|dict):
     if isinstance(collection, dict):
         if value in collection.keys():
             collection.pop(value)

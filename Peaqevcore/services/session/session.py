@@ -29,8 +29,7 @@ class SessionPrice:
     def total_energy(self) -> float:
         return round(self.get_status()["energy"]["value"], 3)
 
-    def reset(self): #add inputparams here
-        #push a heartbeat to the api
+    def reset(self):
         self.__init__(self.average_data.export)
 
     def terminate(self, mock_time: float=None):

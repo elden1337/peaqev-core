@@ -150,3 +150,6 @@ class Hours:
     async def async_get_total_charge(self):
         pass
     
+    @abstractmethod
+    async def async_update_adjusted_average(self, val):
+        pass
