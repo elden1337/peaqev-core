@@ -98,8 +98,8 @@ class PriceAwareHours(Hours):
         if self._hub.options.price.dynamic_top_price:
             await self._core.async_update_top_price(dyn_top_price)
     
-    def update_prices(self, prices:dict = [], prices_tomorrow:dict=[]) -> None:
-        self._core.update_prices(prices, prices_tomorrow)
+    async def async_update_prices(self, prices:dict = [], prices_tomorrow:dict=[]) -> None:
+        await self._core.async_update_prices(prices, prices_tomorrow)
 
     async def async_update_adjusted_average(self, val):
         await self._core.async_update_adjusted_average(val)
