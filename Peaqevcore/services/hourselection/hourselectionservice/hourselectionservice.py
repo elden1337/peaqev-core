@@ -97,22 +97,32 @@ class HourSelectionService:
             case DayTypes.Today | DayTypes.Interim:
                 await hours.async_add_expensive_hours(self.parent.model.options.absolute_top_price)
             case DayTypes.Tomorrow:
-                _top = await self.parent.model.options.async_add_tomorrow_to_top_price(self.parent.prices_tomorrow, self._mock_day)
+                _top = await self.parent.model.options.async_add_tomorrow_to_top_price(
+                    self.parent.prices_tomorrow, 
+                    self._mock_day
+                    )
                 await hours.async_add_expensive_hours(_top)     
-        await hours.async_remove_cheap_hours(self.parent.model.options.min_price)
-        return hours
+        return await hours.async_remove_cheap_hours(self.parent.model.options.min_price)
 
     async def async_determine_hours(self, price_list: dict, prices: list) -> HourObject:
         ret = HourObject([],[],{})
-        ch_type = self.parent.model.options.cautionhour_type
-        peak = self.parent.model.current_peak
         try:
             for p in price_list:    
                 if price_list[p]["force_non"] is True:
                     ret.nh.append(p)
-                elif await async_should_be_cautionhour(price_list[p], prices, peak, ch_type):
+                elif await async_should_be_cautionhour(
+                    price_list[p], 
+                    prices, 
+                    self.parent.model.current_peak, 
+                    self.parent.model.options.cautionhour_type
+                    ):
                     ret.ch.append(p)
-                    ret.dyn_ch[p] = round(await async_set_charge_allowance(price_list[p]["permax"], ch_type),2)
+                    ret.dyn_ch[p] = round(
+                        await async_set_charge_allowance(
+                            price_list[p]["permax"], 
+                            self.parent.model.options.cautionhour_type
+                            ),
+                        2)
                 else:
                     ret.nh.append(p)
         except IndexError as e:
