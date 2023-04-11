@@ -16,6 +16,7 @@ class Hoursselection:
         min_price: float = 0,
         cautionhour_type: str = CautionHourType.SUAVE.value,
         blocknocturnal: bool = False,
+        max_charge: float = 0,
         base_mock_hour: int = None,
     ):
         self.cautionhour_type_enum = (

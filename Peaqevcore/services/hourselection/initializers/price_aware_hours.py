@@ -23,6 +23,7 @@ class PriceAwareHours(Hours):
             min_price=hub.options.price.min_price,
             cautionhour_type=self._cautionhour_type_string,
             blocknocturnal=hub.options.blocknocturnal,
+            max_charge=hub.options.max_charge
         )
         self._hass = hub.state_machine
         self._prices = []
