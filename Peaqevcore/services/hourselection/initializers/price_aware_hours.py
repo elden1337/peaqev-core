@@ -7,20 +7,22 @@ from ...scheduler.scheduler_facade import SchedulerFacade
 
 _LOGGER = logging.getLogger(__name__)
 
+
 class PriceAwareHours(Hours):
-    def __init__(
-            self,
-            hub
-    ):
+    def __init__(self, hub):
         self._hub = hub
         self._timer = Timer()
-        self._cautionhour_type = CautionHourType.get_num_value(hub.options.price.cautionhour_type)
+        self._cautionhour_type = CautionHourType.get_num_value(
+            hub.options.price.cautionhour_type
+        )
         self._cautionhour_type_string = hub.options.price.cautionhour_type
         self._core = core_hours(
-            absolute_top_price=self._set_absolute_top_price(hub.options.price.top_price),
+            absolute_top_price=self._set_absolute_top_price(
+                hub.options.price.top_price
+            ),
             min_price=hub.options.price.min_price,
-            cautionhour_type=self._cautionhour_type_string, 
-            blocknocturnal=hub.options.blocknocturnal
+            cautionhour_type=self._cautionhour_type_string,
+            blocknocturnal=hub.options.blocknocturnal,
         )
         self._hass = hub.state_machine
         self._prices = []
@@ -94,11 +96,11 @@ class PriceAwareHours(Hours):
                 return True
         return False
 
-    async def async_update_top_price(self, dyn_top_price) -> None: 
+    async def async_update_top_price(self, dyn_top_price) -> None:
         if self._hub.options.price.dynamic_top_price:
             await self._core.async_update_top_price(dyn_top_price)
-    
-    def update_prices(self, prices:dict = [], prices_tomorrow:dict=[]) -> None:
+
+    def update_prices(self, prices: dict = [], prices_tomorrow: dict = []) -> None:
         self._core.update_prices(prices, prices_tomorrow)
 
     async def async_update_adjusted_average(self, val):
@@ -117,12 +119,14 @@ class PriceAwareHours(Hours):
     async def async_get_total_charge(self):
         if self._is_initialized:
             try:
-                return await self._core.async_get_total_charge(self._hub.sensors.current_peak.value)
+                return await self._core.async_get_total_charge(
+                    self._hub.sensors.current_peak.value
+                )
             except ZeroDivisionError as e:
                 _LOGGER.warning(f"get_total_charge could not be calculated: {e}")
             return 0
         _LOGGER.debug("get avg kwh price, not initialized")
-        return "-"
+        return 0
 
     @staticmethod
     def _set_absolute_top_price(_input) -> float:
