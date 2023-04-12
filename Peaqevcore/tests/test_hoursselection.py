@@ -1021,6 +1021,22 @@ async def test_adjust_tomorrows_top_price_25():
     await r.async_update_prices(prices, prices_tomorrow)
     assert len(r.non_hours) == 12
 
+
+@pytest.mark.asyncio
+async def test_230412():
+    r = h(cautionhour_type=CautionHourType.AGGRESSIVE, absolute_top_price=30, min_price=0.0)
+    prices = [0.54, 0.55, 0.57, 0.6, 0.62, 0.72, 0.74, 0.88, 0.9, 0.83, 0.77, 0.81, 0.77, 0.72, 0.61, 0.55, 0.51, 0.56, 0.58, 0.52, 0.44, 0.42, 0.34, 0.15]
+    prices_tomorrow = [0.07, 0.07, 0.06, 0.06, 0.06, 0.11, 0.41, 0.45, 0.47, 0.45, 0.44, 0.42, 0.4, 0.4, 0.35, 0.37, 0.39, 0.41, 0.41, 0.41, 0.39, 0.35, 0.29, 0.21]
+    await r.async_update_adjusted_average(0.77)
+    await r.service.async_set_day(12)
+    assert r.model.options.top_price_type == TopPriceType.Absolute
+    await r.async_update_top_price(0.97)
+    assert r.model.options.top_price_type == TopPriceType.Dynamic
+    r.service._mock_hour = await r.service.async_set_hour(22)
+    await r.async_update_prices(prices, prices_tomorrow)
+    assert r.non_hours == []
+    assert r.dynamic_caution_hours == {}
+
 """important, fix this later."""
 # async def test_230208_2():
 #     r = h(cautionhour_type=CautionHourType.AGGRESSIVE.value, absolute_top_price=3, min_price=0.0)

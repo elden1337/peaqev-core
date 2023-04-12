@@ -3,6 +3,8 @@ from .hoursbase import Hours
 class RegularHours(Hours):
     def __init__(self, hub):
         self.hub = hub
+        self.timer = None
+        self.scheduler = None
         super().__init__(False, self.hub.options.nonhours, self.hub.options.cautionhours)
 
     @property
