@@ -259,7 +259,7 @@ async def test_average_kwh_price_today_tomorrow():
     assert await r.async_get_average_kwh_price() == 0.61
 
 @pytest.mark.asyncio
-async def test_cheap_today_expensive_tomorrow():
+async def test_cheap_today_expensive_tomorrow_2():
     MOCKHOUR = 14
     r = h(cautionhour_type=CautionHourType.SUAVE, base_mock_hour=MOCKHOUR)
     prices = MOCKPRICES_CHEAP
@@ -671,7 +671,7 @@ async def test_charge_price_fixed_today_only():
     assert await r.async_get_average_kwh_price() == 1
 
 @pytest.mark.asyncio
-async def test_charge_price_fixed_today_only():
+async def test_charge_price_fixed_today_tomorrow():
     r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=0, min_price=0)
     r.service._mock_hour = await r.service.async_set_hour(13)
     prices = [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1]

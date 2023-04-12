@@ -14,7 +14,7 @@ class Hoursselection:
         self,
         absolute_top_price: float = 0,
         min_price: float = 0,
-        cautionhour_type: str = CautionHourType.SUAVE.value,
+        cautionhour_type: str|CautionHourType = CautionHourType.SUAVE.value,
         blocknocturnal: bool = False,
         max_charge: float = 0,
         base_mock_hour: int|None = None,
