@@ -6,7 +6,7 @@ from ...timer.timer import Timer
 from ...scheduler.scheduler_facade import SchedulerFacade
 
 class Hours:
-    _timer: Timer
+    timer: Timer
     scheduler: SchedulerFacade
 
     def __init__(
@@ -31,10 +31,6 @@ class Hours:
     @property
     def price_aware(self) -> bool:
         return self._price_aware
-
-    @property
-    def timer(self) -> Timer:
-        return self._timer
 
     @property
     @abstractmethod
