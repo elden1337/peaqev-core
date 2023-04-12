@@ -24,7 +24,7 @@ class PriceAwareHours(Hours):
         )
         self._hass = hub.state_machine
         self._prices = []
-        self._scheduler = SchedulerFacade(hub=self._hub, options=self.options)
+        self.scheduler = SchedulerFacade(hub=self._hub, options=self.options)
         super().__init__(price_aware=True)
 
     @property

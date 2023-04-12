@@ -7,7 +7,7 @@ from ...scheduler.scheduler_facade import SchedulerFacade
 
 class Hours:
     _timer: Timer
-    _scheduler: SchedulerFacade
+    scheduler: SchedulerFacade
 
     def __init__(
             self,
@@ -35,10 +35,6 @@ class Hours:
     @property
     def timer(self) -> Timer:
         return self._timer
-
-    @property
-    def scheduler(self) -> SchedulerFacade:
-        return self._scheduler
 
     @property
     @abstractmethod
@@ -84,7 +80,7 @@ class Hours:
         pass
 
     @abstractmethod
-    def update_prices(self, prices:dict = [], prices_tomorrow:dict=[]) -> None:
+    def update_prices(self, prices:list = [], prices_tomorrow:list=[]) -> None:
         pass
 
     @property
@@ -98,9 +94,8 @@ class Hours:
         pass
 
     @property
-    @abstractmethod
     def prices(self) -> list:
-        pass
+        return []
 
     @prices.setter
     @abstractmethod
@@ -108,9 +103,8 @@ class Hours:
         pass
 
     @property
-    @abstractmethod
     def prices_tomorrow(self) -> list:
-        pass
+        return []
 
     @prices_tomorrow.setter
     @abstractmethod

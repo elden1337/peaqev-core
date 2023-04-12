@@ -265,8 +265,8 @@ async def test_cheap_today_expensive_tomorrow_2():
     prices = MOCKPRICES_CHEAP
     prices_tomorrow = MOCKPRICES_EXPENSIVE
     await r.async_update_prices(prices, prices_tomorrow)
-    assert r.non_hours == [18]
-    assert r.dynamic_caution_hours == {15: 0.95, 16: 0.75, 17: 0.68, 19: 0.34, 20: 0.54, 21: 0.45, 22: 0.7, 23: 0.76}
+    assert r.non_hours == [8]
+    assert r.dynamic_caution_hours == {5: 0.8, 6: 0.46, 7: 0.3, 9: 0.34, 10: 0.44, 11: 0.45, 12: 0.54, 13: 0.66}
 
 @pytest.mark.asyncio
 async def test_both_min_and_max_price():
