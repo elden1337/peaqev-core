@@ -23,7 +23,7 @@ class ChargerSwitch(HubMember):
         super().__init__(data_type=data_type, listenerentity=listenerentity, init_override=init_override, initval=initval, hass=hass)
 
     @property
-    def is_initialized(self) -> bool:
+    def is_initialized(self) -> bool:        
         if self._hubdata.chargerobject is not None and not self._hubdata.chargerobject.is_initialized:
             return False
         return super().is_initialized

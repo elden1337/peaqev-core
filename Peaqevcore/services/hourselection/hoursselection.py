@@ -17,7 +17,7 @@ class Hoursselection:
         cautionhour_type: str = CautionHourType.SUAVE.value,
         blocknocturnal: bool = False,
         max_charge: float = 0,
-        base_mock_hour: int = None,
+        base_mock_hour: int|None = None,
     ):
         self.cautionhour_type_enum = (
             CautionHourType(cautionhour_type.lower())
@@ -105,7 +105,7 @@ class Hoursselection:
         await self.model.options.async_set_absolute_top_price(dyn_top_price)
         await self.async_update_prices(self.prices, self.prices_tomorrow)
 
-    async def async_update_prices(self, prices: dict = [], prices_tomorrow: dict = []):
+    async def async_update_prices(self, prices: list = [], prices_tomorrow: list = []):
         self.prices = prices
         self.prices_tomorrow = prices_tomorrow
         await self.service.async_update()

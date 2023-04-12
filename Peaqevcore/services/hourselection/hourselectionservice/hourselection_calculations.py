@@ -33,7 +33,7 @@ async def async_create_cautions(
         normalized_hourdict: dict, 
         cautionhour_type: CautionHourType, 
         range_start: int = 0,
-        adjusted_average:float = None, 
+        adjusted_average:float|None = None, 
         blocknocturnal:bool = False
         ) -> dict:
     """Rank the normalized pricelist to find out which are going to become non- or caution-hours"""

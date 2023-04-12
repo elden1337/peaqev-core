@@ -1,5 +1,6 @@
 import statistics as stat
 import logging
+from typing import Any
 from ....models.hourselection.hourobjects.hourobject import HourObject
 
 
@@ -21,7 +22,7 @@ async def async_create_dict(input: list):
         raise ValueError
 
 
-def convert_none_list(lst: any) -> list:
+def convert_none_list(lst: Any) -> list:
     ret = []
     if lst is None or not isinstance(lst, list):
         return ret
@@ -31,7 +32,7 @@ def convert_none_list(lst: any) -> list:
                 return ret
         return lst
     except:
-        return _make_array_from_empty(lst)
+        return _make_array_from_empty(str(lst))
 
 
 def _try_parse(input:str, parsetype:type):

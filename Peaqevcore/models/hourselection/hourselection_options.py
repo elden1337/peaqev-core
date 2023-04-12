@@ -24,7 +24,7 @@ class HourSelectionOptions:
         self.fixed_top_price = self.top_price
         self.absolute_top_price, self.top_price_type, self.min_price = set_absolute_top_price(self.min_price, self.top_price)
 
-    async def async_add_tomorrow_to_top_price(self, prices_tomorrow:list, mock_day:int = None) -> float: #move to separate file
+    async def async_add_tomorrow_to_top_price(self, prices_tomorrow:list, mock_day:int|None = None) -> float: #move to separate file
         _day = mock_day or datetime.now().day
         if _day + 1 > monthrange(datetime.now().year, datetime.now().month)[1]:
             """tomorrow is a new month so those prices should be calculated separately"""
@@ -33,7 +33,7 @@ class HourSelectionOptions:
             return self.absolute_top_price
         return min(await async_add_tomorrow(_day, prices_tomorrow, self.absolute_top_price), self.absolute_top_price)
     
-    async def async_set_absolute_top_price(self, monthly_avg_top:float=None) -> None:
+    async def async_set_absolute_top_price(self, monthly_avg_top:float|None=None) -> None:
         _min = self.min_price
         self.fixed_top_price = self.top_price
         if monthly_avg_top is None:

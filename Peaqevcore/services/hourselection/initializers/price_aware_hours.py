@@ -57,7 +57,7 @@ class PriceAwareHours(Hours):
 
     @property
     def min_price(self):
-        return self._core.options.min_price
+        return self._core.model.options.min_price
 
     @property
     def prices(self) -> list:
@@ -102,7 +102,7 @@ class PriceAwareHours(Hours):
         if self._hub.options.price.dynamic_top_price:
             await self._core.async_update_top_price(dyn_top_price)
 
-    async def async_update_prices(self, prices:dict = [], prices_tomorrow:dict=[]) -> None:
+    async def async_update_prices(self, prices:list = [], prices_tomorrow:list=[]) -> None:
         await self._core.async_update_prices(prices, prices_tomorrow)
 
     async def async_update_adjusted_average(self, val):

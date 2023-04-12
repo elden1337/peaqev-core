@@ -19,10 +19,10 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class HourSelectionService:
-    def __init__(self, parent: Hoursselection, base_mock_hour: int = None):
+    def __init__(self, parent: Hoursselection, base_mock_hour: int|None = None):
         self.parent = parent
         self._mock_hour = base_mock_hour
-        self._mock_day:int = None
+        self._mock_day:int|None = None
         self.preserve_interim: bool = False
         self._midnight_touched: bool = False
 
@@ -129,13 +129,13 @@ class HourSelectionService:
             _LOGGER.error(f"Error in determine hours: {e}")
         return ret
     
-    def set_hour(self, testhour:int = None) -> int:
+    def set_hour(self, testhour:int|None = None) -> int:
         return testhour if testhour is not None else self._mock_hour if self._mock_hour is not None else datetime.now().hour
     
-    async def async_set_hour(self, testhour:int = None) -> int:
+    async def async_set_hour(self, testhour:int|None = None) -> int:
         return testhour if testhour is not None else self._mock_hour if self._mock_hour is not None else datetime.now().hour
     
-    async def async_set_day(self, day:int = None):
+    async def async_set_day(self, day:int|None = None):
         self._mock_day = day if day is not None else datetime.now().day
 
     async def async_interim_day_update(self, today: HourObject, tomorrow: HourObject) -> Tuple[HourObject, HourObject]:
