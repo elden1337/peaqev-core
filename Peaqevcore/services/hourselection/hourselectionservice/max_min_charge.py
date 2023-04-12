@@ -19,11 +19,11 @@ class hoursexportmodel:
         self._total_charge = round(value,1)
 
     async def async_update(self, avg24, peak, max_desired) -> None:
-        for i in range(0,25):
-            if await self.async_sum_charge(avg24, peak) > max_desired:
+        for i in range(len(self.original_input_hours.items())):
+            _sum = await self.async_sum_charge(avg24, peak)
+            if _sum > max_desired:
                 await self.async_decrease()
-        for i in range(0,25):
-            if await self.async_sum_charge(avg24, peak) < max_desired:
+            elif _sum < max_desired:
                 await self.async_increase()
         self.total_charge = await self.async_sum_charge(avg24, peak)
 
@@ -45,7 +45,10 @@ class hoursexportmodel:
             self.input_hours, 
             key=lambda k: self.input_hours[k][0] if self.input_hours[k][1] < 1 else 999
             )
-        self.input_hours[min_key] = (self.input_hours[min_key][0], min(1, self.original_input_hours[min_key][1]))
+        self.input_hours[min_key] = (self.input_hours[min_key][0], min(
+            1, 
+            self.original_input_hours[min_key][1]
+            ))
 
 
 async def do():
