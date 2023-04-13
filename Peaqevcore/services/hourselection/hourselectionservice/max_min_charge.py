@@ -81,7 +81,7 @@ class MaxMinCharge:
             prices_tomorrow:list,
             mock_hour: int|None = None
             ) -> None:
-        hour = mock_hour or 21 #await self.parent.async_set_hour()
+        hour = mock_hour if mock_hour is not None else 21 #await self.parent.async_set_hour()
         ret_today, ret_tomorrow = await self.async_loop_nonhours(hour, non_hours, prices, prices_tomorrow)
         await self.async_loop_caution_hours(hour, dynamic_caution_hours, prices, prices_tomorrow, ret_today, ret_tomorrow)        
         await self.async_add_available_hours(hour, prices, prices_tomorrow, ret_today, ret_tomorrow)
@@ -91,7 +91,7 @@ class MaxMinCharge:
     @staticmethod
     async def async_add_available_hours(hour: int, prices:list, prices_tomorrow:list, ret_today: dict, ret_tomorrow:dict) -> None:
         _hour = hour
-        _range = 24 if len(prices_tomorrow) > 0 else len(prices) < hour
+        _range = 24 if len(prices_tomorrow) > 0 else len(prices) - hour
         for i in range(_range):
             if _hour < hour and _hour not in ret_tomorrow.keys():
                 ret_tomorrow[_hour] = (prices_tomorrow[_hour], 1)
@@ -107,7 +107,7 @@ class MaxMinCharge:
         for k, v in caution_hours.items():
             if k >= hour:
                 ret_today[k] = (prices[k], v)
-            else:
+            elif len(prices_tomorrow) > 0:
                 ret_tomorrow[k] = (prices_tomorrow[k], v)
 
     @staticmethod
@@ -117,7 +117,7 @@ class MaxMinCharge:
         for n in non_hours:
             if n >= hour:
                 ret_today[n] = (prices[n], 0)
-            else:
+            elif len(prices_tomorrow) > 0:
                 ret_tomorrow[n] = (prices_tomorrow[n], 0)
         return ret_today, ret_tomorrow
 
