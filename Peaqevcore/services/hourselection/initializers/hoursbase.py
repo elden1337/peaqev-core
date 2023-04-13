@@ -143,3 +143,7 @@ class Hours:
     @abstractmethod
     async def async_update_adjusted_average(self, val):
         pass
+
+    @abstractmethod
+    async def async_update_max_min(self, max_charge):
+        pass

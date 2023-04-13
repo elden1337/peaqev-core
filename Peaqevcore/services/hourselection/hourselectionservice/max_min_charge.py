@@ -7,11 +7,13 @@ class MaxMinModel:
     input_hours: dict[int, Tuple[float, float]] = field(default_factory=lambda: {})
     original_input_hours: dict[int, Tuple[float, float]] = field(default_factory=lambda: {})
     total_charge: float = 0
-
+    
 
 class MaxMinCharge:
-    def __init__(self) -> None:
+    def __init__(self, hoursselection) -> None:
         self.model = MaxMinModel()
+        self.parent = hoursselection
+        self.active: bool = False
 
     @property
     def total_charge(self) -> float:
@@ -27,7 +29,7 @@ class MaxMinCharge:
         return [k for k, v in self.model.input_hours.items() if v[1] == 0]
     
     @property
-    def caution_hours(self) -> dict:
+    def dynamic_caution_hours(self) -> dict:
         """dynamic caution hours"""
         return {k: v[1] for k, v in self.model.input_hours.items() if 0 < v[1] < 1}
 
@@ -45,9 +47,9 @@ class MaxMinCharge:
         self.total_charge = await self.async_sum_charge(_avg24, peak)
 
     async def async_initial_charge(self, avg24, peak) -> float:
-        total=24*(peak-avg24)
+        total=24*(peak-avg24) #todo: fix 24 to be dynamic
         total -= len(self.non_hours)*(peak-avg24)
-        total -= sum(self.caution_hours.values())*(peak-avg24)
+        total -= sum(self.dynamic_caution_hours.values())*(peak-avg24)
         return total
 
     async def async_sum_charge(self, avg24, peak) -> float:
@@ -73,20 +75,31 @@ class MaxMinCharge:
             self.model.original_input_hours[min_key][1]
             ))
 
-    async def async_make_hours(
+    async def async_setup(
             self, 
-            non_hours:list, 
-            dynamic_caution_hours:dict, 
-            prices:list, 
-            prices_tomorrow:list,
+            max_charge: float,
+            non_hours:list|None = None, 
+            dynamic_caution_hours:dict|None = None, 
+            prices:list|None = None, 
+            prices_tomorrow:list|None = None,
             mock_hour: int|None = None
             ) -> None:
-        hour = mock_hour if mock_hour is not None else 21 #await self.parent.async_set_hour()
-        ret_today, ret_tomorrow = await self.async_loop_nonhours(hour, non_hours, prices, prices_tomorrow)
-        await self.async_loop_caution_hours(hour, dynamic_caution_hours, prices, prices_tomorrow, ret_today, ret_tomorrow)        
-        await self.async_add_available_hours(hour, prices, prices_tomorrow, ret_today, ret_tomorrow)
+        
+        if max_charge == 0:
+            self.active = False
+            return
+                
+        hour = mock_hour if mock_hour is not None else await self.parent.async_set_hour()
+        _non_hours = self.parent.internal_non_hours if non_hours is None else non_hours
+        _dynamic_caution_hours = self.parent.internal_dynamic_caution_hours if dynamic_caution_hours is None else dynamic_caution_hours
+        _prices = self.parent.prices if prices is None else prices
+        _prices_tomorrow = self.parent.prices_tomorrow if prices_tomorrow is None else prices_tomorrow
+        ret_today, ret_tomorrow = await self.async_loop_nonhours(hour, _non_hours, _prices, _prices_tomorrow)
+        await self.async_loop_caution_hours(hour, _dynamic_caution_hours, _prices, _prices_tomorrow, ret_today, ret_tomorrow)        
+        await self.async_add_available_hours(hour, _prices, _prices_tomorrow, ret_today, ret_tomorrow)
         self.model.input_hours = await self.async_sort_dicts(ret_today, ret_tomorrow)        
         self.model.original_input_hours = self.model.input_hours.copy()
+        self.active = True
 
     @staticmethod
     async def async_add_available_hours(hour: int, prices:list, prices_tomorrow:list, ret_today: dict, ret_tomorrow:dict) -> None:

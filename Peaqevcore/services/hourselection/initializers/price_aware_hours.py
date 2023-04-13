@@ -133,3 +133,11 @@ class PriceAwareHours(Hours):
         if _input is None or _input <= 0:
             return float("inf")
         return _input
+    
+    async def async_update_max_min(self, max_charge):
+        await self._core.max_min.async_setup(max_charge)
+        await self._core.max_min.async_update(
+            avg24=self._hub.sensors.powersensormovingaverage24.value, 
+            peak=self._hub.sensors.current_peak.value, 
+            max_desired=max_charge
+            )
