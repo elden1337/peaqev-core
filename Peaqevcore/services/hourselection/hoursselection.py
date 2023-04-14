@@ -1,4 +1,5 @@
 import logging
+from typing import Tuple
 from ...models.hourselection.cautionhourtype import CautionHourType
 from ...models.hourselection.hourselection_model import HourSelectionModel
 from ...models.hourselection.hourselection_options import HourSelectionOptions
@@ -123,20 +124,24 @@ class Hoursselection:
         self.prices_tomorrow = prices_tomorrow
         await self.service.async_update()
 
-    async def async_get_average_kwh_price(self):
-        ret = await self.async_get_charge_or_price()
+    async def async_get_average_kwh_price(self) -> Tuple[float, float|None]:
+        ret1 = None
+        if self.max_min.active:
+            ret1 = self.max_min.average_price
+        ret0 = await self.async_get_charge_or_price()
         try:
-            return round(sum(ret.values()) / len(ret), 2)
+            return round(sum(ret0.values()) / len(ret0), 2), ret1
         except ZeroDivisionError as e:
             _LOGGER.warning(f"get_average_kwh_price_core could not be calculated: {e}")
-        return 0
+        return 0,None
 
-    async def async_get_total_charge(self, currentpeak: float) -> float:
+    async def async_get_total_charge(self, currentpeak: float) -> Tuple[float, float|None]:
+        ret1 = None
         if self.max_min.active:
-            return self.max_min.total_charge
+            ret1 = self.max_min.total_charge
         self.model.current_peak = currentpeak
-        ret = await self.async_get_charge_or_price(True)
-        return round(sum(ret.values()), 1)
+        ret0 = await self.async_get_charge_or_price(True)
+        return round(sum(ret0.values()), 1), ret1
 
     async def async_get_charge_or_price(self, charge: bool = False) -> dict:
         hour = await self.service.async_set_hour()

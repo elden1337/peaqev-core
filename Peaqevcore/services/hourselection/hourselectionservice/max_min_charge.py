@@ -19,6 +19,10 @@ class MaxMinCharge:
     def total_charge(self) -> float:
         return self.model.total_charge
     
+    @property
+    def average_price(self) -> float:
+        return round(sum([v[0] * v[1] for k,v in self.model.input_hours.items() if v[1] > 0])/self.total_charge,1)
+    
     @total_charge.setter
     def total_charge(self, value: float) -> None:
         self.model.total_charge = round(value,1)

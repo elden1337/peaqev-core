@@ -4,6 +4,7 @@ from abc import abstractmethod
 from ..const import NON_HOUR, CAUTION_HOUR, CHARGING_PERMITTED
 from ...timer.timer import Timer
 from ...scheduler.scheduler_facade import SchedulerFacade
+from typing import Tuple
 
 class Hours:
     timer: Timer
@@ -133,11 +134,11 @@ class Hours:
         pass
 
     @abstractmethod
-    async def async_get_average_kwh_price(self):
+    async def async_get_average_kwh_price(self) -> Tuple[float, float|None]:
         pass
 
     @abstractmethod
-    async def async_get_total_charge(self):
+    async def async_get_total_charge(self) -> Tuple[float, float|None]:
         pass
     
     @abstractmethod

@@ -1,4 +1,5 @@
 import logging
+from typing import Tuple
 from .hoursbase import Hours
 from ..hoursselection import Hoursselection as core_hours
 from ....models.hourselection.cautionhourtype import CautionHourType
@@ -108,25 +109,25 @@ class PriceAwareHours(Hours):
     async def async_update_adjusted_average(self, val):
         await self._core.async_update_adjusted_average(val)
 
-    async def async_get_average_kwh_price(self):
+    async def async_get_average_kwh_price(self) -> Tuple[float, float|None]:
         if self._is_initialized:
             try:
                 return await self._core.async_get_average_kwh_price()
             except ZeroDivisionError as e:
                 _LOGGER.warning(f"get_average_kwh_price could not be calculated: {e}")
-            return 0
+            return 0, None
         _LOGGER.debug("get avg kwh price, not initialized")
-        return "-"
+        return 0 , None
 
-    async def async_get_total_charge(self):
+    async def async_get_total_charge(self) -> Tuple[float, float|None]:
         if self._is_initialized:
             try:
                 return await self._core.async_get_total_charge(self._hub.sensors.current_peak.value)
             except ZeroDivisionError as e:
                 _LOGGER.warning(f"get_total_charge could not be calculated: {e}")
-            return 0
+            return 0, None
         _LOGGER.debug("get avg kwh price, not initialized")
-        return "-"
+        return 0, None
 
     @staticmethod
     def _set_absolute_top_price(_input) -> float:
