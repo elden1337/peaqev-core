@@ -36,10 +36,6 @@ class Hoursselection:
         self.service = HourSelectionService(parent=self, base_mock_hour=base_mock_hour)
         self.max_min = MaxMinCharge(self)
 
-    # async def async_update_max_min(self, avg24, peak, max_charge):
-    #     await self.max_min.async_make_hours()
-    #     await self.max_min.async_update(avg24, peak, max_charge)
-
     @property
     def offsets(self) -> dict:
         return self.model.hours.offset_dict

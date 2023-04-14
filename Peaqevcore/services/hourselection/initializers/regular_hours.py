@@ -26,3 +26,6 @@ class RegularHours(Hours):
     @property
     def is_initialized(self) -> bool:
         return True
+    
+    async def async_update_max_min(self, max_charge):
+        pass
