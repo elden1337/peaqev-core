@@ -89,7 +89,7 @@ class MaxMinCharge:
             self.active = False
             return
                 
-        hour = mock_hour if mock_hour is not None else await self.parent.async_set_hour()
+        hour = mock_hour if mock_hour is not None else await self.parent.service.async_set_hour()
         _non_hours = self.parent.internal_non_hours if non_hours is None else non_hours
         _dynamic_caution_hours = self.parent.internal_dynamic_caution_hours if dynamic_caution_hours is None else dynamic_caution_hours
         _prices = self.parent.prices if prices is None else prices
