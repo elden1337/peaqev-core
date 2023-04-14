@@ -34,7 +34,7 @@ class MaxMinCharge:
         return {k: v[1] for k, v in self.model.input_hours.items() if 0 < v[1] < 1}
 
     async def async_update(self, avg24, peak, max_desired) -> None:
-        _avg24 = round(avg24,1)
+        _avg24 = round((avg24/1000),1)
         for i in range(len(self.model.original_input_hours.items())):
             _sum = await self.async_sum_charge(_avg24, peak)
             if _sum - max_desired > 0.05:
@@ -47,9 +47,10 @@ class MaxMinCharge:
         self.total_charge = await self.async_sum_charge(_avg24, peak)
 
     async def async_initial_charge(self, avg24, peak) -> float:
-        total=24*(peak-avg24) #todo: fix 24 to be dynamic
-        total -= len(self.non_hours)*(peak-avg24)
-        total -= sum(self.dynamic_caution_hours.values())*(peak-avg24)
+        _avg24 = round((avg24/1000),1)
+        total=24*(peak-_avg24) #todo: fix 24 to be dynamic
+        total -= len(self.non_hours)*(peak-_avg24)
+        total -= sum(self.dynamic_caution_hours.values())*(peak-_avg24)
         return total
 
     async def async_sum_charge(self, avg24, peak) -> float:

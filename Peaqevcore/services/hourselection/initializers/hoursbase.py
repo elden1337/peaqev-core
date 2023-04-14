@@ -12,8 +12,8 @@ class Hours:
     def __init__(
             self,
             price_aware: bool,
-            non_hours: list = None,
-            caution_hours: list = None
+            non_hours: list = [],
+            caution_hours: list = []
     ):
         self._non_hours = non_hours
         self._caution_hours = caution_hours
