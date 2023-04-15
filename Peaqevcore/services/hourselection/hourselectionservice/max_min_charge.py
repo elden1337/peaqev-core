@@ -1,4 +1,7 @@
 from __future__ import annotations
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ..hoursselection import Hoursselection
 from dataclasses import dataclass, field
 from typing import Tuple
 
@@ -10,7 +13,7 @@ class MaxMinModel:
     
 
 class MaxMinCharge:
-    def __init__(self, hoursselection) -> None:
+    def __init__(self, hoursselection: Hoursselection) -> None:
         self.model = MaxMinModel()
         self.parent = hoursselection
         self.active: bool = False
@@ -29,12 +32,10 @@ class MaxMinCharge:
 
     @property
     def non_hours(self) -> list:
-        """non hours"""
         return [k for k, v in self.model.input_hours.items() if v[1] == 0]
     
     @property
     def dynamic_caution_hours(self) -> dict:
-        """dynamic caution hours"""
         return {k: v[1] for k, v in self.model.input_hours.items() if 0 < v[1] < 1}
 
     async def async_update(self, avg24, peak, max_desired) -> None:
@@ -92,8 +93,7 @@ class MaxMinCharge:
         
         if max_charge == 0:
             self.active = False
-            return
-                
+            return        
         hour = mock_hour if mock_hour is not None else await self.parent.service.async_set_hour()
         _non_hours = self.parent.internal_non_hours if non_hours is None else non_hours
         _dynamic_caution_hours = self.parent.internal_dynamic_caution_hours if dynamic_caution_hours is None else dynamic_caution_hours
