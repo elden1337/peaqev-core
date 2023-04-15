@@ -2,15 +2,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ..hoursselection import Hoursselection
-from dataclasses import dataclass, field
 from typing import Tuple
-
-@dataclass
-class MaxMinModel:
-    input_hours: dict[int, Tuple[float, float]] = field(default_factory=lambda: {})
-    original_input_hours: dict[int, Tuple[float, float]] = field(default_factory=lambda: {})
-    total_charge: float = 0
-    
+from ....models.hourselection.max_min_model import MaxMinModel
 
 class MaxMinCharge:
     def __init__(self, hoursselection: Hoursselection) -> None:
@@ -23,8 +16,8 @@ class MaxMinCharge:
         return self.model.total_charge
     
     @property
-    def average_price(self) -> float:
-        return round(sum([v[0] * v[1] for k,v in self.model.input_hours.items() if v[1] > 0])/self.total_charge,1)
+    def average_price(self) -> float|None:
+        return self.model.average_price
     
     @total_charge.setter
     def total_charge(self, value: float) -> None:
