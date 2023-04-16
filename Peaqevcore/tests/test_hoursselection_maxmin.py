@@ -51,7 +51,6 @@ async def test_230412_maxmin_active_average_price_decrease():
     assert r.max_min.active is True
     await r.max_min.async_update(0, peak, max(1, initial_charge[0]-10))
     ret =await r.async_get_average_kwh_price()
-    print(r.max_min.average_price)
     assert ret[1] is not None
     assert ret[1] <= ret[0]
     
@@ -103,7 +102,6 @@ async def test_230412_maxmin_active_decrease_increase_suave():
     r.service._mock_hour = await r.service.async_set_hour(19)
     await r.async_update_prices(P230412[0], P230412[1])
     initial_charge = await r.async_get_total_charge(peak)
-    print(initial_charge)
     await r.max_min.async_setup(100)
     assert r.max_min.active is True
     await r.max_min.async_update(0, peak, max(1, initial_charge[0]-10))
@@ -116,5 +114,23 @@ async def test_230412_maxmin_active_decrease_increase_suave():
     assert r.max_min.total_charge == ret[1]
     assert ret[1] == ret[0]
     assert r.max_min.total_charge == initial_charge[0]
+
+@pytest.mark.asyncio
+async def test_230412_fixed_price():
+    r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=30, min_price=0.0)
+    peak= 2.28
+    await r.async_update_adjusted_average(0.77)
+    await r.service.async_set_day(12)
+    await r.async_update_top_price(0.97)
+    r.service._mock_hour = await r.service.async_set_hour(19)
+    await r.async_update_prices(P230412[0], P230412[1])
+    await r.max_min.async_setup(peak)
+    await r.max_min.async_update(0, peak, peak/2)
+    ret =await r.async_get_average_kwh_price()
+    assert ret == (0.31, 0.06)
+    
+
+
+
 
 

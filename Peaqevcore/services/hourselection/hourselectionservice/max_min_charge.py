@@ -5,6 +5,8 @@ if TYPE_CHECKING:
 from typing import Tuple
 from ....models.hourselection.max_min_model import MaxMinModel
 
+MINIMUM_DIFFERENCE = 0.05
+
 class MaxMinCharge:
     def __init__(self, hoursselection: Hoursselection) -> None:
         self.model = MaxMinModel()
@@ -33,19 +35,22 @@ class MaxMinCharge:
 
     async def async_update(self, avg24, peak, max_desired) -> None:
         _avg24 = round((avg24/1000),1)
+        
         for i in range(len(self.model.original_input_hours.items())):
             _sum = await self.async_sum_charge(_avg24, peak)
-            if _sum - max_desired > 0.05:
+            if _sum - max_desired > MINIMUM_DIFFERENCE:
                 await self.async_decrease()
-            elif _sum - max_desired < -0.05:
+            elif _sum - max_desired < MINIMUM_DIFFERENCE*-1:
                 expected_charge = round((max_desired-_sum)/(peak-_avg24),2)
                 await self.async_increase(expected_charge)
-            if abs(_sum - max_desired) < 0.05:
+            if abs(_sum - max_desired) < MINIMUM_DIFFERENCE:
                 break            
         self.total_charge = await self.async_sum_charge(_avg24, peak)
+        self.model.expected_hourly_charge = peak-_avg24
 
     async def async_initial_charge(self, avg24, peak) -> float:
         _avg24 = round((avg24/1000),1)
+        self.model.expected_hourly_charge = peak-_avg24
         total=24*(peak-_avg24) #todo: fix 24 to be dynamic
         total -= len(self.non_hours)*(peak-_avg24)
         total -= sum(self.dynamic_caution_hours.values())*(peak-_avg24)
