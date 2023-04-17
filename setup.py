@@ -32,5 +32,11 @@ setuptools.setup(
         "peaqevcore.models.locale.price.models",
         "peaqevcore.services.scheduler",
         "peaqevcore.services.timer"
+        ],
+    extras_require={
+        'tests': [
+            'pytest>3.6.4',
+            'pytest-cov<2.6',
         ]
+    },
 )   
