@@ -124,24 +124,30 @@ class Hoursselection:
         self.prices_tomorrow = prices_tomorrow
         await self.service.async_update()
 
-    async def async_get_average_kwh_price(self) -> Tuple[float, float|None]:
-        ret1 = None
+    async def async_get_average_kwh_price(self) -> Tuple[float|None, float|None]:
+        ret_dynamic = None
         if self.max_min.active:
-            ret1 = self.max_min.average_price
-        ret0 = await self.async_get_charge_or_price()
-        try:
-            return round(sum(ret0.values()) / len(ret0), 2), ret1
-        except ZeroDivisionError as e:
-            _LOGGER.warning(f"get_average_kwh_price_core could not be calculated: {e}")
-        return 0,None
+            ret_dynamic = self.max_min.average_price
+            ret_static = self.max_min.original_average_price
+            return ret_static, ret_dynamic
+        else:
+            ret_static = await self.async_get_charge_or_price()
+            try:
+                return round(sum(ret_static.values()) / len(ret_static), 2), ret_dynamic
+            except ZeroDivisionError as e:
+                _LOGGER.warning(f"get_average_kwh_price_core could not be calculated: {e}")
+            return 0,None
 
     async def async_get_total_charge(self, currentpeak: float) -> Tuple[float, float|None]:
-        ret1 = None
+        ret_dynamic = None
         if self.max_min.active:
-            ret1 = self.max_min.total_charge
-        self.model.current_peak = currentpeak
-        ret0 = await self.async_get_charge_or_price(True)
-        return round(sum(ret0.values()), 1), ret1
+            ret_dynamic = self.max_min.total_charge
+            ret_static = self.max_min.original_total_charge
+            return ret_static, ret_dynamic
+        else:
+            self.model.current_peak = currentpeak
+            ret_static = await self.async_get_charge_or_price(True)
+            return round(sum(ret_static.values()), 1), ret_dynamic
 
     async def async_get_charge_or_price(self, charge: bool = False) -> dict:
         hour = await self.service.async_set_hour()

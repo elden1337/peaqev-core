@@ -21,9 +21,14 @@ class MaxMinCharge:
     def average_price(self) -> float|None:
         return self.model.average_price
     
-    @total_charge.setter
-    def total_charge(self, value: float) -> None:
-        self.model.total_charge = round(value,1)
+    @property
+    def original_total_charge(self) -> float:
+        return self.model.original_total_charge
+    
+    @property
+    def original_average_price(self) -> float|None:
+        return self.model.original_average_price
+
 
     @property
     def non_hours(self) -> list:
@@ -35,18 +40,15 @@ class MaxMinCharge:
 
     async def async_update(self, avg24, peak, max_desired) -> None:
         _avg24 = round((avg24/1000),1)
-        
-        for i in range(len(self.model.original_input_hours.items())):
-            _sum = await self.async_sum_charge(_avg24, peak)
-            if _sum - max_desired > MINIMUM_DIFFERENCE:
-                await self.async_decrease()
-            elif _sum - max_desired < MINIMUM_DIFFERENCE*-1:
-                expected_charge = round((max_desired-_sum)/(peak-_avg24),2)
-                await self.async_increase(expected_charge)
-            if abs(_sum - max_desired) < MINIMUM_DIFFERENCE:
-                break            
-        self.total_charge = await self.async_sum_charge(_avg24, peak)
         self.model.expected_hourly_charge = peak-_avg24
+        for i in range(len(self.model.original_input_hours.items())):
+            if self.total_charge - max_desired > MINIMUM_DIFFERENCE:
+                await self.async_decrease()
+            elif self.total_charge - max_desired < MINIMUM_DIFFERENCE*-1:
+                expected_charge = round((max_desired-self.total_charge)/(peak-_avg24),2)
+                await self.async_increase(expected_charge)
+            if abs(self.total_charge - max_desired) < MINIMUM_DIFFERENCE:
+                break        
 
     async def async_initial_charge(self, avg24, peak) -> float:
         _avg24 = round((avg24/1000),1)
