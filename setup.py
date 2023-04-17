@@ -37,7 +37,7 @@ setuptools.setup(
         'tests': [
             'pytest>3.6.4',
             'pytest-cov<2.6',
-            'asynctest'
+            'pytest-asyncio'
         ]
     },
 )   
