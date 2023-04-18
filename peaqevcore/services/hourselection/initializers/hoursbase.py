@@ -134,7 +134,7 @@ class Hours:
         pass
 
     @abstractmethod
-    async def async_get_average_kwh_price(self) -> Tuple[float, float|None]:
+    async def async_get_average_kwh_price(self) -> Tuple[float|None, float|None]:
         pass
 
     @abstractmethod

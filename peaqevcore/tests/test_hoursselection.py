@@ -87,6 +87,14 @@ async def test_mockprices2_non_hours():
     assert r.non_hours == [21]
 
 @pytest.mark.asyncio
+async def test_mockprices2_non_hours_unknown_tomorrow():
+    r = h(base_mock_hour=21)
+    prices = MOCKPRICES2
+    prices_tomorrow = ["unknown" for i in range(0,24)]
+    await r.async_update_prices(prices, prices_tomorrow)
+    assert r.non_hours == [21]
+
+@pytest.mark.asyncio
 async def test_mockprices2_caution_hours():
     r = h(base_mock_hour=21)
     prices = MOCKPRICES2

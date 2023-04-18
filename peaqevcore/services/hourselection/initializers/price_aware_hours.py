@@ -109,7 +109,7 @@ class PriceAwareHours(Hours):
     async def async_update_adjusted_average(self, val):
         await self._core.async_update_adjusted_average(val)
 
-    async def async_get_average_kwh_price(self) -> Tuple[float, float|None]:
+    async def async_get_average_kwh_price(self) -> Tuple[float|None, float|None]:
         if self._is_initialized:
             try:
                 return await self._core.async_get_average_kwh_price()

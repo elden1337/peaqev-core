@@ -30,6 +30,8 @@ def convert_none_list(lst: Any) -> list:
         for l in lst:
             if l is None:
                 return ret
+            elif not _try_parse(l, float):
+                return ret
         return lst
     except:
         return _make_array_from_empty(str(lst))
