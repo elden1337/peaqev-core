@@ -766,6 +766,7 @@ async def test_cheapest_cautionhour_in_nonhours():
     r.service._mock_hour = await r.service.async_set_hour(0)
     assert r.non_hours == [16,17,18,19]
     assert r.dynamic_caution_hours == {}
+    assert r.model.options.absolute_top_price == 5.5
     
 @pytest.mark.asyncio
 async def test_230108():
