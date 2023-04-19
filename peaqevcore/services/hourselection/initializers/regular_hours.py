@@ -29,3 +29,11 @@ class RegularHours(Hours):
     
     async def async_update_max_min(self, max_charge):
         pass
+
+    @property
+    def absolute_top_price(self):
+        return None
+    
+    @property
+    def min_price(self):
+        return None
