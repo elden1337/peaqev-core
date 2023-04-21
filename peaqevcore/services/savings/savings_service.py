@@ -38,14 +38,12 @@ class SavingsService:
         return {
             "car_connected_at": self.model.car_connected_at,
             "prices": self.model.prices,
-            "registered_consumption": self.model.registered_consumption,
+            "consumption": self.model.consumption,
             "peaks": self.model.peaks,
         }
 
     async def async_start_listen(self, connected_at: datetime | None = None) -> None:
-        if connected_at is None:
-            connected_at = datetime.now()
-        self.model.car_connected_at = connected_at
+        self.model.car_connected_at = connected_at or datetime.now()
         self.model.status = SavingsStatus.Collecting
 
     async def async_stop_listen(self) -> None:
@@ -56,20 +54,18 @@ class SavingsService:
     ) -> None:
         await self.model.async_add_prices(prices, _date)
 
-    async def async_add_to_registered_consumption(
+    async def async_add_to_consumption(
         self,
-        registered_consumption: float,
+        consumption: float,
         _date: date | None = None,
         _hour: int | None = None,
     ) -> None:
-        await self.model.async_add_to_registered_consumption(
-            registered_consumption, _date, _hour
-        )
+        await self.model.async_add_to_consumption(consumption, _date, _hour)
 
-    async def async_add_to_peaks(
-        self, peak: float, _date: date | None = None, _hour: int | None = None
-    ) -> None:
-        await self.model.async_add_to_peaks(peak, _date, _hour)
+    # async def async_add_to_peaks(
+    #     self, peak: float, _date: date | None = None, _hour: int | None = None
+    # ) -> None:
+    #     await self.model.async_add_to_peaks(peak, _date, _hour)
 
     async def async_register_charge_session(
         self, charge_session: dict, original_peak: float | None = None
@@ -88,7 +84,7 @@ class SavingsService:
         self.savings_trade = max(simulated_cost - charge_cost, 0)
 
     async def async_direct_peak_cost(
-        self, charge_session: dict, original_peak
+        self, charge_session: dict, original_peak: float | None
     ) -> float:
         ret = 0
         if original_peak is None:
@@ -100,9 +96,6 @@ class SavingsService:
                 raise Exception
             for hour, energy in value.items():
                 if energy + self.model.peaks[key][hour] > observed_peak:
-                    print(
-                        f"energy: {energy}, peak: {self.model.peaks[key][hour]}, original_peak: {original_peak}"
-                    )
                     ret = energy + self.model.peaks[key][hour]
                     observed_peak = energy + self.model.peaks[key][hour]
         diff = ret - original_peak

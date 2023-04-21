@@ -12,28 +12,26 @@ class SavingsModel:
     peak_price_per_kwh: float
     car_connected_at: datetime | None = None
     prices: dict[date, list[float]] = field(default_factory=lambda: {})
-    registered_consumption: dict[date, dict[int, float]] = field(
-        default_factory=lambda: {}
-    )
-    peaks: dict[date, dict[int, float]] = field(default_factory=lambda: {})
+    consumption: dict[date, dict[int, float]] = field(default_factory=lambda: {})
+    # peaks: dict[date, dict[int, float]] = field(default_factory=lambda: {})
     status: SavingsStatus = SavingsStatus.Off
 
     async def async_reset(self) -> None:
         self.status = SavingsStatus.Off
         self.prices = {}
-        self.registered_consumption = {}
+        self.consumption = {}
         self.peaks = {}
 
     async def async_re_initialize(self, incoming: dict):
-        self.car_connected_at = incoming.get("car_connected_at")
+        self.car_connected_at = incoming.get("car_connected_at", None)
         self.prices = incoming.get("prices", {})
-        self.registered_consumption = incoming.get("registered_consumption", {})
+        self.consumption = incoming.get("consumption", {})
         self.peaks = incoming.get("peaks", {})
         if all(
             [
                 self.car_connected_at is not None,
                 len(self.prices) > 0,
-                len(self.registered_consumption) > 0,
+                len(self.consumption) > 0,
                 len(self.peaks) > 0,
             ]
         ):
@@ -48,28 +46,28 @@ class SavingsModel:
             _date = datetime.now().date()
         self.prices[_date] = prices
 
-    async def async_add_to_registered_consumption(
+    async def async_add_to_consumption(
         self,
-        registered_consumption: float,
+        consumption: float,
         date: date | None = None,
         hour: int | None = None,
     ) -> None:
         if self.status is not SavingsStatus.Collecting:
             return
         _date, _hour = await self.async_check_date_hour(date, hour)
-        await self.async_try_add(_date, _hour, self.registered_consumption)
-        self.registered_consumption[_date][_hour] = max(
-            [registered_consumption, self.registered_consumption[_date][_hour]]
+        await self.async_try_add(_date, _hour, self.consumption)
+        self.consumption[_date][_hour] = max(
+            [consumption, self.consumption[_date][_hour]]
         )
 
-    async def async_add_to_peaks(
-        self, peak: float, date: date | None = None, hour: int | None = None
-    ) -> None:
-        if self.status is not SavingsStatus.Collecting:
-            return
-        _date, _hour = await self.async_check_date_hour(date, hour)
-        await self.async_try_add(_date, _hour, self.peaks)
-        self.peaks[_date][_hour] = max([peak, self.peaks[_date][_hour]])
+    # async def async_add_to_peaks(
+    #     self, peak: float, date: date | None = None, hour: int | None = None
+    # ) -> None:
+    #     if self.status is not SavingsStatus.Collecting:
+    #         return
+    #     _date, _hour = await self.async_check_date_hour(date, hour)
+    #     await self.async_try_add(_date, _hour, self.peaks)
+    #     self.peaks[_date][_hour] = max([peak, self.peaks[_date][_hour]])
 
     async def async_check_date_hour(
         self, _date: date | None, _hour: int | None

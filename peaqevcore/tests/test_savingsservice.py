@@ -58,24 +58,24 @@ PRICES2 = [
 
 
 @pytest.mark.asyncio
-async def test_add_registered_consumption():
+async def test_add_consumption():
     s = SavingsService(peak_price=36.25)
     _date = datetime(2021, 3, 24).date()
     _hour = 20
     await s.async_start_listen()
     for i in range(100):
-        await s.async_add_to_registered_consumption(0.5 + (i / 10), _date, _hour)
-    assert s.model.registered_consumption[_date][_hour] == 10.4
+        await s.async_add_to_consumption(0.5 + (i / 10), _date, _hour)
+    assert s.model.consumption[_date][_hour] == 10.4
 
 
 @pytest.mark.asyncio
-async def test_add_registered_consumption_not_collecting():
+async def test_add_consumption_not_collecting():
     s = SavingsService(peak_price=36.25)
     _date = datetime(2021, 3, 24).date()
     _hour = 20
     for i in range(100):
-        await s.async_add_to_registered_consumption(0.5, _date, _hour)
-    assert _date not in s.model.registered_consumption.keys()
+        await s.async_add_to_consumption(0.5, _date, _hour)
+    assert _date not in s.model.consumption.keys()
 
 
 @pytest.mark.asyncio
@@ -134,7 +134,7 @@ async def test_wait_charge_same_day_onephase():
     # register the draw before charging begins
     _cons = 0.1
     for i in range(660):
-        await s.async_add_to_registered_consumption(0.5 + (_cons), _date, _hour)
+        await s.async_add_to_consumption(0.5 + (_cons), _date, _hour)
         await s.async_add_to_peaks(0.5, _date, _hour)
         if i % 60 == 0:
             _hour += 1
@@ -161,7 +161,7 @@ async def test_wait_charge_same_day_threephase():
     # register the draw before charging begins
     _cons = 0.1
     for i in range(660):
-        await s.async_add_to_registered_consumption(0.5 + (_cons), _date, _hour)
+        await s.async_add_to_consumption(0.5 + (_cons), _date, _hour)
         await s.async_add_to_peaks(0.5, _date, _hour)
         if i % 60 == 0:
             _hour += 1
@@ -191,7 +191,7 @@ async def test_wait_charge_next_day_threephase():
     _cons = 0.1
     _min = _connect_car_at.minute
     for i in range(1200):
-        await s.async_add_to_registered_consumption(0.5 + (_cons), _date, _hour)
+        await s.async_add_to_consumption(0.5 + (_cons), _date, _hour)
         await s.async_add_to_peaks(0.5, _date, _hour)
         _min += 1
         if _min == 60:
