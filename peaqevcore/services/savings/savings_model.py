@@ -20,19 +20,19 @@ class SavingsModel:
         self.status = SavingsStatus.Off
         self.prices = {}
         self.consumption = {}
-        self.peaks = {}
+        # self.peaks = {}
 
     async def async_re_initialize(self, incoming: dict):
         self.car_connected_at = incoming.get("car_connected_at", None)
         self.prices = incoming.get("prices", {})
         self.consumption = incoming.get("consumption", {})
-        self.peaks = incoming.get("peaks", {})
+        # self.peaks = incoming.get("peaks", {})
         if all(
             [
                 self.car_connected_at is not None,
                 len(self.prices) > 0,
                 len(self.consumption) > 0,
-                len(self.peaks) > 0,
+                # len(self.peaks) > 0,
             ]
         ):
             self.status = SavingsStatus.Collecting
