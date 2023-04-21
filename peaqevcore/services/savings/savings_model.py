@@ -1,4 +1,3 @@
-
 from dataclasses import dataclass, field
 from .savings_status import SavingsStatus
 from datetime import date, datetime
@@ -11,12 +10,14 @@ _LOGGER = logging.getLogger(__name__)
 @dataclass
 class SavingsModel:
     peak_price_per_kwh: float
-    car_connected_at: datetime|None = None
+    car_connected_at: datetime | None = None
     prices: dict[date, list[float]] = field(default_factory=lambda: {})
-    registered_consumption: dict[date, dict[int, float]] = field(default_factory=lambda: {})
+    registered_consumption: dict[date, dict[int, float]] = field(
+        default_factory=lambda: {}
+    )
     peaks: dict[date, dict[int, float]] = field(default_factory=lambda: {})
     status: SavingsStatus = SavingsStatus.Off
-    
+
     async def async_reset(self) -> None:
         self.status = SavingsStatus.Off
         self.prices = {}
@@ -24,60 +25,55 @@ class SavingsModel:
         self.peaks = {}
 
     async def async_re_initialize(self, incoming: dict):
-            self.car_connected_at = incoming.get("car_connected_at")
-            self.prices = incoming.get("prices", {})
-            self.registered_consumption = incoming.get("registered_consumption", {})
-            self.peaks = incoming.get("peaks", {})
-            if all([
+        self.car_connected_at = incoming.get("car_connected_at")
+        self.prices = incoming.get("prices", {})
+        self.registered_consumption = incoming.get("registered_consumption", {})
+        self.peaks = incoming.get("peaks", {})
+        if all(
+            [
                 self.car_connected_at is not None,
                 len(self.prices) > 0,
                 len(self.registered_consumption) > 0,
-                len(self.peaks) > 0
-            ]):
-                self.status = SavingsStatus.Collecting
-            else:
-                _LOGGER.warning("Cannot re-initialize SavingsModel, missing data")
+                len(self.peaks) > 0,
+            ]
+        ):
+            self.status = SavingsStatus.Collecting
+        else:
+            _LOGGER.warning("Cannot re-initialize SavingsModel, missing data")
 
-    async def async_add_prices(self, prices:list[float], _date: date|None = None) -> None:
+    async def async_add_prices(
+        self, prices: list[float], _date: date | None = None
+    ) -> None:
         if _date is None:
             _date = datetime.now().date()
         self.prices[_date] = prices
 
     async def async_add_to_registered_consumption(
-            self, 
-            registered_consumption:float, 
-            _date: date|None = None, 
-            _hour:int|None = None
-            ) -> None:
+        self,
+        registered_consumption: float,
+        _date: date | None = None,
+        _hour: int | None = None,
+    ) -> None:
         if self.status is not SavingsStatus.Collecting:
             return
         _date, _hour = await self.async_check_date_hour(_date, _hour)
         await self.async_try_add(_date, _hour, self.registered_consumption)
-        self.registered_consumption[_date][_hour] =max(
-            [
-            registered_consumption, 
-            self.registered_consumption[_date][_hour]
-            ]
-            )
+        self.registered_consumption[_date][_hour] = max(
+            [registered_consumption, self.registered_consumption[_date][_hour]]
+        )
 
     async def async_add_to_peaks(
-            self, 
-            peak:float, 
-            _date: date|None = None, 
-            _hour:int|None = None
-            ) -> None:
+        self, peak: float, _date: date | None = None, _hour: int | None = None
+    ) -> None:
         if self.status is not SavingsStatus.Collecting:
             return
         _date, _hour = await self.async_check_date_hour(_date, _hour)
         await self.async_try_add(_date, _hour, self.peaks)
-        self.peaks[_date][_hour] = max(
-            [
-            peak, 
-            self.peaks[_date][_hour]
-            ]
-            )
+        self.peaks[_date][_hour] = max([peak, self.peaks[_date][_hour]])
 
-    async def async_check_date_hour(self, _date: date|None, _hour:int|None) -> Tuple[date, int]:
+    async def async_check_date_hour(
+        self, _date: date | None, _hour: int | None
+    ) -> Tuple[date, int]:
         if _date is None:
             _date = date.today()
         if _hour is None:
