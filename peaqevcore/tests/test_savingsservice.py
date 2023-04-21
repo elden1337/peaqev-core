@@ -79,27 +79,6 @@ async def test_add_consumption_not_collecting():
 
 
 @pytest.mark.asyncio
-async def test_add_to_peak():
-    s = SavingsService(peak_price=36.25)
-    _date = datetime(2021, 3, 24).date()
-    _hour = 20
-    await s.async_start_listen()
-    for i in range(100):
-        await s.async_add_to_peaks(0.5, _date, _hour)
-    assert s.model.peaks[_date][_hour] == 0.5
-
-
-@pytest.mark.asyncio
-async def test_add_to_peak_not_collecting():
-    s = SavingsService(peak_price=36.25)
-    _date = datetime(2021, 3, 24).date()
-    _hour = 20
-    for i in range(100):
-        await s.async_add_to_peaks(0.5, _date, _hour)
-    assert _date not in s.model.peaks.keys()
-
-
-@pytest.mark.asyncio
 async def test_calculate_estimated_power_and_energy():
     s = SavingsService(peak_price=36.25)
     _connect_car_at = datetime(2023, 4, 20, 12, 00, 0)
@@ -134,8 +113,8 @@ async def test_wait_charge_same_day_onephase():
     # register the draw before charging begins
     _cons = 0.1
     for i in range(660):
-        await s.async_add_to_consumption(0.5 + (_cons), _date, _hour)
-        await s.async_add_to_peaks(0.5, _date, _hour)
+        await s.async_add_to_consumption(0.5, _date, _hour)
+        # await s.async_add_to_peaks(0.5, _date, _hour)
         if i % 60 == 0:
             _hour += 1
             _cons += 0.1
@@ -162,14 +141,14 @@ async def test_wait_charge_same_day_threephase():
     _cons = 0.1
     for i in range(660):
         await s.async_add_to_consumption(0.5 + (_cons), _date, _hour)
-        await s.async_add_to_peaks(0.5, _date, _hour)
+        # await s.async_add_to_peaks(0.5, _date, _hour)
         if i % 60 == 0:
             _hour += 1
             _cons += 0.1
     # this should come from session-service later, but i need to add per hour there as well.
     _mock_charge_draw = {_connect_car_at.date(): {21: 5.2, 22: 5.2, 23: 4.6}}
     await s.async_register_charge_session(_mock_charge_draw, _original_peak)
-    assert s.savings_peak == 116
+    assert s.savings_peak == 155.88
     assert s.savings_trade == 2.38
     # finalize
     await s.async_stop_listen()
@@ -192,7 +171,7 @@ async def test_wait_charge_next_day_threephase():
     _min = _connect_car_at.minute
     for i in range(1200):
         await s.async_add_to_consumption(0.5 + (_cons), _date, _hour)
-        await s.async_add_to_peaks(0.5, _date, _hour)
+        # await s.async_add_to_peaks(0.5, _date, _hour)
         _min += 1
         if _min == 60:
             _min = 0
@@ -208,7 +187,7 @@ async def test_wait_charge_next_day_threephase():
         (_connect_car_at + timedelta(days=1)).date(): {2: 5.2, 3: 5.2, 4: 5, 5: 3},
     }
     await s.async_register_charge_session(_mock_charge_draw, _original_peak)
-    assert s.savings_peak == 116
+    assert s.savings_peak == 174
     assert s.savings_trade == 14.89
     # finalize
     await s.async_stop_listen()

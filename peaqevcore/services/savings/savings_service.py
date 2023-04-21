@@ -91,13 +91,13 @@ class SavingsService:
             return ret
         observed_peak = original_peak
         for key, value in charge_session.items():
-            peaks = self.model.peaks.get(key, None)
+            peaks = self.model.consumption.get(key, None)
             if peaks is None:
                 raise Exception
             for hour, energy in value.items():
-                if energy + self.model.peaks[key][hour] > observed_peak:
-                    ret = energy + self.model.peaks[key][hour]
-                    observed_peak = energy + self.model.peaks[key][hour]
+                if energy + self.model.consumption[key][hour] > observed_peak:
+                    ret = energy + self.model.consumption[key][hour]
+                    observed_peak = energy + self.model.consumption[key][hour]
         diff = ret - original_peak
         if diff < 0:
             return 0
