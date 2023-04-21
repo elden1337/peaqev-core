@@ -11,6 +11,10 @@ class SavingsService:
         self._savings_trade = 0
 
     @property
+    def status(self) -> SavingsStatus:
+        return self.model.status
+
+    @property
     def savings_peak(self) -> float:
         return self._savings_peak
 
@@ -29,6 +33,14 @@ class SavingsService:
     @property
     def savings_total(self) -> float:
         return sum([self.savings_peak, self.savings_trade])
+
+    async def async_export_data(self) -> dict:
+        return {
+            "car_connected_at": self.model.car_connected_at,
+            "prices": self.model.prices,
+            "registered_consumption": self.model.registered_consumption,
+            "peaks": self.model.peaks,
+        }
 
     async def async_start_listen(self, connected_at: datetime | None = None) -> None:
         if connected_at is None:

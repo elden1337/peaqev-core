@@ -51,23 +51,23 @@ class SavingsModel:
     async def async_add_to_registered_consumption(
         self,
         registered_consumption: float,
-        _date: date | None = None,
-        _hour: int | None = None,
+        date: date | None = None,
+        hour: int | None = None,
     ) -> None:
         if self.status is not SavingsStatus.Collecting:
             return
-        _date, _hour = await self.async_check_date_hour(_date, _hour)
+        _date, _hour = await self.async_check_date_hour(date, hour)
         await self.async_try_add(_date, _hour, self.registered_consumption)
         self.registered_consumption[_date][_hour] = max(
             [registered_consumption, self.registered_consumption[_date][_hour]]
         )
 
     async def async_add_to_peaks(
-        self, peak: float, _date: date | None = None, _hour: int | None = None
+        self, peak: float, date: date | None = None, hour: int | None = None
     ) -> None:
         if self.status is not SavingsStatus.Collecting:
             return
-        _date, _hour = await self.async_check_date_hour(_date, _hour)
+        _date, _hour = await self.async_check_date_hour(date, hour)
         await self.async_try_add(_date, _hour, self.peaks)
         self.peaks[_date][_hour] = max([peak, self.peaks[_date][_hour]])
 
