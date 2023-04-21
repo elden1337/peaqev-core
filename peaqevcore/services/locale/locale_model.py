@@ -15,10 +15,8 @@ class Locale_Type:
     price: LocalePrice = None
     free_charge_pattern: TimePattern = None
     peak_cycle: TimePeriods = TimePeriods.Hourly
-    is_quarterly: bool = field(init=False, repr=False)
-    
 
-    def free_charge(self, mockdt: datetime=datetime.min) -> bool:
+    def free_charge(self, mockdt: datetime = datetime.min) -> bool:
         if self.free_charge_pattern is None:
             return False
         now = datetime.now() if mockdt is datetime.min else mockdt
