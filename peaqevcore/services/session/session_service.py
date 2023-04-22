@@ -9,7 +9,7 @@ import logging
 _LOGGER = logging.getLogger(__name__)
 
 
-class SessionPrice:
+class SessionService:
     def __init__(self) -> None:
         self.model = SessionModel()
         self.average_data = EnergyWeekly()

@@ -1,4 +1,4 @@
-from ..services.session.session_price import SessionPrice
+from ..services.session.session_service import SessionService
 
 import pytest
 from datetime import datetime
@@ -6,7 +6,7 @@ from datetime import datetime
 
 @pytest.mark.asyncio
 async def test_session_fluctuate():
-    s = SessionPrice()
+    s = SessionService()
     timer = 1651607299
     await s.async_setup(mock_time=timer)
     await s.async_update_price(0.6, timer)
@@ -22,7 +22,7 @@ async def test_session_fluctuate():
 
 @pytest.mark.asyncio
 async def test_session_fluctuate_tenfold():
-    s = SessionPrice()
+    s = SessionService()
     timer = 1651607299
     await s.async_setup(mock_time=timer)
     await s.async_update_price(6, timer)
@@ -38,7 +38,7 @@ async def test_session_fluctuate_tenfold():
 
 @pytest.mark.asyncio
 async def test_session_split_price():
-    s = SessionPrice()
+    s = SessionService()
     timer = 1651607299
     await s.async_setup(mock_time=timer)
     await s.async_update_price(2, timer)
@@ -56,7 +56,7 @@ async def test_session_split_price():
 
 @pytest.mark.asyncio
 async def test_session_full_hour():
-    s = SessionPrice()
+    s = SessionService()
     timer = 1651607299
     await s.async_setup(mock_time=timer)
     await s.async_update_price(1, timer)
@@ -70,7 +70,7 @@ async def test_session_full_hour():
 
 @pytest.mark.asyncio
 async def test_session_full_hour_no_price():
-    s = SessionPrice()
+    s = SessionService()
     timer = 1651607299
     await s.async_setup(mock_time=timer)
     await s.async_update_power_reading(1000, timer)
@@ -82,7 +82,7 @@ async def test_session_full_hour_no_price():
 
 @pytest.mark.asyncio
 async def test_session_half_hour():
-    s = SessionPrice()
+    s = SessionService()
     timer = 1651607299
     await s.async_setup(mock_time=timer)
     await s.async_update_price(1, timer)
@@ -96,7 +96,7 @@ async def test_session_half_hour():
 
 @pytest.mark.asyncio
 async def test_session_with_zero_periods():
-    s = SessionPrice()
+    s = SessionService()
     timer = 1651607299
     await s.async_setup(mock_time=timer)
     await s.async_update_price(2, timer)
@@ -120,7 +120,7 @@ async def test_session_with_zero_periods():
 
 @pytest.mark.asyncio
 async def test_session_with_zero_periods_price_update_in_between():
-    s = SessionPrice()
+    s = SessionService()
     timer = 1651607299
     await s.async_setup(mock_time=timer)
     await s.async_update_price(2, timer)
@@ -144,7 +144,7 @@ async def test_session_with_zero_periods_price_update_in_between():
 
 @pytest.mark.asyncio
 async def test_session_get_status():
-    s = SessionPrice()
+    s = SessionService()
     timer = 1651607299
     await s.async_setup(mock_time=timer)
     await s.async_update_price(2, timer)
@@ -174,7 +174,7 @@ async def test_session_get_status():
 
 @pytest.mark.asyncio
 async def test_session_get_statistics():
-    s = SessionPrice()
+    s = SessionService()
     timer = 1651607299
     await s.async_setup(mock_time=timer)
     await s.async_update_price(2, timer)
