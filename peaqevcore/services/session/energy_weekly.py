@@ -5,6 +5,7 @@ import time
 
 _LOGGER = logging.getLogger(__name__)
 
+
 @dataclass
 class Day:
     sessions: int
@@ -12,18 +13,19 @@ class Day:
 
 
 class EnergyWeekly:
-    model: dict[int, Day]
+    def __init__(self):
+        self.model: dict[int, Day] = {}
 
-    def __init__(self, incoming_dict: dict = None):
+    async def async_setup(self, incoming_dict: dict | None = None):
         if incoming_dict is not None:
-            self.unpack(incoming_dict)
+            await self.async_unpack(incoming_dict)
         else:
-            self.set_init_model()
+            await self.async_set_init_model()
 
-    def set_init_model(self):
+    async def async_set_init_model(self):
         ret = {}
-        for i in range(0,7):
-            ret[i] = Day(0,0)
+        for i in range(0, 7):
+            ret[i] = Day(0, 0)
         self.model = ret
 
     @property
@@ -31,10 +33,7 @@ class EnergyWeekly:
         "export the model to HA-friendly states"
         ret = {}
         for idx, m in self.model.items():
-            m_ret = {
-                "sessions": m.sessions,
-                "total_charge": m.charge
-            }
+            m_ret = {"sessions": m.sessions, "total_charge": m.charge}
             ret[idx] = m_ret
         return ret
 
@@ -44,11 +43,11 @@ class EnergyWeekly:
         charge = sum([h.charge for h in self.model.values()])
         ret = 0.0
         try:
-            ret = charge/sessions
+            ret = charge / sessions
         except:
             _LOGGER.debug(f"Could not calculate average")
-        return round(ret,1)
-        
+        return round(ret, 1)
+
     @property
     def total_sessions(self) -> int:
         try:
@@ -56,7 +55,7 @@ class EnergyWeekly:
         except:
             _LOGGER.debug("could not retreive sessions.")
             return 0
-        
+
     @property
     def total_charge(self) -> float:
         try:
@@ -65,30 +64,31 @@ class EnergyWeekly:
             _LOGGER.debug("could not retreive total charge")
             return 0.0
 
-    def unpack(self, incoming: dict) -> dict[int, Day]:
+    async def async_unpack(self, incoming: dict) -> dict[int, Day] | None:
         if isinstance(incoming, dict) and len(incoming):
             model = {}
-            for i in range(0,7):
+            for i in range(0, 7):
                 if i in incoming.keys():
-                    m_ret = Day(incoming[i]["sessions"], incoming[i]["total_charge"])    
+                    m_ret = Day(incoming[i]["sessions"], incoming[i]["total_charge"])
                 else:
-                    m_ret = Day(0,0)
+                    m_ret = Day(0, 0)
                 model[i] = m_ret
             self.model = model
-        else: 
-            return self.set_init_model()
+        else:
+            return await self.async_set_init_model()
 
-    def update(self, _charge:float, mock_time: int = None):
-        timer = mock_time if mock_time is not None else time.time()
+    async def async_update(self, _charge: float, mock_time: float | None = None):
+        timer = mock_time or time.time()
         if _charge > 0:
             self.model[datetime.fromtimestamp(timer).weekday()].charge += _charge
             self.model[datetime.fromtimestamp(timer).weekday()].sessions += 1
 
-    def average_for_day(self, day: int) -> float:
+    async def async_average_for_day(self, day: int) -> float:
         try:
-            return self.model[day].charge/self.model[day].sessions
+            return self.model[day].charge / self.model[day].sessions
         except:
             return 0.0
+
 
 # EXAMPLE = {
 #     0: Day(1,50),

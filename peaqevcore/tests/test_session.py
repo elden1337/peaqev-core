@@ -1,183 +1,198 @@
-from ..services.session.session import SessionPrice
+from ..services.session.session_price import SessionPrice
+
 import pytest
 from datetime import datetime
 
-def test_session_fluctuate():
-    s = SessionPrice()
-    timer = 1651607299
-    s._set_delta(timer)
-    s.update_price(0.6, timer)
-    s.update_power_reading(6000, timer)    
-    timer += 1200
-    s.update_price(0.3, timer)
-    s.update_power_reading(3000, timer)    
-    timer += 1200    
-    s.terminate(timer)
-    assert s.total_energy == 3
-    assert round(s.total_price,4) == 1.5
 
-def test_session_fluctuate_tenfold():
+@pytest.mark.asyncio
+async def test_session_fluctuate():
     s = SessionPrice()
     timer = 1651607299
-    s._set_delta(timer)
-    s.update_price(6, timer)
-    s.update_power_reading(6000, timer)    
+    await s.async_setup(mock_time=timer)
+    await s.async_update_price(0.6, timer)
+    await s.async_update_power_reading(6000, timer)
     timer += 1200
-    s.update_price(3, timer)
-    s.update_power_reading(3000, timer)    
-    timer += 1200    
-    s.terminate(timer)
+    await s.async_update_price(0.3, timer)
+    await s.async_update_power_reading(3000, timer)
+    timer += 1200
+    await s.async_terminate(timer)
     assert s.total_energy == 3
-    assert round(s.total_price,4) == 15
+    assert round(s.total_price, 4) == 1.5
 
-def test_session_split_price():
+
+@pytest.mark.asyncio
+async def test_session_fluctuate_tenfold():
     s = SessionPrice()
     timer = 1651607299
-    s._set_delta(timer)
-    s.update_price(2, timer)
-    s.update_power_reading(2000, timer)
+    await s.async_setup(mock_time=timer)
+    await s.async_update_price(6, timer)
+    await s.async_update_power_reading(6000, timer)
+    timer += 1200
+    await s.async_update_price(3, timer)
+    await s.async_update_power_reading(3000, timer)
+    timer += 1200
+    await s.async_terminate(timer)
+    assert s.total_energy == 3
+    assert round(s.total_price, 4) == 15
+
+
+@pytest.mark.asyncio
+async def test_session_split_price():
+    s = SessionPrice()
+    timer = 1651607299
+    await s.async_setup(mock_time=timer)
+    await s.async_update_price(2, timer)
+    await s.async_update_power_reading(2000, timer)
     timer += 900
-    s.update_price(3, timer)
+    await s.async_update_price(3, timer)
     timer += 900
-    s.update_power_reading(1000, timer)
+    await s.async_update_power_reading(1000, timer)
     timer += 1800
-    s.terminate(timer)
+    await s.async_terminate(timer)
 
     assert s.total_energy == 1.5
     assert s.total_price == 4
 
 
-def test_session_full_hour():
+@pytest.mark.asyncio
+async def test_session_full_hour():
     s = SessionPrice()
     timer = 1651607299
-    s._set_delta(timer)
-    s.update_price(1, timer)
-    s.update_power_reading(1000, timer)
+    await s.async_setup(mock_time=timer)
+    await s.async_update_price(1, timer)
+    await s.async_update_power_reading(1000, timer)
     timer += 3600
-    s.update_power_reading(1000, timer)
-    s.terminate(timer)
+    await s.async_update_power_reading(1000, timer)
+    await s.async_terminate(timer)
     assert s.total_energy == 1
     assert s.total_price == 1
 
-def test_session_full_hour_no_price():
+
+@pytest.mark.asyncio
+async def test_session_full_hour_no_price():
     s = SessionPrice()
     timer = 1651607299
-    s._set_delta(timer)
-    s.update_power_reading(1000, timer)
+    await s.async_setup(mock_time=timer)
+    await s.async_update_power_reading(1000, timer)
     timer += 3600
-    s.update_power_reading(1000, timer)
-    #s.terminate(timer)
+    await s.async_update_power_reading(1000, timer)
+    # await s.async_terminate(timer)
     assert s.total_energy == 1
 
-def test_session_half_hour():
+
+@pytest.mark.asyncio
+async def test_session_half_hour():
     s = SessionPrice()
     timer = 1651607299
-    s._set_delta(timer)
-    s.update_price(1, timer)
-    s.update_power_reading(1000, timer)
+    await s.async_setup(mock_time=timer)
+    await s.async_update_price(1, timer)
+    await s.async_update_power_reading(1000, timer)
     timer += 1800
-    s.update_power_reading(1000, timer)
-    s.terminate(timer)
+    await s.async_update_power_reading(1000, timer)
+    await s.async_terminate(timer)
     assert s.total_energy == 0.5
     assert s.total_price == 0.5
 
-def test_session_with_zero_periods():
+
+@pytest.mark.asyncio
+async def test_session_with_zero_periods():
     s = SessionPrice()
     timer = 1651607299
-    s._set_delta(timer)
-    s.update_price(2, timer)
-    s.update_power_reading(4000, timer)
+    await s.async_setup(mock_time=timer)
+    await s.async_update_price(2, timer)
+    await s.async_update_power_reading(4000, timer)
     timer += 900
-     #2kr
-    s.update_power_reading(0, timer) 
+    # 2kr
+    await s.async_update_power_reading(0, timer)
     timer += 900
-     #2kr
-    s.update_price(3, timer)
+    # 2kr
+    await s.async_update_price(3, timer)
     timer += 900
-     #2kr
-    s.update_power_reading(1000, timer)
+    # 2kr
+    await s.async_update_power_reading(1000, timer)
     timer += 1800
-     #3.5kr
-    s.terminate(timer)
+    # 3.5kr
+    await s.async_terminate(timer)
 
     assert s.total_energy == 1.5
     assert s.total_price == 3.5
 
-def test_session_with_zero_periods_price_update_in_between():
+
+@pytest.mark.asyncio
+async def test_session_with_zero_periods_price_update_in_between():
     s = SessionPrice()
     timer = 1651607299
-    s._set_delta(timer)
-    s.update_price(2, timer)
-    s.update_power_reading(4000, timer)
+    await s.async_setup(mock_time=timer)
+    await s.async_update_price(2, timer)
+    await s.async_update_power_reading(4000, timer)
     timer += 900
-     #2kr
-    s.update_price(3, timer)
+    # 2kr
+    await s.async_update_price(3, timer)
     timer += 900
-    #5kr
-    s.update_power_reading(0, timer) 
+    # 5kr
+    await s.async_update_power_reading(0, timer)
     timer += 900
-     #5kr
-    s.update_power_reading(1000, timer)
+    # 5kr
+    await s.async_update_power_reading(1000, timer)
     timer += 1800
-     #6.5kr
-    s.terminate(timer)
+    # 6.5kr
+    await s.async_terminate(timer)
 
     assert s.total_energy == 2.5
     assert s.total_price == 6.5
 
-def test_session_get_status():
+
+@pytest.mark.asyncio
+async def test_session_get_status():
     s = SessionPrice()
     timer = 1651607299
-    s._set_delta(timer)
-    s.update_price(2, timer)
-    s.update_power_reading(4000, timer)
+    await s.async_setup(mock_time=timer)
+    await s.async_update_price(2, timer)
+    await s.async_update_power_reading(4000, timer)
     timer += 900
-    status = s.get_status()
+    status = await s.async_get_status()
     assert status["price"] == 0
-    s.update_price(3, timer)
+    await s.async_update_price(3, timer)
     timer += 900
-    status = s.get_status()
+    status = await s.async_get_status()
     assert status["price"] == 2
-    s.update_power_reading(0, timer) 
+    await s.async_update_power_reading(0, timer)
     timer += 900
-    status = s.get_status()
+    status = await s.async_get_status()
     assert status["price"] == 5
-     #5kr
-    s.update_power_reading(1000, timer)
+    # 5kr
+    await s.async_update_power_reading(1000, timer)
     timer += 1800
-    status = s.get_status()
+    status = await s.async_get_status()
     assert status["price"] == 5
     assert status["energy"]["value"] == 2
-    s.terminate(timer)
+    await s.async_terminate(timer)
 
     assert s.total_energy == 2.5
     assert s.total_price == 6.5
 
 
-def test_session_get_statistics():
+@pytest.mark.asyncio
+async def test_session_get_statistics():
     s = SessionPrice()
     timer = 1651607299
-    s._set_delta(timer)
-    s.update_price(2, timer)
-    s.update_power_reading(4000, timer)
+    await s.async_setup(mock_time=timer)
+    await s.async_update_price(2, timer)
+    await s.async_update_power_reading(4000, timer)
     timer += 900
-    status = s.get_status()
-    s.update_price(3, timer)
+    status = await s.async_get_status()
+    await s.async_update_price(3, timer)
     timer += 900
-    status = s.get_status()
-    s.update_power_reading(0, timer) 
+    status = await s.async_get_status()
+    await s.async_update_power_reading(0, timer)
     timer += 900
-    status = s.get_status()
-    s.update_power_reading(1000, timer)
+    status = await s.async_get_status()
+    await s.async_update_power_reading(1000, timer)
     timer += 1800
-    status = s.get_status()
+    status = await s.async_get_status()
     assert status["energy"]["value"] == 2
-    s.terminate(timer)
+    await s.async_terminate(timer)
     assert s.total_energy == 2.5
     assert s.average_data.average == 2.5
     export = s.average_data.export
-    assert export[datetime.fromtimestamp(timer).weekday()]['total_charge'] == 2.5
-    
-
-
-
+    assert export[datetime.fromtimestamp(timer).weekday()]["total_charge"] == 2.5
