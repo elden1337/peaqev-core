@@ -39,7 +39,7 @@ class SavingsService:
             "car_connected_at": self.model.car_connected_at,
             "prices": self.model.prices,
             "consumption": self.model.consumption,
-            "peaks": self.model.peaks,
+            # "peaks": self.model.peaks,
         }
 
     async def async_start_listen(self, connected_at: datetime | None = None) -> None:

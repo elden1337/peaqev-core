@@ -1,6 +1,6 @@
-from ...PeaqErrors import PeaqKeyError, PeaqValueError
 from dataclasses import dataclass
 from datetime import datetime
+
 
 @dataclass
 class PeaksModel:
@@ -8,7 +8,7 @@ class PeaksModel:
     _m: int = 0
     _is_dirty: bool = False
 
-    async def async_set_init_dict(self, dict_data:dict, dt=datetime.now()) -> None:
+    async def async_set_init_dict(self, dict_data: dict, dt=datetime.now()) -> None:
         ppdict = dict()
         self._m = dict_data.get("m")
         if dt.month != self.m:
@@ -21,12 +21,12 @@ class PeaksModel:
             if len(self._p):
                 self._p = dict(self._p.items() | ppdict.items())
                 print(f"new existing: {self._p}")
-            else: 
+            else:
                 self._p = ppdict
             self._m = dict_data.get("m")
             self.is_dirty = True
 
-    def set_init_dict(self, dict_data:dict, dt=datetime.now()) -> None:
+    def set_init_dict(self, dict_data: dict, dt=datetime.now()) -> None:
         ppdict = dict()
         self._m = dict_data.get("m")
         if dt.month != self.m:
@@ -39,7 +39,7 @@ class PeaksModel:
             if len(self._p):
                 self._p = dict(self._p.items() | ppdict.items())
                 print(f"new existing: {self._p}")
-            else: 
+            else:
                 self._p = ppdict
             self._m = dict_data.get("m")
             self.is_dirty = True
@@ -53,10 +53,10 @@ class PeaksModel:
             self._p[key] = value
             return self._p
         except KeyError:
-            raise PeaqKeyError(f"Invalid key '{key}'")
+            raise Exception(f"Invalid key '{key}'")
         except ValueError:
-            raise PeaqValueError(f"Invalid value '{value}'")
-            
+            raise Exception(f"Invalid value '{value}'")
+
     @property
     def m(self) -> int:
         return self._m
@@ -78,9 +78,7 @@ class PeaksModel:
     def export_peaks(self) -> dict:
         return {
             "m": self._m,
-            "p": dict(
-                [(f"{pp[0]}h{pp[1]}", self._p.get(pp)) for pp in self._p]
-                )
+            "p": dict([(f"{pp[0]}h{pp[1]}", self._p.get(pp)) for pp in self._p]),
         }
 
     @property
@@ -107,8 +105,8 @@ class PeaksModel:
                 self._p.pop(key)
                 return self._p
             except KeyError:
-                raise PeaqValueError(f"Key '{key}' does not exist.")
-        raise PeaqValueError("Expected key but received none.")
+                raise Exception(f"Key '{key}' does not exist.")
+        raise Exception("Expected key but received none.")
 
     def reset(self) -> None:
         self._m = datetime.now().month
