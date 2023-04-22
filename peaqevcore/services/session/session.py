@@ -16,7 +16,7 @@ class Session:
     def session_energy(self):
         return self.service.total_energy
 
-    async def async_update_session_energy(self, val):
+    async def async_set_session_energy(self, val):
         await self.service.async_update_power_reading(val)
         await self.async_update_session_pricing()
 
