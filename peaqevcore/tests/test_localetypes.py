@@ -43,7 +43,7 @@ async def test_SE_Bjerke_Energi():
 @pytest.mark.asyncio
 async def test_generic_querytype_avg_threedays():
     pt = QUERYTYPES[QueryType.AverageOfThreeDays]
-    pt.reset()
+    await pt.async_reset()
     await pt.async_try_update(
         new_val=1.2, timestamp=datetime.combine(date(2022, 7, 14), time(20, 30))
     )
@@ -51,7 +51,7 @@ async def test_generic_querytype_avg_threedays():
         new_val=2, timestamp=datetime.combine(date(2022, 7, 14), time(21, 30))
     )
     to_state_machine = pt.peaks.export_peaks
-    pt.peaks.set_init_dict(
+    await pt.peaks.async_set_init_dict(
         dict_data=to_state_machine, dt=datetime.combine(date(2022, 7, 14), time(23, 30))
     )
     await pt.async_try_update(
@@ -65,7 +65,7 @@ async def test_generic_querytype_avg_threedays():
 @pytest.mark.asyncio
 async def test_generic_querytype_avg_threedays2():
     pg = QUERYTYPES[QueryType.AverageOfThreeDays]
-    pg.reset()
+    await pg.async_reset()
     await pg.async_try_update(
         new_val=1.2, timestamp=datetime.combine(date(2022, 7, 14), time(20, 30))
     )
@@ -81,11 +81,11 @@ async def test_generic_querytype_avg_threedays2():
 async def test_generic_querytype_avg_threedays3():
     to_state_machine = {"m": 7, "p": {"14h21": 2}}
     p1 = QUERYTYPES[QueryType.AverageOfThreeDays]
-    p1.reset()
+    await p1.async_reset()
     await p1.async_try_update(
         new_val=1, timestamp=datetime.combine(date(2022, 7, 15), time(21, 30))
     )
-    p1.peaks.set_init_dict(
+    await p1.peaks.async_set_init_dict(
         to_state_machine, datetime.combine(date(2022, 7, 15), time(21, 30))
     )
     assert len(p1.peaks.p) == 2
@@ -107,11 +107,11 @@ async def test_faulty_number_in_import():
         "p": {"14h21": 2, "11h22": 1.49, "12h9": 1.93, "12h14": 0.73},
     }
     p1 = QUERYTYPES[QueryType.AverageOfThreeDays]
-    p1.reset()
+    await p1.async_reset()
     await p1.async_try_update(
         new_val=1, timestamp=datetime.combine(date(2022, 7, 15), time(21, 30))
     )
-    p1.peaks.set_init_dict(
+    await p1.peaks.async_set_init_dict(
         to_state_machine, datetime.combine(date(2022, 7, 15), time(21, 30))
     )
     assert len(p1.peaks.p) == 3
@@ -130,11 +130,11 @@ async def test_faulty_number_in_import():
 async def test_overridden_number_in_import():
     to_state_machine = {"m": 7, "p": {"11h22": 1.49, "12h9": 1.93, "13h16": 0.86}}
     p1 = QUERYTYPES[QueryType.AverageOfThreeDays]
-    p1.reset()
+    await p1.async_reset()
     await p1.async_try_update(
         new_val=0.22, timestamp=datetime.combine(date(2022, 7, 13), time(21, 30))
     )
-    p1.peaks.set_init_dict(
+    await p1.peaks.async_set_init_dict(
         to_state_machine, datetime.combine(date(2022, 7, 13), time(21, 30))
     )
     assert p1.charged_peak == 1.43
@@ -299,11 +299,11 @@ async def test_peak_new_hour_multiple():
 async def test_overridden_number_in_import_2():
     to_state_machine = {"m": 7, "p": {"1h15": 1.5}}
     p1 = QUERYTYPES[QueryType.AverageOfThreeDays]
-    p1.reset()
+    await p1.async_reset()
     await p1.async_try_update(
         new_val=0.22, timestamp=datetime.combine(date(2022, 7, 2), time(15, 30))
     )
-    p1.peaks.set_init_dict(
+    await p1.peaks.async_set_init_dict(
         to_state_machine, datetime.combine(date(2022, 7, 2), time(15, 30))
     )
     assert len(p1.peaks.p) == 2
