@@ -1,27 +1,43 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .locale_model import Locale_Type
+
 from .countries.default import Default, NoPeak
 from .countries.belgium import VregBelgium
 from .countries.sweden import (
     SE_Bjerke_Energi,
-    SE_FalbygdensEnergi, 
-    SE_Gothenburg, 
-    SE_Karlstad, 
-    SE_Kristinehamn, 
-    SE_Linde_Energi, 
-    SE_Malarenergi, 
-    SE_Malung_Salen, 
-    SE_Nacka_normal, 
-    SE_NACKA_timediff, 
-    SE_Partille, 
-    SE_SHE_AB, 
-    SE_Skovde, 
+    SE_FalbygdensEnergi,
+    SE_Gothenburg,
+    SE_Karlstad,
+    SE_Kristinehamn,
+    SE_Linde_Energi,
+    SE_Malarenergi,
+    SE_Malung_Salen,
+    SE_Nacka_normal,
+    SE_NACKA_timediff,
+    SE_Partille,
+    SE_SHE_AB,
+    SE_Skovde,
     SE_Sollentuna,
     SE_TekniskaVerken_Link,
     SE_Eskilstuna,
     SE_Ellevio,
-    SE_JBF
-    #SE_Telge_Energi
-    )
-from .countries.norway import NO_AgderEnergi, NO_Elvia, NO_GlitreEnergi, NO_LNett, NO_Lede, NO_Mellom, NO_Tensio, NO_BKK, NO_AskerNett
+    SE_JBF,
+    # SE_Telge_Energi
+)
+from .countries.norway import (
+    NO_AgderEnergi,
+    NO_Elvia,
+    NO_GlitreEnergi,
+    NO_LNett,
+    NO_Lede,
+    NO_Mellom,
+    NO_Tensio,
+    NO_BKK,
+    NO_AskerNett,
+)
 
 
 """LOCALETYPES"""
@@ -30,7 +46,7 @@ LOCALE_SE_GOTHENBURG = "Gothenburg, Sweden"
 LOCALE_SE_KARLSTAD = "Karlstad, Sweden"
 LOCALE_SE_KRISTINEHAMN = "Kristinehamn, Sweden"
 LOCALE_SE_NACKA_NORMAL = "Nacka, Sweden (Normal tariffe)"
-#LOCALE_SE_NACKA_TIMEDIFF = "Nacka, Sweden (Time differentiated tariffe)"
+# LOCALE_SE_NACKA_TIMEDIFF = "Nacka, Sweden (Time differentiated tariffe)"
 LOCALE_SE_PARTILLE = "Partille, Sweden"
 LOCALE_DEFAULT = "Other, just want to test"
 LOCALE_NO_PEAK = "No peak shaving needed"
@@ -85,7 +101,7 @@ LOCALETYPEDICT = {
     LOCALE_NO_MELLOM: NO_Mellom,
     LOCALE_NO_ASKER: NO_AskerNett,
     LOCALE_SE_ELLEVIO: SE_Ellevio,
-    LOCALE_SE_JBF: SE_JBF
+    LOCALE_SE_JBF: SE_JBF,
 }
 
 """Lookup locales for config flow"""
@@ -116,21 +132,34 @@ LOCALES = [
     LOCALE_SE_SOLLENTUNA,
     LOCALE_SE_TEKNISKA_LINK,
     LOCALE_DEFAULT,
-    LOCALE_NO_PEAK
-    ]
+    LOCALE_NO_PEAK,
+]
 
 
 class LocaleData:
-    def __init__(self, input_type:str, domain:str):
-        self._data = None
+    def __init__(self, input_type: str, domain: str):
         self._type = input_type
         self._domain = domain
-        self._data = LOCALETYPEDICT[input_type]
+        self._data: Locale_Type = LOCALETYPEDICT[input_type]()
 
     @property
     def type(self) -> str:
         return self._type
 
     @property
-    def data(self):
+    def data(self) -> Locale_Type:
         return self._data
+
+    async def async_try_update_peak(self, new_val, timestamp):
+        """Try to update peak data."""
+        if self._data is not None:
+            await self._data.query_model.async_try_update(new_val, timestamp)
+
+
+class LocaleFactory:
+    @staticmethod
+    async def async_create(input_type: str, domain: str = "peaqev"):
+        """Create a locale object."""
+        ret = LocaleData(input_type, domain)
+        await ret.data.async_set_query_service()
+        return ret

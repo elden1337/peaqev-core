@@ -18,12 +18,12 @@ from dataclasses import dataclass
 from ..locale_model import Locale_Type
 
 
-@dataclass(frozen=True)
+@dataclass
 class SE_Sollentuna(Locale_Type):
     observed_peak = QueryType.AverageOfThreeHours
     charged_peak = QueryType.AverageOfThreeHours
     query_model = QUERYTYPES[QueryType.AverageOfThreeHours]
-    query_model.set_query_service(QueryService(QUERYSETS[QUERYTYPE_SOLLENTUNA]))
+    query_service = QueryService(QUERYSETS[QUERYTYPE_SOLLENTUNA])
 
     free_charge_pattern = TimePattern(
         [
@@ -45,14 +45,12 @@ class SE_Sollentuna(Locale_Type):
     # https://www.seom.se/el/elnat/2022-ars-priser-och-villkor/
 
 
-@dataclass(frozen=True)
+@dataclass
 class SE_Skovde(Locale_Type):
     observed_peak = QueryType.Max
     charged_peak = QueryType.Max
     query_model = QUERYTYPES[QueryType.Max]
-    query_model.set_query_service(
-        QueryService(QUERYSETS[QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22])
-    )
+    query_service = QueryService(QUERYSETS[QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22])
 
     free_charge_pattern = TimePattern(
         [
@@ -73,14 +71,12 @@ class SE_Skovde(Locale_Type):
     # single peak i denna period månadsvis.
 
 
-@dataclass(frozen=True)
+@dataclass
 class SE_SHE_AB(Locale_Type):
     observed_peak = QueryType.AverageOfThreeHours
     charged_peak = QueryType.AverageOfThreeHours
     query_model = QUERYTYPES[QueryType.AverageOfThreeHours]
-    query_model.set_query_service(
-        QueryService(QUERYSETS[QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19])
-    )
+    query_service = QueryService(QUERYSETS[QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19])
 
     free_charge_pattern = TimePattern(
         [
@@ -104,7 +100,7 @@ class SE_SHE_AB(Locale_Type):
     """
 
 
-@dataclass(frozen=True)
+@dataclass
 class SE_Partille(Locale_Type):
     observed_peak = QueryType.Max
     charged_peak = QueryType.Max
@@ -112,14 +108,14 @@ class SE_Partille(Locale_Type):
     price = LocalePrice(price_type=PriceType.Static, value=29.5, currency="SEK")
 
 
-@dataclass(frozen=True)
+@dataclass
 class SE_FalbygdensEnergi(Locale_Type):
     observed_peak = QueryType.Max
     charged_peak = QueryType.Max
     query_model = QUERYTYPES[QueryType.Max]
 
 
-@dataclass(frozen=True)
+@dataclass
 class SE_Nacka_normal(Locale_Type):
     observed_peak = QueryType.AverageOfThreeHours
     charged_peak = QueryType.AverageOfThreeHours
@@ -128,7 +124,7 @@ class SE_Nacka_normal(Locale_Type):
     # https://www.nackaenergi.se/images/downloads/natavgifter/FAQ_NYA_TARIFFER.pdf
 
 
-@dataclass(frozen=True)
+@dataclass
 class SE_NACKA_timediff(Locale_Type):
     pass
 
@@ -136,7 +132,7 @@ class SE_NACKA_timediff(Locale_Type):
     # https://www.nackaenergi.se/images/downloads/natavgifter/FAQ_NYA_TARIFFER.pdf
 
 
-@dataclass(frozen=True)
+@dataclass
 class SE_Malung_Salen(Locale_Type):
     observed_peak = QueryType.AverageOfFiveDays
     charged_peak = QueryType.AverageOfFiveDays
@@ -155,7 +151,7 @@ class SE_Malung_Salen(Locale_Type):
     # Rörlig avgift vinter november – mars 118,75 kr/kW
 
 
-@dataclass(frozen=True)
+@dataclass
 class SE_Linde_Energi(Locale_Type):
     observed_peak = QueryType.Max
     charged_peak = QueryType.Max
@@ -169,13 +165,13 @@ class SE_Linde_Energi(Locale_Type):
     """
 
 
-@dataclass(frozen=True)
+@dataclass
 class SE_Kristinehamn(Locale_Type):
     observed_peak = QueryType.Max
     charged_peak = QueryType.Max
     query_model = QUERYTYPES[QueryType.Max]
-    query_model.set_query_service(
-        QueryService(QUERYSETS[QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR])
+    query_service = QueryService(
+        QUERYSETS[QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR]
     )
 
     """
@@ -184,7 +180,7 @@ class SE_Kristinehamn(Locale_Type):
     """
 
 
-@dataclass(frozen=True)
+@dataclass
 class SE_Karlstad(Locale_Type):
     observed_peak = QueryType.Max  # todo check if correct
     charged_peak = QueryType.Max  # todo check if correct
@@ -196,7 +192,7 @@ class SE_Karlstad(Locale_Type):
     """
 
 
-@dataclass(frozen=True)
+@dataclass
 class SE_Gothenburg(Locale_Type):
     observed_peak = QueryType.AverageOfThreeDays
     charged_peak = QueryType.AverageOfThreeDays
@@ -204,7 +200,7 @@ class SE_Gothenburg(Locale_Type):
     price = LocalePrice(price_type=PriceType.Static, value=36.25, currency="SEK")
 
 
-@dataclass(frozen=True)
+@dataclass
 class SE_Ellevio(Locale_Type):
     # docs: https://www.ellevio.se/privat/om-din-el/forsta-din-elkostnad/ny-prismodell-for-elnatet/
     observed_peak = QueryType.AverageOfThreeDays
@@ -213,15 +209,14 @@ class SE_Ellevio(Locale_Type):
     price = LocalePrice(price_type=PriceType.Static, value=65, currency="SEK")
 
 
-@dataclass(frozen=True)
+@dataclass
 class SE_JBF(Locale_Type):
     # docs: http://www.jbf.nu/sv/natavgift
     observed_peak = QueryType.AverageOfThreeHours
     charged_peak = QueryType.AverageOfThreeHours
     query_model = QUERYTYPES[QueryType.AverageOfThreeHours]
-    query_model.set_query_service(
-        QueryService(QUERYSETS[QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22])
-    )
+    query_service = QueryService(QUERYSETS[QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22])
+
     price = LocalePrice(price_type=PriceType.Static, value=96.6, currency="SEK")
     free_charge_pattern = TimePattern(
         [
@@ -245,7 +240,7 @@ class SE_JBF(Locale_Type):
     # Högbelastningstid är vardagar kl. 06.00 – 22.00 under månaderna november – mars.
 
 
-@dataclass(frozen=True)
+@dataclass
 class SE_Bjerke_Energi(Locale_Type):
     observed_peak = QueryType.Max
     charged_peak = QueryType.Max
@@ -335,7 +330,7 @@ class SE_Bjerke_Energi(Locale_Type):
     """
 
 
-@dataclass(frozen=True)
+@dataclass
 class SE_Telge_Energi(Locale_Type):
     observed_peak = QueryType.Max
     charged_peak = QueryType.Max
@@ -387,7 +382,7 @@ class SE_Telge_Energi(Locale_Type):
     """
 
 
-@dataclass(frozen=True)
+@dataclass
 class SE_Malarenergi(Locale_Type):
     observed_peak = QueryType.AverageOfThreeHours
     charged_peak = QueryType.AverageOfThreeHours
@@ -400,7 +395,7 @@ class SE_Malarenergi(Locale_Type):
     """
 
 
-@dataclass(frozen=True)
+@dataclass
 class SE_TekniskaVerken_Link(Locale_Type):
     observed_peak = QueryType.Max
     charged_peak = QueryType.Max
@@ -409,7 +404,7 @@ class SE_TekniskaVerken_Link(Locale_Type):
     # docs: unknown
 
 
-@dataclass(frozen=True)
+@dataclass
 class SE_Eskilstuna(Locale_Type):
     observed_peak = QueryType.Max
     charged_peak = QueryType.Max
