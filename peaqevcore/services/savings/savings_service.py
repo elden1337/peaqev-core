@@ -2,6 +2,9 @@ from .savings_model import SavingsModel
 from .savings_status import SavingsStatus
 from typing import Tuple
 from datetime import date, datetime, timedelta
+import logging
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class SavingsService:
@@ -41,6 +44,14 @@ class SavingsService:
             "consumption": self.model.consumption,
             # "peaks": self.model.peaks,
         }
+
+    async def async_import_data(self, data: dict) -> None:
+        try:
+            self.model.car_connected_at = data["car_connected_at"]
+            self.model.prices = data["prices"]
+            self.model.consumption = data["consumption"]
+        except Exception as e:
+            _LOGGER.error(f"Could not import data: {e}")
 
     async def async_start_listen(self, connected_at: datetime | None = None) -> None:
         self.model.car_connected_at = connected_at or datetime.now()

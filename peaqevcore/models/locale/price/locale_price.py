@@ -1,5 +1,5 @@
 from __future__ import annotations
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from .models.seasoned_price import SeasonedPrice
 from .models.tiered_price import TieredPrice
 from ..enums.price_type import PriceType
@@ -7,21 +7,30 @@ from ..enums.price_type import PriceType
 
 @dataclass
 class LocalePrice:
-    price_type: PriceType
-    value: float | list[TieredPrice] | list[SeasonedPrice]
-    currency:str
+    price_type: PriceType = PriceType.Unset
+    value: float = 0.0
+    _values: list[TieredPrice] | list[SeasonedPrice] | list = field(
+        default_factory=lambda: []
+    )
+    currency: str = ""
+
+    @property
+    def is_active(self) -> bool:
+        return self.price_type != PriceType.Unset
 
     def __post_init__(self):
         match self.price_type:
+            case PriceType.Unset:
+                pass
             case PriceType.Static:
-                assert isinstance(self.value, (float,int))
+                assert isinstance(self.value, (float, int))
+                assert len(self.currency)
             case PriceType.Seasoned:
-                assert type(self.value) == list
-                assert isinstance(self.value[0], SeasonedPrice)
+                assert isinstance(self._values[0], SeasonedPrice)
+                assert len(self.currency)
             case PriceType.Tiered:
-                assert type(self.value) == list
-                assert isinstance(self.value[0], TieredPrice)
-        assert len(self.currency)
+                assert isinstance(self._values[0], TieredPrice)
+                assert len(self.currency)
 
     @property
     def price(self) -> float:
@@ -39,14 +48,11 @@ class LocalePrice:
 
     def _get_price_seasoned(self) -> float:
         s: SeasonedPrice
-        for s in self.value:
+        for s in self._values:
             if s.validity.valid():
-                return s.value        
+                return s.value
 
     def _get_price_tiered(self):
         t: TieredPrice
-        for t in self.value:
+        for t in self._values:
             pass
-    
-
-

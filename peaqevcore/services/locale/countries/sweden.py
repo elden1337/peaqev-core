@@ -248,7 +248,7 @@ class SE_Bjerke_Energi(Locale_Type):
     price = LocalePrice(
         price_type=PriceType.Seasoned,
         currency="SEK",
-        value=[
+        _values=[
             SeasonedPrice(
                 validity=TimePattern(
                     [

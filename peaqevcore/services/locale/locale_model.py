@@ -18,7 +18,7 @@ class Locale_Type:
     charged_peak: QueryType = field(init=False)
     query_model: LocaleQuery = field(init=False)
     query_service: QueryService | None = None
-    price: LocalePrice | None = None
+    price: LocalePrice = LocalePrice()
     free_charge_pattern: TimePattern | None = None
     peak_cycle: TimePeriods = TimePeriods.Hourly
 
