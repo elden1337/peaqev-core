@@ -194,10 +194,13 @@ class SE_Karlstad(Locale_Type):
 
 @dataclass
 class SE_Gothenburg(Locale_Type):
-    observed_peak = QueryType.AverageOfThreeDays
-    charged_peak = QueryType.AverageOfThreeDays
-    query_model = QUERYTYPES[QueryType.AverageOfThreeDays]
-    price = LocalePrice(price_type=PriceType.Static, value=36.25, currency="SEK")
+    def __post_init__(self):
+        self.observed_peak = QueryType.AverageOfThreeDays
+        self.charged_peak = QueryType.AverageOfThreeDays
+        self.query_model = QUERYTYPES[QueryType.AverageOfThreeDays]
+        self.price = LocalePrice(
+            price_type=PriceType.Static, value=36.25, currency="SEK"
+        )
 
 
 @dataclass
