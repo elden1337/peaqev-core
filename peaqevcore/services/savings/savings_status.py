@@ -2,6 +2,6 @@ from enum import Enum
 
 
 class SavingsStatus(Enum):
-    Off = 0
-    Collecting = 1
-    Error = 3
+    Off = "Off"
+    Collecting = "Collecting"
+    Error = "Error"
