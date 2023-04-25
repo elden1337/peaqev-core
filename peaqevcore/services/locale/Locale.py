@@ -161,5 +161,6 @@ class LocaleFactory:
     async def async_create(input_type: str, domain: str = "peaqev"):
         """Create a locale object."""
         ret = LocaleData(input_type, domain)
+        print(ret)
         await ret.data.async_set_query_service()
         return ret

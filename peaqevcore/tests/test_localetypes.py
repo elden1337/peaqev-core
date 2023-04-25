@@ -1,7 +1,19 @@
 from datetime import datetime, date, time
 import pytest
 from ..models.locale.enums.querytype import QueryType
-from ..services.locale.Locale import LocaleFactory, LOCALE_SE_GOTHENBURG
+from ..services.locale.Locale import (
+    LocaleFactory,
+    LOCALE_SE_GOTHENBURG,
+    LOCALE_BE_VREG,
+    LOCALE_SE_BJERKE_ENERGI,
+    LOCALE_SE_ELLEVIO,
+    LOCALE_SE_JBF,
+    LOCALE_SE_KRISTINEHAMN,
+    LOCALE_SE_SKOVDE,
+    LOCALE_SE_SOLLENTUNA,
+    LOCALE_DEFAULT,
+    LOCALE_NO_PEAK,
+)
 from ..services.locale.querytypes.const import (
     QUERYTYPE_AVERAGEOFTHREEDAYS,
     QUERYTYPE_AVERAGEOFTHREEHOURS,
@@ -18,16 +30,16 @@ from ..services.locale.countries.sweden import (
     SE_Ellevio,
     SE_JBF,
 )
-from ..services.locale.countries.belgium import VregBelgium
 from ..services.locale.countries.default import NoPeak
 
 
 @pytest.mark.asyncio
 async def test_SE_Bjerke_Energi():
-    p = SE_Bjerke_Energi()
-    assert await p.async_free_charge(mockdt=datetime(2005, 7, 14, 22, 30)) is True
+    p = await LocaleFactory.async_create(LOCALE_SE_BJERKE_ENERGI)
+
+    assert await p.data.async_free_charge(mockdt=datetime(2005, 7, 14, 22, 30)) is True
     assert (
-        await p.async_free_charge(
+        await p.data.async_free_charge(
             mockdt=datetime.combine(date(2005, 7, 14), time(15, 00))
         )
         is False
@@ -138,102 +150,94 @@ async def test_overridden_number_in_import():
 
 @pytest.mark.asyncio
 async def test_SE_Gothenburg():
-    p = SE_Gothenburg()
-    assert p.free_charge(p) is False
-    await p.query_model.async_try_update(
+    p = await LocaleFactory.async_create(LOCALE_SE_GOTHENBURG)
+    assert await p.data.async_free_charge() is False
+    await p.data.query_model.async_try_update(
         new_val=1.2, timestamp=datetime.combine(date(2022, 7, 14), time(22, 30))
     )
-    await p.query_model.async_try_update(
+    await p.data.query_model.async_try_update(
         new_val=1, timestamp=datetime.combine(date(2022, 7, 16), time(22, 30))
     )
-    await p.query_model.async_try_update(
+    await p.data.query_model.async_try_update(
         new_val=1.5, timestamp=datetime.combine(date(2022, 7, 17), time(22, 30))
     )
-    await p.query_model.async_try_update(
+    await p.data.query_model.async_try_update(
         new_val=1.7, timestamp=datetime.combine(date(2022, 7, 17), time(22, 30))
     )
-    await p.query_model.async_try_update(
+    await p.data.query_model.async_try_update(
         new_val=1.5, timestamp=datetime.combine(date(2022, 7, 19), time(22, 30))
     )
-    assert p.query_model.observed_peak > 0
+    assert p.data.query_model.observed_peak > 0
     del p
 
 
 @pytest.mark.asyncio
 async def test_generic_querytype_avg_threehour2s():
-    p = SE_Sollentuna()
-    await p.query_model.async_try_update(
+    p = await LocaleFactory.async_create(LOCALE_SE_SOLLENTUNA)
+    await p.data.query_model.async_try_update(
         new_val=1.2, timestamp=datetime.combine(date(2022, 7, 14), time(22, 30))
     )
-    assert p.query_model.observed_peak == 1.2
-    await p.query_model.async_try_update(
+    assert p.data.query_model.observed_peak == 1.2
+    await p.data.query_model.async_try_update(
         new_val=1, timestamp=datetime.combine(date(2022, 7, 16), time(22, 30))
     )
-    assert p.query_model.observed_peak == 1
-    await p.query_model.async_try_update(
+    assert p.data.query_model.observed_peak == 1
+    await p.data.query_model.async_try_update(
         new_val=1.5, timestamp=datetime.combine(date(2022, 7, 17), time(22, 30))
     )
-    assert p.query_model.observed_peak == 1
-    await p.query_model.async_try_update(
+    assert p.data.query_model.observed_peak == 1
+    await p.data.query_model.async_try_update(
         new_val=1.7, timestamp=datetime.combine(date(2022, 7, 17), time(23, 30))
     )
-    assert p.query_model.observed_peak == 1.2
-    await p.query_model.async_try_update(
+    assert p.data.query_model.observed_peak == 1.2
+    await p.data.query_model.async_try_update(
         new_val=1.5, timestamp=datetime.combine(date(2022, 7, 19), time(22, 30))
     )
-    assert p.query_model.observed_peak == 1.5
+    assert p.data.query_model.observed_peak == 1.5
     d1 = date(2022, 7, 14)
     t = time(22, 30)
     dt1 = datetime.combine(d1, t)
-    await p.query_model.async_try_update(new_val=1.2, timestamp=dt1)
+    await p.data.query_model.async_try_update(new_val=1.2, timestamp=dt1)
     d2 = date(2022, 7, 16)
     dt2 = datetime.combine(d2, t)
-    await p.query_model.async_try_update(new_val=1, timestamp=dt2)
+    await p.data.query_model.async_try_update(new_val=1, timestamp=dt2)
     d3 = date(2022, 7, 17)
     dt3 = datetime.combine(d3, t)
-    await p.query_model.async_try_update(new_val=1.5, timestamp=dt3)
+    await p.data.query_model.async_try_update(new_val=1.5, timestamp=dt3)
     d3 = date(2022, 7, 17)
     dt3 = datetime.combine(d3, t)
-    await p.query_model.async_try_update(new_val=1.7, timestamp=dt3)
+    await p.data.query_model.async_try_update(new_val=1.7, timestamp=dt3)
     d4 = date(2022, 7, 19)
     dt4 = datetime.combine(d4, t)
-    await p.query_model.async_try_update(new_val=1.5, timestamp=dt4)
+    await p.data.query_model.async_try_update(new_val=1.5, timestamp=dt4)
     del p
-
-
-# async def test_SE_Kristinehamn():
-#     p = SE_Kristinehamn
-#     await p.query_model.async_try_update(new_val=0.5, timestamp=datetime.combine(date(2023, 6, 14), time(20, 30)))
-#     assert p.query_model.charged_peak == 0.5
-#     await p.query_model.async_try_update(new_val=1.2, timestamp=datetime.combine(date(2023, 2, 14), time(16, 30)))
-#     assert p.query_model.charged_peak == 1.2
 
 
 @pytest.mark.asyncio
 async def test_peak_new_month():
-    p = SE_Gothenburg()
-    await p.query_model.async_try_update(
+    p = await LocaleFactory.async_create(LOCALE_SE_GOTHENBURG)
+    await p.data.query_model.async_try_update(
         new_val=1.2, timestamp=datetime.combine(date(2022, 6, 2), time(22, 30))
     )
-    await p.query_model.async_try_update(
+    await p.data.query_model.async_try_update(
         new_val=1, timestamp=datetime.combine(date(2022, 6, 16), time(22, 30))
     )
-    await p.query_model.async_try_update(
+    await p.data.query_model.async_try_update(
         new_val=1.5, timestamp=datetime.combine(date(2022, 6, 17), time(20, 30))
     )
-    await p.query_model.async_try_update(
+    await p.data.query_model.async_try_update(
         new_val=1.7, timestamp=datetime.combine(date(2022, 6, 17), time(22, 30))
     )
-    await p.query_model.async_try_update(
+    await p.data.query_model.async_try_update(
         new_val=1.5, timestamp=datetime.combine(date(2022, 6, 19), time(22, 30))
     )
-    assert len(p.query_model.peaks.p) == 3
-    assert p.query_model.observed_peak == 1.2
-    await p.query_model.async_try_update(
+    assert len(p.data.query_model.peaks.p) == 3
+    assert p.data.query_model.observed_peak == 1.2
+    await p.data.query_model.async_try_update(
         new_val=0.03, timestamp=datetime.combine(date(2022, 7, 1), time(0, 0))
     )
-    assert len(p.query_model.peaks.p) == 1
-    assert p.query_model.observed_peak == 0.03
+    assert len(p.data.query_model.peaks.p) == 1
+    assert p.data.query_model.observed_peak == 0.03
     del p
 
 
@@ -306,13 +310,17 @@ async def test_overridden_number_in_import_2():
 
 
 @pytest.mark.asyncio
-async def test_quarterly():
-    p = SE_Kristinehamn()
-    assert await p.async_is_quarterly() is False
-    p2 = VregBelgium()
-    assert await p2.async_is_quarterly() is True
-    del p
+async def test_is_quarterly():
+    p2 = await LocaleFactory.async_create(LOCALE_BE_VREG)
+    assert await p2.data.async_is_quarterly() is True
     del p2
+
+
+@pytest.mark.asyncio
+async def test_is_not_quarterly():
+    p = await LocaleFactory.async_create(LOCALE_SE_KRISTINEHAMN)
+    assert await p.data.async_is_quarterly() is False
+    del p
 
 
 @pytest.mark.asyncio
@@ -413,32 +421,3 @@ async def test_peak_new_month_2():
     assert len(p.data.query_model.peaks.p) == 1
     assert p.data.query_model.observed_peak == 0.03
     del p
-    # p = SE_Gothenburg
-    # await p.query_model.async_try_update(
-    #     new_val=1.2, timestamp=datetime.combine(date(2022, 7, 2), time(22, 30))
-    # )
-    # await p.query_model.async_try_update(
-    #     new_val=1, timestamp=datetime.combine(date(2022, 7, 16), time(22, 30))
-    # )
-    # await p.query_model.async_try_update(
-    #     new_val=1.5, timestamp=datetime.combine(date(2022, 7, 17), time(20, 30))
-    # )
-    # await p.query_model.async_try_update(
-    #     new_val=1.7, timestamp=datetime.combine(date(2022, 7, 17), time(22, 30))
-    # )
-    # await p.query_model.async_try_update(
-    #     new_val=1.5, timestamp=datetime.combine(date(2022, 7, 19), time(22, 30))
-    # )
-    # assert len(p.query_model.peaks.p) == 3
-    # assert p.query_model.observed_peak == 1.2
-    # await p.query_model.async_try_update(
-    #     new_val=0.03, timestamp=datetime.combine(date(2022, 8, 1), time(22, 30))
-    # )
-    # assert p.query_model.observed_peak == 0.03
-    # assert len(p.query_model.peaks.p) == 1
-    # await p.query_model.async_try_update(
-    #     new_val=0.06, timestamp=datetime.combine(date(2022, 8, 2), time(22, 30))
-    # )
-    # assert len(p.query_model.peaks.p) == 2
-    # assert p.query_model.charged_peak == 0.04
-    # assert p.query_model.observed_peak == 0.03

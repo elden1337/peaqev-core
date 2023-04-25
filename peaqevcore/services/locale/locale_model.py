@@ -22,15 +22,6 @@ class Locale_Type:
     free_charge_pattern: TimePattern | None = None
     peak_cycle: TimePeriods = TimePeriods.Hourly
 
-    # def free_charge(self, mockdt: datetime = datetime.min) -> bool:
-    #     if self.free_charge_pattern is None:
-    #         return False
-    #     now = datetime.now() if mockdt is datetime.min else mockdt
-    #     return self.free_charge_pattern.valid(now)
-
-    # def is_quarterly(self) -> bool:
-    #     return self.peak_cycle == TimePeriods.QuarterHourly
-
     async def async_free_charge(self, mockdt: datetime | None = None) -> bool:
         if self.free_charge_pattern is None:
             return False
