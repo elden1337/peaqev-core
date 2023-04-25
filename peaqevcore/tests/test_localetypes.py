@@ -24,16 +24,11 @@ from ..services.locale.countries.default import NoPeak
 
 @pytest.mark.asyncio
 async def test_SE_Bjerke_Energi():
-    p = SE_Bjerke_Energi
+    p = SE_Bjerke_Energi()
+    assert await p.async_free_charge(mockdt=datetime(2005, 7, 14, 22, 30)) is True
     assert (
         await p.async_free_charge(
-            p, mockdt=datetime.combine(date(2005, 7, 14), time(22, 30))
-        )
-        is True
-    )
-    assert (
-        await p.async_free_charge(
-            p, mockdt=datetime.combine(date(2005, 7, 14), time(15, 00))
+            mockdt=datetime.combine(date(2005, 7, 14), time(15, 00))
         )
         is False
     )
@@ -143,7 +138,7 @@ async def test_overridden_number_in_import():
 
 @pytest.mark.asyncio
 async def test_SE_Gothenburg():
-    p = SE_Gothenburg
+    p = SE_Gothenburg()
     assert p.free_charge(p) is False
     await p.query_model.async_try_update(
         new_val=1.2, timestamp=datetime.combine(date(2022, 7, 14), time(22, 30))
@@ -166,7 +161,7 @@ async def test_SE_Gothenburg():
 
 @pytest.mark.asyncio
 async def test_generic_querytype_avg_threehour2s():
-    p = SE_Sollentuna
+    p = SE_Sollentuna()
     await p.query_model.async_try_update(
         new_val=1.2, timestamp=datetime.combine(date(2022, 7, 14), time(22, 30))
     )
@@ -216,7 +211,7 @@ async def test_generic_querytype_avg_threehour2s():
 
 @pytest.mark.asyncio
 async def test_peak_new_month():
-    p = SE_Gothenburg
+    p = SE_Gothenburg()
     await p.query_model.async_try_update(
         new_val=1.2, timestamp=datetime.combine(date(2022, 6, 2), time(22, 30))
     )
@@ -244,7 +239,7 @@ async def test_peak_new_month():
 
 @pytest.mark.asyncio
 async def test_peak_new_hour():
-    p = SE_Gothenburg
+    p = SE_Gothenburg()
     await p.query_model.async_try_update(
         new_val=1.2, timestamp=datetime.combine(date(2022, 6, 1), time(1, 30))
     )
@@ -262,7 +257,7 @@ async def test_peak_new_hour():
 
 @pytest.mark.asyncio
 async def test_peak_new_hour_multiple():
-    p = SE_Gothenburg
+    p = SE_Gothenburg()
     await p.query_model.async_try_update(
         new_val=1.2, timestamp=datetime.combine(date(2022, 7, 2), time(22, 30))
     )
@@ -312,18 +307,18 @@ async def test_overridden_number_in_import_2():
 
 @pytest.mark.asyncio
 async def test_quarterly():
-    p = SE_Kristinehamn
-    assert not p.is_quarterly(p)
-    p2 = VregBelgium
-    assert p2.is_quarterly(p2)
+    p = SE_Kristinehamn()
+    assert await p.async_is_quarterly() is False
+    p2 = VregBelgium()
+    assert await p2.async_is_quarterly() is True
     del p
     del p2
 
 
 @pytest.mark.asyncio
 async def test_se_ellevio():
-    p = SE_Ellevio
-    assert p.free_charge(p, mockdt=datetime.now()) is False
+    p = SE_Ellevio()
+    assert await p.async_free_charge(mockdt=datetime.now()) is False
     await p.query_model.async_try_update(
         new_val=1.2, timestamp=datetime.combine(date(2022, 7, 14), time(22, 30))
     )
@@ -345,17 +340,23 @@ async def test_se_ellevio():
 
 @pytest.mark.asyncio
 async def test_se_jbf():
-    p = SE_JBF
+    p = SE_JBF()
     assert (
-        p.free_charge(p, mockdt=datetime.combine(date(2023, 2, 14), time(21, 59)))
+        await p.async_free_charge(
+            mockdt=datetime.combine(date(2023, 2, 14), time(21, 59))
+        )
         is False
     )
     assert (
-        p.free_charge(p, mockdt=datetime.combine(date(2023, 2, 14), time(22, 1)))
+        await p.async_free_charge(
+            mockdt=datetime.combine(date(2023, 2, 14), time(22, 1))
+        )
         is True
     )
     assert (
-        p.free_charge(p, mockdt=datetime.combine(date(2023, 5, 17), time(12, 0)))
+        await p.async_free_charge(
+            mockdt=datetime.combine(date(2023, 5, 17), time(12, 0))
+        )
         is True
     )
 

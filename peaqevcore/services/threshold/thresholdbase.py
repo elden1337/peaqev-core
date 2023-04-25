@@ -21,7 +21,7 @@ ALGORITHM_INPUTS = {
 }
 
 
-def _calculate_algorithm_inputs(type: str, minute: int) -> float:
+async def async_calculate_algorithm_inputs(type: str, minute: int) -> float:
     inputs = ALGORITHM_INPUTS[type]
     return round((((minute + pow(inputs[0], minute)) * inputs[1]) + inputs[2]) * 100, 2)
 
@@ -41,34 +41,6 @@ class ThresholdBase:
     @property
     def currents(self) -> dict:
         return self._currents
-
-    @property
-    def stop(self) -> float:
-        is_caution = (
-            str(datetime.now().hour) in self._hub.hours.caution_hours
-            if self._hub.options.price.price_aware is False
-            else False
-        )
-
-        return ThresholdBase._stop(
-            datetime.now().minute,
-            is_caution,
-            self._hub.sensors.locale.data.is_quarterly(),
-        )
-
-    @property
-    def start(self) -> float:
-        is_caution = (
-            str(datetime.now().hour) in self._hub.hours.caution_hours
-            if self._hub.options.price.price_aware is False
-            else False
-        )
-
-        return ThresholdBase._start(
-            datetime.now().minute,
-            is_caution,
-            self._hub.sensors.locale.data.is_quarterly(),
-        )
 
     @property
     @abstractmethod
@@ -168,20 +140,24 @@ class ThresholdBase:
         return ret
 
     @staticmethod
-    def _stop(now_min: int, is_caution_hour: bool, is_quarterly: bool = False) -> float:
-        minute = _convert_quarterly_minutes(now_min, is_quarterly)
+    async def async_stop(
+        now_min: int | None, is_caution_hour: bool, is_quarterly: bool = False
+    ) -> float:
+        _minute = now_min or datetime.now().minute
+        minute = await async_convert_quarterly_minutes(_minute, is_quarterly)
         if is_caution_hour and minute < 45:
-            return _calculate_algorithm_inputs("stop_caution", minute)
-        return _calculate_algorithm_inputs("stop", minute)
+            return await async_calculate_algorithm_inputs("stop_caution", minute)
+        return await async_calculate_algorithm_inputs("stop", minute)
 
     @staticmethod
-    def _start(
-        now_min: int, is_caution_hour: bool, is_quarterly: bool = False
+    async def async_start(
+        now_min: int | None, is_caution_hour: bool, is_quarterly: bool = False
     ) -> float:
-        minute = _convert_quarterly_minutes(now_min, is_quarterly)
+        _minute = now_min or datetime.now().minute
+        minute = await async_convert_quarterly_minutes(_minute, is_quarterly)
         if is_caution_hour and minute < 45:
-            return _calculate_algorithm_inputs("start_caution", minute)
-        return _calculate_algorithm_inputs("start", minute)
+            return await async_calculate_algorithm_inputs("start_caution", minute)
+        return await async_calculate_algorithm_inputs("start", minute)
 
     @staticmethod
     def allowed_current(

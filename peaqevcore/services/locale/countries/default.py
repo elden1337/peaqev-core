@@ -11,48 +11,50 @@ from ..querytypes.const import QUERYTYPE_NEVER
 
 @dataclass
 class Default(Locale_Type):
-    observed_peak = QueryType.Max
-    charged_peak = QueryType.Max
-    query_model = QUERYTYPES[QueryType.Max]
+    def __post__init__(self):
+        self.observed_peak = QueryType.Max
+        self.charged_peak = QueryType.Max
+        self.query_model = QUERYTYPES[QueryType.Max]
 
 
 @dataclass
 class NoPeak(Locale_Type):
-    observed_peak = QueryType.Max
-    charged_peak = QueryType.Max
-    query_model = QUERYTYPES[QueryType.Max]
-    query_service = QueryService(QUERYSETS[QUERYTYPE_NEVER])
-    free_charge_pattern = TimePattern(
-        [
-            {
-                CalendarPeriods.Month: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-                CalendarPeriods.Weekday: [0, 1, 2, 3, 4, 5, 6],
-                CalendarPeriods.Hour: [
-                    0,
-                    1,
-                    2,
-                    3,
-                    4,
-                    5,
-                    6,
-                    7,
-                    8,
-                    9,
-                    10,
-                    11,
-                    12,
-                    13,
-                    14,
-                    15,
-                    16,
-                    17,
-                    18,
-                    19,
-                    20,
-                    21,
-                    22,
-                    23,
-                ],
-            }
-        ]
-    )
+    def __post__init__(self):
+        self.observed_peak = QueryType.Max
+        self.charged_peak = QueryType.Max
+        self.query_model = QUERYTYPES[QueryType.Max]
+        self.query_service = QueryService(QUERYSETS[QUERYTYPE_NEVER])
+        self.free_charge_pattern = TimePattern(
+            [
+                {
+                    CalendarPeriods.Month: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                    CalendarPeriods.Weekday: [0, 1, 2, 3, 4, 5, 6],
+                    CalendarPeriods.Hour: [
+                        0,
+                        1,
+                        2,
+                        3,
+                        4,
+                        5,
+                        6,
+                        7,
+                        8,
+                        9,
+                        10,
+                        11,
+                        12,
+                        13,
+                        14,
+                        15,
+                        16,
+                        17,
+                        18,
+                        19,
+                        20,
+                        21,
+                        22,
+                        23,
+                    ],
+                }
+            ]
+        )

@@ -9,32 +9,32 @@ from ...models.locale.enums.querytype import QueryType
 from ...models.locale.enums.time_periods import TimePeriods
 from ..locale.time_pattern import TimePattern
 from ...models.locale.price.locale_price import LocalePrice
-from .querytypes.querytypes import LocaleQuery
+from .locale_query import LocaleQuery, ILocaleQuery
 
 
 @dataclass
 class Locale_Type:
-    observed_peak: QueryType = field(init=False)
-    charged_peak: QueryType = field(init=False)
-    query_model: LocaleQuery = field(init=False)
+    observed_peak: QueryType | None = None
+    charged_peak: QueryType | None = None
+    query_model: ILocaleQuery = field(default_factory=ILocaleQuery)
     query_service: QueryService | None = None
     price: LocalePrice = LocalePrice()
     free_charge_pattern: TimePattern | None = None
     peak_cycle: TimePeriods = TimePeriods.Hourly
 
-    def free_charge(self, mockdt: datetime = datetime.min) -> bool:
+    # def free_charge(self, mockdt: datetime = datetime.min) -> bool:
+    #     if self.free_charge_pattern is None:
+    #         return False
+    #     now = datetime.now() if mockdt is datetime.min else mockdt
+    #     return self.free_charge_pattern.valid(now)
+
+    # def is_quarterly(self) -> bool:
+    #     return self.peak_cycle == TimePeriods.QuarterHourly
+
+    async def async_free_charge(self, mockdt: datetime | None = None) -> bool:
         if self.free_charge_pattern is None:
             return False
-        now = datetime.now() if mockdt is datetime.min else mockdt
-        return self.free_charge_pattern.valid(now)
-
-    def is_quarterly(self) -> bool:
-        return self.peak_cycle == TimePeriods.QuarterHourly
-
-    async def async_free_charge(self, mockdt: datetime = datetime.min) -> bool:
-        if self.free_charge_pattern is None:
-            return False
-        now = datetime.now() if mockdt is datetime.min else mockdt
+        now = mockdt or datetime.now()
         return await self.free_charge_pattern.async_valid(now)
 
     async def async_is_quarterly(self) -> bool:
