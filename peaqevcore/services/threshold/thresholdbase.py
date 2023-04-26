@@ -233,7 +233,6 @@ class ThresholdBase:
         return ThresholdBase._stop(
             datetime.now().minute,
             is_caution,
-            self._hub.sensors.locale.data.is_quarterly(self._hub.sensors.locale.data),
         )
 
     @property
@@ -248,7 +247,6 @@ class ThresholdBase:
         return ThresholdBase._start(
             datetime.now().minute,
             is_caution,
-            self._hub.sensors.locale.data.is_quarterly(self._hub.sensors.locale.data),
         )
 
     @staticmethod
