@@ -336,3 +336,28 @@ async def test_230426_session_new_prices():
     await r.async_update_prices(P230426[0], P230426[1])
     await r.max_min.async_update(0.7, peak, 5)
     assert r.non_hours[1] == 17
+
+
+@pytest.mark.asyncio
+async def test_230426_session_map_correct_cheapest():
+    r = h(
+        cautionhour_type=CautionHourType.SCROOGE, absolute_top_price=30, min_price=0.0
+    )
+    peak = 2.28
+    await r.async_update_adjusted_average(0.77)
+    await r.service.async_set_day(26)
+    await r.async_update_top_price(10.89)
+    r.service._mock_hour = await r.service.async_set_hour(13)
+    await r.async_update_prices(P230426[0], P230426[1])
+    await r.max_min.async_update(0.7, peak, 5)
+    r.service._mock_hour = await r.service.async_set_hour(16)
+    _desired_decreased = 2.4
+    await r.max_min.async_update(3.4, peak, _desired_decreased)
+    # print(r.non_hours)
+    # print(r.dynamic_caution_hours)
+    # print(r.max_min.total_charge)
+    available_charge = round(
+        sum([v[1] for k, v in r.max_min.model.input_hours.items() if v[1] > 0]) * peak,
+        1,
+    )
+    assert r.max_min.total_charge == available_charge == _desired_decreased
