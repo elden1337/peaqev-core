@@ -20,7 +20,7 @@ from ..locale_model import Locale_Type
 
 @dataclass
 class SE_Sollentuna(Locale_Type):
-    def __post__init__(self):
+    def __post_init__(self):
         self.observed_peak = QueryType.AverageOfThreeHours
         self.charged_peak = QueryType.AverageOfThreeHours
         self.query_model = QUERYTYPES[QueryType.AverageOfThreeHours]

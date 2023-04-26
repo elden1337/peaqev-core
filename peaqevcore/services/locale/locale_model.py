@@ -10,17 +10,85 @@ from ...models.locale.enums.time_periods import TimePeriods
 from ..locale.time_pattern import TimePattern
 from ...models.locale.price.locale_price import LocalePrice
 from .locale_query import LocaleQuery, ILocaleQuery
+from abc import abstractmethod
 
 
-@dataclass
 class Locale_Type:
-    observed_peak: QueryType | None = None
-    charged_peak: QueryType | None = None
-    query_model: ILocaleQuery = field(default_factory=ILocaleQuery)
-    query_service: QueryService | None = None
-    price: LocalePrice = LocalePrice()
-    free_charge_pattern: TimePattern | None = None
-    peak_cycle: TimePeriods = TimePeriods.Hourly
+    _observed_peak = None
+    _charged_peak = None
+    _query_model: ILocaleQuery = field(default_factory=ILocaleQuery)
+    _query_service = None
+    _price: LocalePrice = LocalePrice()
+    _free_charge_pattern = None
+    _peak_cycle: TimePeriods = TimePeriods.Hourly
+
+    @property
+    @abstractmethod
+    def observed_peak(self) -> QueryType:
+        return self._observed_peak
+
+    @observed_peak.setter
+    @abstractmethod
+    def observed_peak(self, value: QueryType):
+        self._observed_peak = value
+
+    @property
+    @abstractmethod
+    def charged_peak(self) -> QueryType:
+        return self._charged_peak
+
+    @charged_peak.setter
+    @abstractmethod
+    def charged_peak(self, value: QueryType):
+        self._charged_peak = value
+
+    @property
+    @abstractmethod
+    def query_model(self) -> ILocaleQuery:
+        return self._query_model
+
+    @query_model.setter
+    @abstractmethod
+    def query_model(self, value: ILocaleQuery):
+        self._query_model = value
+
+    @property
+    @abstractmethod
+    def query_service(self) -> QueryService:
+        return self._query_service
+
+    @query_service.setter
+    @abstractmethod
+    def query_service(self, value: QueryService):
+        self._query_service = value
+
+    @property
+    @abstractmethod
+    def price(self) -> LocalePrice:
+        return self._price
+
+    @price.setter
+    @abstractmethod
+    def price(self, value: LocalePrice):
+        self._price = value
+
+    @property
+    @abstractmethod
+    def free_charge_pattern(self) -> TimePattern:
+        return self._free_charge_pattern
+
+    @free_charge_pattern.setter
+    @abstractmethod
+    def free_charge_pattern(self, value: TimePattern):
+        self._free_charge_pattern = value
+
+    @property
+    def peak_cycle(self) -> TimePeriods:
+        return self._peak_cycle
+
+    @peak_cycle.setter
+    def peak_cycle(self, value: TimePeriods):
+        self._peak_cycle = value
 
     async def async_free_charge(self, mockdt: datetime | None = None) -> bool:
         if self.free_charge_pattern is None:

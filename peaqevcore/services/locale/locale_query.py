@@ -83,10 +83,10 @@ class LocaleQuery(ILocaleQuery):
         self._observed_peak_value: float = 0
         self._charged_peak_value: float = 0
 
-    def reset(self) -> None:
-        self._peaks.reset()
-        self._observed_peak_value = 0
-        self._charged_peak_value = 0
+    # def reset(self) -> None:
+    #     self._peaks.reset()
+    #     self._observed_peak_value = 0
+    #     self._charged_peak_value = 0
 
     @property
     def peaks(self) -> PeaksModel:
@@ -155,6 +155,7 @@ class LocaleQuery(ILocaleQuery):
 
     async def async_try_update(self, new_val, timestamp: datetime | None = None):
         _timestamp = timestamp or datetime.now()
+
         if not await self._props.queryservice.async_should_register_peak(dt=_timestamp):
             return
         _dt = (_timestamp.day, _timestamp.hour)
