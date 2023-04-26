@@ -26,6 +26,12 @@ async def async_calculate_algorithm_inputs(type: str, minute: int) -> float:
     return round((((minute + pow(inputs[0], minute)) * inputs[1]) + inputs[2]) * 100, 2)
 
 
+def _calculate_algorithm_inputs(type: str, minute: int) -> float:
+    """legacy. remove once peaqhvac is async."""
+    inputs = ALGORITHM_INPUTS[type]
+    return round((((minute + pow(inputs[0], minute)) * inputs[1]) + inputs[2]) * 100, 2)
+
+
 class ThresholdBase:
     BASECURRENT = 6
 
@@ -212,3 +218,53 @@ class ThresholdBase:
                 ret = value
                 break
         return min(ret, power_canary_amp) if power_canary_amp > -1 else ret
+
+    # legacy below
+
+    @property
+    def stop(self) -> float:
+        """legacy. remove once peaqhvac is async."""
+        is_caution = (
+            str(datetime.now().hour) in self._hub.hours.caution_hours
+            if self._hub.options.price.price_aware is False
+            else False
+        )
+
+        return ThresholdBase._stop(
+            datetime.now().minute,
+            is_caution,
+            self._hub.sensors.locale.data.is_quarterly(self._hub.sensors.locale.data),
+        )
+
+    @property
+    def start(self) -> float:
+        """legacy. remove once peaqhvac is async."""
+        is_caution = (
+            str(datetime.now().hour) in self._hub.hours.caution_hours
+            if self._hub.options.price.price_aware is False
+            else False
+        )
+
+        return ThresholdBase._start(
+            datetime.now().minute,
+            is_caution,
+            self._hub.sensors.locale.data.is_quarterly(self._hub.sensors.locale.data),
+        )
+
+    @staticmethod
+    def _stop(now_min: int, is_caution_hour: bool, is_quarterly: bool = False) -> float:
+        """legacy. remove once peaqhvac is async."""
+        minute = _convert_quarterly_minutes(now_min, is_quarterly)
+        if is_caution_hour and minute < 45:
+            return _calculate_algorithm_inputs("stop_caution", minute)
+        return _calculate_algorithm_inputs("stop", minute)
+
+    @staticmethod
+    def _start(
+        now_min: int, is_caution_hour: bool, is_quarterly: bool = False
+    ) -> float:
+        """legacy. remove once peaqhvac is async."""
+        minute = _convert_quarterly_minutes(now_min, is_quarterly)
+        if is_caution_hour and minute < 45:
+            return _calculate_algorithm_inputs("start_caution", minute)
+        return _calculate_algorithm_inputs("start", minute)
