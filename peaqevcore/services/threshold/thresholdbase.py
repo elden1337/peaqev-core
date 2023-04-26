@@ -141,7 +141,9 @@ class ThresholdBase:
 
     @staticmethod
     async def async_stop(
-        now_min: int | None, is_caution_hour: bool, is_quarterly: bool = False
+        now_min: int | None = None,
+        is_caution_hour: bool = False,
+        is_quarterly: bool = False,
     ) -> float:
         _minute = now_min or datetime.now().minute
         minute = await async_convert_quarterly_minutes(_minute, is_quarterly)
@@ -151,7 +153,9 @@ class ThresholdBase:
 
     @staticmethod
     async def async_start(
-        now_min: int | None, is_caution_hour: bool, is_quarterly: bool = False
+        now_min: int | None = None,
+        is_caution_hour: bool = False,
+        is_quarterly: bool = False,
     ) -> float:
         _minute = now_min or datetime.now().minute
         minute = await async_convert_quarterly_minutes(_minute, is_quarterly)
