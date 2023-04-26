@@ -78,9 +78,9 @@ class Prediction:
     ) -> float:
         """legacy. remove once peaqhvac is async."""
         if now_min not in range(0, 60):
-            raise PeaqValueError(f"Value 'now_min' ({now_min}) must be between (0..60]")
+            raise Exception(f"Value 'now_min' ({now_min}) must be between (0..60]")
         if now_sec not in range(0, 60):
-            raise PeaqValueError(f"Value 'now_max' ({now_sec}) must be between (0..60]")
+            raise Exception(f"Value 'now_max' ({now_sec}) must be between (0..60]")
 
         minute = _convert_quarterly_minutes(now_min, is_quarterly)
 
