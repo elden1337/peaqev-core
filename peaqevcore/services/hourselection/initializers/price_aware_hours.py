@@ -8,20 +8,22 @@ from ...scheduler.scheduler_facade import SchedulerFacade
 
 _LOGGER = logging.getLogger(__name__)
 
+
 class PriceAwareHours(Hours):
-    def __init__(
-            self,
-            hub
-    ):
+    def __init__(self, hub):
         self._hub = hub
         self.timer = Timer()
-        self._cautionhour_type = CautionHourType.get_num_value(hub.options.price.cautionhour_type)
+        self._cautionhour_type = CautionHourType.get_num_value(
+            hub.options.price.cautionhour_type
+        )
         self._cautionhour_type_string = hub.options.price.cautionhour_type
         self._core = core_hours(
-            absolute_top_price=self._set_absolute_top_price(hub.options.price.top_price),
+            absolute_top_price=self._set_absolute_top_price(
+                hub.options.price.top_price
+            ),
             min_price=hub.options.price.min_price,
-            cautionhour_type=self._cautionhour_type_string, 
-            blocknocturnal=hub.options.blocknocturnal
+            cautionhour_type=self._cautionhour_type_string,
+            blocknocturnal=hub.options.blocknocturnal,
         )
         self._hass = hub.state_machine
         self._prices = []
@@ -99,17 +101,19 @@ class PriceAwareHours(Hours):
                 return True
         return False
 
-    async def async_update_top_price(self, dyn_top_price) -> None: 
+    async def async_update_top_price(self, dyn_top_price) -> None:
         if self._hub.options.price.dynamic_top_price:
             await self._core.async_update_top_price(dyn_top_price)
 
-    async def async_update_prices(self, prices:list = [], prices_tomorrow:list=[]) -> None:
+    async def async_update_prices(
+        self, prices: list = [], prices_tomorrow: list = []
+    ) -> None:
         await self._core.async_update_prices(prices, prices_tomorrow)
 
     async def async_update_adjusted_average(self, val):
         await self._core.async_update_adjusted_average(val)
 
-    async def async_get_average_kwh_price(self) -> Tuple[float|None, float|None]:
+    async def async_get_average_kwh_price(self) -> Tuple[float | None, float | None]:
         if self._is_initialized:
             try:
                 return await self._core.async_get_average_kwh_price()
@@ -117,12 +121,14 @@ class PriceAwareHours(Hours):
                 _LOGGER.warning(f"get_average_kwh_price could not be calculated: {e}")
             return 0, None
         _LOGGER.debug("get avg kwh price, not initialized")
-        return 0 , None
+        return 0, None
 
-    async def async_get_total_charge(self) -> Tuple[float, float|None]:
+    async def async_get_total_charge(self) -> Tuple[float, float | None]:
         if self._is_initialized:
             try:
-                return await self._core.async_get_total_charge(self._hub.sensors.current_peak.value)
+                return await self._core.async_get_total_charge(
+                    self._hub.sensors.current_peak.value
+                )
             except ZeroDivisionError as e:
                 _LOGGER.warning(f"get_total_charge could not be calculated: {e}")
             return 0, None
@@ -134,11 +140,15 @@ class PriceAwareHours(Hours):
         if _input is None or _input <= 0:
             return float("inf")
         return _input
-    
-    async def async_update_max_min(self, max_charge):
-        await self._core.max_min.async_setup(max_charge)
+
+    async def async_update_max_min(
+        self, max_charge: float, session_energy: float | None = None
+    ):
+        if not self._core.max_min.active:
+            await self._core.max_min.async_setup(max_charge)
         await self._core.max_min.async_update(
-            avg24=self._hub.sensors.powersensormovingaverage24.value, 
-            peak=self._hub.sensors.current_peak.value, 
-            max_desired=max_charge
-            )
+            avg24=self._hub.sensors.powersensormovingaverage24.value,
+            peak=self._hub.sensors.current_peak.value,
+            max_desired=max_charge,
+            session_energy=session_energy,
+        )

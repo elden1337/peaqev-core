@@ -1,10 +1,3 @@
-from ..querytypes.const import (
-    QUERYTYPE_AVERAGEOFTHREEDAYS,
-    QUERYTYPE_AVERAGEOFTHREEDAYS_MIN,
-    QUERYTYPE_AVERAGEOFTHREEHOURS_MIN,
-    QUERYTYPE_AVERAGEOFTHREEHOURS,
-    QUERYTYPE_BASICMAX,
-)
 from ....models.locale.enums.querytype import QueryType
 from ..querytypes.querytypes import QUERYTYPES
 from ..locale_model import Locale_Type
