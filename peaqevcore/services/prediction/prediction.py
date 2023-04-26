@@ -56,7 +56,7 @@ class Prediction:
             if hasattr(self._hub.sensors, "powersensormovingaverage")
             else 0,
             self._hub.sensors.totalhourlyenergy.value,
-            self._hub.sensors.locale.data.is_quarterly(self._hub.sensors.locale.data),
+            # self._hub.sensors.locale.data.is_quarterly(self._hub.sensors.locale.data),
         )
 
     @property
