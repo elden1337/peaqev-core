@@ -42,6 +42,7 @@ class MaxMinCharge:
     async def async_update(
         self, avg24, peak, max_desired: float, session_energy: float | None = None
     ) -> None:
+        await self.async_setup(max_charge=peak)
         _session = session_energy or 0
         _desired = max_desired - _session
         _avg24 = round((avg24 / 1000), 1)
