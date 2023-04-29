@@ -113,6 +113,61 @@ P230426 = [
     ],
 ]
 
+P230429 = [
+    [
+        1.35,
+        1.35,
+        1.28,
+        1.28,
+        1.27,
+        1.25,
+        1.26,
+        1.31,
+        1.32,
+        1.33,
+        1.27,
+        1.14,
+        0.97,
+        0.73,
+        0.66,
+        0.63,
+        0.66,
+        0.66,
+        0.73,
+        0.7,
+        0.68,
+        0.64,
+        0.46,
+        0.42,
+    ],
+    [
+        0.45,
+        0.45,
+        0.43,
+        0.43,
+        0.43,
+        0.42,
+        0.43,
+        0.45,
+        0.5,
+        0.48,
+        0.43,
+        0.14,
+        0.07,
+        0.05,
+        0.04,
+        0.07,
+        0.25,
+        0.51,
+        0.6,
+        0.62,
+        0.6,
+        0.6,
+        0.54,
+        0.5,
+    ],
+]
+
 
 @pytest.mark.asyncio
 async def test_230412_maxmin_not_active():
@@ -361,3 +416,21 @@ async def test_230426_session_map_correct_cheapest():
         1,
     )
     assert r.max_min.total_charge == available_charge == _desired_decreased
+
+
+@pytest.mark.asyncio
+async def test_230429_session_map_correct_cheapest():
+    r = h(
+        cautionhour_type=CautionHourType.SCROOGE, absolute_top_price=30, min_price=0.0
+    )
+    peak = 2.28
+    await r.async_update_adjusted_average(1)
+    await r.service.async_set_day(29)
+    await r.async_update_top_price(0.93)
+    r.service._mock_hour = await r.service.async_set_hour(15)
+    await r.async_update_prices(P230429[0], P230429[1])
+    await r.max_min.async_update(0.46, peak, 8)
+    r.service._mock_hour = await r.service.async_set_hour(16)
+    available = [k for k, v in r.max_min.model.input_hours.items() if v[1] > 0]
+    # print(P230429[0][23], P230429[1][14])
+    assert available == [11, 12, 13, 14]
