@@ -342,14 +342,6 @@ async def test_230426_session_decrease():
     ]
     r.service._mock_hour = await r.service.async_set_hour(18)
     await r.max_min.async_update(0.5, 2.28, 3.2)
-    # original_all = {k: v for k, v in r.max_min.model.original_input_hours.items()}
-    # print(f"original-all: {original_all}")
-    # tweak_non = {k: v for k, v in r.max_min.model.input_hours.items() if v[1] == 0}
-    # print(f"tweaked-no: {tweak_non}")
-    # print(f"16: {P230426[0][16]}, {P230426[1][16]}")
-    # print(f"17: {P230426[0][17]}, {P230426[1][17]}")
-    # tweak = {k: v for k, v in r.max_min.model.input_hours.items() if v[1] > 0}
-    # print(f"tweaked-yes: {tweak}")
     assert r.non_hours == [
         18,
         19,

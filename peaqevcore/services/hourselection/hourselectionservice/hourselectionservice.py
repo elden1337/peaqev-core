@@ -156,6 +156,36 @@ class HourSelectionService:
             _LOGGER.error(f"Error in determine hours: {e}")
         return ret
 
+    async def async_interim_day_update(
+        self, today: HourObject, tomorrow: HourObject
+    ) -> Tuple[HourObject, HourObject]:
+        """Updates the non- and caution-hours with an adjusted mean of 14h - 13h today-tomorrow to get a more sane nightly curve."""
+        if len(self.parent.model.prices_tomorrow) < 23:
+            self.preserve_interim = False
+            return today, tomorrow
+
+        hour = await self.async_set_hour()
+        # hour = len(self.parent.prices) - 10
+        # negative_hour = hour * -1
+        negative_hour = (len(self.parent.prices) - hour) * -1
+        print(hour)
+        print(negative_hour)
+        pricelist = self.parent.model.prices_today[hour::]
+        pricelist[len(pricelist) :] = self.parent.model.prices_tomorrow[0:hour]
+        new_hours = await self.async_update_per_day(
+            prices=pricelist, range_start=hour, day_type=DayTypes.Interim
+        )
+
+        today = await async_update_interim_lists(
+            range(hour, len(self.parent.prices)), today, new_hours, hour
+        )
+        tomorrow = await async_update_interim_lists(
+            range(0, hour), tomorrow, new_hours, negative_hour
+        )
+        self.preserve_interim = True
+        return today, tomorrow
+
+    # helpers
     def set_hour(self, testhour: int | None = None) -> int:
         return (
             testhour
@@ -176,30 +206,3 @@ class HourSelectionService:
 
     async def async_set_day(self, day: int | None = None):
         self._mock_day = day if day is not None else datetime.now().day
-
-    async def async_interim_day_update(
-        self, today: HourObject, tomorrow: HourObject
-    ) -> Tuple[HourObject, HourObject]:
-        """Updates the non- and caution-hours with an adjusted mean of 14h - 13h today-tomorrow to get a more sane nightly curve."""
-        if len(self.parent.model.prices_tomorrow) < 23:
-            self.preserve_interim = False
-            return today, tomorrow
-
-        hour = await self.async_set_hour()
-        negative_hour = hour * -1
-        # hour =len(self.parent.prices)-10
-        # negative_hour = (len(self.parent.prices) - hour)*-1
-        pricelist = self.parent.model.prices_today[hour::]
-        pricelist[len(pricelist) :] = self.parent.model.prices_tomorrow[0:hour]
-        new_hours = await self.async_update_per_day(
-            prices=pricelist, range_start=hour, day_type=DayTypes.Interim
-        )
-
-        today = await async_update_interim_lists(
-            range(hour, len(self.parent.prices)), today, new_hours, hour
-        )
-        tomorrow = await async_update_interim_lists(
-            range(0, hour), tomorrow, new_hours, negative_hour
-        )
-        self.preserve_interim = True
-        return today, tomorrow
