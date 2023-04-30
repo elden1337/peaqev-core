@@ -15,7 +15,7 @@ class Threshold(ThresholdBase):
             is not ChargeControllerStates.Start.name
         ):
             return min(amps.values())
-        return await ThresholdBase.async_allowed_current(
+        return await ThresholdBase.async_base_allowed_current(
             datetime.now().minute,
             self._hub.sensors.powersensormovingaverage.value
             if self._hub.sensors.powersensormovingaverage.value is not None
@@ -26,5 +26,26 @@ class Threshold(ThresholdBase):
             self._hub.sensors.totalhourlyenergy.value,
             self._hub.current_peak_dynamic,
             await self._hub.sensors.locale.data.async_is_quarterly(),
+            self._hub.power.power_canary.max_current_amp,
+        )
+
+    def allowed_current(self) -> int:
+        amps = self._setcurrentdict()
+        if (
+            self._hub.chargecontroller.status_string
+            is not ChargeControllerStates.Start.name
+        ):
+            return min(amps.values())
+        return ThresholdBase.base_allowed_current(
+            datetime.now().minute,
+            self._hub.sensors.powersensormovingaverage.value
+            if self._hub.sensors.powersensormovingaverage.value is not None
+            else 0,
+            self._hub.sensors.charger_enabled.value,
+            self._hub.sensors.charger_done.value,
+            amps,
+            self._hub.sensors.totalhourlyenergy.value,
+            self._hub.current_peak_dynamic,
+            self._hub.sensors.locale.data.is_quarterly(),
             self._hub.power.power_canary.max_current_amp,
         )

@@ -82,7 +82,7 @@ async def test__stop_caution_non_caution_early():
 
 @pytest.mark.asyncio
 async def test_allowed_current_base():
-    ret = t.allowed_current(
+    ret = await t.async_base_allowed_current(
         now_min=0,
         moving_avg=1,
         charger_enabled=False,
@@ -96,7 +96,7 @@ async def test_allowed_current_base():
 
 @pytest.mark.asyncio
 async def test_allowed_current_1():
-    ret = t.allowed_current(
+    ret = await t.async_base_allowed_current(
         now_min=10,
         moving_avg=560,
         charger_enabled=True,
@@ -110,7 +110,7 @@ async def test_allowed_current_1():
 
 @pytest.mark.asyncio
 async def test_allowed_current_2():
-    ret = t.allowed_current(
+    ret = await t.async_base_allowed_current(
         now_min=50,
         moving_avg=560,
         charger_enabled=True,
@@ -148,7 +148,7 @@ async def test__stop_quarterly_caution():
 
 @pytest.mark.asyncio
 async def test_allowed_current_negative_movingavg():
-    ret = t.allowed_current(
+    ret = await t.async_base_allowed_current(
         now_min=10,
         moving_avg=-560,
         charger_enabled=True,
@@ -162,7 +162,7 @@ async def test_allowed_current_negative_movingavg():
 
 @pytest.mark.asyncio
 async def test_allowed_current_negative_totalenergy():
-    ret = t.allowed_current(
+    ret = await t.async_base_allowed_current(
         now_min=10,
         moving_avg=560,
         charger_enabled=True,
@@ -176,7 +176,7 @@ async def test_allowed_current_negative_totalenergy():
 
 @pytest.mark.asyncio
 async def test_allowed_current_negative_totalenergy_and_movingavg():
-    ret = t.allowed_current(
+    ret = await t.async_base_allowed_current(
         now_min=10,
         moving_avg=-1560,
         charger_enabled=True,
@@ -191,7 +191,7 @@ async def test_allowed_current_negative_totalenergy_and_movingavg():
 @pytest.mark.asyncio
 async def test_allowed_current_fluctuate():
     for i in range(12, 26):
-        ret = t.allowed_current(
+        ret = await t.async_base_allowed_current(
             now_min=i,
             moving_avg=MOVINGAVGS.get(i, 0),
             charger_enabled=True,
@@ -206,7 +206,7 @@ async def test_allowed_current_fluctuate():
 @pytest.mark.asyncio
 async def test_allowed_current_fluctuate_async():
     for i in range(12, 26):
-        ret = await t.async_allowed_current(
+        ret = await t.async_base_allowed_current(
             now_min=i,
             moving_avg=MOVINGAVGS.get(i, 0),
             charger_enabled=True,

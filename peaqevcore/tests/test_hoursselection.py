@@ -4329,6 +4329,43 @@ async def test_230412():
     assert r.dynamic_caution_hours == {}
 
 
+@pytest.mark.asyncio
+async def test_negative_price_230430():
+    r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=3, min_price=0.0)
+    prices = [
+        0.45,
+        0.45,
+        0.43,
+        0.43,
+        0.43,
+        0.42,
+        0.43,
+        0.45,
+        0.5,
+        0.48,
+        0.43,
+        0.14,
+        0.07,
+        0.05,
+        0.04,
+        0.07,
+        0.25,
+        0.51,
+        0.6,
+        0.62,
+        0.6,
+        0.6,
+        0.54,
+        0.5,
+    ]
+    await r.async_update_adjusted_average(0.97)
+    await r.service.async_set_day(30)
+    await r.async_update_top_price(0.92)
+    r.service._mock_hour = await r.service.async_set_hour(11)
+    await r.async_update_prices(prices)
+    assert r.non_hours == [2]
+
+
 """important, fix this later."""
 # async def test_230208_2():
 #     r = h(cautionhour_type=CautionHourType.AGGRESSIVE.value, absolute_top_price=3, min_price=0.0)
