@@ -48,10 +48,10 @@ class ThresholdBase:
     def currents(self) -> dict:
         return self._currents
 
-    @property
-    @abstractmethod
-    def allowedcurrent(self) -> int:
-        pass
+    # @property
+    # @abstractmethod
+    # def allowedcurrent(self) -> int:
+    #     pass
 
     def _setcurrentdict(self) -> dict:
         """only allow amps if user has set this value high enough"""
@@ -151,7 +151,7 @@ class ThresholdBase:
         is_caution_hour: bool = False,
         is_quarterly: bool = False,
     ) -> float:
-        _minute = now_min or datetime.now().minute
+        _minute = now_min if now_min is not None else datetime.now().minute
         minute = await async_convert_quarterly_minutes(_minute, is_quarterly)
         if is_caution_hour and minute < 45:
             return await async_calculate_algorithm_inputs("stop_caution", minute)
@@ -163,14 +163,14 @@ class ThresholdBase:
         is_caution_hour: bool = False,
         is_quarterly: bool = False,
     ) -> float:
-        _minute = now_min or datetime.now().minute
+        _minute = now_min if now_min is not None else datetime.now().minute
         minute = await async_convert_quarterly_minutes(_minute, is_quarterly)
         if is_caution_hour and minute < 45:
             return await async_calculate_algorithm_inputs("start_caution", minute)
         return await async_calculate_algorithm_inputs("start", minute)
 
     @staticmethod
-    def allowed_current(
+    def base_allowed_current(
         now_min: int,
         moving_avg: float,
         charger_enabled: bool,
@@ -195,7 +195,7 @@ class ThresholdBase:
         return min(ret, power_canary_amp) if power_canary_amp > -1 else ret
 
     @staticmethod
-    async def async_allowed_current(
+    async def async_base_allowed_current(
         now_min: int,
         moving_avg: float,
         charger_enabled: bool,
