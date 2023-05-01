@@ -124,7 +124,11 @@ class LocaleQuery(ILocaleQuery):
             if self._props.sumtype is SumTypes.Max
             else self._observed_peak_value
         )
-        return round(ret, 2)
+        try:
+            return round(ret, 2)
+        except TypeError as t:
+            _LOGGER.warning(t)
+            return 0
 
     @observed_peak.setter
     def observed_peak(self, val):
