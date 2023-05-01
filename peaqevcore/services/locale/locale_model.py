@@ -99,6 +99,9 @@ class Locale_Type:
     async def async_is_quarterly(self) -> bool:
         return self.peak_cycle == TimePeriods.QuarterHourly
 
+    def is_quarterly(self) -> bool:
+        return self.peak_cycle == TimePeriods.QuarterHourly
+
     async def async_set_query_service(self):
         if self.query_service is not None:
             await self.query_model.async_set_query_service(self.query_service)
