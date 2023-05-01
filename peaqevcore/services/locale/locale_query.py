@@ -105,7 +105,11 @@ class LocaleQuery(ILocaleQuery):
         if self._peaks.is_dirty:
             self._sanitize_values()
         ret = self._charged_peak_value
-        return round(ret, 2)
+        try:
+            return round(ret, 2)
+        except TypeError as t:
+            _LOGGER.warning(t)
+            return 0
 
     @charged_peak.setter
     def charged_peak(self, val):
