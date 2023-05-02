@@ -60,6 +60,7 @@ PRICES2 = [
 @pytest.mark.asyncio
 async def test_add_consumption():
     s = SavingsService(peak_price=36.25)
+    assert not s.model.consumption
     _date = datetime(2021, 3, 24).date()
     _hour = 20
     await s.async_start_listen()

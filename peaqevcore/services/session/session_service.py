@@ -13,6 +13,7 @@ class SessionService:
     def __init__(self) -> None:
         self.model = SessionModel()
         self.average_data = EnergyWeekly()
+        self._original_peak: float = 0
 
     async def async_setup(
         self, init_average_data: dict | None = None, mock_time: float | None = None
@@ -44,7 +45,16 @@ class SessionService:
     def total_price(self, val):
         self.total_price = val
 
-    async def async_reset(self):
+    @property
+    def session_data(self) -> dict:
+        return self.model.consumption
+
+    @property
+    def original_peak(self) -> float:
+        return self._original_peak
+
+    async def async_reset(self, original_peak: float = 0):
+        self._original_peak = original_peak
         _init_avg = self.average_data.export
         self.__init__()
         await self.async_setup(_init_avg)
@@ -62,6 +72,7 @@ class SessionService:
         for i in self.model.readings:
             self.model.total_energy += i.reading_integral
             self.model.total_price += i.reading_cost
+        await self.model.async_add_consumption(self.model.total_energy)
 
     async def async_get_status(self) -> dict:
         self.model.total_energy = 0

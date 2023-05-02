@@ -16,6 +16,14 @@ class Session:
     def session_energy(self):
         return self.service.total_energy
 
+    @property
+    def session_data(self) -> dict:
+        return self.service.session_data
+
+    @property
+    def original_peak(self) -> float:
+        return self.service.original_peak
+
     async def async_set_session_energy(self, val):
         await self.service.async_update_power_reading(val)
         await self.async_update_session_pricing()

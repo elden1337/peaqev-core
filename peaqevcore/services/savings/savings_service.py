@@ -9,7 +9,7 @@ _LOGGER = logging.getLogger(__name__)
 
 class SavingsService:
     def __init__(self, peak_price: float) -> None:
-        self.model = SavingsModel(peak_price)
+        self.model = SavingsModel(peak_price_per_kwh=peak_price)
         self._savings_peak = 0
         self._savings_trade = 0
 

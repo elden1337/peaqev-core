@@ -1,8 +1,9 @@
 from dataclasses import dataclass, field
+from ..savings.consumption_model import ConsumptionModel
 
 
 @dataclass
-class SessionModel:
+class SessionModel(ConsumptionModel):
     total_price: float = 0
     price: float = 0
     current_power: float = 0
