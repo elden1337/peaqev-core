@@ -2,12 +2,15 @@ from datetime import datetime, date, time
 import math
 from ...models.hourselection.hourselection_options import HourSelectionOptions
 from .schedule_session import ScheduleSession
+import logging
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class Scheduler:
     """This class obj is what constitutes a running scheduler."""
 
-    def __init__(self, options: HourSelectionOptions = None):
+    def __init__(self, options: HourSelectionOptions | None = None):
         self.model = ScheduleSession(hourselection_options=options)
         self.active = False
 
@@ -26,6 +29,7 @@ class Scheduler:
         starttime: datetime = datetime.now(),
         override_settings=False,
     ):
+        await self.async_check_parameters(desired_charge, departuretime)
         if self.scheduler_active:
             await self.async_cancel()
         self.model.departuretime = departuretime
@@ -33,19 +37,34 @@ class Scheduler:
         self.model.remaining_charge = desired_charge
         self.model._override_settings = override_settings
 
+    async def async_check_parameters(
+        self, desired_charge: float, departuretime: datetime
+    ):
+        if desired_charge <= 0:
+            _LOGGER.error("Desired charge for scheduler must be greater than 0")
+        if departuretime <= datetime.now():
+            _LOGGER.error(
+                f"Departuretime must be in the future. You added: {departuretime}"
+            )
+
     async def async_update(
         self,
         avg24: float,
         peak: float,
-        charged_amount: float = None,
-        prices: list = None,
-        prices_tomorrow: list = None,
+        charged_amount: float | None = None,
+        prices: list | None = None,
+        prices_tomorrow: list | None = None,
         mockdt: datetime | None = None,
     ):
         """calculate based on the pricing of hours, current peak and the avg24hr energy consumption"""
-        self.model.MOCKDT = mockdt if mockdt is not None else datetime.now()
+        self.model._mock_dt = mockdt if mockdt is not None else datetime.now()
         self.active = True
-        if any([self.model.remaining_charge <= 0, self.model.departuretime <= mockdt]):
+        if any(
+            [
+                self.model.remaining_charge <= 0,
+                self.model.departuretime <= self.model._mock_dt,
+            ]
+        ):
             return await self.async_cancel()
         charge_per_hour = peak - (avg24 / 1000)
         if charge_per_hour <= 0:

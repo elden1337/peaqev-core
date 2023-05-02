@@ -11,20 +11,20 @@ class ScheduleSession:
     departuretime: datetime = datetime.min
     _hours_price: dict[datetime, float] = field(init=False)
     _hours_charge: dict[datetime, float] = field(init=False)
-    _nh:list = field(default_factory=lambda : [])
-    _ch:dict = field(default_factory=lambda : {})
-    MOCKDT:datetime = None
-    _init_ok:bool = False
-    _override_settings:bool = False
-    _tomorrow_valid:bool = False
+    _nh: list = field(default_factory=lambda: [])
+    _ch: dict = field(default_factory=lambda: {})
+    _mock_dt: datetime | None = None
+    _init_ok: bool = False
+    _override_settings: bool = False
+    _tomorrow_valid: bool = False
 
     @property
     def hours_price(self):
         return self._hours_price
 
     @hours_price.setter
-    def hours_price(self, prices:list):
-        today_date = datetime.now() if self.MOCKDT is None else self.MOCKDT
+    def hours_price(self, prices: list):
+        today_date = datetime.now() if self._mock_dt is None else self._mock_dt
         price_dict = dict()
         for idx, price in enumerate(prices[0]):
             price_dict[datetime.combine(today_date.date(), time(idx, 0))] = price
@@ -35,7 +35,9 @@ class ScheduleSession:
                 price_dict[datetime.combine(tomorrow_date, time(idx, 0))] = price
         else:
             self._tomorrow_valid = False
-        self._hours_price = self._filter_price_dict(price_dict, self.starttime, self.departuretime)
+        self._hours_price = self._filter_price_dict(
+            price_dict, self.starttime, self.departuretime
+        )
 
     @property
     def hours_charge(self) -> dict:
@@ -47,7 +49,7 @@ class ScheduleSession:
     def hours_charge(self, val):
         self._hours_charge = val
         self._init_ok = True
-        
+
     @property
     def non_hours(self) -> list:
         self._make_hours()
@@ -62,7 +64,7 @@ class ScheduleSession:
         ch = dict()
         nh = []
         _timer = datetime.combine(self.starttime.date(), time(self.starttime.hour, 0))
-        today_dt = datetime.now() if self.MOCKDT is None else self.MOCKDT
+        today_dt = datetime.now() if self._mock_dt is None else self._mock_dt
         while _timer < self.departuretime:
             if _timer >= today_dt:
                 if _timer not in self.hours_charge.keys():
@@ -75,7 +77,12 @@ class ScheduleSession:
         self._nh = nh
         self._ch = ch
 
-    def _filter_price_dict(self, price_dict:dict, starttime:datetime, departuretime:datetime) -> dict:
-        ret = {key:value for (key,value) in price_dict.items() if starttime <= key <= departuretime}
+    def _filter_price_dict(
+        self, price_dict: dict, starttime: datetime, departuretime: datetime
+    ) -> dict:
+        ret = {
+            key: value
+            for (key, value) in price_dict.items()
+            if starttime <= key <= departuretime
+        }
         return ret
-        
