@@ -73,11 +73,6 @@ class SavingsService:
     ) -> None:
         await self.model.async_add_to_consumption(consumption, _date, _hour)
 
-    # async def async_add_to_peaks(
-    #     self, peak: float, _date: date | None = None, _hour: int | None = None
-    # ) -> None:
-    #     await self.model.async_add_to_peaks(peak, _date, _hour)
-
     async def async_register_charge_session(
         self, charge_session: dict, original_peak: float | None = None
     ) -> None:

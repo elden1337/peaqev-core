@@ -1,5 +1,6 @@
 from __future__ import annotations
 import time
+from datetime import datetime, date
 from .power_reading import PowerReading
 from .energy_weekly import EnergyWeekly
 from .session_model import SessionModel
@@ -14,6 +15,8 @@ class SessionService:
         self.model = SessionModel()
         self.average_data = EnergyWeekly()
         self._original_peak: float = 0
+        self._current_date: date = date.today()
+        self._current_hour: int = 0
 
     async def async_setup(
         self, init_average_data: dict | None = None, mock_time: float | None = None
@@ -72,7 +75,11 @@ class SessionService:
         for i in self.model.readings:
             self.model.total_energy += i.reading_integral
             self.model.total_price += i.reading_cost
-        await self.model.async_add_consumption(self.model.total_energy)
+        await self.model.async_add_consumption(
+            consumption=self.model.total_energy,
+            date=self._current_date,
+            hour=self._current_hour,
+        )
 
     async def async_get_status(self) -> dict:
         self.model.total_energy = 0
@@ -122,5 +129,11 @@ class SessionService:
 
     async def async_set_delta(self, mock_time: float | None = None) -> None:
         now = mock_time or time.time()
+        await self.async_update_date_and_hour(now)
         self.model.time_delta = now - self.model.current_time
         self.model.current_time = now
+
+    async def async_update_date_and_hour(self, dt: float) -> None:
+        date_time = datetime.fromtimestamp(dt)
+        self._current_date = date_time.date()
+        self._current_hour = date_time.hour
