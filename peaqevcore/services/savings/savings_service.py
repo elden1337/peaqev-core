@@ -142,4 +142,8 @@ class SavingsService:
             for hour, power in value.items():
                 ret[ret_idx] = power * 1000
                 ret_idx += 1
-        return int(sum(ret.values()) / len(ret)), sum(ret.values()) / 1000
+        try:
+            return int(sum(ret.values()) / len(ret)), sum(ret.values()) / 1000
+        except ZeroDivisionError:
+            _LOGGER.error("Could not calculate estimated power for savings.")
+            return 0, 0

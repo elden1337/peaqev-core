@@ -51,8 +51,8 @@ class Session:
     async def async_terminate(self):
         await self.service.async_terminate()
 
-    async def async_reset(self):
-        await self.service.async_reset()
+    async def async_reset(self, original_peak=0):
+        await self.service.async_reset(original_peak)
 
     async def async_unpack(self, data):
         await self.service.average_data.async_unpack(data)
