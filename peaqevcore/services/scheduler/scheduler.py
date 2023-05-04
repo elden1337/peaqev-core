@@ -10,9 +10,10 @@ _LOGGER = logging.getLogger(__name__)
 class Scheduler:
     """This class obj is what constitutes a running scheduler."""
 
-    def __init__(self, options: HourSelectionOptions | None = None):
+    def __init__(self, options: HourSelectionOptions | None = None, test: bool = False):
         self.model = ScheduleSession(hourselection_options=options)
         self.active = False
+        self.is_test = test
 
     @property
     def scheduler_active(self) -> bool:
@@ -29,7 +30,10 @@ class Scheduler:
         starttime: datetime = datetime.now(),
         override_settings=False,
     ):
-        await self.async_check_parameters(desired_charge, departuretime)
+        if not await self.async_check_parameters(
+            desired_charge, departuretime, starttime
+        ):
+            return
         if self.scheduler_active:
             await self.async_cancel()
         self.model.departuretime = departuretime
@@ -38,14 +42,20 @@ class Scheduler:
         self.model._override_settings = override_settings
 
     async def async_check_parameters(
-        self, desired_charge: float, departuretime: datetime
-    ):
+        self, desired_charge: float, departuretime: datetime, starttime: datetime
+    ) -> bool:
+        if departuretime < starttime:
+            _LOGGER.error("Starttime must be before departuretime if added.")
+            return False
         if desired_charge <= 0:
             _LOGGER.error("Desired charge for scheduler must be greater than 0")
-        if departuretime <= datetime.now():
+            return False
+        if departuretime <= datetime.now() and self.is_test is False:
             _LOGGER.error(
                 f"Departuretime must be in the future. You added: {departuretime}"
             )
+            return False
+        return True
 
     async def async_update(
         self,
