@@ -424,5 +424,28 @@ async def test_230429_session_map_correct_cheapest():
     await r.max_min.async_update(0.46, peak, 8)
     r.service._mock_hour = await r.service.async_set_hour(16)
     available = [k for k, v in r.max_min.model.input_hours.items() if v[1] > 0]
-    # print(P230429[0][23], P230429[1][14])
     assert available == [11, 12, 13, 14]
+
+
+@pytest.mark.asyncio
+async def test_230429_session_map_single_hour():
+    r = h(
+        cautionhour_type=CautionHourType.SCROOGE, absolute_top_price=30, min_price=0.0
+    )
+    peak = 2.28
+    await r.async_update_adjusted_average(1)
+    await r.service.async_set_day(29)
+    await r.async_update_top_price(0.93)
+    r.service._mock_hour = await r.service.async_set_hour(15)
+    await r.async_update_prices(P230429[0], P230429[1])
+    await r.max_min.async_update(0.46, peak, 2.2)
+    r.service._mock_hour = await r.service.async_set_hour(16)
+    available = [k for k, v in r.max_min.model.input_hours.items() if v[1] > 0]
+    assert available == [14]
+    assert r.max_min.model.input_hours[14][1] == 1
+    await r.max_min.async_update(0.46, peak, 2.2, 0.2)
+    assert r.max_min.model.input_hours[14][1] == 1
+    await r.max_min.async_update(0.46, peak, 2.2, 0.4)
+    assert r.max_min.model.input_hours[14][1] == 1
+    await r.max_min.async_update(0.46, peak, 2.2, 1.4)
+    assert r.max_min.model.input_hours[14][1] == 1

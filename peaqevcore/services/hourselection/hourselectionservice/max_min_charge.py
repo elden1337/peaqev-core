@@ -6,7 +6,7 @@ if TYPE_CHECKING:
 from typing import Tuple
 from ....models.hourselection.max_min_model import MaxMinModel
 
-MINIMUM_DIFFERENCE = 0.05
+MINIMUM_DIFFERENCE = 0.1
 
 
 class MaxMinCharge:
@@ -42,20 +42,25 @@ class MaxMinCharge:
     async def async_update(
         self, avg24, peak, max_desired: float, session_energy: float | None = None
     ) -> None:
+        available = [k for k, v in self.model.input_hours.items() if v[1] > 0]
+        if len(available) == 1:
+            return
         await self.async_setup(max_charge=peak)
         _session = session_energy or 0
         _desired = max_desired - _session
         _avg24 = round((avg24 / 1000), 1)
         self.model.expected_hourly_charge = peak - _avg24
+        await self.async_increase_decrease(_desired, _avg24, peak)
+
+    async def async_increase_decrease(self, desired, avg24, peak) -> None:
         for i in range(len(self.model.original_input_hours.items())):
-            if self.total_charge - _desired > MINIMUM_DIFFERENCE:
+            _load = self.total_charge - desired
+            if _load > MINIMUM_DIFFERENCE:
                 await self.async_decrease()
-            elif self.total_charge - _desired < MINIMUM_DIFFERENCE * -1:
-                expected_charge = round(
-                    (_desired - self.total_charge) / (peak - _avg24), 2
-                )
+            elif _load < MINIMUM_DIFFERENCE * -1:
+                expected_charge = (desired - self.total_charge) / (peak - avg24)
                 await self.async_increase(expected_charge)
-            if abs(self.total_charge - _desired) < MINIMUM_DIFFERENCE:
+            if abs(_load) < MINIMUM_DIFFERENCE:
                 break
 
     async def async_initial_charge(self, avg24, peak) -> float:
