@@ -42,20 +42,23 @@ class MaxMinCharge:
     async def async_update(
         self, avg24, peak, max_desired: float, session_energy: float | None = None
     ) -> None:
-        available = [k for k, v in self.model.input_hours.items() if v[1] > 0]
-        if len(available) == 1:
-            return
-        await self.async_setup(max_charge=peak)
+        allow_decrease = (
+            len([k for k, v in self.model.input_hours.items() if v[1] > 0]) != 1
+        )
+        if allow_decrease:
+            await self.async_setup(max_charge=peak)
         _session = session_energy or 0
         _desired = max_desired - _session
         _avg24 = round((avg24 / 1000), 1)
         self.model.expected_hourly_charge = peak - _avg24
-        await self.async_increase_decrease(_desired, _avg24, peak)
+        await self.async_increase_decrease(_desired, _avg24, peak, allow_decrease)
 
-    async def async_increase_decrease(self, desired, avg24, peak) -> None:
+    async def async_increase_decrease(
+        self, desired, avg24, peak, allow_decrease: bool
+    ) -> None:
         for i in range(len(self.model.original_input_hours.items())):
             _load = self.total_charge - desired
-            if _load > MINIMUM_DIFFERENCE:
+            if _load > MINIMUM_DIFFERENCE and allow_decrease:
                 await self.async_decrease()
             elif _load < MINIMUM_DIFFERENCE * -1:
                 expected_charge = (desired - self.total_charge) / (peak - avg24)
