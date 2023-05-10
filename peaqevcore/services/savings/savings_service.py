@@ -99,7 +99,9 @@ class SavingsService:
         for key, value in charge_session.items():
             peaks = self.model.consumption.get(key, None)
             if peaks is None:
-                raise Exception
+                _LOGGER.error(f"Could not find peaks for date {key}.")
+                return 0
+                # raise Exception
             for hour, energy in value.items():
                 if energy + self.model.consumption[key][hour] > observed_peak:
                     ret = energy + self.model.consumption[key][hour]
@@ -145,5 +147,6 @@ class SavingsService:
         try:
             return int(sum(ret.values()) / len(ret)), sum(ret.values()) / 1000
         except ZeroDivisionError:
-            _LOGGER.error("Could not calculate estimated power for savings.")
+            """there has been no charging. return 0. Should this be decided before this function?"""
+            # _LOGGER.error("Could not calculate estimated power for savings.")
             return 0, 0
