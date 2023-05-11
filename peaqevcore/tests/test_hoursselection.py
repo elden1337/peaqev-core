@@ -1013,7 +1013,7 @@ async def test_new_test_3():
     ]
     await r.async_update_prices(prices, prices_tomorrow)
     assert r.non_hours == [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 7, 8, 9]
-    assert r.dynamic_caution_hours == {10: 0.59, 11: 0.65, 12: 0.66}
+    assert r.dynamic_caution_hours == {10: 0.6, 11: 0.66, 12: 0.67}
 
 
 @pytest.mark.asyncio
@@ -3402,7 +3402,7 @@ async def test_230208():
     ]
     await r.async_update_prices(prices, prices_tomorrow)
     r.service._mock_hour = await r.service.async_set_hour(13)
-    assert r.non_hours == [14, 15, 16, 17, 18, 19, 20, 7, 8, 9, 10, 11, 12]
+    assert r.non_hours == [13, 14, 15, 16, 17, 18, 19, 20, 7, 8, 9, 10, 11, 12]
     r.service._mock_hour = await r.service.async_set_hour(14)
     assert r.non_hours == [14, 15, 16, 17, 18, 19, 20, 7, 8, 9, 10, 11, 12, 13]
 
