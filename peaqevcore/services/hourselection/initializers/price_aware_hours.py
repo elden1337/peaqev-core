@@ -142,7 +142,10 @@ class PriceAwareHours(Hours):
         return _input
 
     async def async_update_max_min(
-        self, max_charge: float, session_energy: float | None = None
+        self,
+        max_charge: float,
+        session_energy: float | None = None,
+        car_connected: bool = False,
     ):
         if not self._core.max_min.active:
             await self._core.max_min.async_setup(max_charge)
@@ -151,4 +154,5 @@ class PriceAwareHours(Hours):
             peak=self._hub.sensors.current_peak.value,
             max_desired=max_charge,
             session_energy=session_energy,
+            car_connected=car_connected,
         )

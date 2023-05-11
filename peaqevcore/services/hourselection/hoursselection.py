@@ -16,9 +16,9 @@ class Hoursselection:
         self,
         absolute_top_price: float = 0,
         min_price: float = 0,
-        cautionhour_type: str|CautionHourType = CautionHourType.SUAVE.value,
+        cautionhour_type: str | CautionHourType = CautionHourType.SUAVE.value,
         blocknocturnal: bool = False,
-        base_mock_hour: int|None = None,
+        base_mock_hour: int | None = None,
     ):
         self.cautionhour_type_enum = (
             CautionHourType(cautionhour_type.lower())
@@ -43,7 +43,7 @@ class Hoursselection:
 
     @property
     def non_hours(self) -> list:
-        if self.max_min.active: 
+        if self.max_min.active:
             return self.max_min.non_hours
         return self.internal_non_hours
 
@@ -66,7 +66,7 @@ class Hoursselection:
             listtype=HourTypeList.NonHour, hour=self.service.set_hour()
         )
         return self.model.hours.non_hours
-    
+
     @property
     def internal_dynamic_caution_hours(self) -> dict:
         self.model.hours.update_hour_list(
@@ -120,11 +120,16 @@ class Hoursselection:
         await self.async_update_prices(self.prices, self.prices_tomorrow)
 
     async def async_update_prices(self, prices: list = [], prices_tomorrow: list = []):
+        max_min: bool = False
+        if any([self.prices != prices, self.prices_tomorrow != prices_tomorrow]):
+            max_min = True
         self.prices = prices
         self.prices_tomorrow = prices_tomorrow
         await self.service.async_update()
+        # if max_min:
+        #     await self.max_min.async_setup(max_charge=1)
 
-    async def async_get_average_kwh_price(self) -> Tuple[float|None, float|None]:
+    async def async_get_average_kwh_price(self) -> Tuple[float | None, float | None]:
         ret_dynamic = None
         if self.max_min.active:
             ret_dynamic = self.max_min.average_price
@@ -135,10 +140,14 @@ class Hoursselection:
             try:
                 return round(sum(ret_static.values()) / len(ret_static), 2), ret_dynamic
             except ZeroDivisionError as e:
-                _LOGGER.warning(f"get_average_kwh_price_core could not be calculated: {e}")
-            return 0,None
+                _LOGGER.warning(
+                    f"get_average_kwh_price_core could not be calculated: {e}"
+                )
+            return 0, None
 
-    async def async_get_total_charge(self, currentpeak: float) -> Tuple[float, float|None]:
+    async def async_get_total_charge(
+        self, currentpeak: float
+    ) -> Tuple[float, float | None]:
         ret_dynamic = None
         if self.max_min.active:
             ret_dynamic = self.max_min.total_charge

@@ -62,7 +62,7 @@ async def test_summertime_tomorrow():
     ]
     await r.async_update_prices(prices, prices_tomorrow)
     r.service._mock_hour = 14
-    assert r.non_hours == [15, 16, 17, 18, 19, 6, 7, 8, 9, 10, 11, 12, 13]
+    assert r.non_hours == [16, 17, 18, 6, 7, 8, 9, 10, 11, 12, 13]
     assert len(r.prices_tomorrow) == 23
 
 
@@ -124,7 +124,7 @@ async def test_summertime_today():
     ]
     await r.async_update_prices(prices, prices_tomorrow)
     r.service._mock_hour = 14
-    assert r.non_hours == [14, 15, 16, 17, 18, 7, 8, 9, 10, 11, 12, 13]
+    assert r.non_hours == [15, 16, 17, 7, 8, 9, 10, 11, 12, 13]
     assert len(r.prices) == 23
 
 
@@ -162,8 +162,8 @@ async def test_wintertime_tomorrow():
     prices_tomorrow = [
         0.363,
         0.361,
-        0.369,
         1,
+        0.369,
         0.402,
         0.469,
         0.546,
@@ -186,9 +186,10 @@ async def test_wintertime_tomorrow():
         1.448,
         1.107,
     ]
+    assert len(prices_tomorrow) == 25
     await r.async_update_prices(prices, prices_tomorrow)
     r.service._mock_hour = 14
-    assert r.non_hours == [15, 16, 17, 18, 19, 7, 8, 9, 10, 11, 12, 13]
+    assert r.non_hours == [16, 17, 18, 7, 8, 9, 10, 11, 12, 13]
     print(prices_tomorrow)
     assert prices[19] > prices_tomorrow[2]
     assert len(r.prices_tomorrow) == 24
@@ -254,5 +255,5 @@ async def test_wintertime_today():
     ]
     await r.async_update_prices(prices, prices_tomorrow)
     r.service._mock_hour = 14
-    assert r.non_hours == [15, 16, 17, 18, 7, 8, 9, 10, 11, 12, 13]
+    assert r.non_hours == [16, 17, 18, 7, 8, 9, 10, 11, 12, 13]
     assert len(r.prices) == 24

@@ -39,13 +39,28 @@ class MaxMinCharge:
     def dynamic_caution_hours(self) -> dict:
         return {k: v[1] for k, v in self.model.input_hours.items() if 0 < v[1] < 1}
 
+    async def async_allow_decrease(self, car_connected: bool | None = None) -> bool:
+        if car_connected is not None:
+            return any(
+                [
+                    not car_connected
+                    or len([k for k, v in self.model.input_hours.items() if v[1] > 0])
+                    != 1
+                ]
+            )
+        return len([k for k, v in self.model.input_hours.items() if v[1] > 0]) != 1
+
     async def async_update(
-        self, avg24, peak, max_desired: float, session_energy: float | None = None
+        self,
+        avg24,
+        peak,
+        max_desired: float,
+        session_energy: float | None = None,
+        car_connected: bool | None = None,
     ) -> None:
-        allow_decrease = (
-            len([k for k, v in self.model.input_hours.items() if v[1] > 0]) != 1
-        )
-        if allow_decrease:
+        allow_decrease: bool = False
+        if await self.async_allow_decrease(car_connected):
+            allow_decrease = True
             await self.async_setup(max_charge=peak)
         _session = session_energy or 0
         _desired = max_desired - _session
