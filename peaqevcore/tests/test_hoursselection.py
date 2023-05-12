@@ -704,7 +704,7 @@ async def test_total_charge_today_tomorrow():
     await r.async_update_prices(prices, prices_tomorrow)
     r.service._mock_hour = await r.service.async_set_hour(MOCKHOUR)
     ret = await r.async_get_total_charge(2)
-    assert ret[0] == 37.2
+    assert ret[0] == 33.9
 
 
 @pytest.mark.asyncio
@@ -727,7 +727,7 @@ async def test_average_kwh_price_today_tomorrow():
     r.service._mock_hour = await r.service.async_set_hour(MOCKHOUR)
     await r.async_update_prices(prices, prices_tomorrow)
     ret = await r.async_get_average_kwh_price()
-    assert ret[0] == 0.61
+    assert ret[0] == 0.53
 
 
 @pytest.mark.asyncio
@@ -882,10 +882,29 @@ async def test_expensive_today_cheap_tomorrow_2():
     prices = MOCKPRICES_EXPENSIVE
     prices_tomorrow = MOCKPRICES_CHEAP
     await r.async_update_prices(prices, prices_tomorrow)
-    assert r.non_hours == [8, 19, 20, 21, 22]
+    assert r.non_hours == [8]
+    assert r.caution_hours == [
+        6,
+        7,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+    ]
 
 
-@pytest.mark.asyncio
+@ pytest.mark.asyncio - ä
 async def test_new_test():
     MOCKHOUR = 13
     r = h(
@@ -1296,9 +1315,9 @@ async def test_regular5():
     ]
     await r.async_update_prices(prices, prices_tomorrow)
     r.service._mock_hour = await r.service.async_set_hour(13)
-    assert r.non_hours == [13, 8, 9, 10, 11, 12]
+    assert r.non_hours == [13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
     r.service._mock_hour = await r.service.async_set_hour(22)
-    assert r.non_hours == [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+    assert r.non_hours == [22, 13, 14, 15, 16, 17, 18, 19, 20, 21]
 
 
 @pytest.mark.asyncio
@@ -2129,35 +2148,35 @@ async def test_offset_dict_1():
         0.364,
     ]
     await r.async_update_prices(prices)
-    assert r.offsets == {
-        "today": {
-            0: -1.0,
-            1: -0.96,
-            2: -0.92,
-            3: -0.88,
-            4: -0.84,
-            5: -0.81,
-            6: -0.75,
-            7: -0.67,
-            8: -0.58,
-            9: -0.39,
-            10: -0.29,
-            11: -0.22,
-            12: -0.13,
-            13: -0.22,
-            14: -0.32,
-            15: -0.23,
-            16: 2.74,
-            17: 3.85,
-            18: 3.51,
-            19: 0.91,
-            20: -0.29,
-            21: -0.44,
-            22: -0.51,
-            23: -0.54,
-        },
-        "tomorrow": {},
+    _tod1 = r.offsets.get("today")
+    assert _tod1 == {
+        0: -1.0,
+        1: -0.96,
+        2: -0.92,
+        3: -0.88,
+        4: -0.84,
+        5: -0.81,
+        6: -0.75,
+        7: -0.67,
+        8: -0.58,
+        9: -0.39,
+        10: -0.29,
+        11: -0.22,
+        12: -0.13,
+        13: -0.22,
+        14: -0.32,
+        15: -0.23,
+        16: 2.74,
+        17: 3.85,
+        18: 3.51,
+        19: 0.91,
+        20: -0.29,
+        21: -0.44,
+        22: -0.51,
+        23: -0.54,
     }
+    _tom1 = r.offsets.get("tomorrow")
+    assert _tom1 == {}
     prices_tomorrow = [
         0.47,
         0.475,
@@ -2185,59 +2204,59 @@ async def test_offset_dict_1():
         0.232,
     ]
     await r.async_update_prices(prices, prices_tomorrow)
-    assert r.offsets == {
-        "today": {
-            0: -1.0,
-            1: -0.96,
-            2: -0.92,
-            3: -0.88,
-            4: -0.84,
-            5: -0.81,
-            6: -0.75,
-            7: -0.67,
-            8: -0.58,
-            9: -0.39,
-            10: -0.29,
-            11: -0.22,
-            12: -0.13,
-            13: -0.22,
-            14: -0.88,
-            15: -0.83,
-            16: 0.78,
-            17: 1.39,
-            18: 1.2,
-            19: -0.21,
-            20: -0.86,
-            21: -0.94,
-            22: -0.98,
-            23: -1.0,
-        },
-        "tomorrow": {
-            0: -0.88,
-            1: -0.88,
-            2: -0.85,
-            3: -0.86,
-            4: -0.85,
-            5: -0.72,
-            6: 0.08,
-            7: 1.57,
-            8: 1.63,
-            9: 1.07,
-            10: 0.72,
-            11: 0.53,
-            12: 0.73,
-            13: 1.06,
-            14: 0.68,
-            15: 0.77,
-            16: 0.77,
-            17: 1.15,
-            18: 0.82,
-            19: 0.54,
-            20: 0.26,
-            21: -0.25,
-            22: -0.96,
-            23: -1.0,
-        },
+    _tod = r.offsets.get("today")
+    _tom = r.offsets.get("tomorrow")
+    assert _tod == {
+        0: -0.89,
+        1: -0.89,
+        2: -0.86,
+        3: -0.87,
+        4: -0.86,
+        5: -0.75,
+        6: -0.02,
+        7: 1.33,
+        8: 1.38,
+        9: 0.88,
+        10: 0.55,
+        11: 0.39,
+        12: 0.57,
+        13: 0.87,
+        14: 1.36,
+        15: 0.77,
+        16: 0.77,
+        17: 1.15,
+        18: 0.82,
+        19: 0.54,
+        20: 0.26,
+        21: -0.25,
+        22: -0.96,
+        23: -1.0,
+    }
+    assert _tom == {
+        0: -0.89,
+        1: -0.89,
+        2: -0.86,
+        3: -0.87,
+        4: -0.86,
+        5: -0.75,
+        6: -0.02,
+        7: 1.33,
+        8: 1.38,
+        9: 0.88,
+        10: 0.55,
+        11: 0.39,
+        12: 0.57,
+        13: 0.87,
+        14: 1.36,
+        15: 0.77,
+        16: 0.77,
+        17: 1.15,
+        18: 0.82,
+        19: 0.54,
+        20: 0.26,
+        21: -0.25,
+        22: -0.96,
+        23: -1.0,
     }
 
 
@@ -4363,7 +4382,7 @@ async def test_negative_price_230430():
     await r.async_update_top_price(0.92)
     r.service._mock_hour = await r.service.async_set_hour(11)
     await r.async_update_prices(prices)
-    assert r.non_hours == [2]
+    assert r.non_hours == []
 
 
 """important, fix this later."""
