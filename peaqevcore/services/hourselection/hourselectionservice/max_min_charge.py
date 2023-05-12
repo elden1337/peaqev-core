@@ -41,11 +41,11 @@ class MaxMinCharge:
 
     async def async_allow_decrease(self, car_connected: bool | None = None) -> bool:
         if car_connected is not None:
-            return any(
+            return all(
                 [
-                    not car_connected
-                    or len([k for k, v in self.model.input_hours.items() if v[1] > 0])
-                    != 1
+                    not car_connected,
+                    len([k for k, v in self.model.input_hours.items() if v[1] > 0])
+                    != 1,
                 ]
             )
         return len([k for k, v in self.model.input_hours.items() if v[1] > 0]) != 1
@@ -60,6 +60,7 @@ class MaxMinCharge:
     ) -> None:
         allow_decrease: bool = False
         if await self.async_allow_decrease(car_connected):
+            print("here")
             allow_decrease = True
             await self.async_setup(max_charge=peak)
         _session = session_energy or 0

@@ -168,6 +168,61 @@ P230429 = [
     ],
 ]
 
+P230512 = [
+    [
+        0.27,
+        0.28,
+        0.34,
+        0.43,
+        0.43,
+        0.46,
+        0.68,
+        1.27,
+        1.43,
+        1.26,
+        1.24,
+        0.99,
+        0.82,
+        0.7,
+        0.61,
+        0.6,
+        0.61,
+        0.77,
+        0.88,
+        0.89,
+        0.78,
+        0.76,
+        0.7,
+        0.63,
+    ],
+    [
+        0.44,
+        0.43,
+        0.43,
+        0.44,
+        0.45,
+        0.45,
+        0.4,
+        0.4,
+        0.42,
+        0.42,
+        0.4,
+        0.35,
+        0.3,
+        0.16,
+        0.15,
+        0.17,
+        0.35,
+        0.42,
+        0.43,
+        0.43,
+        0.42,
+        0.42,
+        0.36,
+        0.25,
+    ],
+]
+
 
 @pytest.mark.asyncio
 async def test_230412_maxmin_not_active():
@@ -449,3 +504,24 @@ async def test_230429_session_map_single_hour():
     assert r.max_min.model.input_hours[14][1] == 1
     await r.max_min.async_update(0.46, peak, 2.2, 1.4)
     assert r.max_min.model.input_hours[14][1] == 1
+
+
+@pytest.mark.asyncio
+async def test_230512_car_connected():
+    r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=30, min_price=0.0)
+    peak = 1.68
+    await r.async_update_adjusted_average(0.66)
+    await r.service.async_set_day(12)
+    await r.async_update_top_price(0.86)
+    r.service._mock_hour = await r.service.async_set_hour(14)
+    await r.async_update_prices(P230512[0], P230512[1])
+    await r.max_min.async_update(0.4, peak, 7)
+    available = [k for k, v in r.max_min.model.input_hours.items() if v[1] > 0]
+    r.service._mock_hour = await r.service.async_set_hour(15)
+    await r.max_min.async_update(0.4, peak, 7, car_connected=True)
+    available2 = [k for k, v in r.max_min.model.input_hours.items() if v[1] > 0]
+    assert available == available2
+    r.service._mock_hour = await r.service.async_set_hour(18)
+    await r.max_min.async_update(0.4, peak, 7, car_connected=True)
+    available3 = [k for k, v in r.max_min.model.input_hours.items() if v[1] > 0]
+    assert available2 == available3
