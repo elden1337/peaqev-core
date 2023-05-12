@@ -904,7 +904,7 @@ async def test_expensive_today_cheap_tomorrow_2():
     ]
 
 
-@ pytest.mark.asyncio - ä
+@pytest.mark.asyncio
 async def test_new_test():
     MOCKHOUR = 13
     r = h(
