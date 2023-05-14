@@ -10,8 +10,8 @@ MINIMUM_DIFFERENCE = 0.1
 
 
 class MaxMinCharge:
-    def __init__(self, hoursselection: Hoursselection) -> None:
-        self.model = MaxMinModel()
+    def __init__(self, hoursselection: Hoursselection, min_price: float | None) -> None:
+        self.model = MaxMinModel(min_price=min_price)
         self.parent = hoursselection
         self.active: bool = False
 
@@ -60,7 +60,6 @@ class MaxMinCharge:
     ) -> None:
         allow_decrease: bool = False
         if await self.async_allow_decrease(car_connected):
-            print("here")
             allow_decrease = True
             await self.async_setup(max_charge=peak)
         _session = session_energy or 0
@@ -101,6 +100,7 @@ class MaxMinCharge:
             self.model.input_hours,
             key=lambda k: self.model.input_hours[k][0]
             if self.model.input_hours[k][1] != 0
+            and self.model.input_hours[k][0] > self.model.min_price
             else -1,
         )
         self.model.input_hours[max_key] = (self.model.input_hours[max_key][0], 0)

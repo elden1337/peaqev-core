@@ -35,7 +35,7 @@ class Hoursselection:
         )
         self.model.validate()
         self.service = HourSelectionService(parent=self, base_mock_hour=base_mock_hour)
-        self.max_min: MaxMinCharge = MaxMinCharge(self)
+        self.max_min: MaxMinCharge = MaxMinCharge(self, self.model.options.min_price)
 
     @property
     def offsets(self) -> dict:
