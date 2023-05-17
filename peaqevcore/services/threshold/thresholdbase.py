@@ -172,6 +172,7 @@ class ThresholdBase:
     @staticmethod
     def base_allowed_current(
         now_min: int,
+        now_sec: int,
         moving_avg: float,
         charger_enabled: bool,
         charger_done: bool,
@@ -186,9 +187,11 @@ class ThresholdBase:
         if not charger_enabled or charger_done or moving_avg == 0:
             return ret
         currents = currents_dict
+        minsec = minute * 60 + now_sec
         for key, value in currents.items():
             if (
-                (((moving_avg + key) / 60) * (60 - minute) + total_energy * 1000) / 1000
+                (((moving_avg + key) / 3600) * (3600 - minsec) + total_energy * 1000)
+                / 1000
             ) < peak:
                 ret = value
                 break
@@ -197,6 +200,7 @@ class ThresholdBase:
     @staticmethod
     async def async_base_allowed_current(
         now_min: int,
+        now_sec: int,
         moving_avg: float,
         charger_enabled: bool,
         charger_done: bool,
@@ -211,9 +215,11 @@ class ThresholdBase:
         if not charger_enabled or charger_done or moving_avg == 0:
             return ret
         currents = currents_dict
+        minsec = minute * 60 + now_sec
         for key, value in currents.items():
             if (
-                (((moving_avg + key) / 60) * (60 - minute) + total_energy * 1000) / 1000
+                (((moving_avg + key) / 3600) * (3600 - minsec) + total_energy * 1000)
+                / 1000
             ) < peak:
                 ret = value
                 break

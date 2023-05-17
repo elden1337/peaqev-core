@@ -17,6 +17,7 @@ class Threshold(ThresholdBase):
             return min(amps.values())
         return await ThresholdBase.async_base_allowed_current(
             datetime.now().minute,
+            datetime.now().second,
             self._hub.sensors.powersensormovingaverage.value
             if self._hub.sensors.powersensormovingaverage.value is not None
             else 0,
@@ -38,6 +39,7 @@ class Threshold(ThresholdBase):
             return min(amps.values())
         return ThresholdBase.base_allowed_current(
             datetime.now().minute,
+            datetime.now().second,
             self._hub.sensors.powersensormovingaverage.value
             if self._hub.sensors.powersensormovingaverage.value is not None
             else 0,
