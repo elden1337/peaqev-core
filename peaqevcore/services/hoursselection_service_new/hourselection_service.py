@@ -27,17 +27,17 @@ class DateTimeModel:
     _quarter: int = 1
     _quarter_set: bool = False
 
-    async def async_set_date(self, mock_date: date):
+    def set_date(self, mock_date: date):
         assert isinstance(mock_date, date), "Date must be a date object"
         self._date = mock_date
         self._date_set = True
 
-    async def async_set_hour(self, mock_hour: int):
+    def set_hour(self, mock_hour: int):
         assert 0 <= mock_hour <= 23, "Hour must be between 0 and 23"
         self._hour = mock_hour
         self._hour_set = True
 
-    async def async_set_quarter(self, mock_quarter: int):
+    def set_quarter(self, mock_quarter: int):
         assert 1 <= mock_quarter <= 4, "Quarter must be between 0 and 3"
         self._quarter = mock_quarter
         self._quarter_set = True
@@ -82,14 +82,14 @@ class HourPrice:
         self.permittance = 1.0 if self.hour_type == HourType.BelowMin else 0.0
 
     @staticmethod
-    async def async_set_hour_type(max_price, min_price, price):
+    def set_hour_type(max_price, min_price, price):
         if price > max_price:
             return HourType.AboveMax
         elif price < min_price:
             return HourType.BelowMin
         return HourType.Regular
 
-    async def async_set_passed(self, dt: DateTimeModel):
+    def set_passed(self, dt: DateTimeModel):
         if dt.hdate > self.day:
             self.passed = True
         elif dt.hdate == self.day:
@@ -124,6 +124,8 @@ class HourSelectionOptions:
 
 
 # -----------------
+from statistics import stdev, mean
+
 class HourSelectionService:
     def __init__(self, options: HourSelectionOptions = HourSelectionOptions()):
         self.options = options
@@ -133,37 +135,37 @@ class HourSelectionService:
     async def async_update(self):
         print(self.dtmodel)
         for hp in self.model.hours_prices:
-            await hp.async_set_passed(self.dtmodel)
+            hp.set_passed(self.dtmodel)
 
     async def async_update_prices(
         self, prices: list[float], prices_tomorrow: list[float] = []
     ):
         self.model.prices_today = prices  # clean first
         self.model.prices_tomorrow = prices_tomorrow  # clean first
-        self.model.hours_prices = await self.async_create_hour_prices(
+        self.model.hours_prices = self._create_hour_prices(
             prices, prices_tomorrow
         )
 
-    async def async_create_hour_prices(
+    def _create_hour_prices(
         self, prices: list[float], prices_tomorrow: list[float] = []
     ) -> list:
         match len(prices):
             case 24:
-                return await self.async_create_hour_prices_hourly(
+                return self._create_hour_prices_hourly(
                     prices, prices_tomorrow
                 )
             case 96:
-                return await self.async_create_hour_prices_quarterly(
+                return self._create_hour_prices_quarterly(
                     prices, prices_tomorrow
                 )
         raise ValueError("Prices must be either 24 or 96")
 
-    async def async_create_hour_prices_quarterly(
+    def _create_hour_prices_quarterly(
         self, prices: list[float], prices_tomorrow: list[float] = []
     ) -> list:
         return []
 
-    async def async_create_hour_prices_hourly(
+    def _create_hour_prices_hourly(
         self, prices: list[float], prices_tomorrow: list[float] = []
     ) -> list:
         ret = []
@@ -175,7 +177,7 @@ class HourSelectionService:
                     hour=idx,
                     price=p,
                     passed=True if idx < self.dtmodel.hour else False,
-                    hour_type=await HourPrice.async_set_hour_type(
+                    hour_type=HourPrice.set_hour_type(
                         self.options.max_price, self.options.min_price, p
                     ),
                 )
@@ -188,14 +190,34 @@ class HourSelectionService:
                     hour=idx,
                     price=p,
                     passed=False,
-                    hour_type=await HourPrice.async_set_hour_type(
+                    hour_type=HourPrice.set_hour_type(
                         self.options.max_price, self.options.min_price, p
                     ),
                 )
             )
+        self._set_permittance(ret)
         return ret
 
+    def _set_permittance(self, hour_prices: list[HourPrice]) -> None:
+        # Calculate the mean and standard deviation of the prices
+        prices = [hp.price for hp in hour_prices]
+        price_mean = mean(prices)
+        price_stdev = stdev(prices)
 
+        # Set the permittance attribute of each HourPrice object based on its price
+        for hp in hour_prices:
+            if hp.hour_type == HourType.BelowMin:
+                hp.permittance = 1.0
+            elif hp.hour_type == HourType.AboveMax:
+                hp.permittance = 0.0
+            elif hp.price < price_mean - price_stdev:
+                hp.permittance = 1.0
+            elif hp.price > price_mean + price_stdev:
+                hp.permittance = 0.0
+            else:
+                hp.permittance = round(1.0 - ((hp.price - price_mean + price_stdev) / (2 * price_stdev)),2)
+
+#-----------------main.py
 import asyncio
 
 P230520 = [
@@ -253,20 +275,34 @@ P230520 = [
     ],
 ]
 
+import matplotlib.pyplot as plt
+
+def graph_hour_prices(hour_prices: list[HourPrice]) -> None:
+    # Extract the prices and quarters from the HourPrice objects
+    permittance = [hp.permittance for hp in hour_prices]
+    idx = [hp.idx for hp in hour_prices]
+
+    # Create a line plot of the prices vs. quarters
+    plt.plot(idx, permittance)
+    plt.xlabel('Quarter')
+    plt.ylabel('Price')
+    plt.title('Hour Prices')
+    plt.show()
 
 async def do():
     opt = HourSelectionOptions(max_price=2, min_price=0.05)
     hss = HourSelectionService(opt)
     await hss.async_update_prices(P230520[0], P230520[1])
+    for p in hss.model.hours_prices:
+        print(p)
+    graph_hour_prices(hss.model.hours_prices)
+    # print("---- updating date")
+    # hss.dtmodel.set_date(date(2023, 5, 24))
+    # await hss.async_update()
     # for p in hss.model.hours_prices:
     #     print(p)
 
-    print("---- updating date")
-    await hss.dtmodel.async_set_date(date(2023, 5, 24))
-    await hss.async_update()
-    for p in hss.model.hours_prices:
-        print(p)
-
+    
     # print(list(map(lambda x: x.quarter, hss.model.hours_prices)))
     # filtered_list = list(
     #     filter(lambda obj: obj.hour_type == HourType.BelowMin, hss.model.hours_prices)
