@@ -24,7 +24,7 @@ class DateTimeModel:
     _date_set: bool = False
     _hour: int = 0
     _hour_set: bool = False
-    _quarter: int = 1
+    _quarter: int = 0
     _quarter_set: bool = False
 
     def set_date(self, mock_date: date):
@@ -38,7 +38,7 @@ class DateTimeModel:
         self._hour_set = True
 
     def set_quarter(self, mock_quarter: int):
-        assert 1 <= mock_quarter <= 4, "Quarter must be between 0 and 3"
+        assert 0 <= mock_quarter <= 3, "Quarter must be between 0 and 3"
         self._quarter = mock_quarter
         self._quarter_set = True
 
@@ -56,7 +56,7 @@ class DateTimeModel:
 
     @property
     def quarter(self) -> int:
-        return self._quarter if self._quarter_set else (datetime.now().minute // 15) + 1
+        return self._quarter if self._quarter_set else (datetime.now().minute // 15)
 
 
 # -----------------hourprice.py
@@ -69,14 +69,14 @@ class HourPrice:
     idx: str = field(init=False)
     day: date = date.today()
     hour: int = 0
-    quarter: int = 1
+    quarter: int = 0
     price: float = 0.0
     permittance: float = field(init=False)
     passed: bool = False
     hour_type: HourType = HourType.Regular
 
     def __post_init__(self):
-        assert 1 <= self.quarter <= 4, "Quarter must be between 0 and 3"
+        assert 0 <= self.quarter <= 3, "Quarter must be between 0 and 3"
         assert 0 <= self.hour <= 23, "Hour must be between 0 and 23"
         self.idx = f"{self.day}-{self.hour}-{self.quarter}"
         self.permittance = 1.0 if self.hour_type == HourType.BelowMin else 0.0
@@ -125,6 +125,7 @@ class HourSelectionOptions:
 
 # -----------------
 from statistics import stdev, mean
+from datetime import date, time
 
 class HourSelectionService:
     def __init__(self, options: HourSelectionOptions = HourSelectionOptions()):
@@ -217,6 +218,25 @@ class HourSelectionService:
             else:
                 hp.permittance = round(1.0 - ((hp.price - price_mean + price_stdev) / (2 * price_stdev)),2)
 
+    def _sort_hour_prices(self, hour_prices: list[HourPrice]) -> list[HourPrice]:
+        sorted_hour_prices = sorted(hour_prices, key=lambda hp: (hp.day, hp.hour, hp.quarter))
+        return sorted_hour_prices
+
+    def _create_dt_object(self, day: date, hour: int, quarter: int = 0) -> datetime:
+        return datetime.combine(day, time(hour, quarter * 15))
+
+    @property
+    def non_hours(self) -> list[datetime]:
+        return [self._create_dt_object(hp.day, hp.hour, hp.quarter) for hp in self.model.hours_prices if not hp.passed and hp.permittance == 0.0]
+    
+    @property   
+    def caution_hours(self) -> list[datetime]:
+        return list(self.dynamic_caution_hours.keys())
+    
+    @property
+    def dynamic_caution_hours(self) -> dict[datetime, float]:
+        return {self._create_dt_object(hp.day, hp.hour, hp.quarter): hp.permittance for hp in self.model.hours_prices if not hp.passed and 0.0 < hp.permittance < 1.0}
+
 #-----------------main.py
 import asyncio
 
@@ -293,9 +313,11 @@ async def do():
     opt = HourSelectionOptions(max_price=2, min_price=0.05)
     hss = HourSelectionService(opt)
     await hss.async_update_prices(P230520[0], P230520[1])
-    for p in hss.model.hours_prices:
-        print(p)
-    graph_hour_prices(hss.model.hours_prices)
+    # for p in hss.model.hours_prices:
+    #     print(p)
+    # graph_hour_prices(hss.model.hours_prices)
+
+    print(hss.non_hours)
     # print("---- updating date")
     # hss.dtmodel.set_date(date(2023, 5, 24))
     # await hss.async_update()
