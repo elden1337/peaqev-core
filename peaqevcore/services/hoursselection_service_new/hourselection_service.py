@@ -143,16 +143,16 @@ class HourSelectionService:
     ):
         self.model.prices_today = prices  # clean first
         self.model.prices_tomorrow = prices_tomorrow  # clean first
-        self.model.hours_prices = self._create_hour_prices(
+        self.model.hours_prices = await self.async_create_hour_prices(
             prices, prices_tomorrow
         )
 
-    def _create_hour_prices(
+    async def async_create_hour_prices(
         self, prices: list[float], prices_tomorrow: list[float] = []
     ) -> list:
         match len(prices):
             case 24:
-                return self._create_hour_prices_hourly(
+                return await self.async_create_hour_prices_hourly(
                     prices, prices_tomorrow
                 )
             case 96:
@@ -166,7 +166,7 @@ class HourSelectionService:
     ) -> list:
         return []
 
-    def _create_hour_prices_hourly(
+    async def async_create_hour_prices_hourly(
         self, prices: list[float], prices_tomorrow: list[float] = []
     ) -> list:
         ret = []
@@ -196,16 +196,21 @@ class HourSelectionService:
                     ),
                 )
             )
-        self._set_permittance(ret)
+        await self.async_set_permittance(ret)
         return ret
 
-    def _set_permittance(self, hour_prices: list[HourPrice]) -> None:
+    async def async_set_permittance(self, hour_prices: list[HourPrice]) -> None:
         # Calculate the mean and standard deviation of the prices
         prices = [hp.price for hp in hour_prices]
         price_mean = mean(prices)
         price_stdev = stdev(prices)
 
         # Set the permittance attribute of each HourPrice object based on its price
+        await self.async_set_initial_permittance(hour_prices, price_mean, price_stdev)
+        await self.async_set_scooped_permittance(hour_prices)
+
+    @staticmethod
+    async def async_set_initial_permittance(hour_prices: list[HourPrice], price_mean: float, price_stdev:float) -> None:
         for hp in hour_prices:
             if hp.hour_type == HourType.BelowMin:
                 hp.permittance = 1.0
@@ -217,6 +222,10 @@ class HourSelectionService:
                 hp.permittance = 0.0
             else:
                 hp.permittance = round(1.0 - ((hp.price - price_mean + price_stdev) / (2 * price_stdev)),2)
+
+    @staticmethod
+    async def async_set_scooped_permittance(hour_prices: list[HourPrice]) -> None:
+        pass
 
     def _sort_hour_prices(self, hour_prices: list[HourPrice]) -> list[HourPrice]:
         sorted_hour_prices = sorted(hour_prices, key=lambda hp: (hp.day, hp.hour, hp.quarter))
@@ -315,7 +324,7 @@ async def do():
     await hss.async_update_prices(P230520[0], P230520[1])
     # for p in hss.model.hours_prices:
     #     print(p)
-    # graph_hour_prices(hss.model.hours_prices)
+    graph_hour_prices(hss.model.hours_prices)
 
     print(hss.non_hours)
     # print("---- updating date")
