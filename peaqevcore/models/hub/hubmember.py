@@ -79,32 +79,37 @@ class HubMember:
 
     @value.setter
     def value(self, value):
-        if isinstance(value, self._type):
-            self._value = value
-        elif self._type is float:
-            try:
-                self._value = float(value)
-            except ValueError:
-                self._value = 0
-        elif self._type is int:
-            try:
-                self._value = int(float(value))
-            except ValueError:
-                self._value = 0
-        elif self._type is bool:
-            try:
-                if value is None:
+        try:
+            if isinstance(value, self._type):
+                self._value = value
+            elif self._type is float:
+                try:
+                    self._value = float(value)
+                except ValueError:
+                    self._value = 0
+            elif self._type is int:
+                try:
+                    self._value = int(float(value))
+                except ValueError:
+                    self._value = 0
+            elif self._type is bool:
+                try:
+                    if value is None:
+                        self._value = False
+                    elif value.lower() == "on":
+                        self._value = True
+                    elif value.lower() == "off":
+                        self._value = False
+                except ValueError as e:
+                    msg = f"Could not parse bool, setting to false to be sure {value}, {self._listenerentity}, {e}"
+                    _LOGGER.error(msg)
                     self._value = False
-                elif value.lower() == "on":
-                    self._value = True
-                elif value.lower() == "off":
-                    self._value = False
-            except ValueError as e:
-                msg = f"Could not parse bool, setting to false to be sure {value}, {self._listenerentity}, {e}"
-                _LOGGER.error(msg)
-                self._value = False
-        elif self._type is str:
-            self._value = str(value)
+            elif self._type is str:
+                self._value = str(value)
+        except Exception as e:
+            _LOGGER.error(
+                f"could not set value for {self._listenerentity} to {value} of type {self._type} because of {e}"
+            )
 
     def update(self):
         try:
