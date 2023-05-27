@@ -106,9 +106,9 @@ class HubMember:
         elif self._type is str:
             self._value = str(value)
 
-    async def async_update(self):
+    def update(self):
         try:
-            self.value = await self.async_get_sensor_from_hass(
+            self.value = self.get_sensor_from_hass(
                 f"{self._listenerentity}|{self._listenerattribute}"
             )
         except:
