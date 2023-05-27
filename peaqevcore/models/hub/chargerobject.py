@@ -14,7 +14,7 @@ class ChargerObject(HubMember):
         self._warned_not_initialized = False
         self._is_initialized = init_override
         super().__init__(
-            data_type=data_type,
+            data_type=self._type,
             listenerentity=listenerentity,
             init_override=init_override,
         )
