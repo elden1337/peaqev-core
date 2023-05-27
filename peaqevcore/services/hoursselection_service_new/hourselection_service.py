@@ -342,5 +342,29 @@ async def do():
     #     print(f)
 
 
-if __name__ == "__main__":
-    asyncio.run(do())
+# if __name__ == "__main__":
+#     asyncio.run(do())
+
+
+TT = [
+           "Charging",
+            "Discharging",
+            "Paused",
+            "Scheduled",
+            "Waiting for car demand",
+            "Waiting",
+            "Disconnected",
+            "Error",
+            "Ready",
+            "Locked",
+            "Locked, car connected",
+            "Updating",
+            "Waiting in queue by Power Sharing",
+            "Waiting in queue by Power Boost",
+            "Waiting MID failed",
+            "Waiting MID safety margin exceeded",
+            "Waiting in queue by Eco-Smart",
+            "Unknown",
+        ]
+for t in TT:
+    print(f'"{t.lower()}",')
