@@ -9,7 +9,7 @@ class ChargerObject(HubMember):
         self, data_type: list, listenerentity: str, init_override: bool = False
     ):
         self._native_values = data_type
-        self._type = type(data_type[0])
+        self._type = str
         self._listenerentity = listenerentity
         self._warned_not_initialized = False
         self._is_initialized = init_override
