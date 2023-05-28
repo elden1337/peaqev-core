@@ -119,8 +119,6 @@ class Hoursselection:
         self.prices = prices
         self.prices_tomorrow = prices_tomorrow
         await self.service.async_update_prices(self.prices, self.prices_tomorrow)
-        # if max_min:
-        #     await self.max_min.async_setup(max_charge=1)
 
     async def async_get_average_kwh_price(self) -> Tuple[float | None, float | None]:
         ret_dynamic = None

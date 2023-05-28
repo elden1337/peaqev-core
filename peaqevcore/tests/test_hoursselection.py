@@ -500,15 +500,15 @@ async def test_mockprices1_caution_hours_aggressive():
 async def test_mockprices1_caution_hours_per_type():
     r = h(cautionhour_type=CautionHourType.AGGRESSIVE)
     prices = MOCKPRICES1
-    r.service._mock_hour = await r.service.async_set_hour(21)
+    r.service.dtmodel.set_hour(21)
     await r.async_update_prices(prices)
     r2 = h(cautionhour_type=CautionHourType.INTERMEDIATE)
     prices2 = MOCKPRICES1
-    r2.service._mock_hour = 21
+    r2.service.dtmodel.set_hour(21)
     await r2.async_update_prices(prices2)
     r3 = h(cautionhour_type=CautionHourType.SUAVE)
     prices3 = MOCKPRICES1
-    r3.service._mock_hour = 21
+    r3.service.dtmodel.set_hour(21)
     await r3.async_update_prices(prices3)
     assert len(r.caution_hours) <= len(r2.caution_hours)
     assert len(r2.caution_hours) <= len(r3.caution_hours)
@@ -518,7 +518,8 @@ async def test_mockprices1_caution_hours_per_type():
 
 @pytest.mark.asyncio
 async def test_mockprices2_non_hours():
-    r = h(base_mock_hour=21)
+    r = h()
+    r.service.dtmodel.set_hour(21)
     prices = MOCKPRICES2
     await r.async_update_prices(prices)
     assert r.non_hours == [21]
@@ -526,7 +527,8 @@ async def test_mockprices2_non_hours():
 
 @pytest.mark.asyncio
 async def test_mockprices2_non_hours_unknown_tomorrow():
-    r = h(base_mock_hour=21)
+    r = h()
+    r.service.dtmodel.set_hour(21)
     prices = MOCKPRICES2
     prices_tomorrow = ["unknown" for i in range(0, 24)]
     await r.async_update_prices(prices, prices_tomorrow)
