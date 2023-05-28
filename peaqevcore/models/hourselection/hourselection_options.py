@@ -1,6 +1,12 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+from ...models.hourselection.cautionhourtype import CautionHourType
+
 import logging
 from dataclasses import dataclass, field
 from .topprice_type import TopPriceType
+
 from .set_top_price import set_absolute_top_price, async_add_tomorrow, async_validate_top_min_prices
 _LOGGER = logging.getLogger(__name__)
 
@@ -11,6 +17,7 @@ from calendar import monthrange
 
 @dataclass(frozen=False)
 class HourSelectionOptions:
+    cautionhour_type_enum: CautionHourType = CautionHourType.SUAVE
     cautionhour_type: float = 0
     top_price: float = 0 #move to separate file
     fixed_top_price: float = 0 #move to separate file

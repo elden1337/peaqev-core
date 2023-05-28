@@ -471,7 +471,8 @@ MOCKPRICELIST = [
 
 @pytest.mark.asyncio
 async def test_mockprices1_non_hours():
-    r = h(base_mock_hour=21)
+    r = h()
+    r.service.dtmodel.set_hour(21)
     prices = MOCKPRICES1
     await r.async_update_prices(prices)
     assert r.non_hours == [21]
@@ -479,7 +480,8 @@ async def test_mockprices1_non_hours():
 
 @pytest.mark.asyncio
 async def test_mockprices1_caution_hours():
-    r = h(base_mock_hour=21)
+    r = h()
+    r.service.dtmodel.set_hour(21)
     prices = MOCKPRICES1
     await r.async_update_prices(prices)
     assert r.caution_hours == [22]
@@ -489,7 +491,7 @@ async def test_mockprices1_caution_hours():
 async def test_mockprices1_caution_hours_aggressive():
     r = h(cautionhour_type=CautionHourType.AGGRESSIVE)
     prices = MOCKPRICES1
-    r.service._mock_hour = await r.service.async_set_hour(21)
+    r.service.dtmodel.set_hour(21)
     await r.async_update_prices(prices)
     assert r.caution_hours == [22]
 

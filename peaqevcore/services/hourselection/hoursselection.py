@@ -4,7 +4,7 @@ from ...models.hourselection.cautionhourtype import CautionHourType
 from ...models.hourselection.hourselection_model import HourSelectionModel
 from ...models.hourselection.hourselection_options import HourSelectionOptions
 from ...models.hourselection.hourtypelist import HourTypeList
-from .hourselectionservice.hourselectionservice import HourSelectionService
+from ..hoursselection_service_new.hourselection_service import HourSelectionService
 from .hourselectionservice.hoursselection_helpers import convert_none_list
 from .hourselectionservice.max_min_charge import MaxMinCharge
 
@@ -28,13 +28,14 @@ class Hoursselection:
         self.model = HourSelectionModel(
             options=HourSelectionOptions(
                 cautionhour_type=CautionHourType.get_num_value(cautionhour_type),
+                cautionhour_type_enum=self.cautionhour_type_enum,
                 min_price=min_price,
                 top_price=absolute_top_price,
                 blocknocturnal=blocknocturnal,
             )
         )
         self.model.validate()
-        self.service = HourSelectionService(parent=self, base_mock_hour=base_mock_hour)
+        self.service = HourSelectionService(options=self.model.options)
         self.max_min: MaxMinCharge = MaxMinCharge(self, self.model.options.min_price)
 
     @property
@@ -62,17 +63,18 @@ class Hoursselection:
 
     @property
     def internal_non_hours(self) -> list:
-        self.model.hours.update_hour_list(
-            listtype=HourTypeList.NonHour, hour=self.service.set_hour()
-        )
-        return self.model.hours.non_hours
+        # self.model.hours.update_hour_list(
+        #     listtype=HourTypeList.NonHour, hour=self.service.set_hour()
+        # )
+        # return self.model.hours.non_hours
+       return [h.hour for h in self.service.non_hours]
 
     @property
     def internal_dynamic_caution_hours(self) -> dict:
-        self.model.hours.update_hour_list(
-            listtype=HourTypeList.DynCautionHour, hour=self.service.set_hour()
-        )
-        return self.model.hours.dynamic_caution_hours
+        # self.model.hours.update_hour_list(
+        #     listtype=HourTypeList.DynCautionHour, hour=self.service.set_hour()
+        # )
+        return {k.hour: v for k,v in self.service.dynamic_caution_hours}
 
     @property
     def prices(self) -> list:
@@ -91,15 +93,6 @@ class Hoursselection:
     @prices_tomorrow.setter
     def prices_tomorrow(self, val):
         ret = convert_none_list(val)
-        if all(
-            [
-                self.service.preserve_interim,
-                ret is not None,
-                ret != self.model.prices_tomorrow,
-                len(ret) > 1,
-            ]
-        ):
-            self.service.preserve_interim = False
         self.model.prices_tomorrow = ret
 
     @property
@@ -125,7 +118,7 @@ class Hoursselection:
             max_min = True
         self.prices = prices
         self.prices_tomorrow = prices_tomorrow
-        await self.service.async_update()
+        await self.service.async_update_prices(self.prices, self.prices_tomorrow)
         # if max_min:
         #     await self.max_min.async_setup(max_charge=1)
 
