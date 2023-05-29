@@ -151,6 +151,11 @@ class HourSelectionService:
     def future_hours(self) -> list[HourPrice]:
         self.update()
         return [hp for hp in self.model.hours_prices if not hp.passed]
+    
+    @property
+    def passed_hours(self) -> list[HourPrice]:
+        self.update()
+        return [hp for hp in self.model.hours_prices if hp.passed]
 
     async def async_update_prices(
         self, prices: list[float], prices_tomorrow: list[float] = []
