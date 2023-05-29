@@ -1,133 +1,12 @@
-# from .models.datetime_model import DateTimeModel
-# from .models.hour_price import HourPrice
-# from .models.hourselection_model import HourSelectionModel
-
-
-# -----------------hour_type.py
-from enum import Enum
-
-
-class HourType(Enum):
-    Regular = 0
-    AboveMax = 1
-    BelowMin = 2
-
-
-# -----------------datetime_model.py
-from dataclasses import dataclass, field
-from datetime import datetime, date, timedelta
-
-
-@dataclass
-class DateTimeModel:
-    _date: date = field(default_factory=date.today)
-    _date_set: bool = False
-    _hour: int = 0
-    _hour_set: bool = False
-    _quarter: int = 0
-    _quarter_set: bool = False
-
-    def set_datetime(self, mock_dt: datetime):
-        assert isinstance(mock_dt, datetime), "Datetime must be a datetime object"
-        self._date = mock_dt.date()
-        self._date_set = True
-        self._hour = mock_dt.hour
-        self._hour_set = True
-        self._quarter = mock_dt.minute // 15
-        self._quarter_set = True
-
-    def set_date(self, mock_date: date):
-        assert isinstance(mock_date, date), "Date must be a date object"
-        self._date = mock_date
-        self._date_set = True
-
-    def set_hour(self, mock_hour: int):
-        assert 0 <= mock_hour <= 23, "Hour must be between 0 and 23"
-        self._hour = mock_hour
-        self._hour_set = True
-
-    def set_quarter(self, mock_quarter: int):
-        assert 0 <= mock_quarter <= 3, "Quarter must be between 0 and 3"
-        self._quarter = mock_quarter
-        self._quarter_set = True
-
-    @property
-    def hdate(self) -> date:
-        return self._date if self._date_set else date.today()
-
-    @property
-    def hdate_tomorrow(self) -> date:
-        return self.hdate + timedelta(days=1)
-
-    @property
-    def hour(self) -> int:
-        return self._hour if self._hour_set else datetime.now().hour
-
-    @property
-    def quarter(self) -> int:
-        return self._quarter if self._quarter_set else (datetime.now().minute // 15)
-
-
-# -----------------hourprice.py
-from dataclasses import dataclass, field
-from datetime import date
-
-
-@dataclass
-class HourPrice:
-    idx: str = field(init=False)
-    day: date = date.today()
-    hour: int = 0
-    quarter: int = 0
-    price: float = 0.0
-    permittance: float = field(init=False)
-    passed: bool = False
-    hour_type: HourType = HourType.Regular
-
-    def __post_init__(self):
-        assert 0 <= self.quarter <= 3, "Quarter must be between 0 and 3"
-        assert 0 <= self.hour <= 23, "Hour must be between 0 and 23"
-        self.idx = f"{self.day}-{self.hour}-{self.quarter}"
-        self.permittance = 1.0 if self.hour_type == HourType.BelowMin else 0.0
-
-    @staticmethod
-    def set_hour_type(max_price, min_price, price):
-        if price > max_price:
-            return HourType.AboveMax
-        elif price < min_price:
-            return HourType.BelowMin
-        return HourType.Regular
-
-    def set_passed(self, dt: DateTimeModel):
-        if dt.hdate > self.day:
-            self.passed = True
-        elif dt.hdate == self.day:
-            if self.hour < dt.hour:
-                self.passed = True
-            elif self.hour == dt.hour and self.quarter < dt.quarter:
-                print(f"{self.hour} {self.quarter} {dt.hour} {dt.quarter}")
-                self.passed = True
-        else:
-            self.passed = False
-
-
-# -----------------hourselection_model.py
-from dataclasses import dataclass, field
-
-
-@dataclass
-class HourSelectionModel:
-    prices_today: list[float] = field(default_factory=list)
-    prices_tomorrow: list[float] = field(default_factory=list)
-    hours_prices: list[HourPrice] = field(default_factory=list)
-
-
-
-# -----------------
+from .models.datetime_model import DateTimeModel
+from .models.hour_price import HourPrice
+from .models.hourselection_model import HourSelectionModel
 from statistics import stdev, mean
-from datetime import date, time
+from datetime import datetime
 from ...models.hourselection.hourselection_options import HourSelectionOptions
 from ...models.hourselection.cautionhourtype import CautionHourType
+from .models.hour_type import HourType
+
 
 class HourSelectionService:
     def __init__(self, options: HourSelectionOptions = HourSelectionOptions()):
@@ -156,6 +35,19 @@ class HourSelectionService:
     def passed_hours(self) -> list[HourPrice]:
         self.update()
         return [hp for hp in self.model.hours_prices if hp.passed]
+
+    @property
+    def non_hours(self) -> list[datetime]:
+        return [hp.dt for hp in self.model.hours_prices if not hp.passed and hp.permittance == 0.0]
+    
+    @property   
+    def caution_hours(self) -> list[datetime]:
+        return list(self.dynamic_caution_hours.keys())
+    
+    @property
+    def dynamic_caution_hours(self) -> dict[datetime, float]:
+        return {hp.dt: hp.permittance for hp in self.model.hours_prices if not hp.passed and 0.0 < hp.permittance < 1.0}
+
 
     async def async_update_prices(
         self, prices: list[float], prices_tomorrow: list[float] = []
@@ -277,21 +169,9 @@ class HourSelectionService:
         sorted_hour_prices = sorted(hour_prices, key=lambda hp: (hp.day, hp.hour, hp.quarter))
         return sorted_hour_prices
 
-    def _create_dt_object(self, day: date, hour: int, quarter: int = 0) -> datetime:
-        return datetime.combine(day, time(hour, quarter * 15))
 
-    @property
-    def non_hours(self) -> list[datetime]:
-        return [self._create_dt_object(hp.day, hp.hour, hp.quarter) for hp in self.model.hours_prices if not hp.passed and hp.permittance == 0.0]
-    
-    @property   
-    def caution_hours(self) -> list[datetime]:
-        return list(self.dynamic_caution_hours.keys())
-    
-    @property
-    def dynamic_caution_hours(self) -> dict[datetime, float]:
-        return {self._create_dt_object(hp.day, hp.hour, hp.quarter): hp.permittance for hp in self.model.hours_prices if not hp.passed and 0.0 < hp.permittance < 1.0}
 
+    
 # #-----------------main.py
 # import asyncio
 
