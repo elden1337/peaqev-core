@@ -14,6 +14,7 @@ setuptools.setup(
         "peaqevcore.services.hourselection.initializers",
         "peaqevcore.models.hourselection",
         "peaqevcore.models.hourselection.hourobjects",
+        "peaqevcore.services.hourselection.hoursselection_service_new"
         "peaqevcore.services.chargertype",
         "peaqevcore.models.chargertype",
         "peaqevcore.models",

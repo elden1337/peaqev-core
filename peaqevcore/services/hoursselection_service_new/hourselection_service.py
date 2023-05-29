@@ -27,6 +27,15 @@ class DateTimeModel:
     _quarter: int = 0
     _quarter_set: bool = False
 
+    def set_datetime(self, mock_dt: datetime):
+        assert isinstance(mock_dt, datetime), "Datetime must be a datetime object"
+        self._date = mock_dt.date()
+        self._date_set = True
+        self._hour = mock_dt.hour
+        self._hour_set = True
+        self._quarter = mock_dt.minute // 15
+        self._quarter_set = True
+
     def set_date(self, mock_date: date):
         assert isinstance(mock_date, date), "Date must be a date object"
         self._date = mock_date
@@ -96,6 +105,7 @@ class HourPrice:
             if self.hour < dt.hour:
                 self.passed = True
             elif self.hour == dt.hour and self.quarter < dt.quarter:
+                print(f"{self.hour} {self.quarter} {dt.hour} {dt.quarter}")
                 self.passed = True
         else:
             self.passed = False
@@ -122,12 +132,25 @@ from ...models.hourselection.cautionhourtype import CautionHourType
 class HourSelectionService:
     def __init__(self, options: HourSelectionOptions = HourSelectionOptions()):
         self.options = options
-        self.model = HourSelectionModel()
         self.dtmodel = DateTimeModel()
+        self.model = HourSelectionModel()
 
-    async def async_update(self):
+    def update(self):
         for hp in self.model.hours_prices:
             hp.set_passed(self.dtmodel)
+
+    async def async_update(self):
+        self.update()
+
+    @property
+    def all_hours(self) -> list[HourPrice]:
+        self.update()
+        return self.model.hours_prices
+
+    @property
+    def future_hours(self) -> list[HourPrice]:
+        self.update()
+        return [hp for hp in self.model.hours_prices if not hp.passed]
 
     async def async_update_prices(
         self, prices: list[float], prices_tomorrow: list[float] = []
