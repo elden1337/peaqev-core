@@ -1,3 +1,4 @@
+from datetime import date
 import pytest
 import statistics as stat
 from ..services.hourselection.hoursselection import Hoursselection as h
@@ -3167,7 +3168,7 @@ async def test_adjust_tomorrows_top_price_1():
         1.107,
     ]
     await r.async_update_adjusted_average(0.8)
-    await r.service.async_set_day(1)
+    r.service.dtmodel.set_date(date(2023, 1, 1))
     assert r.model.options.top_price_type == TopPriceType.Absolute
     await r.async_update_top_price(0.4)
     assert r.model.options.top_price_type == TopPriceType.Dynamic
@@ -3232,7 +3233,7 @@ async def test_adjust_tomorrows_top_price_5():
         1.107,
     ]
     await r.async_update_adjusted_average(0.8)
-    await r.service.async_set_day(5)
+    r.service.dtmodel.set_date(date(2023, 1, 5))
     assert r.model.options.top_price_type == TopPriceType.Absolute
     await r.async_update_top_price(0.4)
     assert r.model.options.top_price_type == TopPriceType.Dynamic
@@ -3297,7 +3298,7 @@ async def test_adjust_tomorrows_top_price_10():
         1.107,
     ]
     await r.async_update_adjusted_average(0.8)
-    await r.service.async_set_day(10)
+    r.service.dtmodel.set_date(date(2023, 1, 10))
     assert r.model.options.top_price_type == TopPriceType.Absolute
     await r.async_update_top_price(0.6)
     assert r.model.options.top_price_type == TopPriceType.Dynamic
@@ -3362,7 +3363,7 @@ async def test_adjust_tomorrows_top_price_15():
         1.107,
     ]
     await r.async_update_adjusted_average(0.8)
-    await r.service.async_set_day(15)
+    r.service.dtmodel.set_date(date(2023, 1, 15))
     assert r.model.options.top_price_type == TopPriceType.Absolute
     await r.async_update_top_price(4)
     assert r.model.options.top_price_type == TopPriceType.Dynamic
@@ -3427,7 +3428,7 @@ async def test_adjust_tomorrows_top_price_25():
         1.107,
     ]
     await r.async_update_adjusted_average(0.8)
-    await r.service.async_set_day(29)
+    r.service.dtmodel.set_date(date(2023, 1, 29))
     assert r.model.options.top_price_type == TopPriceType.Absolute
     await r.async_update_top_price(0.7)
     assert r.model.options.top_price_type == TopPriceType.Dynamic
@@ -3445,7 +3446,7 @@ async def test_230412():
     )
 
     await r.async_update_adjusted_average(0.77)
-    await r.service.async_set_day(12)
+    r.service.dtmodel.set_date(date(2023, 1, 12))
     assert r.model.options.top_price_type == TopPriceType.Absolute
     await r.async_update_top_price(0.97)
     assert r.model.options.top_price_type == TopPriceType.Dynamic
@@ -3485,7 +3486,7 @@ async def test_negative_price_230430():
         0.5,
     ]
     await r.async_update_adjusted_average(0.97)
-    await r.service.async_set_day(30)
+    r.service.dtmodel.set_date(date(2023, 1, 30))
     await r.async_update_top_price(0.92)
     r.service.dtmodel.set_hour(11)
     await r.async_update_prices(prices)

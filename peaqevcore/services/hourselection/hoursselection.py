@@ -110,7 +110,7 @@ class Hoursselection:
         await self.model.options.async_set_absolute_top_price(dyn_top_price)
         await self.async_update_prices(self.prices, self.prices_tomorrow)
 
-    async def async_update_prices(self, prices: list = [], prices_tomorrow: list = []):
+    async def async_update_prices(self, prices: list, prices_tomorrow: list = []):
         max_min: bool = False
         if any([self.prices != prices, self.prices_tomorrow != prices_tomorrow]):
             max_min = True

@@ -75,6 +75,8 @@ class HourSelectionService:
                 )
             case 96:
                 return self._create_hour_prices_quarterly(prices, prices_tomorrow)
+            case 0:
+                return []
         raise ValueError(f"Prices must be either 24 or 96. len is {len(prices)}")
 
     def _create_hour_prices_quarterly(
