@@ -30,7 +30,7 @@ class HourSelectionService:
     def future_hours(self) -> list[HourPrice]:
         self.update()
         return [hp for hp in self.model.hours_prices if not hp.passed]
-    
+
     @property
     def passed_hours(self) -> list[HourPrice]:
         self.update()
@@ -38,16 +38,23 @@ class HourSelectionService:
 
     @property
     def non_hours(self) -> list[datetime]:
-        return [hp.dt for hp in self.model.hours_prices if not hp.passed and hp.permittance == 0.0]
-    
-    @property   
+        return [
+            hp.dt
+            for hp in self.model.hours_prices
+            if not hp.passed and hp.permittance == 0.0
+        ]
+
+    @property
     def caution_hours(self) -> list[datetime]:
         return list(self.dynamic_caution_hours.keys())
-    
+
     @property
     def dynamic_caution_hours(self) -> dict[datetime, float]:
-        return {hp.dt: hp.permittance for hp in self.model.hours_prices if not hp.passed and 0.0 < hp.permittance < 1.0}
-
+        return {
+            hp.dt: hp.permittance
+            for hp in self.model.hours_prices
+            if not hp.passed and 0.0 < hp.permittance < 1.0
+        }
 
     async def async_update_prices(
         self, prices: list[float], prices_tomorrow: list[float] = []
@@ -67,10 +74,8 @@ class HourSelectionService:
                     prices, prices_tomorrow
                 )
             case 96:
-                return self._create_hour_prices_quarterly(
-                    prices, prices_tomorrow
-                )
-        raise ValueError("Prices must be either 24 or 96")
+                return self._create_hour_prices_quarterly(prices, prices_tomorrow)
+        raise ValueError(f"Prices must be either 24 or 96. len is {len(prices)}")
 
     def _create_hour_prices_quarterly(
         self, prices: list[float], prices_tomorrow: list[float] = []
@@ -121,7 +126,9 @@ class HourSelectionService:
         self._set_scooped_permittance(hour_prices, self.options.cautionhour_type_enum)
 
     @staticmethod
-    def _set_initial_permittance(hour_prices: list[HourPrice], price_mean: float, price_stdev:float) -> None:
+    def _set_initial_permittance(
+        hour_prices: list[HourPrice], price_mean: float, price_stdev: float
+    ) -> None:
         for hp in hour_prices:
             if hp.hour_type == HourType.BelowMin:
                 hp.permittance = 1.0
@@ -132,13 +139,17 @@ class HourSelectionService:
             elif hp.price > price_mean + price_stdev:
                 hp.permittance = 0.0
             else:
-                hp.permittance = round(1.0 - ((hp.price - price_mean + price_stdev) / (2 * price_stdev)),2)
+                hp.permittance = round(
+                    1.0 - ((hp.price - price_mean + price_stdev) / (2 * price_stdev)), 2
+                )
 
     @staticmethod
-    def _set_scooped_permittance(hour_prices: list[HourPrice], caution_hour_type: CautionHourType) -> None:
+    def _set_scooped_permittance(
+        hour_prices: list[HourPrice], caution_hour_type: CautionHourType
+    ) -> None:
         lo_cutoff = 0.5
         hi_cutoff = 0.75
-        max_hours = 24 #todo: add support for 96 if quarterly
+        max_hours = 24  # todo: add support for 96 if quarterly
         match caution_hour_type:
             case CautionHourType.SUAVE:
                 """suave"""
@@ -153,7 +164,7 @@ class HourSelectionService:
             case CautionHourType.SCROOGE:
                 """scrooge"""
                 lo_cutoff = 0.7
-                max_hours = 8 #todo: add support for 32 if quarterly
+                max_hours = 8  # todo: add support for 32 if quarterly
 
         for i in hour_prices:
             _t = i.permittance
@@ -161,17 +172,16 @@ class HourSelectionService:
                 i.permittance = 0.0
             elif i.permittance >= hi_cutoff:
                 i.permittance = 1.0
-        for ii in hour_prices:
-            print(ii)
+        # for ii in hour_prices:
+        #     print(ii)
 
-        
     def _sort_hour_prices(self, hour_prices: list[HourPrice]) -> list[HourPrice]:
-        sorted_hour_prices = sorted(hour_prices, key=lambda hp: (hp.day, hp.hour, hp.quarter))
+        sorted_hour_prices = sorted(
+            hour_prices, key=lambda hp: (hp.day, hp.hour, hp.quarter)
+        )
         return sorted_hour_prices
 
 
-
-    
 # #-----------------main.py
 # import asyncio
 
@@ -260,7 +270,7 @@ class HourSelectionService:
 #     # for p in hss.model.hours_prices:
 #     #     print(p)
 
-    
+
 #     # print(list(map(lambda x: x.quarter, hss.model.hours_prices)))
 #     # filtered_list = list(
 #     #     filter(lambda obj: obj.hour_type == HourType.BelowMin, hss.model.hours_prices)

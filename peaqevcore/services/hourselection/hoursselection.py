@@ -50,10 +50,11 @@ class Hoursselection:
 
     @property
     def caution_hours(self) -> list:
-        self.model.hours.update_hour_list(
-            listtype=HourTypeList.CautionHour, hour=self.service.set_hour()
-        )
-        return self.model.hours.caution_hours
+        return [k.hour for k, v in self.service.dynamic_caution_hours]
+        # self.model.hours.update_hour_list(
+        #     listtype=HourTypeList.CautionHour, hour=self.service.set_hour()
+        # )
+        # return self.model.hours.caution_hours
 
     @property
     def dynamic_caution_hours(self) -> dict:
@@ -67,14 +68,11 @@ class Hoursselection:
         #     listtype=HourTypeList.NonHour, hour=self.service.set_hour()
         # )
         # return self.model.hours.non_hours
-       return [h.hour for h in self.service.non_hours]
+        return [h.hour for h in self.service.non_hours]
 
     @property
     def internal_dynamic_caution_hours(self) -> dict:
-        # self.model.hours.update_hour_list(
-        #     listtype=HourTypeList.DynCautionHour, hour=self.service.set_hour()
-        # )
-        return {k.hour: v for k,v in self.service.dynamic_caution_hours}
+        return {k.hour: v for k, v in self.service.dynamic_caution_hours}
 
     @property
     def prices(self) -> list:
@@ -150,7 +148,8 @@ class Hoursselection:
             return round(sum(ret_static.values()), 1), ret_dynamic
 
     async def async_get_charge_or_price(self, charge: bool = False) -> dict:
-        hour = await self.service.async_set_hour()
+        # hour = await self.service.async_set_hour()
+        hour = self.service.dtmodel.hour
         ret = {}
 
         async def async_looper_charge(h: int):

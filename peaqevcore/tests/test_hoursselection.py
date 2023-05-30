@@ -10,463 +10,7 @@ from ..services.hourselection.hourselectionservice.hoursselection_helpers import
 )
 from ..models.hourselection.cautionhourtype import CautionHourType, VALUES_CONVERSION
 from ..models.hourselection.topprice_type import TopPriceType
-
-MOCKPRICES1 = [
-    0.129,
-    0.123,
-    0.077,
-    0.064,
-    0.149,
-    0.172,
-    1,
-    2.572,
-    2.688,
-    2.677,
-    2.648,
-    2.571,
-    2.561,
-    2.07,
-    2.083,
-    2.459,
-    2.508,
-    2.589,
-    2.647,
-    2.648,
-    2.603,
-    2.588,
-    1.424,
-    0.595,
-]
-MOCKPRICES2 = [
-    0.392,
-    0.408,
-    0.418,
-    0.434,
-    0.408,
-    0.421,
-    0.45,
-    0.843,
-    0.904,
-    1.013,
-    0.939,
-    0.915,
-    0.703,
-    0.445,
-    0.439,
-    0.566,
-    0.913,
-    1.4,
-    2.068,
-    2.182,
-    1.541,
-    2.102,
-    1.625,
-    1.063,
-]
-MOCKPRICES3 = [
-    0.243,
-    0.282,
-    0.279,
-    0.303,
-    0.299,
-    0.314,
-    0.304,
-    0.377,
-    0.482,
-    0.484,
-    0.482,
-    0.268,
-    0.171,
-    0.174,
-    0.171,
-    0.277,
-    0.52,
-    0.487,
-    0.51,
-    0.487,
-    0.451,
-    0.397,
-    0.331,
-    0.35,
-]
-MOCKPRICES4 = [
-    0.629,
-    0.37,
-    0.304,
-    0.452,
-    0.652,
-    1.484,
-    2.704,
-    3.693,
-    3.64,
-    3.275,
-    2.838,
-    2.684,
-    2.606,
-    1.463,
-    0.916,
-    0.782,
-    0.793,
-    1.199,
-    1.825,
-    2.108,
-    1.909,
-    1.954,
-    1.168,
-    0.268,
-]
-MOCKPRICES5 = [
-    0.299,
-    0.388,
-    0.425,
-    0.652,
-    0.94,
-    1.551,
-    2.835,
-    3.62,
-    3.764,
-    3.313,
-    2.891,
-    2.723,
-    2.621,
-    1.714,
-    1.422,
-    1.187,
-    1.422,
-    1.422,
-    1.673,
-    1.63,
-    1.551,
-    1.669,
-    0.785,
-    0.264,
-]
-MOCKPRICES6 = [
-    1.057,
-    1.028,
-    0.826,
-    0.87,
-    1.15,
-    1.754,
-    2.42,
-    2.918,
-    3.262,
-    3.009,
-    2.594,
-    2.408,
-    2.364,
-    2.34,
-    2.306,
-    2.376,
-    2.494,
-    2.626,
-    2.626,
-    2.516,
-    2.564,
-    2.565,
-    2.489,
-    1.314,
-]
-MOCKPRICES7 = [
-    0.475,
-    1.051,
-    0.329,
-    0.396,
-    0.394,
-    2.049,
-    2.145,
-    3.019,
-    2.92,
-    2.534,
-    2.194,
-    2.12,
-    2.073,
-    1.86,
-    1.765,
-    1.578,
-    1.59,
-    1.943,
-    2.07,
-    2.098,
-    2.088,
-    2.041,
-    1.888,
-    0.475,
-]
-MOCKPRICES_FLAT = [
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-]
-MOCKPRICES_SHORT = [0.51, 0.487, 0.451, 0.397, 0.331, 0.35]
-PRICES_BLANK = ",,,,,,,,,,,,,,,,,,,,,,,"
-PRICS_ARRAY_WITH_STRING = "6,6,6,6,6,6,6,6,hej,6,6,6,6,6,6"
-PRICES_ARRAYSTR = "6.0,6.0,6.0,6.06,6.0,6.0,6.6,6,6,6,6,6,6,6"
-MOCKPRICES6 = [
-    1.057,
-    1.028,
-    0.826,
-    0.87,
-    1.15,
-    1.754,
-    2.42,
-    2.918,
-    3.262,
-    3.009,
-    2.594,
-    2.408,
-    2.364,
-    2.34,
-    2.306,
-    2.376,
-    2.494,
-    2.626,
-    2.626,
-    2.516,
-    2.564,
-    2.565,
-    2.489,
-    1.314,
-]
-MOCKPRICES_CHEAP = [
-    0.042,
-    0.034,
-    0.026,
-    0.022,
-    0.02,
-    0.023,
-    0.027,
-    0.037,
-    0.049,
-    0.068,
-    0.08,
-    0.093,
-    0.093,
-    0.091,
-    0.103,
-    0.178,
-    0.36,
-    0.427,
-    1.032,
-    0.972,
-    0.551,
-    0.628,
-    0.404,
-    0.355,
-]
-MOCKPRICES_EXPENSIVE = [
-    0.366,
-    0.359,
-    0.357,
-    0.363,
-    0.402,
-    2.026,
-    4.036,
-    4.935,
-    6.689,
-    4.66,
-    4.145,
-    4.094,
-    3.526,
-    2.861,
-    2.583,
-    2.456,
-    2.414,
-    2.652,
-    2.799,
-    3.896,
-    4.232,
-    4.228,
-    3.824,
-    2.084,
-]
-MOCK220621 = [
-    1.987,
-    1.813,
-    0.996,
-    0.527,
-    0.759,
-    1.923,
-    3.496,
-    4.512,
-    4.375,
-    3.499,
-    2.602,
-    2.926,
-    2.857,
-    2.762,
-    2.354,
-    2.678,
-    3.117,
-    2.384,
-    3.062,
-    2.376,
-    2.245,
-    2.046,
-    1.84,
-    0.372,
-]
-MOCK220622 = [
-    0.142,
-    0.106,
-    0.1,
-    0.133,
-    0.266,
-    0.412,
-    2.113,
-    3,
-    4.98,
-    4.374,
-    3.913,
-    3.796,
-    3.491,
-    3.241,
-    3.173,
-    2.647,
-    2.288,
-    2.254,
-    2.497,
-    2.247,
-    2.141,
-    2.2,
-    2.113,
-    0.363,
-]
-
-MOCKPRICELIST = [
-    MOCKPRICES1,
-    MOCKPRICES2,
-    MOCKPRICES3,
-    MOCKPRICES4,
-    MOCKPRICES5,
-    MOCKPRICES6,
-    MOCKPRICES7,
-    [
-        1.918,
-        1.795,
-        1.654,
-        1.348,
-        1.348,
-        1.432,
-        1.695,
-        1.797,
-        1.837,
-        1.993,
-        2.032,
-        2.163,
-        2.113,
-        2.059,
-        2.131,
-        2.142,
-        2.247,
-        2.366,
-        2.37,
-        2.213,
-        2.067,
-        1.724,
-        1.334,
-        1.136,
-    ],
-    [
-        1.713,
-        1.716,
-        1.663,
-        1.568,
-        1.58,
-        1.631,
-        1.996,
-        2.471,
-        2.771,
-        2.808,
-        3.095,
-        3.166,
-        3.155,
-        3.155,
-        3.154,
-        3.162,
-        3.333,
-        3.394,
-        3.275,
-        2.984,
-        2.747,
-        4.32,
-        3.14,
-        2.853,
-    ],
-    [
-        2.853,
-        3.14,
-        4.32,
-        2.853,
-        2.855,
-        3.02,
-        3.532,
-        5.259,
-        6.032,
-        6.057,
-        6.065,
-        5.924,
-        5.686,
-        5.77,
-        6.071,
-        6.13,
-        6.257,
-        6.815,
-        6.621,
-        6.157,
-        5.31,
-        4.481,
-        3.951,
-        3.568,
-    ],
-    [
-        1.71,
-        1.714,
-        1.661,
-        1.566,
-        1.578,
-        1.628,
-        1.994,
-        2.468,
-        2.767,
-        2.804,
-        3.091,
-        3.162,
-        3.151,
-        3.151,
-        3.15,
-        3.158,
-        3.329,
-        3.39,
-        3.27,
-        2.98,
-        2.743,
-        2.578,
-        2.409,
-        1.918,
-    ],
-]
+from .prices import *
 
 
 @pytest.mark.asyncio
@@ -694,7 +238,7 @@ async def test_total_charge_just_today():
     r = h(cautionhour_type=CautionHourType.SUAVE, base_mock_hour=MOCKHOUR)
     prices = MOCKPRICES1
     await r.async_update_prices(prices)
-    r.service._mock_hour = await r.service.async_set_hour(MOCKHOUR)
+    r.service.dtmodel.set_hour(MOCKHOUR)
     ret = await r.async_get_total_charge(2)
     assert ret[0] == 17.1
 
@@ -706,7 +250,7 @@ async def test_total_charge_today_tomorrow():
     prices = MOCKPRICES1
     prices_tomorrow = MOCKPRICES2
     await r.async_update_prices(prices, prices_tomorrow)
-    r.service._mock_hour = await r.service.async_set_hour(MOCKHOUR)
+    r.service.dtmodel.set_hour(MOCKHOUR)
     ret = await r.async_get_total_charge(2)
     assert ret[0] == 33.9
 
@@ -716,7 +260,7 @@ async def test_average_kwh_price_just_today():
     r = h(cautionhour_type=CautionHourType.SUAVE)
     MOCKHOUR = 0
     prices = MOCKPRICES1
-    r.service._mock_hour = await r.service.async_set_hour(MOCKHOUR)
+    r.service.dtmodel.set_hour(MOCKHOUR)
     await r.async_update_prices(prices)
     ret = await r.async_get_average_kwh_price()
     assert ret[0] == 0.34
@@ -728,7 +272,7 @@ async def test_average_kwh_price_today_tomorrow():
     r = h(cautionhour_type=CautionHourType.SUAVE)
     prices = MOCKPRICES1
     prices_tomorrow = MOCKPRICES2
-    r.service._mock_hour = await r.service.async_set_hour(MOCKHOUR)
+    r.service.dtmodel.set_hour(MOCKHOUR)
     await r.async_update_prices(prices, prices_tomorrow)
     ret = await r.async_get_average_kwh_price()
     assert ret[0] == 0.53
@@ -1160,7 +704,7 @@ async def test_over_midnight():
         0.02,
     ]
     await r.async_update_prices(prices, prices_tomorrow)
-    r.service._mock_hour = await r.service.async_set_hour(23)
+    r.service.dtmodel.set_hour(23)
     assert r.service.preserve_interim == True
     assert r.non_hours == [7, 8, 9]
     prices = [
@@ -1191,7 +735,7 @@ async def test_over_midnight():
     ]
     prices_tomorrow = []
     await r.async_update_prices(prices, prices_tomorrow)
-    r.service._mock_hour = await r.service.async_set_hour(2)
+    r.service.dtmodel.set_hour(2)
     assert r.non_hours == [7, 8, 9]
 
 
@@ -1251,9 +795,9 @@ async def test_very_high_prices():
         5.717,
         3.386,
     ]
-    r.service._mock_hour = await r.service.async_set_hour(13)
+    r.service.dtmodel.set_hour(13)
     await r.async_update_prices(prices, prices_tomorrow)
-    r.service._mock_hour = await r.service.async_set_hour(MOCKHOUR)
+    r.service.dtmodel.set_hour(MOCKHOUR)
     assert r.non_hours == [19, 20, 21, 10, 14, 15, 16, 17, 18]
 
 
@@ -1288,7 +832,7 @@ async def test_regular5():
         0.95,
         0.817,
     ]
-    r.service._mock_hour = await r.service.async_set_hour(0)
+    r.service.dtmodel.set_hour(0)
     await r.async_update_prices(prices)
     assert r.non_hours == [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
     prices_tomorrow = [
@@ -1318,9 +862,9 @@ async def test_regular5():
         1.065,
     ]
     await r.async_update_prices(prices, prices_tomorrow)
-    r.service._mock_hour = await r.service.async_set_hour(13)
+    r.service.dtmodel.set_hour(13)
     assert r.non_hours == [13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
-    r.service._mock_hour = await r.service.async_set_hour(22)
+    r.service.dtmodel.set_hour(22)
     assert r.non_hours == [22, 13, 14, 15, 16, 17, 18, 19, 20, 21]
 
 
@@ -1358,7 +902,7 @@ async def test_regular5_max_price():
         0.817,
     ]
     await r.async_update_prices(prices)
-    r.service._mock_hour = await r.service.async_set_hour(0)
+    r.service.dtmodel.set_hour(0)
     assert r.non_hours == [
         6,
         7,
@@ -1406,7 +950,7 @@ async def test_regular5_max_price():
         1.065,
     ]
     await r.async_update_prices(prices, prices_tomorrow)
-    r.service._mock_hour = await r.service.async_set_hour(13)
+    r.service.dtmodel.set_hour(13)
     assert r.non_hours == [
         13,
         14,
@@ -1465,7 +1009,7 @@ async def test_regular6():
         0.817,
     ]
     await r.async_update_prices(prices)
-    r.service._mock_hour = await r.service.async_set_hour(0)
+    r.service.dtmodel.set_hour(0)
     assert r.non_hours == [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
 
 
@@ -1501,14 +1045,14 @@ async def test_regular7():
         1.065,
     ]
     await r.async_update_prices(prices)
-    r.service._mock_hour = await r.service.async_set_hour(0)
+    r.service.dtmodel.set_hour(0)
     assert r.non_hours == [13, 14, 15, 16, 17, 18, 19, 20, 21]
 
 
 @pytest.mark.asyncio
 async def test_remove_tomorrow():
     r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=0, min_price=0)
-    r.service._mock_hour = await r.service.async_set_hour(13)
+    r.service.dtmodel.set_hour(13)
     prices = [
         2.801,
         2.265,
@@ -1562,7 +1106,7 @@ async def test_remove_tomorrow():
         3.386,
     ]
     await r.async_update_prices(prices, prices_tomorrow)
-    r.service._mock_hour = await r.service.async_set_hour(0)
+    r.service.dtmodel.set_hour(0)
     prices = [
         3.452,
         1.311,
@@ -1596,7 +1140,7 @@ async def test_remove_tomorrow():
 @pytest.mark.asyncio
 async def test_set_tomorrow_as_comma_string():
     r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=0, min_price=0)
-    r.service._mock_hour = await r.service.async_set_hour(13)
+    r.service.dtmodel.set_hour(13)
     prices = [
         2.801,
         2.265,
@@ -1650,7 +1194,7 @@ async def test_set_tomorrow_as_comma_string():
         3.386,
     ]
     await r.async_update_prices(prices, prices_tomorrow)
-    r.service._mock_hour = await r.service.async_set_hour(0)
+    r.service.dtmodel.set_hour(0)
     prices2 = [
         3.452,
         1.311,
@@ -1684,124 +1228,20 @@ async def test_set_tomorrow_as_comma_string():
 @pytest.mark.asyncio
 async def test_negative_prices_and_min_price():
     r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=0, min_price=0.3)
-    r.service._mock_hour = await r.service.async_set_hour(7)
-    prices = [
-        0.013,
-        0.004,
-        0,
-        -0.001,
-        -0.001,
-        0,
-        0.011,
-        0.027,
-        0.042,
-        0.041,
-        0.041,
-        0.041,
-        0.034,
-        0.029,
-        0.034,
-        0.039,
-        0.069,
-        0.086,
-        0.064,
-        0.032,
-        0.014,
-        0.012,
-        0.005,
-        0,
-    ]
-    await r.async_update_prices(prices)
+    r.service.dtmodel.set_hour(7)
+    await r.async_update_prices(PNEGATIVE[0])
     assert r.non_hours == []
-    r.service._mock_hour = await r.service.async_set_hour(14)
-    prices_tomorrow = [
-        -0.014,
-        -0.027,
-        -0.028,
-        -0.028,
-        -0.028,
-        -0.027,
-        -0.015,
-        -0.005,
-        0,
-        0.008,
-        0.013,
-        0.022,
-        0.02,
-        0.023,
-        0.026,
-        0.028,
-        0.06,
-        0.101,
-        0.082,
-        0.128,
-        0.08,
-        0.068,
-        0.073,
-        0.068,
-    ]
-    await r.async_update_prices(prices, prices_tomorrow)
+    r.service.dtmodel.set_hour(14)
+    await r.async_update_prices(PNEGATIVE[0], PNEGATIVE[1])
     assert r.non_hours == []
 
 
 @pytest.mark.asyncio
 async def test_high_diff_in_interim_update():
     r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=0, min_price=0)
-    r.service._mock_hour = await r.service.async_set_hour(7)
-    prices = [
-        0.139,
-        0.157,
-        0.176,
-        0.196,
-        0.219,
-        0.232,
-        0.263,
-        0.3,
-        0.345,
-        0.436,
-        0.488,
-        0.523,
-        0.565,
-        0.521,
-        0.475,
-        0.515,
-        1.972,
-        2.521,
-        2.351,
-        1.074,
-        0.488,
-        0.416,
-        0.378,
-        0.364,
-    ]
-    r.service._mock_hour = await r.service.async_set_hour(14)
-    prices_tomorrow = [
-        0.47,
-        0.475,
-        0.499,
-        0.489,
-        0.499,
-        0.616,
-        1.341,
-        2.69,
-        2.74,
-        2.237,
-        1.914,
-        1.746,
-        1.926,
-        2.227,
-        2.719,
-        2.853,
-        2.855,
-        3.416,
-        2.928,
-        2.519,
-        2.105,
-        1.344,
-        0.287,
-        0.232,
-    ]
-    await r.async_update_prices(prices, prices_tomorrow)
+    r.service.dtmodel.set_hour(7)
+    r.service.dtmodel.set_hour(14)
+    await r.async_update_prices(P221105[0], P221105[1])
     assert r.non_hours == [17, 18, 7, 8, 9, 13]
     assert r.dynamic_caution_hours == {
         16: 0.32,
@@ -1817,34 +1257,8 @@ async def test_high_diff_in_interim_update():
 async def test_22115_adjusted_average_today_only():
     # average today is 0.63
     r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=0, min_price=0)
-    r.service._mock_hour = await r.service.async_set_hour(7)
-    prices = [
-        0.139,
-        0.157,
-        0.176,
-        0.196,
-        0.219,
-        0.232,
-        0.263,
-        0.3,
-        0.345,
-        0.436,
-        0.488,
-        0.523,
-        0.565,
-        0.521,
-        0.475,
-        0.515,
-        1.972,
-        2.521,
-        2.351,
-        1.074,
-        0.488,
-        0.416,
-        0.378,
-        0.364,
-    ]
-    await r.async_update_prices(prices)
+    r.service.dtmodel.set_hour(7)
+    await r.async_update_prices(P221105[0])
     assert r.non_hours == [16, 17, 18]
     assert r.caution_hours == [10, 11, 12, 13, 15, 19, 20]
 
@@ -1853,35 +1267,9 @@ async def test_22115_adjusted_average_today_only():
 async def test_22115_adjusted_average_today_only_lower():
     # average today is 0.63
     r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=0, min_price=0)
-    r.service._mock_hour = await r.service.async_set_hour(7)
+    r.service.dtmodel.set_hour(7)
     await r.async_update_adjusted_average(0.3)
-    prices = [
-        0.139,
-        0.157,
-        0.176,
-        0.196,
-        0.219,
-        0.232,
-        0.263,
-        0.3,
-        0.345,
-        0.436,
-        0.488,
-        0.523,
-        0.565,
-        0.521,
-        0.475,
-        0.515,
-        1.972,
-        2.521,
-        2.351,
-        1.074,
-        0.488,
-        0.416,
-        0.378,
-        0.364,
-    ]
-    await r.async_update_prices(prices)
+    await r.async_update_prices(P221105[0])
     assert r.non_hours == [16, 17, 18]
     assert r.caution_hours == [8, 9, 10, 11, 12, 13, 14, 15, 19, 20, 21, 22, 23]
 
@@ -1890,35 +1278,9 @@ async def test_22115_adjusted_average_today_only_lower():
 async def test_22115_adjusted_average_today_only_raise():
     # average today is 0.63
     r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=0, min_price=0)
-    r.service._mock_hour = await r.service.async_set_hour(7)
+    r.service.dtmodel.set_hour(7)
     await r.async_update_adjusted_average(1)
-    prices = [
-        0.139,
-        0.157,
-        0.176,
-        0.196,
-        0.219,
-        0.232,
-        0.263,
-        0.3,
-        0.345,
-        0.436,
-        0.488,
-        0.523,
-        0.565,
-        0.521,
-        0.475,
-        0.515,
-        1.972,
-        2.521,
-        2.351,
-        1.074,
-        0.488,
-        0.416,
-        0.378,
-        0.364,
-    ]
-    await r.async_update_prices(prices)
+    await r.async_update_prices(P221105[0])
     assert r.non_hours == [16, 17, 18]
     assert r.caution_hours == [19]
 
@@ -1927,61 +1289,9 @@ async def test_22115_adjusted_average_today_only_raise():
 async def test_22115_adjusted_average():
     # average today is 0.63
     r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=0, min_price=0)
-    r.service._mock_hour = await r.service.async_set_hour(7)
-    prices = [
-        0.139,
-        0.157,
-        0.176,
-        0.196,
-        0.219,
-        0.232,
-        0.263,
-        0.3,
-        0.345,
-        0.436,
-        0.488,
-        0.523,
-        0.565,
-        0.521,
-        0.475,
-        0.515,
-        1.972,
-        2.521,
-        2.351,
-        1.074,
-        0.488,
-        0.416,
-        0.378,
-        0.364,
-    ]
-    r.service._mock_hour = await r.service.async_set_hour(14)
-    prices_tomorrow = [
-        0.47,
-        0.475,
-        0.499,
-        0.489,
-        0.499,
-        0.616,
-        1.341,
-        2.69,
-        2.74,
-        2.237,
-        1.914,
-        1.746,
-        1.926,
-        2.227,
-        2.719,
-        2.853,
-        2.855,
-        3.416,
-        2.928,
-        2.519,
-        2.105,
-        1.344,
-        0.287,
-        0.232,
-    ]
-    await r.async_update_prices(prices, prices_tomorrow)
+    r.service.dtmodel.set_hour(7)
+    r.service.dtmodel.set_hour(14)
+    await r.async_update_prices(P221105[0], P221105[1])
     assert r.non_hours == [17, 18, 7, 8, 9, 13]
     assert r.dynamic_caution_hours == {
         16: 0.32,
@@ -1997,62 +1307,10 @@ async def test_22115_adjusted_average():
 async def test_22115_adjusted_average_lower():
     # average today is 0.63
     r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=0, min_price=0)
-    r.service._mock_hour = await r.service.async_set_hour(7)
+    r.service.dtmodel.set_hour(7)
     await r.async_update_adjusted_average(0.33)
-    prices = [
-        0.139,
-        0.157,
-        0.176,
-        0.196,
-        0.219,
-        0.232,
-        0.263,
-        0.3,
-        0.345,
-        0.436,
-        0.488,
-        0.523,
-        0.565,
-        0.521,
-        0.475,
-        0.515,
-        1.972,
-        2.521,
-        2.351,
-        1.074,
-        0.488,
-        0.416,
-        0.378,
-        0.364,
-    ]
-    r.service._mock_hour = await r.service.async_set_hour(14)
-    prices_tomorrow = [
-        0.47,
-        0.475,
-        0.499,
-        0.489,
-        0.499,
-        0.616,
-        1.341,
-        2.69,
-        2.74,
-        2.237,
-        1.914,
-        1.746,
-        1.926,
-        2.227,
-        2.719,
-        2.853,
-        2.855,
-        3.416,
-        2.928,
-        2.519,
-        2.105,
-        1.344,
-        0.287,
-        0.232,
-    ]
-    await r.async_update_prices(prices, prices_tomorrow)
+    r.service.dtmodel.set_hour(14)
+    await r.async_update_prices(P221105[0], P221105[1])
     assert r.non_hours == [17, 18, 7, 8, 9, 13]
     assert r.caution_hours == [16, 19, 5, 6, 10, 11, 12]
 
@@ -2061,62 +1319,10 @@ async def test_22115_adjusted_average_lower():
 async def test_22115_adjusted_average_raise():
     # average today is 0.63
     r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=0, min_price=0)
-    r.service._mock_hour = await r.service.async_set_hour(7)
+    r.service.dtmodel.set_hour(7)
     await r.async_update_adjusted_average(1.6)
-    prices = [
-        0.139,
-        0.157,
-        0.176,
-        0.196,
-        0.219,
-        0.232,
-        0.263,
-        0.3,
-        0.345,
-        0.436,
-        0.488,
-        0.523,
-        0.565,
-        0.521,
-        0.475,
-        0.515,
-        1.972,
-        2.521,
-        2.351,
-        1.074,
-        0.488,
-        0.416,
-        0.378,
-        0.364,
-    ]
-    r.service._mock_hour = await r.service.async_set_hour(14)
-    prices_tomorrow = [
-        0.47,
-        0.475,
-        0.499,
-        0.489,
-        0.499,
-        0.616,
-        1.341,
-        2.69,
-        2.74,
-        2.237,
-        1.914,
-        1.746,
-        1.926,
-        2.227,
-        2.719,
-        2.853,
-        2.855,
-        3.416,
-        2.928,
-        2.519,
-        2.105,
-        1.344,
-        0.287,
-        0.232,
-    ]
-    await r.async_update_prices(prices, prices_tomorrow)
+    r.service.dtmodel.set_hour(14)
+    await r.async_update_prices(P221105[0], P221105[1])
     assert r.non_hours == [17, 18, 7, 8, 9, 13]
     assert r.caution_hours == [16, 6, 10, 11, 12]
     assert r.dynamic_caution_hours == {16: 0.32, 6: 0.7, 10: 0.51, 11: 0.56, 12: 0.51}
@@ -2125,33 +1331,7 @@ async def test_22115_adjusted_average_raise():
 @pytest.mark.asyncio
 async def test_offset_dict_1():
     r = h()
-    prices = [
-        0.139,
-        0.157,
-        0.176,
-        0.196,
-        0.219,
-        0.232,
-        0.263,
-        0.3,
-        0.345,
-        0.436,
-        0.488,
-        0.523,
-        0.565,
-        0.521,
-        0.475,
-        0.515,
-        1.972,
-        2.521,
-        2.351,
-        1.074,
-        0.488,
-        0.416,
-        0.378,
-        0.364,
-    ]
-    await r.async_update_prices(prices)
+    await r.async_update_prices(P221105[0])
     _tod1 = r.offsets.get("today")
     assert _tod1 == {
         0: -1.0,
@@ -2181,33 +1361,7 @@ async def test_offset_dict_1():
     }
     _tom1 = r.offsets.get("tomorrow")
     assert _tom1 == {}
-    prices_tomorrow = [
-        0.47,
-        0.475,
-        0.499,
-        0.489,
-        0.499,
-        0.616,
-        1.341,
-        2.69,
-        2.74,
-        2.237,
-        1.914,
-        1.746,
-        1.926,
-        2.227,
-        2.719,
-        2.853,
-        2.855,
-        3.416,
-        2.928,
-        2.519,
-        2.105,
-        1.344,
-        0.287,
-        0.232,
-    ]
-    await r.async_update_prices(prices, prices_tomorrow)
+    await r.async_update_prices(P221105[0], P221105[1])
     _tod = r.offsets.get("today")
     _tom = r.offsets.get("tomorrow")
     assert _tod == {
@@ -2410,7 +1564,7 @@ async def test_offset_dict_2():
 @pytest.mark.asyncio
 async def test_22127_1():
     r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=0, min_price=0)
-    r.service._mock_hour = await r.service.async_set_hour(7)
+    r.service.dtmodel.set_hour(7)
     prices = [
         1.918,
         1.795,
@@ -2445,7 +1599,7 @@ async def test_22127_1():
 @pytest.mark.asyncio
 async def test_22127_1_adjusted_average():
     r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=0, min_price=0)
-    r.service._mock_hour = await r.service.async_set_hour(7)
+    r.service.dtmodel.set_hour(7)
     await r.async_update_adjusted_average(2.8)
     prices = [
         1.918,
@@ -2484,7 +1638,7 @@ async def test_22127_2_adjusted_average():
         cautionhour_type=CautionHourType.INTERMEDIATE, absolute_top_price=0, min_price=0
     )
     # avg today is 1.87
-    r.service._mock_hour = await r.service.async_set_hour(0)
+    r.service.dtmodel.set_hour(0)
     await r.async_update_adjusted_average(2.8)
     prices = [
         1.918,
@@ -2514,7 +1668,7 @@ async def test_22127_2_adjusted_average():
     ]
     await r.async_update_prices(prices)
     assert r.non_hours == [0, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-    r.service._mock_hour = await r.service.async_set_hour(22)
+    r.service.dtmodel.set_hour(22)
     prices_tomorrow = [
         1.71,
         1.714,
@@ -2552,7 +1706,7 @@ async def test_22128_1():
         cautionhour_type=CautionHourType.INTERMEDIATE, absolute_top_price=0, min_price=0
     )
     # avg today is 1.87
-    r.service._mock_hour = await r.service.async_set_hour(0)
+    r.service.dtmodel.set_hour(0)
     prices = [
         1.713,
         1.716,
@@ -2581,7 +1735,7 @@ async def test_22128_1():
     ]
     await r.async_update_prices(prices)
     assert r.non_hours == [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
-    r.service._mock_hour = await r.service.async_set_hour(14)
+    r.service.dtmodel.set_hour(14)
     prices_tomorrow = [
         2.851,
         2.787,
@@ -2619,7 +1773,7 @@ async def test_22128_1_adjusted_average():
         cautionhour_type=CautionHourType.INTERMEDIATE, absolute_top_price=0, min_price=0
     )
     # avg today is 1.87
-    r.service._mock_hour = await r.service.async_set_hour(0)
+    r.service.dtmodel.set_hour(0)
     await r.async_update_adjusted_average(2.7)
     prices = [
         1.713,
@@ -2649,7 +1803,7 @@ async def test_22128_1_adjusted_average():
     ]
     await r.async_update_prices(prices)
     assert r.non_hours == [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
-    r.service._mock_hour = await r.service.async_set_hour(14)
+    r.service.dtmodel.set_hour(14)
     prices_tomorrow = [
         2.851,
         2.787,
@@ -2700,7 +1854,7 @@ async def test_same_price_same_offset():
     r = h(
         cautionhour_type=CautionHourType.INTERMEDIATE, absolute_top_price=0, min_price=0
     )
-    r.service._mock_hour = await r.service.async_set_hour(0)
+    r.service.dtmodel.set_hour(0)
     prices = [
         1.713,
         1.716,
@@ -2727,7 +1881,7 @@ async def test_same_price_same_offset():
         3.14,
         2.853,
     ]
-    r.service._mock_hour = await r.service.async_set_hour(14)
+    r.service.dtmodel.set_hour(14)
     prices_tomorrow = [
         2.853,
         3.14,
@@ -2766,7 +1920,7 @@ async def test_offset_total():
     r = h(
         cautionhour_type=CautionHourType.INTERMEDIATE, absolute_top_price=0, min_price=0
     )
-    r.service._mock_hour = await r.service.async_set_hour(0)
+    r.service.dtmodel.set_hour(0)
     for price in MOCKPRICELIST:
         prices = price
         await r.async_update_prices(prices)
@@ -2776,7 +1930,7 @@ async def test_offset_total():
 @pytest.mark.asyncio
 async def test_not_too_shallow_caution_hours():
     r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=0, min_price=0)
-    r.service._mock_hour = await r.service.async_set_hour(0)
+    r.service.dtmodel.set_hour(0)
     prices = [
         1.713,
         1.716,
@@ -2805,7 +1959,7 @@ async def test_not_too_shallow_caution_hours():
     ]
     await r.async_update_prices(prices)
     val = [c for c in r.dynamic_caution_hours.values() if c < 0.3]
-    r.service._mock_hour = await r.service.async_set_hour(14)
+    r.service.dtmodel.set_hour(14)
     prices_tomorrow = [
         2.853,
         3.14,
@@ -2841,7 +1995,7 @@ async def test_not_too_shallow_caution_hours():
 @pytest.mark.asyncio
 async def test_charge_below_average_today_only():
     r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=0, min_price=0)
-    r.service._mock_hour = await r.service.async_set_hour(0)
+    r.service.dtmodel.set_hour(0)
     _avg = 0
     tests = {}
     for price in MOCKPRICELIST:
@@ -2856,7 +2010,7 @@ async def test_charge_below_average_today_only():
 @pytest.mark.asyncio
 async def test_charge_price_fixed_today_only():
     r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=0, min_price=0)
-    r.service._mock_hour = await r.service.async_set_hour(0)
+    r.service.dtmodel.set_hour(0)
     prices = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
     await r.async_update_prices(prices)
     ret = await r.async_get_average_kwh_price()
@@ -2866,7 +2020,7 @@ async def test_charge_price_fixed_today_only():
 @pytest.mark.asyncio
 async def test_charge_price_fixed_today_tomorrow():
     r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=0, min_price=0)
-    r.service._mock_hour = await r.service.async_set_hour(13)
+    r.service.dtmodel.set_hour(13)
     prices = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1]
     prices_tomorrow = [
         1,
@@ -2902,7 +2056,7 @@ async def test_charge_price_fixed_today_tomorrow():
 @pytest.mark.asyncio
 async def test_charge_below_average_today_and_tomorrow():
     r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=0, min_price=0)
-    r.service._mock_hour = await r.service.async_set_hour(14)
+    r.service.dtmodel.set_hour(14)
     _avg = 0
     for price in MOCKPRICELIST:
         for price2 in MOCKPRICELIST:
@@ -2922,7 +2076,7 @@ async def test_charge_below_average_today_and_tomorrow():
 @pytest.mark.asyncio
 async def test_charge_below_average_today_and_tomorrow_compare_to_mediancharge():
     r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=0, min_price=0)
-    r.service._mock_hour = await r.service.async_set_hour(14)
+    r.service.dtmodel.set_hour(14)
     _avg = 0
     for price in MOCKPRICELIST:
         for price2 in MOCKPRICELIST:
@@ -2948,7 +2102,7 @@ async def test_charge_below_average_today_only_compare_to_mediancharge():
     r = h(
         cautionhour_type=CautionHourType.INTERMEDIATE, absolute_top_price=0, min_price=0
     )
-    r.service._mock_hour = await r.service.async_set_hour(0)
+    r.service.dtmodel.set_hour(0)
     for price in MOCKPRICELIST:
         prices = price
         await r.async_update_prices(prices)
@@ -3012,7 +2166,7 @@ async def test_weird_pricelist():
         1.641,
     ]
     await r.async_update_prices(prices, prices_tomorrow)
-    r.service._mock_hour = await r.service.async_set_hour(20)
+    r.service.dtmodel.set_hour(20)
     assert len(r.offsets["today"])
     assert len(r.offsets["tomorrow"])
 
@@ -3056,7 +2210,7 @@ async def test_cheapest_cautionhour_in_nonhours():
     ]
     await r.async_update_adjusted_average(1.34)
     await r.async_update_prices(prices)
-    r.service._mock_hour = await r.service.async_set_hour(0)
+    r.service.dtmodel.set_hour(0)
     assert r.non_hours == [16, 17, 18, 19]
     assert r.dynamic_caution_hours == {}
     assert r.model.options.absolute_top_price == 5.5
@@ -3097,7 +2251,7 @@ async def test_230108():
     ]
     await r.async_update_prices(prices)
     await r.async_update_adjusted_average(1.34)
-    r.service._mock_hour = await r.service.async_set_hour(12)
+    r.service.dtmodel.set_hour(12)
     assert r.non_hours == [16, 17, 18, 19]
 
 
@@ -3158,7 +2312,7 @@ async def test_cautionhourtypes():
             0.648,
         ]
         await r.async_update_prices(prices)
-        r.service._mock_hour = await r.service.async_set_hour(12)
+        r.service.dtmodel.set_hour(12)
         assert r.non_hours == nonhours[c.value]
         assert r.dynamic_caution_hours == cautionhours[c.value]
 
@@ -3289,7 +2443,7 @@ async def test_230205_cautionhourtypes():
         ]
         await r.async_update_adjusted_average(1.38)
         await r.async_update_prices(prices, prices_tomorrow)
-        r.service._mock_hour = await r.service.async_set_hour(15)
+        r.service.dtmodel.set_hour(15)
         assert r.non_hours == nonhours[c.value]
         assert r.dynamic_caution_hours == cautionhours[c.value]
         del r
@@ -3356,10 +2510,10 @@ async def test_230205_interimday():
     ]
     await r.async_update_prices(prices, prices_tomorrow)
     await r.async_update_adjusted_average(1.38)
-    r.service._mock_hour = await r.service.async_set_hour(13)
+    r.service.dtmodel.set_hour(13)
     assert r.non_hours == [13, 17, 6, 7, 8, 9, 10, 11, 12]
     assert r.caution_hours == [14, 15, 16, 18, 19, 20, 21, 22, 4, 5]
-    r.service._mock_hour = await r.service.async_set_hour(14)
+    r.service.dtmodel.set_hour(14)
     assert r.non_hours == [17, 6, 7, 8, 9, 10, 11, 12, 13]
     assert r.caution_hours == [14, 15, 16, 18, 19, 20, 21, 22, 4, 5]
 
@@ -3424,9 +2578,9 @@ async def test_230208():
         0.284,
     ]
     await r.async_update_prices(prices, prices_tomorrow)
-    r.service._mock_hour = await r.service.async_set_hour(13)
+    r.service.dtmodel.set_hour(13)
     assert r.non_hours == [13, 14, 15, 16, 17, 18, 19, 20, 7, 8, 9, 10, 11, 12]
-    r.service._mock_hour = await r.service.async_set_hour(14)
+    r.service.dtmodel.set_hour(14)
     assert r.non_hours == [14, 15, 16, 17, 18, 19, 20, 7, 8, 9, 10, 11, 12, 13]
 
 
@@ -3489,7 +2643,7 @@ async def test_230313_issue_72():
         0.778,
         0.724,
     ]
-    r.service._mock_hour = await r.service.async_set_hour(14)
+    r.service.dtmodel.set_hour(14)
     await r.async_update_prices(prices, prices_tomorrow)
     await r.async_update_adjusted_average(1.44)
     await r.async_update_top_price(1.45)
@@ -3554,7 +2708,7 @@ async def test_230313_issue_72_scrooge():
         0.778,
         0.724,
     ]
-    r.service._mock_hour = await r.service.async_set_hour(14)
+    r.service.dtmodel.set_hour(14)
     await r.async_update_prices(prices, prices_tomorrow)
     await r.async_update_adjusted_average(1.44)
     await r.async_update_top_price(1.45)
@@ -3622,7 +2776,7 @@ async def test_230314_block_nocturnal():
         0.778,
         0.724,
     ]
-    r.service._mock_hour = await r.service.async_set_hour(14)
+    r.service.dtmodel.set_hour(14)
     await r.async_update_prices(prices, prices_tomorrow)
     await r.async_update_adjusted_average(1.44)
     await r.async_update_top_price(1.45)
@@ -3661,7 +2815,7 @@ async def test_230317_today_only():
     await r.async_update_prices(prices)
     await r.async_update_adjusted_average(0.87)
     await r.async_update_top_price(1.33)
-    r.service._mock_hour = await r.service.async_set_hour(9)
+    r.service.dtmodel.set_hour(9)
     assert r.non_hours == [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
 
 
@@ -3720,12 +2874,12 @@ async def test_230317_today_tomorrow():
         0.471,
         0.464,
     ]
-    r.service._mock_hour = await r.service.async_set_hour(14)
+    r.service.dtmodel.set_hour(14)
     await r.async_update_prices(prices, prices_tomorrow)
     await r.async_update_adjusted_average(0.87)
     await r.async_update_top_price(1.33)
     assert r.non_hours == [14, 15, 16, 17, 18, 19, 20, 21, 22, 5, 6, 7, 8, 9, 12, 13]
-    r.service._mock_hour = await r.service.async_set_hour(20)
+    r.service.dtmodel.set_hour(20)
     assert r.non_hours == [20, 21, 22, 5, 6, 7, 8, 9, 12, 13, 14, 15, 16, 17, 18, 19]
     assert r.caution_hours == []
     assert r.dynamic_caution_hours == {}
@@ -3788,7 +2942,7 @@ async def test_230318_today_tomorrow():
     ]
     await r.async_update_adjusted_average(0.77)
     await r.async_update_top_price(1.28)
-    r.service._mock_hour = await r.service.async_set_hour(13)
+    r.service.dtmodel.set_hour(13)
     assert r.service._mock_hour == 13
     await r.async_update_prices(prices, prices_tomorrow)
     assert r.non_hours == [17, 18, 19, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
@@ -3851,7 +3005,7 @@ async def test_230319_today_tomorrow_scrooge():
     ]
     await r.async_update_adjusted_average(0.8)
     await r.async_update_top_price(1.25)
-    r.service._mock_hour = await r.service.async_set_hour(14)
+    r.service.dtmodel.set_hour(14)
     await r.async_update_prices(prices, prices_tomorrow)
     assert r.non_hours == [14, 15, 16, 17, 18, 19, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
     assert r.caution_hours == []
@@ -3914,10 +3068,10 @@ async def test_230322_over_night_scrooge():
     ]
     await r.async_update_adjusted_average(0.8)
     await r.async_update_top_price(1.25)
-    r.service._mock_hour = await r.service.async_set_hour(14)
+    r.service.dtmodel.set_hour(14)
     await r.async_update_prices(prices, prices_tomorrow)
     assert r.non_hours == [14, 15, 16, 17, 18, 19, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
-    r.service._mock_hour = await r.service.async_set_hour(0)
+    r.service.dtmodel.set_hour(0)
     assert r.service.preserve_interim is True
     await r.async_update_prices(prices_tomorrow)
     _non_hours = r.non_hours
@@ -3945,7 +3099,7 @@ async def test_230322_over_night_scrooge():
         22,
         23,
     ]
-    r.service._mock_hour = await r.service.async_set_hour(1)
+    r.service.dtmodel.set_hour(1)
     # nothing should change here.
     await r.async_update_prices(prices_tomorrow, [])
     assert r.non_hours == _non_hours
@@ -4017,7 +3171,7 @@ async def test_adjust_tomorrows_top_price_1():
     assert r.model.options.top_price_type == TopPriceType.Absolute
     await r.async_update_top_price(0.4)
     assert r.model.options.top_price_type == TopPriceType.Dynamic
-    r.service._mock_hour = await r.service.async_set_hour(14)
+    r.service.dtmodel.set_hour(14)
     await r.async_update_prices(prices, prices_tomorrow)
     assert len(r.non_hours) == 19
 
@@ -4082,7 +3236,7 @@ async def test_adjust_tomorrows_top_price_5():
     assert r.model.options.top_price_type == TopPriceType.Absolute
     await r.async_update_top_price(0.4)
     assert r.model.options.top_price_type == TopPriceType.Dynamic
-    r.service._mock_hour = await r.service.async_set_hour(14)
+    r.service.dtmodel.set_hour(14)
     await r.async_update_prices(prices, prices_tomorrow)
     assert len(r.non_hours) == 19
 
@@ -4147,7 +3301,7 @@ async def test_adjust_tomorrows_top_price_10():
     assert r.model.options.top_price_type == TopPriceType.Absolute
     await r.async_update_top_price(0.6)
     assert r.model.options.top_price_type == TopPriceType.Dynamic
-    r.service._mock_hour = await r.service.async_set_hour(14)
+    r.service.dtmodel.set_hour(14)
     await r.async_update_prices(prices, prices_tomorrow)
     assert len(r.non_hours) == 13
 
@@ -4212,7 +3366,7 @@ async def test_adjust_tomorrows_top_price_15():
     assert r.model.options.top_price_type == TopPriceType.Absolute
     await r.async_update_top_price(4)
     assert r.model.options.top_price_type == TopPriceType.Dynamic
-    r.service._mock_hour = await r.service.async_set_hour(14)
+    r.service.dtmodel.set_hour(14)
     await r.async_update_prices(prices, prices_tomorrow)
     assert len(r.non_hours) == 10
 
@@ -4277,7 +3431,7 @@ async def test_adjust_tomorrows_top_price_25():
     assert r.model.options.top_price_type == TopPriceType.Absolute
     await r.async_update_top_price(0.7)
     assert r.model.options.top_price_type == TopPriceType.Dynamic
-    r.service._mock_hour = await r.service.async_set_hour(14)
+    r.service.dtmodel.set_hour(14)
     await r.async_update_prices(prices, prices_tomorrow)
     assert len(r.non_hours) == 12
 
@@ -4289,65 +3443,14 @@ async def test_230412():
         absolute_top_price=30,
         min_price=0.0,
     )
-    prices = [
-        0.54,
-        0.55,
-        0.57,
-        0.6,
-        0.62,
-        0.72,
-        0.74,
-        0.88,
-        0.9,
-        0.83,
-        0.77,
-        0.81,
-        0.77,
-        0.72,
-        0.61,
-        0.55,
-        0.51,
-        0.56,
-        0.58,
-        0.52,
-        0.44,
-        0.42,
-        0.34,
-        0.15,
-    ]
-    prices_tomorrow = [
-        0.07,
-        0.07,
-        0.06,
-        0.06,
-        0.06,
-        0.11,
-        0.41,
-        0.45,
-        0.47,
-        0.45,
-        0.44,
-        0.42,
-        0.4,
-        0.4,
-        0.35,
-        0.37,
-        0.39,
-        0.41,
-        0.41,
-        0.41,
-        0.39,
-        0.35,
-        0.29,
-        0.21,
-    ]
+
     await r.async_update_adjusted_average(0.77)
     await r.service.async_set_day(12)
     assert r.model.options.top_price_type == TopPriceType.Absolute
     await r.async_update_top_price(0.97)
     assert r.model.options.top_price_type == TopPriceType.Dynamic
-    r.service._mock_hour = await r.service.async_set_hour(22)
-    await r.async_update_prices(prices, prices_tomorrow)
+    r.service.dtmodel.set_hour(22)
+    await r.async_update_prices(P230412[0], P230412[1])
     assert r.non_hours == []
     assert r.dynamic_caution_hours == {}
 
@@ -4384,7 +3487,7 @@ async def test_negative_price_230430():
     await r.async_update_adjusted_average(0.97)
     await r.service.async_set_day(30)
     await r.async_update_top_price(0.92)
-    r.service._mock_hour = await r.service.async_set_hour(11)
+    r.service.dtmodel.set_hour(11)
     await r.async_update_prices(prices)
     assert r.non_hours == []
 
@@ -4394,11 +3497,11 @@ async def test_negative_price_230430():
 #     r = h(cautionhour_type=CautionHourType.AGGRESSIVE.value, absolute_top_price=3, min_price=0.0)
 #     prices = [1.138, 1.112, 1.019, 0.925, 0.925, 0.937, 1.499, 1.7, 1.708, 1.678, 1.339, 0.925, 0.593, 0.485, 0.416, 0.412, 0.412, 0.41, 0.404, 0.409, 0.362, 0.306, 0.282, 0.198]
 #     await r.async_update_adjusted_average(1.44
-#     r.service._mock_hour = await r.service.async_set_hour(13)
+#     r.service.dtmodel.set_hour(13)
 #     assert r.non_hours == [14,15,16,17,18,19,20,7,8,9,10,11,12]
 #     prices_tomorrow = [0.17, 0.142, 0.108, 0.104, 0.168, 0.234, 0.29, 0.355, 0.402, 0.412, 0.417, 0.408, 0.395, 0.366, 0.357, 0.362, 0.361, 0.382, 0.371, 0.342, 0.332, 0.317, 0.303, 0.284]
 #     assert r.non_hours == [14,15,16,17,18,19,20,7,8,9,10,11,12]
-#     r.service._mock_hour = await r.service.async_set_hour(14)
+#     r.service.dtmodel.set_hour(14)
 #     assert r.non_hours == [14,15,16,17,18,19,20,7,8,9,10,11,12,13]
 
 # async def test_230114():
