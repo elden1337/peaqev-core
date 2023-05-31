@@ -61,9 +61,17 @@ class HourSelectionService:
     ):
         self.model.prices_today = prices  # clean first
         self.model.prices_tomorrow = prices_tomorrow  # clean first
-        self.model.hours_prices = await self.async_create_hour_prices(
-            prices, prices_tomorrow
-        )
+        if self._do_recalculate_prices(prices):
+            self.model.hours_prices = await self.async_create_hour_prices(
+                prices, prices_tomorrow
+            )
+
+    def _do_recalculate_prices(self, prices) -> bool:
+        if [
+            hp.price for hp in self.model.hours_prices if hp.day == self.dtmodel.hdate
+        ] == prices:
+            return False
+        return True
 
     async def async_create_hour_prices(
         self, prices: list[float], prices_tomorrow: list[float] = []
@@ -131,7 +139,7 @@ class HourSelectionService:
         self._set_scooped_permittance(hour_prices, self.options.cautionhour_type_enum)
 
     @staticmethod
-    def _set_price_mean(prices: list[float], adjusted_average: float|None) -> float:
+    def _set_price_mean(prices: list[float], adjusted_average: float | None) -> float:
         print(f"adj: {adjusted_average}")
         if not adjusted_average:
             return mean(prices)
@@ -143,7 +151,7 @@ class HourSelectionService:
     ) -> None:
         # print(f"price_mean: {price_mean}")
         # print(f"price_stdev: {price_stdev}")
-        for hp in hour_prices:            
+        for hp in hour_prices:
             if hp.hour_type == HourType.BelowMin:
                 hp.permittance = 1.0
             elif hp.hour_type == HourType.AboveMax:
@@ -156,7 +164,7 @@ class HourSelectionService:
                 hp.permittance = round(
                     1.0 - ((hp.price - price_mean + price_stdev) / (2 * price_stdev)), 2
                 )
-            #print(f"{hp.hour}, {hp.price}kr. {hp.permittance}")
+            # print(f"{hp.hour}, {hp.price}kr. {hp.permittance}")
 
     @staticmethod
     def _set_scooped_permittance(

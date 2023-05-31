@@ -3,6 +3,7 @@ from datetime import date, datetime, time
 from .hour_type import HourType
 from .datetime_model import DateTimeModel
 
+
 @dataclass
 class HourPrice:
     idx: str = field(init=False)
