@@ -117,21 +117,33 @@ class HourSelectionService:
         await self.async_set_permittance(ret)
         return ret
 
-    async def async_set_permittance(self, hour_prices: list[HourPrice]) -> None:
-        # Calculate the mean and standard deviation of the prices
-        prices = [hp.price for hp in hour_prices]
-        price_mean = mean(prices)
-        price_stdev = stdev(prices)
+    async def async_update_adjusted_average(self, adjusted_average: float) -> None:
+        self.model.adjusted_average = adjusted_average
+        self.update()
+        if len(self.model.hours_prices) > 0:
+            await self.async_set_permittance(self.model.hours_prices)
 
-        # Set the permittance attribute of each HourPrice object based on its price
+    async def async_set_permittance(self, hour_prices: list[HourPrice]) -> None:
+        prices = [hp.price for hp in hour_prices]
+        price_mean = self._set_price_mean(prices, self.model.adjusted_average)
+        price_stdev = stdev(prices)
         self._set_initial_permittance(hour_prices, price_mean, price_stdev)
         self._set_scooped_permittance(hour_prices, self.options.cautionhour_type_enum)
+
+    @staticmethod
+    def _set_price_mean(prices: list[float], adjusted_average: float|None) -> float:
+        print(f"adj: {adjusted_average}")
+        if not adjusted_average:
+            return mean(prices)
+        return mean([adjusted_average, mean(prices)])
 
     @staticmethod
     def _set_initial_permittance(
         hour_prices: list[HourPrice], price_mean: float, price_stdev: float
     ) -> None:
-        for hp in hour_prices:
+        # print(f"price_mean: {price_mean}")
+        # print(f"price_stdev: {price_stdev}")
+        for hp in hour_prices:            
             if hp.hour_type == HourType.BelowMin:
                 hp.permittance = 1.0
             elif hp.hour_type == HourType.AboveMax:
@@ -144,6 +156,7 @@ class HourSelectionService:
                 hp.permittance = round(
                     1.0 - ((hp.price - price_mean + price_stdev) / (2 * price_stdev)), 2
                 )
+            #print(f"{hp.hour}, {hp.price}kr. {hp.permittance}")
 
     @staticmethod
     def _set_scooped_permittance(

@@ -50,7 +50,7 @@ class Hoursselection:
 
     @property
     def caution_hours(self) -> list:
-        return [k.hour for k, v in self.service.dynamic_caution_hours]
+        return [k.hour for k, v in self.service.dynamic_caution_hours.items()]
         # self.model.hours.update_hour_list(
         #     listtype=HourTypeList.CautionHour, hour=self.service.set_hour()
         # )
@@ -72,7 +72,7 @@ class Hoursselection:
 
     @property
     def internal_dynamic_caution_hours(self) -> dict:
-        return {k.hour: v for k, v in self.service.dynamic_caution_hours}
+        return {k.hour: v for k, v in self.service.dynamic_caution_hours.items()}
 
     @property
     def prices(self) -> list:
@@ -103,8 +103,9 @@ class Hoursselection:
             self.model.adjusted_average = val
 
     async def async_update_adjusted_average(self, val):
-        self.adjusted_average = val
-        await self.async_update_prices(self.prices, self.prices_tomorrow)
+        #self.adjusted_average = val
+        await self.service.async_update_adjusted_average(val)
+        #await self.async_update_prices(self.prices, self.prices_tomorrow)
 
     async def async_update_top_price(self, dyn_top_price=None) -> None:
         await self.model.options.async_set_absolute_top_price(dyn_top_price)
