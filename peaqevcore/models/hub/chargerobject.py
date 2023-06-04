@@ -39,6 +39,7 @@ class ChargerObject(HubMember):
 
     @HubMember.value.getter
     def value(self):
+        self.update()
         try:
             return str(self._value).lower()
         except:

@@ -82,34 +82,41 @@ class HubMember:
         try:
             if isinstance(value, self._type):
                 self._value = value
-            elif self._type is float:
-                try:
-                    self._value = float(value)
-                except ValueError:
-                    self._value = 0
-            elif self._type is int:
-                try:
-                    self._value = int(float(value))
-                except ValueError:
-                    self._value = 0
+            elif isinstance(value, (int, float)):
+                self._value = self._set_value_numeric(value)
             elif self._type is bool:
-                try:
-                    if value is None:
-                        self._value = False
-                    elif value.lower() == "on":
-                        self._value = True
-                    elif value.lower() == "off":
-                        self._value = False
-                except ValueError as e:
-                    msg = f"Could not parse bool, setting to false to be sure {value}, {self._listenerentity}, {e}"
-                    _LOGGER.error(msg)
-                    self._value = False
+                self._value = self._set_value_bool(value)
             elif self._type is str:
                 self._value = str(value)
         except Exception as e:
             _LOGGER.error(
                 f"could not set value for {self._listenerentity} to {value} of type {self._type} because of {e}"
             )
+
+    def _set_value_numeric(self, value):
+        if self._type is float:
+            try:
+                return float(value)
+            except ValueError:
+                return 0
+        if self._type is int:
+            try:
+                return int(float(value))
+            except ValueError:
+                return 0
+
+    def _set_value_bool(self, value) -> bool:
+        try:
+            if value is None:
+                return False
+            elif value.lower() == "on":
+                return True
+            elif value.lower() == "off":
+                return False
+        except ValueError as e:
+            msg = f"Could not parse bool, setting to false to be sure {value}, {self._listenerentity}, {e}"
+            _LOGGER.error(msg)
+        return False
 
     def update(self):
         try:
