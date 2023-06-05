@@ -8,35 +8,50 @@ _LOGGER = logging.getLogger(__name__)
 
 class HubMember:
     def __init__(
-        self, 
-        data_type, 
-        listenerentity = None, 
-        initval = None, 
-        name = None, 
-        init_override:bool = False,
-        hass = None
-        ):
+        self,
+        data_type,
+        listenerentity=None,
+        initval=None,
+        name=None,
+        init_override: bool = False,
+        hass=None,
+    ):
         self._value = initval
         self._type = data_type
-        self._listenerentity, self._listenerattribute = self._set_listeners(listenerentity)
+        self._listenerentity, self._listenerattribute = self._set_listeners(
+            listenerentity
+        )
         self.name = name
         self.id = nametoid(self.name) if self.name is not None else None
         self.hass = hass
         self.warned_not_initialized = False
         self._is_initialized = init_override
 
-    def _set_listeners(self, listenerentity:str|None) -> Tuple[str, str|None]:
+    def _set_listeners(self, listenerentity: str | None) -> Tuple[str, str | None]:
         """Sets the listening entity. If it contains a |, the value after that will be considered the listener-attribute."""
         if listenerentity is None:
             return None, None
         try:
-            _arr = listenerentity.split('|')
+            _arr = listenerentity.split("|")
             if len(_arr) == 1:
                 return listenerentity, None
             return _arr[0], _arr[1]
         except:
-            _LOGGER.debug(f"could not handle this listenerentity in split-setup: {listenerentity}")
+            _LOGGER.debug(
+                f"could not handle this listenerentity in split-setup: {listenerentity}"
+            )
             return None, None
+
+    def _get_listeners(self) -> str:
+        if self._listenerattribute is None:
+            return self._listenerentity
+        return f"{self._listenerentity}|{self._listenerattribute}"
+
+    def update(self):
+        try:
+            self.value = self.get_sensor_from_hass(self._get_listeners())
+        except:
+            pass
 
     @property
     def is_initialized(self) -> bool:
@@ -65,7 +80,7 @@ class HubMember:
 
     @property
     def attribute(self) -> str:
-        return self._listenerattribute
+        return self._listenerattribute or ""
 
     @property
     def value(self):
@@ -73,41 +88,48 @@ class HubMember:
 
     @value.setter
     def value(self, value):
-        if isinstance(value, self._type):
-            self._value = value
+        self._value = self._set_value(value)
+
+    def _set_value(self, value):
+        if self._listenerattribute is not None:
+            return self._set_value(self.get_sensor_from_hass(self._get_listeners()))
+        if self._type is str:
+            return str(value).lower
+        elif isinstance(value, self._type):
+            return value
         elif self._type is float:
             try:
-                self._value = float(value)
+                return float(value)
             except ValueError:
-                self._value = 0
+                return 0
         elif self._type is int:
             try:
-                self._value = int(float(value))
+                return int(float(value))
             except ValueError:
-                self._value = 0
+                return 0
         elif self._type is bool:
             try:
                 if value is None:
-                    self._value = False
+                    return False
                 elif value.lower() == "on":
-                    self._value = True
+                    return True
                 elif value.lower() == "off":
-                    self._value = False
+                    return False
             except ValueError as e:
                 msg = f"Could not parse bool, setting to false to be sure {value}, {self._listenerentity}, {e}"
                 _LOGGER.error(msg)
-                self._value = False
-        elif  self._type is str:
-            self._value = str(value)
+                return False
 
-    def get_sensor_from_hass(self, sensor:str):
+    def get_sensor_from_hass(self, sensor: str):
         if self.hass is not None:
-            _sensor = sensor.split('|')
-            if len(_sensor) == 2:                
+            _sensor = sensor.split("|")
+            if len(_sensor) == 2:
                 ret = self.hass.states.get(_sensor[0])
                 if ret:
-                    ret_attr = ret.attributes.get(_sensor[1])
-                    return ret_attr
+                    if _sensor[1] is not None:
+                        ret_attr = ret.attributes.get(_sensor[1])
+                        return ret_attr
+                    return ret
             elif len(_sensor) == 1:
                 ret = self.hass.states.get(_sensor[0])
                 if ret:
@@ -115,18 +137,5 @@ class HubMember:
                 else:
                     _LOGGER.warning(f"no state found for sensor: {_sensor[0]}")
 
-    async def async_get_sensor_from_hass(self, sensor:str):
-        if self.hass is not None:
-            _sensor = sensor.split('|')
-            if len(_sensor) == 2:                
-                ret = self.hass.states.get(_sensor[0])
-                if ret:
-                    ret_attr = ret.attributes.get(_sensor[1])
-                    return ret_attr
-            elif len(_sensor) == 1:
-                ret = self.hass.states.get(_sensor[0])
-                if ret:
-                    return ret
-                else:
-                    _LOGGER.warning(f"no state found for sensor: {_sensor[0]}")
-            
+    async def async_get_sensor_from_hass(self, sensor: str):
+        return self.get_sensor_from_hass(sensor)
