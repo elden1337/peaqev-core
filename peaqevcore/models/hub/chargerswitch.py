@@ -37,13 +37,13 @@ class ChargerSwitch(HubMember):
             return False
         return super().is_initialized
 
-    @property
+    @property  # todo: remove, not used
     def current(self) -> int:
         if self._current is None:
             return 0
         return self._current
 
-    @current.setter
+    @current.setter  # todo: remove, not used
     def current(self, value):
         try:
             self._current = int(value)

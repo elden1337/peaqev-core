@@ -37,13 +37,6 @@
 #     def value(self, value):
 #         self._value = value
 
-#     @HubMember.value.getter
-#     def value(self):
-#         self.update()
-#         try:
-#             return str(self._value).lower()
-#         except:
-#             return self._value
 
 import logging
 from .hubmember import HubMember
@@ -74,14 +67,12 @@ class ChargerObject(HubMember):
                 _LOGGER.debug("Chargerobject has initialized")
                 self._is_initialized = True
                 return True
-        # if not self._warned_not_initialized:
-        #     _LOGGER.warning(f"Unable to communicate with the charger-integration. Chargerobject value is: {self.value}. Unable to continue. Please check and reboot Home Assistant.")
-        #     self._warned_not_initialized = True
         return False
 
-    @HubMember.value.setter
-    def value(self, value):
-        if self._listenerattribute is None:
-            self._value = value
-        else:
-            self._value = self.get_sensor_from_hass(self._get_listeners())
+    @HubMember.value.getter
+    def value(self):
+        self.update()
+        try:
+            return str(self._value).lower()
+        except:
+            return self._value
