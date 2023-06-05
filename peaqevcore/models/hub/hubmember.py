@@ -124,9 +124,11 @@ class HubMember:
             _sensor = sensor.split("|")
             if len(_sensor) == 2:
                 ret = self.hass.states.get(_sensor[0])
-                if ret:
+                if ret and _sensor[1] is not None:
                     ret_attr = ret.attributes.get(_sensor[1])
                     return ret_attr
+                else:
+                    return ret
             elif len(_sensor) == 1:
                 ret = self.hass.states.get(_sensor[0])
                 if ret:
