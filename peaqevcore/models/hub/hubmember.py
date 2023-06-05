@@ -268,8 +268,10 @@ class HubMember:
             if len(_sensor) == 2:
                 ret = self.hass.states.get(_sensor[0])
                 if ret:
-                    ret_attr = ret.attributes.get(_sensor[1])
-                    return ret_attr
+                    if _sensor[1] is not None:
+                        ret_attr = ret.attributes.get(_sensor[1])
+                        return ret_attr
+                    return ret
             elif len(_sensor) == 1:
                 ret = self.hass.states.get(_sensor[0])
                 if ret:
@@ -278,16 +280,4 @@ class HubMember:
                     _LOGGER.warning(f"no state found for sensor: {_sensor[0]}")
 
     async def async_get_sensor_from_hass(self, sensor: str):
-        if self.hass is not None:
-            _sensor = sensor.split("|")
-            if len(_sensor) == 2:
-                ret = self.hass.states.get(_sensor[0])
-                if ret:
-                    ret_attr = ret.attributes.get(_sensor[1])
-                    return ret_attr
-            elif len(_sensor) == 1:
-                ret = self.hass.states.get(_sensor[0])
-                if ret:
-                    return ret
-                else:
-                    _LOGGER.warning(f"no state found for sensor: {_sensor[0]}")
+        return self.get_sensor_from_hass(sensor)
