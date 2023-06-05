@@ -112,13 +112,6 @@
 #                 f"could not set value for {self._listenerentity} to {value} of type {self._type} because of {e}"
 #             )
 
-#     def update(self):
-#         try:
-#             self.value = self.get_sensor_from_hass(
-#                 f"{self._listenerentity}|{self._listenerattribute}"
-#             )
-#         except:
-#             pass
 
 #     def get_sensor_from_hass(self, sensor: str):
 #         if self.hass is not None:
@@ -200,6 +193,12 @@ class HubMember:
         if self._listenerattribute is None:
             return self._listenerentity
         return f"{self._listenerentity}|{self._listenerattribute}"
+
+    def update(self):
+        try:
+            self.value = self.get_sensor_from_hass(self._get_listeners())
+        except:
+            pass
 
     @property
     def is_initialized(self) -> bool:
