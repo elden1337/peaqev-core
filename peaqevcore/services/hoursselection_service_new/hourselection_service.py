@@ -1,8 +1,9 @@
+from .models.stop_string import AllowanceObj, set_allowance_obj
 from .models.datetime_model import DateTimeModel
 from .models.hour_price import HourPrice
 from .models.hourselection_model import HourSelectionModel
 from statistics import stdev, mean
-from datetime import datetime
+from datetime import datetime, timedelta
 from ...models.hourselection.hourselection_options import HourSelectionOptions
 from ...models.hourselection.cautionhourtype import CautionHourType
 from .models.hour_type import HourType
@@ -36,6 +37,14 @@ class HourSelectionService:
         self.update()
         return [hp for hp in self.model.hours_prices if hp.passed]
 
+    @property
+    def stopped_string(self) -> str:
+        return self.allowance.display_name
+    
+    @property
+    def allowance(self) -> AllowanceObj:
+        return set_allowance_obj(self.dtmodel, self.future_hours)
+    
     @property
     def non_hours(self) -> list[datetime]:
         return [
@@ -140,7 +149,7 @@ class HourSelectionService:
 
     @staticmethod
     def _set_price_mean(prices: list[float], adjusted_average: float | None) -> float:
-        print(f"adj: {adjusted_average}")
+        #print(f"adj: {adjusted_average}")
         if not adjusted_average:
             return mean(prices)
         return mean([adjusted_average, mean(prices)])
@@ -164,7 +173,6 @@ class HourSelectionService:
                 hp.permittance = round(
                     1.0 - ((hp.price - price_mean + price_stdev) / (2 * price_stdev)), 2
                 )
-            # print(f"{hp.hour}, {hp.price}kr. {hp.permittance}")
 
     @staticmethod
     def _set_scooped_permittance(
@@ -175,17 +183,13 @@ class HourSelectionService:
         max_hours = 24  # todo: add support for 96 if quarterly
         match caution_hour_type:
             case CautionHourType.SUAVE:
-                """suave"""
                 hi_cutoff = 0.7
             case CautionHourType.INTERMEDIATE:
-                """intermediate"""
                 lo_cutoff = 0.6
                 hi_cutoff = 0.7
             case CautionHourType.AGGRESSIVE:
-                """aggressive"""
                 lo_cutoff = 0.7
             case CautionHourType.SCROOGE:
-                """scrooge"""
                 lo_cutoff = 0.7
                 max_hours = 8  # todo: add support for 32 if quarterly
 
@@ -195,8 +199,6 @@ class HourSelectionService:
                 i.permittance = 0.0
             elif i.permittance >= hi_cutoff:
                 i.permittance = 1.0
-        # for ii in hour_prices:
-        #     print(ii)
 
     def _sort_hour_prices(self, hour_prices: list[HourPrice]) -> list[HourPrice]:
         sorted_hour_prices = sorted(

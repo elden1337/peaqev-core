@@ -4,6 +4,8 @@ from datetime import datetime, date, timedelta
 
 @dataclass
 class DateTimeModel:
+    _datetime: datetime = field(default_factory=datetime.now)
+    _datetime_set: bool = False
     _date: date = field(default_factory=date.today)
     _date_set: bool = False
     _hour: int = 0
@@ -13,6 +15,8 @@ class DateTimeModel:
 
     def set_datetime(self, mock_dt: datetime):
         assert isinstance(mock_dt, datetime), "Datetime must be a datetime object"
+        self._datetime = mock_dt
+        self._datetime_set = True
         self._date = mock_dt.date()
         self._date_set = True
         self._hour = mock_dt.hour
