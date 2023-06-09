@@ -7,7 +7,7 @@ from ..enums.price_type import PriceType
 
 @dataclass
 class LocalePrice:
-    price_type: PriceType = PriceType.Unset
+    price_type: PriceType = field(default_factory=lambda: PriceType.Unset)
     value: float = 0.0
     _values: list[TieredPrice] | list[SeasonedPrice] | list = field(
         default_factory=lambda: []
@@ -41,6 +41,8 @@ class LocalePrice:
                 return self._get_price_seasoned()
             case PriceType.Tiered:
                 return self._get_price_tiered()
+            case _:
+                return 0.0
 
     def is_equal(self, other_currency: str) -> bool:
         """Use this method if necessary to test against the el-price currency"""

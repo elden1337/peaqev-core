@@ -5,16 +5,18 @@ from .hourselection_options import HourSelectionOptions
 import logging
 
 _LOGGER = logging.getLogger(__name__)
-        
+
 
 @dataclass(frozen=False)
 class HourSelectionModel:
-    prices_today: List[float] = field(default_factory=lambda : [])
-    prices_tomorrow: List[float] = field(default_factory=lambda : [])
-    adjusted_average: float = None
+    prices_today: List[float] = field(default_factory=lambda: [])
+    prices_tomorrow: List[float] = field(default_factory=lambda: [])
+    adjusted_average: float | None = None
     current_peak: float = 0.0
-    hours: HoursModel = HoursModel()
-    options: HourSelectionOptions = HourSelectionOptions
+    hours: HoursModel = field(default_factory=lambda: HoursModel())
+    options: HourSelectionOptions = field(
+        default_factory=lambda: HourSelectionOptions()
+    )
 
     def __post_init__(self):
         self.validate()
@@ -28,4 +30,3 @@ class HourSelectionModel:
             assert self.adjusted_average >= 0
         else:
             assert self.adjusted_average is None
-        
