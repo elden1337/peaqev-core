@@ -84,6 +84,8 @@ class HubMember:
 
     @property
     def value(self):
+        if self.use_attribute:
+            self.update()
         return self._value
 
     @value.setter
