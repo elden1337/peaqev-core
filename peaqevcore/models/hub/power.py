@@ -4,7 +4,7 @@ from ...util import nametoid
 from ...models.const import DOMAIN
 from .hubmember import HubMember
 from ...hub.killswitch import KillSwitch
-from .const import (TOTALPOWER, HOUSEPOWER)
+from .const import TOTALPOWER, HOUSEPOWER
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -16,10 +16,8 @@ class Power:
         self._house = HubMember(data_type=int, initval=0, name=HOUSEPOWER)
         self._powersensor_includes_car = powersensor_includes_car
         self.killswitch = KillSwitch(
-            sensor=self._config_sensor, 
-            update_interval=120, 
-            grace_interval=300
-            )
+            sensor=self._config_sensor, update_interval=120, grace_interval=300
+        )
         self._setup()
 
     @property
@@ -52,7 +50,7 @@ class Power:
     def car_power(self) -> int:
         try:
             ret = int(self._total.value - self._house.value)
-            return max(0,ret)
+            return max(0, ret)
         except:
             return 0
 
@@ -64,34 +62,34 @@ class Power:
             self.house.entity = self._config_sensor
 
     async def async_update(self, carpowersensor_value=0, config_sensor_value=None):
-        if self._powersensor_includes_car is True:
-            if config_sensor_value is not None:
-                self.total.value = config_sensor_value
-            new_val = (float(self.total.value) - float(carpowersensor_value))
-            if new_val != self.house.value:
-                await self.killswitch.async_update()
-            self.house.value = new_val
-        else:
-            if config_sensor_value is not None:
-                self.house.value = config_sensor_value
-            new_val = (float(self.house.value) + float(carpowersensor_value))
-            if new_val != self.total.value:
-                await self.killswitch.async_update()
-            self.total.value = new_val
+        self.update(carpowersensor_value, config_sensor_value)
+        # if self._powersensor_includes_car is True:
+        #     if config_sensor_value is not None:
+        #         self.total.value = config_sensor_value
+        #     new_val = (float(self.total.value) - float(carpowersensor_value))
+        #     if new_val != self.house.value:
+        #         await self.killswitch.async_update()
+        #     self.house.value = new_val
+        # else:
+        #     if config_sensor_value is not None:
+        #         self.house.value = config_sensor_value
+        #     new_val = (float(self.house.value) + float(carpowersensor_value))
+        #     if new_val != self.total.value:
+        #         await self.killswitch.async_update()
+        #     self.total.value = new_val
 
     def update(self, carpowersensor_value=0, config_sensor_value=None):
         if self._powersensor_includes_car is True:
             if config_sensor_value is not None:
                 self.total.value = config_sensor_value
-            new_val = (float(self.total.value) - float(carpowersensor_value))
+            new_val = float(self.total.value) - float(carpowersensor_value)
             if new_val != self.house.value:
                 self.killswitch.update()
             self.house.value = new_val
         else:
             if config_sensor_value is not None:
                 self.house.value = config_sensor_value
-            new_val = (float(self.house.value) + float(carpowersensor_value))
+            new_val = float(self.house.value) + float(carpowersensor_value)
             if new_val != self.total.value:
                 self.killswitch.update()
             self.total.value = new_val
-        
