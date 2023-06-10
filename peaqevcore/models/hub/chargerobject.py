@@ -48,12 +48,13 @@ class ChargerObject(HubMember):
     def __init__(
         self, data_type: list, listenerentity: str, init_override: bool = False
     ):
-        self._type = data_type
+        self._native_states = data_type
+        self._type = type(data_type[0])
         self._listenerentity = listenerentity
         self._warned_not_initialized = False
         self._is_initialized = init_override
         super().__init__(
-            data_type=data_type,
+            data_type=self._type,
             listenerentity=listenerentity,
             init_override=init_override,
         )
@@ -63,7 +64,7 @@ class ChargerObject(HubMember):
         if self._is_initialized is True:
             return True
         if self.value is not None:
-            if str(self.value).lower() in self._type:
+            if str(self.value).lower() in self._native_states:
                 _LOGGER.debug("Chargerobject has initialized")
                 self._is_initialized = True
                 return True
