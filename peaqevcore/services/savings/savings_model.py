@@ -12,7 +12,7 @@ class SavingsModel(ConsumptionModel):
     peak_price_per_kwh: float = 0
     car_connected_at: datetime | None = None
     prices: dict[date, list[float]] = field(default_factory=lambda: {})
-    status: SavingsStatus = SavingsStatus.Off
+    status: SavingsStatus = field(default_factory=lambda: SavingsStatus.Off)
 
     async def async_reset(self) -> None:
         self.status = SavingsStatus.Off

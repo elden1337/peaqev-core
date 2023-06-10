@@ -18,8 +18,7 @@ class ChargerSwitch(HubMember):
         self._hubdata = hubdata
         self._hass = hass
         self._value = initval
-        self._current = None
-        # self._current_attr_name = currentname
+
         super().__init__(
             data_type=data_type,
             listenerentity=listenerentity,
@@ -36,19 +35,6 @@ class ChargerSwitch(HubMember):
         ):
             return False
         return super().is_initialized
-
-    @property  # todo: remove, not used
-    def current(self) -> int:
-        if self._current is None:
-            return 0
-        return self._current
-
-    @current.setter  # todo: remove, not used
-    def current(self, value):
-        try:
-            self._current = int(value)
-        except ValueError:
-            pass
 
     HASLOGGED_INITWARN = False
 
