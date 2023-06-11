@@ -73,4 +73,5 @@ class ChargerObject(HubMember):
     @HubMember.value.getter
     def value(self):
         self.update()
+        _LOGGER.info(f"Chargerobject value is: {self._value}")
         return self._value

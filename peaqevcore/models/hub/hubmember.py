@@ -92,9 +92,11 @@ class HubMember:
     def value(self, value):
         self._value = self._set_value(value)
 
-    def _set_value(self, value):
-        if self._listenerattribute is not None:
-            return self._set_value(self.get_sensor_from_hass(self._get_listeners()))
+    def _set_value(self, value, passthrough: bool = False):
+        if self._listenerattribute is not None and not passthrough:
+            return self._set_value(
+                self.get_sensor_from_hass(self._get_listeners()), True
+            )
         if self._type is str:
             return str(value).lower()
         elif isinstance(value, self._type):
@@ -138,6 +140,7 @@ class HubMember:
                     return ret
                 else:
                     _LOGGER.warning(f"no state found for sensor: {_sensor[0]}")
+        raise ValueError(f"no hass or no sensor found for {sensor}")
 
     async def async_get_sensor_from_hass(self, sensor: str):
         return self.get_sensor_from_hass(sensor)
