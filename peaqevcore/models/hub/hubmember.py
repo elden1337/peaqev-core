@@ -96,7 +96,7 @@ class HubMember:
         if self._listenerattribute is not None:
             return self._set_value(self.get_sensor_from_hass(self._get_listeners()))
         if self._type is str:
-            return str(value).lower
+            return str(value).lower()
         elif isinstance(value, self._type):
             return value
         elif self._type is float:
