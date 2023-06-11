@@ -11,7 +11,7 @@ import statistics as stat
 
 from .hoursselection_helpers import async_create_dict
 from .hourselection_calculations import (
-    async_normalize_prices,
+    normalize_prices,
     async_create_cautions,
     async_get_offset_dict,
     async_should_be_cautionhour,
@@ -84,9 +84,7 @@ class HourSelectionService:
         pricedict = {}
         if prices is not None and len(prices) > 1:
             pricedict = await async_create_dict(prices)
-            normalized_pricedict = await async_create_dict(
-                await async_normalize_prices(prices)
-            )
+            normalized_pricedict = await async_create_dict(normalize_prices(prices))
             if stat.stdev(prices) > 0.05:
                 ranked = await async_create_cautions(
                     pricedict,

@@ -1,4 +1,5 @@
 import logging
+from statistics import mean
 from typing import Tuple
 from ...models.hourselection.cautionhourtype import CautionHourType
 from ...models.hourselection.hourselection_model import HourSelectionModel
@@ -40,7 +41,10 @@ class Hoursselection:
 
     @property
     def offsets(self) -> dict:
-        return self.model.hours.offset_dict
+        ret = {}
+        ret["today"] = self.service.offset_dict["today"]
+        ret["tomorrow"] = self.service.offset_dict["tomorrow"]
+        return ret
 
     @property
     def non_hours(self) -> list:
@@ -128,9 +132,11 @@ class Hoursselection:
             ret_static = self.max_min.original_average_price
             return ret_static, ret_dynamic
         else:
-            ret_static = await self.async_get_charge_or_price()
+            ret_static = mean(
+                [hp.permittance * hp.price for hp in self.service.future_hours]
+            )
             try:
-                return round(sum(ret_static.values()) / len(ret_static), 2), ret_dynamic
+                return round(ret_static, 2), ret_dynamic
             except ZeroDivisionError as e:
                 _LOGGER.warning(
                     f"get_average_kwh_price_core could not be calculated: {e}"
@@ -147,51 +153,7 @@ class Hoursselection:
             return ret_static, ret_dynamic
         else:
             self.model.current_peak = currentpeak
-            ret_static = await self.async_get_charge_or_price(True)
-            return round(sum(ret_static.values()), 1), ret_dynamic
-
-    async def async_get_charge_or_price(self, charge: bool = False) -> dict:
-        # hour = await self.service.async_set_hour()
-        hour = self.service.dtmodel.hour
-        ret = {}
-
-        async def async_looper_charge(h: int):
-            if h in self.model.hours.dynamic_caution_hours:
-                ret[h] = (
-                    self.model.hours.dynamic_caution_hours[h] * self.model.current_peak
-                )
-            elif h in self.model.hours.non_hours:
-                ret[h] = 0
-            else:
-                ret[h] = self.model.current_peak
-
-        async def async_looper_price(h: int, tomorrow_active: bool):
-            if h in self.model.hours.dynamic_caution_hours:
-                if tomorrow_active:
-                    if h < hour and len(self.prices_tomorrow):
-                        ret[h] = (
-                            self.model.hours.dynamic_caution_hours[h]
-                            * self.prices_tomorrow[h]
-                        )
-                if h >= hour:
-                    ret[h] = self.model.hours.dynamic_caution_hours[h] * self.prices[h]
-            elif h not in self.model.hours.non_hours:
-                if h < hour and len(self.prices_tomorrow):
-                    ret[h] = self.prices_tomorrow[h]
-                if h >= hour:
-                    ret[h] = self.prices[h]
-
-        if self.prices_tomorrow is None or len(self.prices_tomorrow) < 1:
-            for h in range(hour, 24):
-                if charge:
-                    await async_looper_charge(h)
-                else:
-                    await async_looper_price(h, False)
-        else:
-            for h in range(hour, (hour + 24)):
-                h = h - 24 if h > 23 else h
-                if charge:
-                    await async_looper_charge(h)
-                else:
-                    await async_looper_price(h, True)
-        return ret
+            ret_static = sum(
+                [hp.permittance * currentpeak for hp in self.service.future_hours]
+            )
+            return round(ret_static, 1), ret_dynamic

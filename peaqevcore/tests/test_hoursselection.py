@@ -4,7 +4,7 @@ import statistics as stat
 from ..services.hourselection.hoursselection import Hoursselection as h
 from ..services.hourselection.hourselectionservice.hourselection_calculations import (
     async_create_cautions,
-    async_normalize_prices,
+    normalize_prices,
 )
 from ..services.hourselection.hourselectionservice.hoursselection_helpers import (
     async_create_dict,
@@ -123,7 +123,7 @@ async def test_create_dict_error():
 @pytest.mark.asyncio
 async def test_rank_prices_permax():
     hourly = await async_create_dict(MOCKPRICES1)
-    norm_hourly = await async_create_dict(await async_normalize_prices(MOCKPRICES1))
+    norm_hourly = await async_create_dict(normalize_prices(MOCKPRICES1))
     ret = await async_create_cautions(hourly, norm_hourly, CautionHourType.SUAVE)
     for r in ret:
         assert 0 <= ret[r]["permax"] <= 1
@@ -1924,6 +1924,7 @@ async def test_same_price_same_offset():
         3.568,
     ]
     await r.async_update_prices(prices, prices_tomorrow)
+    print(r.offsets)
     assert r.offsets["today"][23] == r.offsets["tomorrow"][0]
     assert r.offsets["today"][22] == r.offsets["tomorrow"][1]
     assert r.offsets["today"][21] == r.offsets["tomorrow"][2]
@@ -3246,26 +3247,3 @@ async def test_negative_price_230430():
     r.service.dtmodel.set_hour(11)
     await r.async_update_prices(prices)
     assert r.non_hours == []
-
-
-"""important, fix this later."""
-# async def test_230208_2():
-#     r = h(cautionhour_type=CautionHourType.AGGRESSIVE.value, absolute_top_price=3, min_price=0.0)
-#     prices = [1.138, 1.112, 1.019, 0.925, 0.925, 0.937, 1.499, 1.7, 1.708, 1.678, 1.339, 0.925, 0.593, 0.485, 0.416, 0.412, 0.412, 0.41, 0.404, 0.409, 0.362, 0.306, 0.282, 0.198]
-#     await r.async_update_adjusted_average(1.44
-#     r.service.dtmodel.set_hour(13)
-#     assert r.non_hours == [14,15,16,17,18,19,20,7,8,9,10,11,12]
-#     prices_tomorrow = [0.17, 0.142, 0.108, 0.104, 0.168, 0.234, 0.29, 0.355, 0.402, 0.412, 0.417, 0.408, 0.395, 0.366, 0.357, 0.362, 0.361, 0.382, 0.371, 0.342, 0.332, 0.317, 0.303, 0.284]
-#     assert r.non_hours == [14,15,16,17,18,19,20,7,8,9,10,11,12]
-#     r.service.dtmodel.set_hour(14)
-#     assert r.non_hours == [14,15,16,17,18,19,20,7,8,9,10,11,12,13]
-
-# async def test_230114():
-#     r = h(cautionhour_type=CautionHourType.INTERMEDIATE, absolute_top_price=5.5, min_price=0)
-#     prices = [0.3851625, 0.3827625, 0.3413, 0.1827375, 0.112175, 0.068175, 0.08505, 0.1418375, 0.1972125, 0.2680625, 0.2506375, 0.16446249999999998, 0.09741250000000001, 0.0849, 0.0856125, 0.2684875, 0.38557499999999995, 0.43436250000000004, 0.38811249999999997, 0.3640749999999999, 0.17528749999999998, 0.2922375, 0.43632499999999996, 0.4551625]
-#     assert r.offsets == {}
-
-# async def test_230115():
-#     r = h(cautionhour_type=CautionHourType.INTERMEDIATE, absolute_top_price=5.5, min_price=0)
-#     prices = [0.4969125, 0.507875, 0.507875, 0.5421750000000001, 0.5877125000000001, 0.6408499999999999, 0.9391375, 1.21775, 1.2558375, 1.2786125000000002, 1.3878375, 1.396975, 1.265125, 1.54485, 1.923825, 1.9844125, 2.054275, 1.8261250000000002, 1.2498, 1.1251125000000002, 0.9264875, 0.8390500000000001, 0.7202750000000001, 0.6539249999999999]
-#     assert r.offsets == {}

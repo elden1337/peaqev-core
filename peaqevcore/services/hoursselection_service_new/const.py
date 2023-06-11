@@ -1,0 +1,2 @@
+TODAY = "today"
+TOMORROW = "tomorrow"
