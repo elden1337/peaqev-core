@@ -722,10 +722,11 @@ async def test_over_midnight():
     ]
     r.service.dtmodel.set_datetime(datetime(2021, 1, 1, 23, 0, 0))
     await r.async_update_prices(prices, prices_tomorrow)
-    assert r.non_hours == [7, 8, 9]
+    assert r.non_hours == [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    r.service.dtmodel.set_datetime(datetime(2021, 1, 2, 0, 0, 0))
     await r.async_update_prices(prices_tomorrow, [])
     r.service.dtmodel.set_datetime(datetime(2021, 1, 2, 2, 0, 0))
-    assert r.non_hours == [7, 8, 9]
+    assert r.non_hours == [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
 
 
 @pytest.mark.asyncio

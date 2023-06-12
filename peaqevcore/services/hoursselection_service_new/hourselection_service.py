@@ -5,13 +5,12 @@ from .models.hourselection_model import HourSelectionModel
 from statistics import stdev, mean
 from datetime import date, datetime, timedelta
 from ...models.hourselection.hourselection_options import HourSelectionOptions
-from ...models.hourselection.cautionhourtype import CautionHourType
-from .models.hour_type import HourType
 from .const import TODAY, TOMORROW
 from ..hourselection.hourselectionservice.hourselection_calculations import (
     normalize_prices,
     get_offset_dict,
 )
+from .permittance import set_initial_permittance, set_scooped_permittance
 
 
 class HourSelectionService:
@@ -115,18 +114,62 @@ class HourSelectionService:
                     prices, prices_tomorrow
                 )
             case 92 | 96 | 100:
-                return self._create_hour_prices_quarterly(prices, prices_tomorrow)
+                return await self.async_create_hour_prices_quarterly(
+                    prices, prices_tomorrow
+                )
             case 0:
                 return []
         raise ValueError(
             f"Length of pricelist must be either 23,24,25,92,96 or 100. Your length is {len(prices)}"
         )
 
-    def _create_hour_prices_quarterly(
+    def _check_passed(self, hour, quarter) -> bool:
+        if self.dtmodel.hour > hour:
+            return True
+        elif self.dtmodel.hour == hour:
+            if self.dtmodel.quarter >= quarter:
+                return True
+        return False
+
+    async def async_create_hour_prices_quarterly(
         self, prices: list[float], prices_tomorrow: list[float] = []
     ) -> list:
         # todo: handle here first if prices or prices_tomorrow are 92 or 100 in length (dst shift)
-        return []
+        ret = []
+        for idx, p in enumerate(prices):
+            assert isinstance(p, (float, int))
+            hour = int(idx / 4)
+            quarter = idx % 4
+            ret.append(
+                HourPrice(
+                    day=self.dtmodel.hdate,
+                    hour=hour,
+                    quarter=quarter,
+                    price=p,
+                    passed=self._check_passed(hour, quarter),
+                    hour_type=HourPrice.set_hour_type(
+                        self.options.absolute_top_price, self.options.min_price, p
+                    ),
+                )
+            )
+        for idx, p in enumerate(prices_tomorrow):
+            assert isinstance(p, (float, int))
+            hour = int(idx / 4)
+            quarter = idx % 4
+            ret.append(
+                HourPrice(
+                    day=self.dtmodel.hdate_tomorrow,
+                    hour=hour,
+                    quarter=quarter,
+                    price=p,
+                    passed=False,
+                    hour_type=HourPrice.set_hour_type(
+                        self.options.absolute_top_price, self.options.min_price, p
+                    ),
+                )
+            )
+        await self.async_set_permittance(ret)
+        return ret
 
     async def async_create_hour_prices_hourly(
         self, prices: list[float], prices_tomorrow: list[float] = []
@@ -172,15 +215,18 @@ class HourSelectionService:
         prices = normalize_prices([hp.price for hp in hour_prices])
         price_mean = self._set_price_mean(prices, self.model.adjusted_average)
         price_stdev = stdev(prices)
-        self._set_initial_permittance(hour_prices, price_mean, price_stdev)
-        self._set_scooped_permittance(hour_prices, self.options.cautionhour_type_enum)
-        self._set_offset_dict(prices, hour_prices[0].day)
+        set_initial_permittance(hour_prices, price_mean, price_stdev)
+        set_scooped_permittance(hour_prices, self.options.cautionhour_type_enum)
+        self._offset_dict = self._set_offset_dict(prices, hour_prices[0].day)
 
-    def _set_offset_dict(self, prices: list[float], day: date) -> None:
+    @staticmethod
+    def _set_offset_dict(prices: list[float], day: date) -> dict:
+        ret = {}
         today = prices[: len(prices) // 2]
         tomorrow = prices[len(prices) // 2 : :]
-        self._offset_dict[day] = get_offset_dict(today)
-        self._offset_dict[day + timedelta(days=1)] = get_offset_dict(tomorrow)
+        ret[day] = get_offset_dict(today)
+        ret[day + timedelta(days=1)] = get_offset_dict(tomorrow)
+        return ret
 
     @staticmethod
     def _set_price_mean(prices: list[float], adjusted_average: float | None) -> float:
@@ -189,56 +235,9 @@ class HourSelectionService:
             return mean(prices)
         return mean([adjusted_average, mean(prices)])
 
-    @staticmethod
-    def _set_initial_permittance(
-        hour_prices: list[HourPrice], price_mean: float, price_stdev: float
-    ) -> None:
-        # print(f"price_mean: {price_mean}")
-        # print(f"price_stdev: {price_stdev}")
-        for hp in hour_prices:
-            if hp.hour_type == HourType.BelowMin:
-                hp.permittance = 1.0
-            elif hp.hour_type == HourType.AboveMax:
-                hp.permittance = 0.0
-            elif hp.price < price_mean - price_stdev:
-                hp.permittance = 1.0
-            elif hp.price > price_mean + price_stdev:
-                hp.permittance = 0.0
-            else:
-                hp.permittance = round(
-                    1.0 - ((hp.price - price_mean + price_stdev) / (2 * price_stdev)), 2
-                )
-
-    @staticmethod
-    def _set_scooped_permittance(
-        hour_prices: list[HourPrice], caution_hour_type: CautionHourType
-    ) -> None:
-        lo_cutoff = 0.4
-        hi_cutoff = 0.75
-        max_hours = 24  # todo: add support for 96 if quarterly
-        match caution_hour_type:
-            case CautionHourType.SUAVE:
-                hi_cutoff = 0.7
-            case CautionHourType.INTERMEDIATE:
-                lo_cutoff = 0.5
-                hi_cutoff = 0.7
-            case CautionHourType.AGGRESSIVE:
-                lo_cutoff = 0.6
-            case CautionHourType.SCROOGE:
-                lo_cutoff = 0.6
-                max_hours = 8  # todo: add support for 32 if quarterly
-
-        for i in hour_prices:
-            _t = i.permittance
-            if i.permittance <= lo_cutoff:
-                i.permittance = 0.0
-            elif i.permittance >= hi_cutoff:
-                i.permittance = 1.0
-            else:
-                i.permittance = round(i.permittance, 2)
-
-    def _sort_hour_prices(self, hour_prices: list[HourPrice]) -> list[HourPrice]:
-        sorted_hour_prices = sorted(
-            hour_prices, key=lambda hp: (hp.day, hp.hour, hp.quarter)
-        )
-        return sorted_hour_prices
+    # @staticmethod
+    # def _sort_hour_prices(hour_prices: list[HourPrice]) -> list[HourPrice]:
+    #     sorted_hour_prices = sorted(
+    #         hour_prices, key=lambda hp: (hp.day, hp.hour, hp.quarter)
+    #     )
+    #     return sorted_hour_prices
