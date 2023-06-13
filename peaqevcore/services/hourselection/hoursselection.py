@@ -73,12 +73,12 @@ class Hoursselection:
         # )
         # return self.model.hours.non_hours
         self.service.update()
-        return [h.hour for h in self.service.non_hours]
+        return self.service.non_hours
 
     @property
     def internal_dynamic_caution_hours(self) -> dict:
         self.service.update()
-        return {k.hour: v for k, v in self.service.dynamic_caution_hours.items()}
+        return self.service.dynamic_caution_hours
 
     @property
     def prices(self) -> list:
