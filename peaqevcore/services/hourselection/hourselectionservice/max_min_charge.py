@@ -192,9 +192,9 @@ class MaxMinCharge:
     ) -> None:
         for k, v in caution_hours.items():
             if k.day == dt.day and k.hour >= dt.hour:
-                ret_today[k] = (prices[k], v)
+                ret_today[k.hour] = (prices[k.hour], v)
             elif len(prices_tomorrow) > 0:
-                ret_tomorrow[k] = (prices_tomorrow[k], v)
+                ret_tomorrow[k.hour] = (prices_tomorrow[k.hour], v)
 
     @staticmethod
     async def async_loop_nonhours(
@@ -204,9 +204,9 @@ class MaxMinCharge:
         ret_tomorrow = {}
         for n in non_hours:
             if n.day == dt.day and n.hour >= dt.hour:
-                ret_today[n] = (prices[n], 0)
+                ret_today[n.hour] = (prices[n.hour], 0)
             elif len(prices_tomorrow) > 0:
-                ret_tomorrow[n] = (prices_tomorrow[n], 0)
+                ret_tomorrow[n.hour] = (prices_tomorrow[n.hour], 0)
         return ret_today, ret_tomorrow
 
     @staticmethod
