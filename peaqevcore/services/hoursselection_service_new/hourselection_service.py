@@ -8,7 +8,7 @@ from ...models.hourselection.hourselection_options import HourSelectionOptions
 from .const import TODAY, TOMORROW
 from ..hourselection.hourselectionservice.hourselection_calculations import (
     normalize_prices,
-    get_offset_dict,
+    deviation_from_mean,
 )
 from .permittance import set_initial_permittance, set_scooped_permittance
 
@@ -18,7 +18,7 @@ class HourSelectionService:
         self.options = options
         self.dtmodel = DateTimeModel()
         self.model = HourSelectionModel()
-        self._offset_dict = {}
+        self._offset_dict: dict[datetime, dict] = {}
 
     def update(self):
         for hp in self.model.hours_prices:
@@ -72,20 +72,7 @@ class HourSelectionService:
 
     @property
     def offset_dict(self) -> dict:
-        vals = self._offset_dict.keys()
-        if len(vals) == 1:
-            return {TODAY: self._offset_dict.values(), TOMORROW: {}}
-        elif len(vals) == 2:
-            if max(vals) - min(vals) == 1:
-                return {
-                    TODAY: self._offset_dict[min(vals)],
-                    TOMORROW: self._offset_dict[max(vals)],
-                }
-            return {
-                TODAY: self._offset_dict[max(vals)],
-                TOMORROW: self._offset_dict[min(vals)],
-            }
-        raise ValueError(f"Offset dict has {len(vals)} values. Must be 1 or 2.")
+        return self._get_offset_dict()
 
     async def async_update_prices(
         self, prices: list[float], prices_tomorrow: list[float] = []
@@ -93,9 +80,15 @@ class HourSelectionService:
         self.model.prices_today = prices  # clean first
         self.model.prices_tomorrow = prices_tomorrow  # clean first
         if self._do_recalculate_prices(prices):
-            self.model.hours_prices = await self.async_create_hour_prices(
+            self.model.hours_prices = await self.async_create_prices(
                 prices, prices_tomorrow
             )
+
+    async def async_update_adjusted_average(self, adjusted_average: float) -> None:
+        self.model.adjusted_average = adjusted_average
+        self.update()
+        if len(self.model.hours_prices) > 0:
+            await self.async_set_permittance(self.model.hours_prices)
 
     def _do_recalculate_prices(self, prices) -> bool:
         if [
@@ -104,7 +97,7 @@ class HourSelectionService:
             return False
         return True
 
-    async def async_create_hour_prices(
+    async def async_create_prices(
         self, prices: list[float], prices_tomorrow: list[float] = []
     ) -> list:
         # todo: fix to allow 23, 24,25, 92, 96, 100 for dst-dates.
@@ -123,7 +116,7 @@ class HourSelectionService:
             f"Length of pricelist must be either 23,24,25,92,96 or 100. Your length is {len(prices)}"
         )
 
-    def _check_passed(self, hour, quarter) -> bool:
+    def _is_passed(self, hour, quarter) -> bool:
         if self.dtmodel.hour > hour:
             return True
         elif self.dtmodel.hour == hour:
@@ -146,7 +139,7 @@ class HourSelectionService:
                     hour=hour,
                     quarter=quarter,
                     price=p,
-                    passed=self._check_passed(hour, quarter),
+                    passed=self._is_passed(hour, quarter),
                     hour_type=HourPrice.set_hour_type(
                         self.options.absolute_top_price, self.options.min_price, p
                     ),
@@ -205,12 +198,6 @@ class HourSelectionService:
         await self.async_set_permittance(ret)
         return ret
 
-    async def async_update_adjusted_average(self, adjusted_average: float) -> None:
-        self.model.adjusted_average = adjusted_average
-        self.update()
-        if len(self.model.hours_prices) > 0:
-            await self.async_set_permittance(self.model.hours_prices)
-
     async def async_set_permittance(self, hour_prices: list[HourPrice]) -> None:
         prices = normalize_prices([hp.price for hp in hour_prices])
         price_mean = self._set_price_mean(prices, self.model.adjusted_average)
@@ -219,13 +206,32 @@ class HourSelectionService:
         set_scooped_permittance(hour_prices, self.options.cautionhour_type_enum)
         self._offset_dict = self._set_offset_dict(prices, hour_prices[0].day)
 
+    def _get_offset_dict(self) -> dict:
+        vals = self._offset_dict.keys()
+        if len(vals) == 1:
+            return {TODAY: self._offset_dict.values(), TOMORROW: {}}
+        elif len(vals) == 2:
+            return {
+                TODAY: self._offset_dict[min(vals)],
+                TOMORROW: self._offset_dict[max(vals)],
+            }
+        raise ValueError(f"Offset dict has {len(vals)} values. Must be 1 or 2.")
+
     @staticmethod
     def _set_offset_dict(prices: list[float], day: date) -> dict:
         ret = {}
-        today = prices[: len(prices) // 2]
-        tomorrow = prices[len(prices) // 2 : :]
-        ret[day] = get_offset_dict(today)
-        ret[day + timedelta(days=1)] = get_offset_dict(tomorrow)
+        _len = len(prices)
+        today: list = []
+        tomorrow: list = []
+        match _len:
+            case 23 | 24 | 25 | 92 | 96 | 100:
+                today = prices
+            case 47 | 48 | 49 | 188 | 192 | 196:
+                today = prices[: len(prices) // 2]
+                tomorrow = prices[len(prices) // 2 : :]
+        ret[day] = deviation_from_mean(today)
+        ret[day + timedelta(days=1)] = deviation_from_mean(tomorrow)
+        # todo: handle interim
         return ret
 
     @staticmethod

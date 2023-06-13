@@ -88,6 +88,10 @@ class PriceAwareHours(Hours):
             self._core.adjusted_average = val
 
     @property
+    def stopped_string(self) -> str:
+        return self._core.service.stopped_string
+
+    @property
     def offsets(self) -> dict:
         return self._core.offsets
 

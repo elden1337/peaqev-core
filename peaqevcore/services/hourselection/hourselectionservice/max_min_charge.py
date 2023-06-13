@@ -130,11 +130,7 @@ class MaxMinCharge:
         if max_charge == 0:
             self.active = False
             return
-        hour = (
-            mock_hour
-            if mock_hour is not None
-            else await self.parent.service.async_set_hour()
-        )
+        hour = self.parent.service.dtmodel.hour
         _non_hours = self.parent.internal_non_hours if non_hours is None else non_hours
         _dynamic_caution_hours = (
             self.parent.internal_dynamic_caution_hours

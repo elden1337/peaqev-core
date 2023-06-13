@@ -50,3 +50,26 @@ async def test_last_nonhour_stopped_until():
     assert service.allowance.prefix_type == AllowanceType.AllowedUntil
     service.dtmodel.set_datetime(datetime(2021, 1, 2, 18, 0, 0))
     assert service.allowance.prefix_type == AllowanceType.StoppedUntil
+
+
+@pytest.mark.asyncio
+async def test_offsets_today_only():
+    opt = HourSelectionOptions(
+        top_price=2, min_price=0.05, cautionhour_type_enum=CautionHourType.SUAVE
+    )
+    service = HourSelectionService(opt)
+    service.dtmodel.set_datetime(datetime(2021, 1, 1, 9, 0, 0))
+    await service.async_update_prices(_p.P230520[0])
+    print(service.offset_dict)
+    assert len(service.offset_dict["today"]) == 24
+
+
+@pytest.mark.asyncio
+async def test_offsets_230613():
+    opt = HourSelectionOptions(
+        top_price=2, min_price=0.05, cautionhour_type_enum=CautionHourType.SUAVE
+    )
+    service = HourSelectionService(opt)
+    service.dtmodel.set_datetime(datetime(2021, 1, 1, 14, 0, 0))
+    await service.async_update_prices(_p.P230613[0], _p.P230613[1])
+    print(service.offset_dict)
