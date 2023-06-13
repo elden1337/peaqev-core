@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
+from datetime import datetime
 
 if TYPE_CHECKING:
     from ..hoursselection import Hoursselection
@@ -131,6 +132,7 @@ class MaxMinCharge:
             self.active = False
             return
         hour = self.parent.service.dtmodel.hour
+        dt = self.parent.service.dtmodel.dt
         _non_hours = self.parent.internal_non_hours if non_hours is None else non_hours
         _dynamic_caution_hours = (
             self.parent.internal_dynamic_caution_hours
@@ -142,10 +144,10 @@ class MaxMinCharge:
             self.parent.prices_tomorrow if prices_tomorrow is None else prices_tomorrow
         )
         ret_today, ret_tomorrow = await self.async_loop_nonhours(
-            hour, _non_hours, _prices, _prices_tomorrow
+            dt, _non_hours, _prices, _prices_tomorrow
         )
         await self.async_loop_caution_hours(
-            hour,
+            dt,
             _dynamic_caution_hours,
             _prices,
             _prices_tomorrow,
@@ -181,7 +183,7 @@ class MaxMinCharge:
 
     @staticmethod
     async def async_loop_caution_hours(
-        hour: int,
+        dt: datetime,
         caution_hours: dict,
         prices: list,
         prices_tomorrow: list,
@@ -189,19 +191,19 @@ class MaxMinCharge:
         ret_tomorrow: dict,
     ) -> None:
         for k, v in caution_hours.items():
-            if k >= hour:
+            if k.day == dt.day and k.hour >= dt.hour:
                 ret_today[k] = (prices[k], v)
             elif len(prices_tomorrow) > 0:
                 ret_tomorrow[k] = (prices_tomorrow[k], v)
 
     @staticmethod
     async def async_loop_nonhours(
-        hour: int, non_hours: list, prices: list, prices_tomorrow: list
+        dt: datetime, non_hours: list, prices: list, prices_tomorrow: list
     ) -> Tuple[dict, dict]:
         ret_today = {}
         ret_tomorrow = {}
         for n in non_hours:
-            if n >= hour:
+            if n.day == dt.day and n.hour >= dt.hour:
                 ret_today[n] = (prices[n], 0)
             elif len(prices_tomorrow) > 0:
                 ret_tomorrow[n] = (prices_tomorrow[n], 0)

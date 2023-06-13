@@ -40,6 +40,10 @@ class DateTimeModel:
         self._quarter_set = True
 
     @property
+    def dt(self) -> datetime:
+        return self._datetime if self._datetime_set else datetime.now()
+
+    @property
     def hdate(self) -> date:
         return self._date if self._date_set else date.today()
 
