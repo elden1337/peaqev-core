@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
-from datetime import datetime
+from datetime import datetime, timedelta
 
 if TYPE_CHECKING:
     from ..hoursselection import Hoursselection
@@ -126,7 +126,6 @@ class MaxMinCharge:
         dynamic_caution_hours: dict | None = None,
         prices: list | None = None,
         prices_tomorrow: list | None = None,
-        mock_hour: int | None = None,
     ) -> None:
         if max_charge == 0:
             self.active = False
@@ -155,28 +154,36 @@ class MaxMinCharge:
             ret_tomorrow,
         )
         await self.async_add_available_hours(
-            hour, _prices, _prices_tomorrow, ret_today, ret_tomorrow
+            dt, _prices, _prices_tomorrow, ret_today, ret_tomorrow
         )
-        self.model.input_hours = await self.async_sort_dicts(ret_today, ret_tomorrow)
+        self.model.input_hours = self._sort_dicts(ret_today, ret_tomorrow)
         self.model.original_input_hours = self.model.input_hours.copy()
         self.active = True
 
     @staticmethod
     async def async_add_available_hours(
-        hour: int,
+        dt: datetime,
         prices: list,
         prices_tomorrow: list,
         ret_today: dict,
         ret_tomorrow: dict,
     ) -> None:
-        _hour = hour
-        _range = 24 if len(prices_tomorrow) > 0 else len(prices) - hour
+        _hour = dt.hour
+        _range = (
+            len(prices) - dt.hour + len(prices_tomorrow)
+            if len(prices_tomorrow) > 0
+            else len(prices) - dt.hour
+        )
+
         for i in range(_range):
-            if _hour < hour and _hour not in ret_tomorrow.keys():
-                ret_tomorrow[_hour] = (prices_tomorrow[_hour], 1)
+            if _hour < dt.hour and _hour not in ret_tomorrow.keys():
+                ret_tomorrow[(dt + timedelta(days=1)).replace(hour=_hour)] = (
+                    prices_tomorrow[_hour],
+                    1,
+                )
                 # todo: must test this without valid prices tomorrow.
-            elif _hour >= hour and _hour not in ret_today.keys():
-                ret_today[_hour] = (prices[_hour], 1)
+            elif _hour >= dt.hour and _hour not in ret_today.keys():
+                ret_today[dt.replace(hour=_hour)] = (prices[_hour], 1)
             _hour += 1
             if _hour > 23:
                 _hour = 0
@@ -192,9 +199,9 @@ class MaxMinCharge:
     ) -> None:
         for k, v in caution_hours.items():
             if k.day == dt.day and k.hour >= dt.hour:
-                ret_today[k.hour] = (prices[k.hour], v)
+                ret_today[k] = (prices[k.hour], v)
             elif len(prices_tomorrow) > 0:
-                ret_tomorrow[k.hour] = (prices_tomorrow[k.hour], v)
+                ret_tomorrow[k] = (prices_tomorrow[k.hour], v)
 
     @staticmethod
     async def async_loop_nonhours(
@@ -204,14 +211,15 @@ class MaxMinCharge:
         ret_tomorrow = {}
         for n in non_hours:
             if n.day == dt.day and n.hour >= dt.hour:
-                ret_today[n.hour] = (prices[n.hour], 0)
+                ret_today[n] = (prices[n.hour], 0)
             elif len(prices_tomorrow) > 0:
-                ret_tomorrow[n.hour] = (prices_tomorrow[n.hour], 0)
+                ret_tomorrow[n] = (prices_tomorrow[n.hour], 0)
         return ret_today, ret_tomorrow
 
     @staticmethod
-    async def async_sort_dicts(ret_today: dict, ret_tomorrow: dict) -> dict:
+    def _sort_dicts(ret_today: dict, ret_tomorrow: dict) -> dict:
         ret = {}
+        print(ret_today)
         for k in sorted(ret_today.keys()):
             ret[k] = ret_today[k]
         for k in sorted(ret_tomorrow.keys()):

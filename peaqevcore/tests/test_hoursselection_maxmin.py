@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import pytest
 import statistics as stat
 from ..services.hourselection.hoursselection import Hoursselection as h
@@ -232,9 +233,8 @@ async def test_230412_maxmin_not_active():
         min_price=0.0,
     )
     await r.async_update_adjusted_average(0.77)
-    await r.service.async_set_day(12)
     await r.async_update_top_price(0.97)
-    r.service._mock_hour = await r.service.async_set_hour(19)
+    r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 19, 0, 0))
     await r.async_update_prices(P230412[0], P230412[1])
     ret = await r.async_get_average_kwh_price()
     assert r.max_min.active is False
@@ -250,9 +250,8 @@ async def test_230412_maxmin_active_average_price():
     )
     peak = 2.28
     await r.async_update_adjusted_average(0.77)
-    await r.service.async_set_day(12)
     await r.async_update_top_price(0.97)
-    r.service._mock_hour = await r.service.async_set_hour(19)
+    r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 19, 0, 0))
     await r.async_update_prices(P230412[0], P230412[1])
     await r.max_min.async_setup(100)
     assert r.max_min.active is True
@@ -266,9 +265,8 @@ async def test_230412_maxmin_active_average_price_decrease():
     r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=30, min_price=0.0)
     peak = 2.28
     await r.async_update_adjusted_average(0.77)
-    await r.service.async_set_day(12)
     await r.async_update_top_price(0.97)
-    r.service._mock_hour = await r.service.async_set_hour(19)
+    r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 19, 0, 0))
     await r.async_update_prices(P230412[0], P230412[1])
     initial_charge = await r.async_get_total_charge(peak)
     await r.max_min.async_setup(100)
@@ -288,9 +286,8 @@ async def test_230412_maxmin_active_total_charge():
     )
     peak = 2.28
     await r.async_update_adjusted_average(0.77)
-    await r.service.async_set_day(12)
     await r.async_update_top_price(0.97)
-    r.service._mock_hour = await r.service.async_set_hour(19)
+    r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 19, 0, 0))
     await r.async_update_prices(P230412[0], P230412[1])
     initial_charge = await r.async_get_total_charge(peak)
     await r.max_min.async_setup(100)
@@ -307,9 +304,8 @@ async def test_230412_maxmin_active_decrease_suave():
     r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=30, min_price=0.0)
     peak = 2.28
     await r.async_update_adjusted_average(0.77)
-    await r.service.async_set_day(12)
     await r.async_update_top_price(0.97)
-    r.service._mock_hour = await r.service.async_set_hour(19)
+    r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 19, 0, 0))
     await r.async_update_prices(P230412[0], P230412[1])
     initial_charge = await r.async_get_total_charge(peak)
     print(initial_charge)
@@ -327,9 +323,8 @@ async def test_230412_maxmin_active_decrease_increase_suave():
     r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=30, min_price=0.0)
     peak = 2.28
     await r.async_update_adjusted_average(0.77)
-    await r.service.async_set_day(12)
     await r.async_update_top_price(0.97)
-    r.service._mock_hour = await r.service.async_set_hour(19)
+    r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 19, 0, 0))
     await r.async_update_prices(P230412[0], P230412[1])
     initial_charge = await r.async_get_total_charge(peak)
     await r.max_min.async_setup(100)
@@ -351,9 +346,8 @@ async def test_230412_fixed_price():
     r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=30, min_price=0.0)
     peak = 2.28
     await r.async_update_adjusted_average(0.77)
-    await r.service.async_set_day(12)
     await r.async_update_top_price(0.97)
-    r.service._mock_hour = await r.service.async_set_hour(19)
+    r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 19, 0, 0))
     await r.async_update_prices(P230412[0], P230412[1])
     await r.max_min.async_setup(peak)
     await r.max_min.async_update(0, peak, peak / 2)
@@ -366,9 +360,8 @@ async def test_230426_session_decrease():
     r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=30, min_price=0.0)
     peak = 2.28
     await r.async_update_adjusted_average(0.77)
-    await r.service.async_set_day(26)
     await r.async_update_top_price(0.89)
-    r.service._mock_hour = await r.service.async_set_hour(14)
+    r.service.dtmodel.set_datetime(datetime(2020, 2, 26, 14, 0, 0))
     await r.async_update_prices(P230426[0], P230426[1])
     await r.max_min.async_setup(peak)
     await r.max_min.async_update(0.7, 2.28, 5)
@@ -395,7 +388,7 @@ async def test_230426_session_decrease():
         12,
         13,
     ]
-    r.service._mock_hour = await r.service.async_set_hour(18)
+    r.service.dtmodel.set_datetime(datetime(2020, 2, 26, 18, 0, 0))
     await r.max_min.async_update(0.5, 2.28, 3.2)
     assert r.non_hours == [
         18,
@@ -432,12 +425,11 @@ async def test_230426_session_new_prices():
     )
     peak = 2.28
     await r.async_update_adjusted_average(0.77)
-    await r.service.async_set_day(26)
     await r.async_update_top_price(0.89)
-    r.service._mock_hour = await r.service.async_set_hour(13)
+    r.service.dtmodel.set_datetime(datetime(2020, 2, 26, 13, 0, 0))
     await r.async_update_prices(P230426[0], P230426[1])
     await r.max_min.async_update(0.7, peak, 5)
-    assert r.non_hours[1] == 17
+    assert r.non_hours[1].hour == 17
 
 
 @pytest.mark.asyncio
@@ -447,12 +439,11 @@ async def test_230426_session_map_correct_cheapest():
     )
     peak = 2.28
     await r.async_update_adjusted_average(0.77)
-    await r.service.async_set_day(26)
     await r.async_update_top_price(10.89)
-    r.service._mock_hour = await r.service.async_set_hour(13)
+    r.service.dtmodel.set_datetime(datetime(2020, 2, 26, 13, 0, 0))
     await r.async_update_prices(P230426[0], P230426[1])
     await r.max_min.async_update(0.7, peak, 5)
-    r.service._mock_hour = await r.service.async_set_hour(16)
+    r.service.dtmodel.set_datetime(datetime(2020, 2, 26, 16, 0, 0))
     _desired_decreased = 2.4
     await r.max_min.async_update(3.4, peak, _desired_decreased)
     # print(r.non_hours)
@@ -472,12 +463,11 @@ async def test_230429_session_map_correct_cheapest():
     )
     peak = 2.28
     await r.async_update_adjusted_average(1)
-    await r.service.async_set_day(29)
     await r.async_update_top_price(0.93)
-    r.service._mock_hour = await r.service.async_set_hour(15)
+    r.service.dtmodel.set_datetime(datetime(2020, 2, 29, 15, 0, 0))
     await r.async_update_prices(P230429[0], P230429[1])
     await r.max_min.async_update(0.46, peak, 8)
-    r.service._mock_hour = await r.service.async_set_hour(16)
+    r.service.dtmodel.set_datetime(datetime(2020, 2, 26, 16, 0, 0))
     available = [k for k, v in r.max_min.model.input_hours.items() if v[1] > 0]
     assert available == [11, 12, 13, 14]
 
@@ -489,21 +479,23 @@ async def test_230429_session_map_single_hour():
     )
     peak = 2.28
     await r.async_update_adjusted_average(1)
-    await r.service.async_set_day(29)
     await r.async_update_top_price(0.93)
-    r.service._mock_hour = await r.service.async_set_hour(15)
+    _date = datetime(2020, 2, 29, 15, 0, 0)
+    r.service.dtmodel.set_datetime(_date)
     await r.async_update_prices(P230429[0], P230429[1])
     await r.max_min.async_update(0.46, peak, 2.2)
-    r.service._mock_hour = await r.service.async_set_hour(16)
+    r.service.dtmodel.set_datetime(datetime(2020, 2, 29, 16, 0, 0))
     available = [k for k, v in r.max_min.model.input_hours.items() if v[1] > 0]
-    assert available == [14]
-    assert r.max_min.model.input_hours[14][1] == 1
+    assert available[0].hour == 14
+    _date += timedelta(days=1)
+    _date = _date.replace(hour=14)
+    assert r.max_min.model.input_hours[_date][1] == 1
     await r.max_min.async_update(0.46, peak, 2.2, 0.2)
-    assert r.max_min.model.input_hours[14][1] == 1
+    assert r.max_min.model.input_hours[_date][1] == 1
     await r.max_min.async_update(0.46, peak, 2.2, 0.4)
-    assert r.max_min.model.input_hours[14][1] == 1
+    assert r.max_min.model.input_hours[_date][1] == 1
     await r.max_min.async_update(0.46, peak, 2.2, 1.4)
-    assert r.max_min.model.input_hours[14][1] == 1
+    assert r.max_min.model.input_hours[_date][1] == 1
 
 
 @pytest.mark.asyncio
@@ -511,17 +503,18 @@ async def test_230512_car_connected():
     r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=30, min_price=0.0)
     peak = 1.68
     await r.async_update_adjusted_average(0.66)
-    await r.service.async_set_day(12)
+
     await r.async_update_top_price(0.86)
-    r.service._mock_hour = await r.service.async_set_hour(14)
+
+    r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 14, 0, 0))
     await r.async_update_prices(P230512[0], P230512[1])
     await r.max_min.async_update(0.4, peak, 7)
     available = [k for k, v in r.max_min.model.input_hours.items() if v[1] > 0]
-    r.service._mock_hour = await r.service.async_set_hour(15)
+    r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 15, 0, 0))
     await r.max_min.async_update(0.4, peak, 7, car_connected=True)
     available2 = [k for k, v in r.max_min.model.input_hours.items() if v[1] > 0]
     assert available == available2
-    r.service._mock_hour = await r.service.async_set_hour(18)
+    r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 18, 0, 0))
     await r.max_min.async_update(0.4, peak, 7, car_connected=True)
     available3 = [k for k, v in r.max_min.model.input_hours.items() if v[1] > 0]
     assert available2 == available3

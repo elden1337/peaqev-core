@@ -1,12 +1,13 @@
 from dataclasses import dataclass, field
 from typing import Tuple
+from datetime import datetime
 
 
 @dataclass
 class MaxMinModel:
     min_price: float
-    input_hours: dict[int, Tuple[float, float]] = field(default_factory=lambda: {})
-    original_input_hours: dict[int, Tuple[float, float]] = field(
+    input_hours: dict[datetime, Tuple[float, float]] = field(default_factory=lambda: {})
+    original_input_hours: dict[datetime, Tuple[float, float]] = field(
         default_factory=lambda: {}
     )
     expected_hourly_charge: float = 0
