@@ -200,9 +200,11 @@ class HourSelectionService:
 
     async def async_set_permittance(self, hour_prices: list[HourPrice]) -> None:
         prices = normalize_prices([hp.price for hp in hour_prices])
-        price_mean = self._set_price_mean(prices, self.model.adjusted_average)
-        price_stdev = stdev(prices)
-        set_initial_permittance(hour_prices, price_mean, price_stdev)
+        set_initial_permittance(
+            hour_prices,
+            self._set_price_mean(prices, self.model.adjusted_average),
+            stdev(prices),
+        )
         set_scooped_permittance(hour_prices, self.options.cautionhour_type_enum)
         self._offset_dict = self._set_offset_dict(prices, hour_prices[0].day)
 
@@ -240,10 +242,3 @@ class HourSelectionService:
         if not adjusted_average:
             return mean(prices)
         return mean([adjusted_average, mean(prices)])
-
-    # @staticmethod
-    # def _sort_hour_prices(hour_prices: list[HourPrice]) -> list[HourPrice]:
-    #     sorted_hour_prices = sorted(
-    #         hour_prices, key=lambda hp: (hp.day, hp.hour, hp.quarter)
-    #     )
-    #     return sorted_hour_prices

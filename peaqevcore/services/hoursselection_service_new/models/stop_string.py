@@ -21,31 +21,37 @@ class AllowanceObj:
     hour: int = -1
     quarter: int = -1
     datum: date = date.today()
-    
+
     def __post_init__(self):
-        #set display name
+        # set display name
         match self.prefix_type:
             case AllowanceType.StoppedUntil:
                 self.display_name = f"{self.prefix_type.value}{self.__set_num_value(self.hour)}:{self.__set_num_value(self.quarter * 15)}."
             case AllowanceType.AllowedUntil:
                 self.display_name = f"{self.prefix_type.value}{self.__set_num_value(self.hour)}:{self.__set_num_value(self.quarter * 15)}."
             case AllowanceType.StoppedUntilTomorrow:
-                self.display_name = f"{self.prefix_type.value}{self.__set_num_value(self.hour)}:00."
+                self.display_name = (
+                    f"{self.prefix_type.value}{self.__set_num_value(self.hour)}:00."
+                )
             case AllowanceType.AllowedUntilTomorrow:
-                self.display_name = f"{self.prefix_type.value}{self.__set_num_value(self.hour)}:00."
+                self.display_name = (
+                    f"{self.prefix_type.value}{self.__set_num_value(self.hour)}:00."
+                )
             case AllowanceType.StoppedUntilFurtherNotice:
                 self.display_name = self.prefix_type.value
             case AllowanceType.AllowedUntilFurtherNotice:
                 self.display_name = self.prefix_type.value
-            
 
-    def __set_num_value(self, hour:int):
+    def __set_num_value(self, hour: int):
         _h = str(hour)
         if len(_h) == 1:
             return f"0{_h}"
         return _h
 
-def set_allowance_obj(dtmodel: DateTimeModel, future_hours: list[HourPrice]) -> AllowanceObj:
+
+def set_allowance_obj(
+    dtmodel: DateTimeModel, future_hours: list[HourPrice]
+) -> AllowanceObj:
     if not len([hp.dt for hp in future_hours if hp.permittance > 0.0]):
         return AllowanceObj(AllowanceType.StoppedUntilFurtherNotice)
     if not len([hp.dt for hp in future_hours if hp.permittance == 0.0]):
@@ -54,12 +60,24 @@ def set_allowance_obj(dtmodel: DateTimeModel, future_hours: list[HourPrice]) -> 
     _stopped = first_start != dtmodel._datetime
     if _stopped:
         if first_start.date() > dtmodel._date:
-            return AllowanceObj(AllowanceType.StoppedUntilTomorrow, hour=first_start.hour)
+            return AllowanceObj(
+                AllowanceType.StoppedUntilTomorrow, hour=first_start.hour
+            )
         else:
-            return AllowanceObj(AllowanceType.StoppedUntil, hour=first_start.hour, quarter=first_start.minute // 15)
+            return AllowanceObj(
+                AllowanceType.StoppedUntil,
+                hour=first_start.hour,
+                quarter=first_start.minute // 15,
+            )
     else:
         first_stop = min([hp.dt for hp in future_hours if hp.permittance == 0.0])
         if first_stop.date() > dtmodel._date:
-            return AllowanceObj(AllowanceType.AllowedUntilTomorrow, hour=first_stop.hour)
+            return AllowanceObj(
+                AllowanceType.AllowedUntilTomorrow, hour=first_stop.hour
+            )
         else:
-            return AllowanceObj(AllowanceType.AllowedUntil, hour=first_stop.hour, quarter=first_stop.minute // 15)
+            return AllowanceObj(
+                AllowanceType.AllowedUntil,
+                hour=first_stop.hour,
+                quarter=first_stop.minute // 15,
+            )
