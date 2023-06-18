@@ -308,14 +308,35 @@ async def test_230412_maxmin_active_decrease_suave():
     r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 19, 0, 0))
     await r.async_update_prices(P230412[0], P230412[1])
     initial_charge = await r.async_get_total_charge(peak)
-    print(initial_charge)
+    print(f"initial_charge: {initial_charge}")
     await r.max_min.async_setup(100)
     assert r.max_min.active is True
-    await r.max_min.async_update(0, peak, max(1, initial_charge[0] - 10))
+    await r.max_min.async_update(0, peak, max(1, initial_charge[0] - 40))
+    print(f"3: {r.max_min.original_total_charge}")
     ret = await r.async_get_total_charge(peak)
     assert r.max_min.total_charge == ret[1]
+    print(ret)
+    assert 1 > 2
     assert ret[1] != ret[0]
     assert r.max_min.total_charge <= initial_charge[0]
+
+
+@pytest.mark.asyncio
+async def test_230412_maxmin_original_charge_static():
+    r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=30, min_price=0.0)
+    peak = 2.28
+    await r.async_update_adjusted_average(0.77)
+    await r.async_update_top_price(0.97)
+    r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 19, 0, 0))
+    await r.async_update_prices(P230412[0], P230412[1])
+    initial_charge = await r.async_get_total_charge(peak)
+    await r.max_min.async_setup(100)
+    assert r.max_min.active is True
+    initial_charge2 = await r.async_get_total_charge(peak)
+    assert initial_charge2[0] == initial_charge[0]
+    await r.max_min.async_update(0, peak, max(1, initial_charge[0] - 40))
+    initial_charge3 = await r.async_get_total_charge(peak)
+    assert initial_charge3[0] == initial_charge[0]
 
 
 @pytest.mark.asyncio
