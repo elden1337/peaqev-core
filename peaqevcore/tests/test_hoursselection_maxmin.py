@@ -308,15 +308,11 @@ async def test_230412_maxmin_active_decrease_suave():
     r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 19, 0, 0))
     await r.async_update_prices(P230412[0], P230412[1])
     initial_charge = await r.async_get_total_charge(peak)
-    print(f"initial_charge: {initial_charge}")
     await r.max_min.async_setup(100)
     assert r.max_min.active is True
     await r.max_min.async_update(0, peak, max(1, initial_charge[0] - 40))
-    print(f"3: {r.max_min.original_total_charge}")
     ret = await r.async_get_total_charge(peak)
     assert r.max_min.total_charge == ret[1]
-    print(ret)
-    assert 1 > 2
     assert ret[1] != ret[0]
     assert r.max_min.total_charge <= initial_charge[0]
 
@@ -489,7 +485,7 @@ async def test_230429_session_map_correct_cheapest():
     await r.async_update_prices(P230429[0], P230429[1])
     await r.max_min.async_update(0.46, peak, 8)
     r.service.dtmodel.set_datetime(datetime(2020, 2, 26, 16, 0, 0))
-    available = [k for k, v in r.max_min.model.input_hours.items() if v[1] > 0]
+    available = [k.hour for k, v in r.max_min.model.input_hours.items() if v[1] > 0]
     assert available == [11, 12, 13, 14]
 
 
