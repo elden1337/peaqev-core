@@ -6,11 +6,12 @@ from statistics import stdev, mean
 from datetime import date, datetime, timedelta
 from ...models.hourselection.hourselection_options import HourSelectionOptions
 from .const import TODAY, TOMORROW
-from ..hourselection.hourselectionservice.hourselection_calculations import (
+from .hourselection_calculations import (
     normalize_prices,
     deviation_from_mean,
 )
 from .permittance import set_initial_permittance, set_scooped_permittance
+from .max_min_charge import MaxMinCharge
 
 
 class HourSelectionService:
@@ -18,6 +19,7 @@ class HourSelectionService:
         self.options = options
         self.dtmodel = DateTimeModel()
         self.model = HourSelectionModel()
+        self.max_min = MaxMinCharge(service=self, min_price=self.options.min_price)
         self._offset_dict: dict[datetime, dict] = {}
 
     def update(self):
@@ -49,6 +51,10 @@ class HourSelectionService:
     @property
     def allowance(self) -> AllowanceObj:
         return set_allowance_obj(self.dtmodel, self.future_hours)
+
+    @property
+    def average_kwh_price(self) -> float:
+        return round(mean([hp.permittance * hp.price for hp in self.future_hours]), 2)
 
     @property
     def non_hours(self) -> list[datetime]:

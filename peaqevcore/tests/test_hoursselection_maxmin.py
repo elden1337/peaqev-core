@@ -237,8 +237,8 @@ async def test_230412_maxmin_not_active():
     r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 19, 0, 0))
     await r.async_update_prices(P230412[0], P230412[1])
     ret = await r.async_get_average_kwh_price()
-    assert r.max_min.active is False
-    assert r.max_min.average_price == ret[1]
+    assert r.service.max_min.active is False
+    assert r.service.max_min.average_price == ret[1]
 
 
 @pytest.mark.asyncio
@@ -253,11 +253,11 @@ async def test_230412_maxmin_active_average_price():
     await r.async_update_top_price(0.97)
     r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 19, 0, 0))
     await r.async_update_prices(P230412[0], P230412[1])
-    await r.max_min.async_setup(100)
-    assert r.max_min.active is True
-    await r.max_min.async_update(0, peak, 100)
+    await r.service.max_min.async_setup(100)
+    assert r.service.max_min.active is True
+    await r.service.max_min.async_update(0, peak, 100)
     ret = await r.async_get_average_kwh_price()
-    assert r.max_min.average_price == ret[1]
+    assert r.service.max_min.average_price == ret[1]
 
 
 @pytest.mark.asyncio
@@ -269,11 +269,12 @@ async def test_230412_maxmin_active_average_price_decrease():
     r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 19, 0, 0))
     await r.async_update_prices(P230412[0], P230412[1])
     initial_charge = await r.async_get_total_charge(peak)
-    await r.max_min.async_setup(100)
-    assert r.max_min.active is True
-    await r.max_min.async_update(0, peak, max(1, initial_charge[0] - 10))
+    await r.service.max_min.async_setup(100)
+    assert r.service.max_min.active is True
+    await r.service.max_min.async_update(0, peak, max(1, initial_charge[0] - 10))
     ret = await r.async_get_average_kwh_price()
     assert ret[1] is not None
+    print(ret)
     assert ret[1] <= ret[0]
 
 
@@ -290,13 +291,13 @@ async def test_230412_maxmin_active_total_charge():
     r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 19, 0, 0))
     await r.async_update_prices(P230412[0], P230412[1])
     initial_charge = await r.async_get_total_charge(peak)
-    await r.max_min.async_setup(100)
-    assert r.max_min.active is True
-    await r.max_min.async_update(0, peak, 100)
+    await r.service.max_min.async_setup(100)
+    assert r.service.max_min.active is True
+    await r.service.max_min.async_update(0, peak, 100)
     ret = await r.async_get_total_charge(peak)
-    assert r.max_min.total_charge == ret[1]
+    assert r.service.max_min.total_charge == ret[1]
     assert ret[1] == ret[0]
-    assert r.max_min.total_charge <= initial_charge[0]
+    assert r.service.max_min.total_charge <= initial_charge[0]
 
 
 @pytest.mark.asyncio
@@ -308,13 +309,13 @@ async def test_230412_maxmin_active_decrease_suave():
     r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 19, 0, 0))
     await r.async_update_prices(P230412[0], P230412[1])
     initial_charge = await r.async_get_total_charge(peak)
-    await r.max_min.async_setup(100)
-    assert r.max_min.active is True
-    await r.max_min.async_update(0, peak, max(1, initial_charge[0] - 40))
+    await r.service.max_min.async_setup(100)
+    assert r.service.max_min.active is True
+    await r.service.max_min.async_update(0, peak, max(1, initial_charge[0] - 40))
     ret = await r.async_get_total_charge(peak)
-    assert r.max_min.total_charge == ret[1]
+    assert r.service.max_min.total_charge == ret[1]
     assert ret[1] != ret[0]
-    assert r.max_min.total_charge <= initial_charge[0]
+    assert r.service.max_min.total_charge <= initial_charge[0]
 
 
 @pytest.mark.asyncio
@@ -326,11 +327,11 @@ async def test_230412_maxmin_original_charge_static():
     r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 19, 0, 0))
     await r.async_update_prices(P230412[0], P230412[1])
     initial_charge = await r.async_get_total_charge(peak)
-    await r.max_min.async_setup(100)
-    assert r.max_min.active is True
+    await r.service.max_min.async_setup(100)
+    assert r.service.max_min.active is True
     initial_charge2 = await r.async_get_total_charge(peak)
     assert initial_charge2[0] == initial_charge[0]
-    await r.max_min.async_update(0, peak, max(1, initial_charge[0] - 40))
+    await r.service.max_min.async_update(0, peak, max(1, initial_charge[0] - 40))
     initial_charge3 = await r.async_get_total_charge(peak)
     assert initial_charge3[0] == initial_charge[0]
 
@@ -344,18 +345,18 @@ async def test_230412_maxmin_active_decrease_increase_suave():
     r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 19, 0, 0))
     await r.async_update_prices(P230412[0], P230412[1])
     initial_charge = await r.async_get_total_charge(peak)
-    await r.max_min.async_setup(100)
-    assert r.max_min.active is True
-    await r.max_min.async_update(0, peak, max(1, initial_charge[0] - 10))
+    await r.service.max_min.async_setup(100)
+    assert r.service.max_min.active is True
+    await r.service.max_min.async_update(0, peak, max(1, initial_charge[0] - 10))
     ret = await r.async_get_total_charge(peak)
-    assert r.max_min.total_charge == ret[1]
+    assert r.service.max_min.total_charge == ret[1]
     assert ret[1] != ret[0]
-    assert r.max_min.total_charge <= initial_charge[0]
-    await r.max_min.async_update(0, peak, initial_charge[0] + 10)
+    assert r.service.max_min.total_charge <= initial_charge[0]
+    await r.service.max_min.async_update(0, peak, initial_charge[0] + 10)
     ret = await r.async_get_total_charge(peak)
-    assert r.max_min.total_charge == ret[1]
+    assert r.service.max_min.total_charge == ret[1]
     assert ret[1] == ret[0]
-    assert r.max_min.total_charge == initial_charge[0]
+    assert r.service.max_min.total_charge == initial_charge[0]
 
 
 @pytest.mark.asyncio
@@ -366,8 +367,8 @@ async def test_230412_fixed_price():
     await r.async_update_top_price(0.97)
     r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 19, 0, 0))
     await r.async_update_prices(P230412[0], P230412[1])
-    await r.max_min.async_setup(peak)
-    await r.max_min.async_update(0, peak, peak / 2)
+    await r.service.max_min.async_setup(peak)
+    await r.service.max_min.async_update(0, peak, peak / 2)
     ret = await r.async_get_average_kwh_price()
     assert ret == (0.31, 0.06)
 
@@ -380,8 +381,8 @@ async def test_230426_session_decrease():
     await r.async_update_top_price(0.89)
     r.service.dtmodel.set_datetime(datetime(2020, 2, 26, 14, 0, 0))
     await r.async_update_prices(P230426[0], P230426[1])
-    await r.max_min.async_setup(peak)
-    await r.max_min.async_update(0.7, 2.28, 5)
+    await r.service.max_min.async_setup(peak)
+    await r.service.max_min.async_update(0.7, 2.28, 5)
     assert r.non_hours == [
         17,
         18,
@@ -406,7 +407,7 @@ async def test_230426_session_decrease():
         13,
     ]
     r.service.dtmodel.set_datetime(datetime(2020, 2, 26, 18, 0, 0))
-    await r.max_min.async_update(0.5, 2.28, 3.2)
+    await r.service.max_min.async_update(0.5, 2.28, 3.2)
     assert r.non_hours == [
         18,
         19,
@@ -432,7 +433,7 @@ async def test_230426_session_decrease():
         16,
         17,
     ]
-    assert r.max_min.total_charge == 2.3
+    assert r.service.max_min.total_charge == 2.3
 
 
 @pytest.mark.asyncio
@@ -445,7 +446,7 @@ async def test_230426_session_new_prices():
     await r.async_update_top_price(0.89)
     r.service.dtmodel.set_datetime(datetime(2020, 2, 26, 13, 0, 0))
     await r.async_update_prices(P230426[0], P230426[1])
-    await r.max_min.async_update(0.7, peak, 5)
+    await r.service.max_min.async_update(0.7, peak, 5)
     assert r.non_hours[1].hour == 17
 
 
@@ -459,18 +460,19 @@ async def test_230426_session_map_correct_cheapest():
     await r.async_update_top_price(10.89)
     r.service.dtmodel.set_datetime(datetime(2020, 2, 26, 13, 0, 0))
     await r.async_update_prices(P230426[0], P230426[1])
-    await r.max_min.async_update(0.7, peak, 5)
+    await r.service.max_min.async_update(0.7, peak, 5)
     r.service.dtmodel.set_datetime(datetime(2020, 2, 26, 16, 0, 0))
     _desired_decreased = 2.4
-    await r.max_min.async_update(3.4, peak, _desired_decreased)
+    await r.service.max_min.async_update(3.4, peak, _desired_decreased)
     # print(r.non_hours)
     # print(r.dynamic_caution_hours)
-    # print(r.max_min.total_charge)
+    # print(r.service.max_min.total_charge)
     available_charge = round(
-        sum([v[1] for k, v in r.max_min.model.input_hours.items() if v[1] > 0]) * peak,
+        sum([v[1] for k, v in r.service.max_min.model.input_hours.items() if v[1] > 0])
+        * peak,
         1,
     )
-    assert r.max_min.total_charge == available_charge == _desired_decreased
+    assert r.service.max_min.total_charge == available_charge == _desired_decreased
 
 
 @pytest.mark.asyncio
@@ -483,9 +485,11 @@ async def test_230429_session_map_correct_cheapest():
     await r.async_update_top_price(0.93)
     r.service.dtmodel.set_datetime(datetime(2020, 2, 29, 15, 0, 0))
     await r.async_update_prices(P230429[0], P230429[1])
-    await r.max_min.async_update(0.46, peak, 8)
+    await r.service.max_min.async_update(0.46, peak, 8)
     r.service.dtmodel.set_datetime(datetime(2020, 2, 26, 16, 0, 0))
-    available = [k.hour for k, v in r.max_min.model.input_hours.items() if v[1] > 0]
+    available = [
+        k.hour for k, v in r.service.max_min.model.input_hours.items() if v[1] > 0
+    ]
     assert available == [11, 12, 13, 14]
 
 
@@ -500,19 +504,19 @@ async def test_230429_session_map_single_hour():
     _date = datetime(2020, 2, 29, 15, 0, 0)
     r.service.dtmodel.set_datetime(_date)
     await r.async_update_prices(P230429[0], P230429[1])
-    await r.max_min.async_update(0.46, peak, 2.2)
+    await r.service.max_min.async_update(0.46, peak, 2.2)
     r.service.dtmodel.set_datetime(datetime(2020, 2, 29, 16, 0, 0))
-    available = [k for k, v in r.max_min.model.input_hours.items() if v[1] > 0]
+    available = [k for k, v in r.service.max_min.model.input_hours.items() if v[1] > 0]
     assert available[0].hour == 14
     _date += timedelta(days=1)
     _date = _date.replace(hour=14)
-    assert r.max_min.model.input_hours[_date][1] == 1
-    await r.max_min.async_update(0.46, peak, 2.2, 0.2)
-    assert r.max_min.model.input_hours[_date][1] == 1
-    await r.max_min.async_update(0.46, peak, 2.2, 0.4)
-    assert r.max_min.model.input_hours[_date][1] == 1
-    await r.max_min.async_update(0.46, peak, 2.2, 1.4)
-    assert r.max_min.model.input_hours[_date][1] == 1
+    assert r.service.max_min.model.input_hours[_date][1] == 1
+    await r.service.max_min.async_update(0.46, peak, 2.2, 0.2)
+    assert r.service.max_min.model.input_hours[_date][1] == 1
+    await r.service.max_min.async_update(0.46, peak, 2.2, 0.4)
+    assert r.service.max_min.model.input_hours[_date][1] == 1
+    await r.service.max_min.async_update(0.46, peak, 2.2, 1.4)
+    assert r.service.max_min.model.input_hours[_date][1] == 1
 
 
 @pytest.mark.asyncio
@@ -525,13 +529,13 @@ async def test_230512_car_connected():
 
     r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 14, 0, 0))
     await r.async_update_prices(P230512[0], P230512[1])
-    await r.max_min.async_update(0.4, peak, 7)
-    available = [k for k, v in r.max_min.model.input_hours.items() if v[1] > 0]
+    await r.service.max_min.async_update(0.4, peak, 7)
+    available = [k for k, v in r.service.max_min.model.input_hours.items() if v[1] > 0]
     r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 15, 0, 0))
-    await r.max_min.async_update(0.4, peak, 7, car_connected=True)
-    available2 = [k for k, v in r.max_min.model.input_hours.items() if v[1] > 0]
+    await r.service.max_min.async_update(0.4, peak, 7, car_connected=True)
+    available2 = [k for k, v in r.service.max_min.model.input_hours.items() if v[1] > 0]
     assert available == available2
     r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 18, 0, 0))
-    await r.max_min.async_update(0.4, peak, 7, car_connected=True)
-    available3 = [k for k, v in r.max_min.model.input_hours.items() if v[1] > 0]
+    await r.service.max_min.async_update(0.4, peak, 7, car_connected=True)
+    available3 = [k for k, v in r.service.max_min.model.input_hours.items() if v[1] > 0]
     assert available2 == available3

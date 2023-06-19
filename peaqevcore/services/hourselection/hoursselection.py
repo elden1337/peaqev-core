@@ -4,10 +4,8 @@ from typing import Tuple
 from ...models.hourselection.cautionhourtype import CautionHourType
 from ...models.hourselection.hourselection_model import HourSelectionModel
 from ...models.hourselection.hourselection_options import HourSelectionOptions
-from ...models.hourselection.hourtypelist import HourTypeList
 from ..hoursselection_service_new.hourselection_service import HourSelectionService
 from .hourselectionservice.hoursselection_helpers import convert_none_list
-from .hourselectionservice.max_min_charge import MaxMinCharge
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -37,7 +35,6 @@ class Hoursselection:
         )
         self.model.validate()
         self.service = HourSelectionService(options=self.model.options)
-        self.max_min: MaxMinCharge = MaxMinCharge(self, self.model.options.min_price)
 
     @property
     def offsets(self) -> dict:
@@ -48,30 +45,22 @@ class Hoursselection:
 
     @property
     def non_hours(self) -> list:
-        if self.max_min.active:
-            return self.max_min.non_hours
+        if self.service.max_min.active:
+            return self.service.max_min.non_hours
         return self.internal_non_hours
 
     @property
     def caution_hours(self) -> list:
         return [k.hour for k, v in self.service.dynamic_caution_hours.items()]
-        # self.model.hours.update_hour_list(
-        #     listtype=HourTypeList.CautionHour, hour=self.service.set_hour()
-        # )
-        # return self.model.hours.caution_hours
 
     @property
     def dynamic_caution_hours(self) -> dict:
-        if self.max_min.active:
-            return self.max_min.dynamic_caution_hours
+        if self.service.max_min.active:
+            return self.service.max_min.dynamic_caution_hours
         return self.internal_dynamic_caution_hours
 
     @property
     def internal_non_hours(self) -> list:
-        # self.model.hours.update_hour_list(
-        #     listtype=HourTypeList.NonHour, hour=self.service.set_hour()
-        # )
-        # return self.model.hours.non_hours
         self.service.update()
         return self.service.non_hours
 
@@ -127,9 +116,9 @@ class Hoursselection:
 
     async def async_get_average_kwh_price(self) -> Tuple[float | None, float | None]:
         ret_dynamic = None
-        if self.max_min.active:
-            ret_dynamic = self.max_min.average_price
-            ret_static = self.max_min.original_average_price
+        if self.service.max_min.active:
+            ret_dynamic = self.service.max_min.average_price
+            ret_static = self.service.average_kwh_price
             return ret_static, ret_dynamic
         else:
             ret_static = mean(
@@ -147,11 +136,8 @@ class Hoursselection:
         self, currentpeak: float
     ) -> Tuple[float, float | None]:
         ret_dynamic = None
-        if self.max_min.active:
-            ret_dynamic = self.max_min.total_charge
-            # ret_static = self.max_min.original_total_charge
-            # return ret_static, ret_dynamic
-        # else:
+        if self.service.max_min.active:
+            ret_dynamic = self.service.max_min.total_charge
         self.model.current_peak = currentpeak
         ret_static = sum(
             [hp.permittance * currentpeak for hp in self.service.future_hours]
