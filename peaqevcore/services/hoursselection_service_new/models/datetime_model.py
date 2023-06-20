@@ -15,7 +15,7 @@ class DateTimeModel:
 
     def set_datetime(self, mock_dt: datetime):
         assert isinstance(mock_dt, datetime), "Datetime must be a datetime object"
-        self._datetime = mock_dt.replace(minute=0, second=0)
+        self._datetime = mock_dt.replace(minute=0, second=0, microsecond=0)
         self._datetime_set = True
         self._date = mock_dt.date()
         self._date_set = True
@@ -41,7 +41,11 @@ class DateTimeModel:
 
     @property
     def dt(self) -> datetime:
-        return self._datetime if self._datetime_set else datetime.now()
+        return (
+            self._datetime
+            if self._datetime_set
+            else datetime.now().replace(minute=0, second=0, microsecond=0)
+        )
 
     @property
     def hdate(self) -> date:

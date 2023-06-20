@@ -25,7 +25,8 @@ class HourPrice:
 
     def _create_dt_object(self) -> datetime:
         return datetime.combine(
-            self.day, time(hour=self.hour, minute=self.quarter * 15, second=0)
+            self.day,
+            time(hour=self.hour, minute=self.quarter * 15, second=0, microsecond=0),
         )
 
     @staticmethod
