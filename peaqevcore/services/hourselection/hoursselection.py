@@ -46,8 +46,10 @@ class Hoursselection:
     @property
     def non_hours(self) -> list:
         if self.service.max_min.active:
-            return self.service.max_min.non_hours
-        return self.internal_non_hours
+            ret = self.service.max_min.non_hours
+        else:
+            ret = self.internal_non_hours
+        return sorted(ret)
 
     @property
     def caution_hours(self) -> list:
@@ -56,8 +58,12 @@ class Hoursselection:
     @property
     def dynamic_caution_hours(self) -> dict:
         if self.service.max_min.active:
-            return self.service.max_min.dynamic_caution_hours
-        return self.internal_dynamic_caution_hours
+            ret = self.service.max_min.dynamic_caution_hours
+        else:
+            ret = self.internal_dynamic_caution_hours
+        keys = list(ret.keys())
+        keys.sort()
+        return {k: ret[k] for k in keys}
 
     @property
     def internal_non_hours(self) -> list:

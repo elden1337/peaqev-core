@@ -35,11 +35,19 @@ class MaxMinCharge:
 
     @property
     def non_hours(self) -> list:
-        return [k for k, v in self.model.input_hours.items() if v[1] == 0]
+        return [
+            k
+            for k, v in self.model.input_hours.items()
+            if v[1] == 0 and k >= self.parent.dtmodel.dt
+        ]
 
     @property
     def dynamic_caution_hours(self) -> dict:
-        return {k: v[1] for k, v in self.model.input_hours.items() if 0 < v[1] < 1}
+        return {
+            k: v[1]
+            for k, v in self.model.input_hours.items()
+            if 0 < v[1] < 1 and k >= self.parent.dtmodel.dt
+        }
 
     async def async_allow_decrease(self, car_connected: bool | None = None) -> bool:
         if car_connected is not None:
@@ -222,7 +230,6 @@ class MaxMinCharge:
     @staticmethod
     def _sort_dicts(ret_today: dict, ret_tomorrow: dict) -> dict:
         ret = {}
-        print(ret_today)
         for k in sorted(ret_today.keys()):
             ret[k] = ret_today[k]
         for k in sorted(ret_tomorrow.keys()):

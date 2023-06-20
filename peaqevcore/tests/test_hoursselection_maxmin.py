@@ -383,7 +383,8 @@ async def test_230426_session_decrease():
     await r.async_update_prices(P230426[0], P230426[1])
     await r.service.max_min.async_setup(peak)
     await r.service.max_min.async_update(0.7, 2.28, 5)
-    assert r.non_hours == [
+    n = [n.hour for n in r.non_hours]
+    assert n == [
         17,
         18,
         19,
@@ -405,15 +406,25 @@ async def test_230426_session_decrease():
         11,
         12,
         13,
-    ]
-    r.service.dtmodel.set_datetime(datetime(2020, 2, 26, 18, 0, 0))
-    await r.service.max_min.async_update(0.5, 2.28, 3.2)
-    assert r.non_hours == [
+        14,
+        15,
+        16,
+        17,
         18,
         19,
         20,
         21,
         22,
+        23,
+    ]
+    r.service.dtmodel.set_datetime(datetime(2020, 2, 26, 18, 0, 0))
+    await r.service.max_min.async_update(0.5, 2.28, 3.2)
+    n2 = [n.hour for n in r.non_hours]
+    assert n2 == [
+        18,
+        19,
+        20,
+        21,
         0,
         1,
         2,
@@ -432,8 +443,15 @@ async def test_230426_session_decrease():
         15,
         16,
         17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
     ]
-    assert r.service.max_min.total_charge == 2.3
+    print(r.service.stopped_string)
+    assert r.service.max_min.total_charge == 3.2
 
 
 @pytest.mark.asyncio

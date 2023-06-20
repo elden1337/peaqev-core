@@ -37,7 +37,11 @@ class HourSelectionService:
     @property
     def future_hours(self) -> list[HourPrice]:
         self.update()
-        return [hp for hp in self.model.hours_prices if not hp.passed]
+        ret = [hp for hp in self.model.hours_prices if not hp.passed]
+        if self.max_min.active:
+            for r in ret:
+                r.permittance = 0.0 if r.dt in self.max_min.non_hours else 1.0
+        return ret
 
     @property
     def passed_hours(self) -> list[HourPrice]:
