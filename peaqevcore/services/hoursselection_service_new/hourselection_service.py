@@ -2,7 +2,7 @@ from .models.stop_string import AllowanceObj, set_allowance_obj
 from .models.datetime_model import DateTimeModel
 from .models.hour_price import HourPrice
 from .models.hourselection_model import HourSelectionModel
-from statistics import stdev, mean
+from statistics import stdev, mean, variance
 from datetime import date, datetime, timedelta
 from ...models.hourselection.hourselection_options import HourSelectionOptions
 from .const import TODAY, TOMORROW

@@ -7,6 +7,8 @@ _LOGGER = logging.getLogger(__name__)
 
 def normalize_prices(prices: list) -> list:
     min_price = min(prices)
+    if min_price > 0:
+        return prices
     c = 0
     if min_price <= 0:
         c = abs(min_price) + 0.01

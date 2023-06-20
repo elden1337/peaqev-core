@@ -73,3 +73,40 @@ async def test_offsets_230613():
     service.dtmodel.set_datetime(datetime(2021, 1, 1, 14, 0, 0))
     await service.async_update_prices(_p.P230613[0], _p.P230613[1])
     print(service.offset_dict)
+
+
+@pytest.mark.asyncio
+async def test_230620():
+    opt = HourSelectionOptions(
+        top_price=1.5, min_price=0.05, cautionhour_type_enum=CautionHourType.AGGRESSIVE
+    )
+    p = [
+        0.9,
+        0.9,
+        0.89,
+        0.89,
+        0.89,
+        0.9,
+        0.94,
+        1.07,
+        1.23,
+        1.09,
+        1.03,
+        0.99,
+        1.01,
+        0.95,
+        0.94,
+        0.95,
+        0.98,
+        1.02,
+        1.08,
+        1.11,
+        1,
+        0.96,
+        0.92,
+        0.9,
+    ]
+    service = HourSelectionService(opt)
+    service.dtmodel.set_datetime(datetime(2023, 6, 20, 11, 27, 0))
+    await service.async_update_prices(p)
+    assert sum([x.permittance for x in service.future_hours]) > 2.0
