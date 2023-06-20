@@ -1,5 +1,5 @@
 import pytest
-
+from ..services.hourselection.hoursselection import Hoursselection
 from peaqevcore.services.hoursselection_service_new.models.stop_string import (
     AllowanceType,
 )
@@ -110,3 +110,70 @@ async def test_230620():
     service.dtmodel.set_datetime(datetime(2023, 6, 20, 11, 27, 0))
     await service.async_update_prices(p)
     assert sum([x.permittance for x in service.future_hours]) > 2.0
+
+
+@pytest.mark.asyncio
+async def test_230620_230621():
+    p = [
+        0.9,
+        0.9,
+        0.89,
+        0.89,
+        0.89,
+        0.9,
+        0.94,
+        1.07,
+        1.23,
+        1.09,
+        1.03,
+        0.99,
+        1.01,
+        0.95,
+        0.94,
+        0.95,
+        0.98,
+        1.02,
+        1.08,
+        1.11,
+        1,
+        0.96,
+        0.92,
+        0.9,
+    ]
+    p2 = [
+        0.9,
+        0.83,
+        0.78,
+        0.79,
+        0.86,
+        0.91,
+        0.94,
+        1.06,
+        1.21,
+        1.1,
+        1.01,
+        0.95,
+        0.95,
+        0.94,
+        0.93,
+        0.94,
+        0.94,
+        0.95,
+        0.95,
+        0.94,
+        0.91,
+        0.9,
+        0.83,
+        0.74,
+    ]
+    h = Hoursselection(
+        absolute_top_price=1.5,
+        min_price=0.05,
+        cautionhour_type=CautionHourType.AGGRESSIVE.value,
+    )
+    h.service.dtmodel.set_datetime(datetime(2023, 6, 20, 22, 12, 0))
+    await h.service.async_update_prices(p, p2)
+    await h.service.max_min.async_setup(5)
+    await h.service.max_min.async_update(0.4, 2.1, 5)
+    print(await h.async_get_average_kwh_price())
+    assert 1 > 2

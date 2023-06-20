@@ -58,7 +58,16 @@ class HourSelectionService:
 
     @property
     def average_kwh_price(self) -> float:
-        return round(mean([hp.permittance * hp.price for hp in self.future_hours]), 2)
+        return round(
+            mean(
+                [
+                    hp.permittance * hp.price
+                    for hp in self.future_hours
+                    if hp.permittance > 0
+                ]
+            ),
+            2,
+        )
 
     @property
     def non_hours(self) -> list[datetime]:

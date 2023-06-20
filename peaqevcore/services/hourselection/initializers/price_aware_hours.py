@@ -55,6 +55,10 @@ class PriceAwareHours(Hours):
         return self._core.caution_hours
 
     @property
+    def future_hours(self) -> list:
+        return self._core.future_hours
+
+    @property
     def absolute_top_price(self):
         return self._core.model.options.absolute_top_price
 

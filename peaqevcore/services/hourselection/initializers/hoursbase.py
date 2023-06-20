@@ -6,15 +6,13 @@ from ...timer.timer import Timer
 from ...scheduler.scheduler_facade import SchedulerFacade
 from typing import Tuple
 
+
 class Hours:
     timer: Timer
     scheduler: SchedulerFacade
 
     def __init__(
-            self,
-            price_aware: bool,
-            non_hours: list = [],
-            caution_hours: list = []
+        self, price_aware: bool, non_hours: list = [], caution_hours: list = []
     ):
         self._non_hours = non_hours
         self._caution_hours = caution_hours
@@ -68,7 +66,7 @@ class Hours:
         pass
 
     @abstractmethod
-    async def async_update_top_price(self, dyn_top_price) -> None: 
+    async def async_update_top_price(self, dyn_top_price) -> None:
         pass
 
     @property
@@ -76,8 +74,13 @@ class Hours:
     def dynamic_caution_hours(self) -> dict:
         pass
 
+    @property
     @abstractmethod
-    def update_prices(self, prices:list = [], prices_tomorrow:list=[]) -> None:
+    def future_hours(self) -> list:
+        pass
+
+    @abstractmethod
+    def update_prices(self, prices: list = [], prices_tomorrow: list = []) -> None:
         pass
 
     @property
@@ -134,13 +137,13 @@ class Hours:
         pass
 
     @abstractmethod
-    async def async_get_average_kwh_price(self) -> Tuple[float|None, float|None]:
+    async def async_get_average_kwh_price(self) -> Tuple[float | None, float | None]:
         pass
 
     @abstractmethod
-    async def async_get_total_charge(self) -> Tuple[float, float|None]:
+    async def async_get_total_charge(self) -> Tuple[float, float | None]:
         pass
-    
+
     @abstractmethod
     async def async_update_adjusted_average(self, val):
         pass

@@ -17,7 +17,6 @@ class Hoursselection:
         min_price: float = 0,
         cautionhour_type: str | CautionHourType = CautionHourType.SUAVE.value,
         blocknocturnal: bool = False,
-        base_mock_hour: int | None = None,
     ):
         self.cautionhour_type_enum = (
             CautionHourType(cautionhour_type.lower())
@@ -74,6 +73,10 @@ class Hoursselection:
     def internal_dynamic_caution_hours(self) -> dict:
         self.service.update()
         return self.service.dynamic_caution_hours
+
+    @property
+    def future_hours(self) -> list:
+        return self.service.future_hours
 
     @property
     def prices(self) -> list:
