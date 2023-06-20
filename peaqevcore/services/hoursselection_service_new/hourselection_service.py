@@ -227,7 +227,11 @@ class HourSelectionService:
                 TODAY: self._offset_dict[min(vals)],
                 TOMORROW: self._offset_dict[max(vals)],
             }
-        raise ValueError(f"Offset dict has {len(vals)} values. Must be 1 or 2.")
+        # todo: log something here.
+        return {
+            TODAY: {},
+            TOMORROW: {},
+        }
 
     @staticmethod
     def _set_offset_dict(prices: list[float], day: date) -> dict:

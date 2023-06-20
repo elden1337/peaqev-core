@@ -35,6 +35,7 @@ class MaxMinCharge:
 
     @property
     def non_hours(self) -> list:
+        print(self.parent.dtmodel.dt)
         return [
             k
             for k, v in self.model.input_hours.items()
@@ -188,7 +189,12 @@ class MaxMinCharge:
 
         for i in range(_range):
             if _hour < dt.hour and _hour not in ret_tomorrow.keys():
-                ret_tomorrow[(dt + timedelta(days=1)).replace(hour=_hour)] = (
+                ret_tomorrow[
+                    (dt + timedelta(days=1))
+                    .replace(hour=_hour)
+                    .replace(minute=0)
+                    .replace(second=0)
+                ] = (
                     prices_tomorrow[_hour],
                     1,
                 )

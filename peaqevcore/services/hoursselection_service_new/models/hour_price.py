@@ -24,7 +24,9 @@ class HourPrice:
         self.dt = self._create_dt_object()
 
     def _create_dt_object(self) -> datetime:
-        return datetime.combine(self.day, time(self.hour, self.quarter * 15))
+        return datetime.combine(
+            self.day, time(hour=self.hour, minute=self.quarter * 15, second=0)
+        )
 
     @staticmethod
     def set_hour_type(max_price, min_price, price):

@@ -557,3 +557,55 @@ async def test_230512_car_connected():
     await r.service.max_min.async_update(0.4, peak, 7, car_connected=True)
     available3 = [k for k, v in r.service.max_min.model.input_hours.items() if v[1] > 0]
     assert available2 == available3
+
+
+@pytest.mark.asyncio
+async def test_230620_non_hours():
+    r = h(
+        cautionhour_type=CautionHourType.AGGRESSIVE,
+        absolute_top_price=1.5,
+        min_price=0.0,
+    )
+    peak = 2.1
+    p = [
+        0.9,
+        0.9,
+        0.89,
+        0.89,
+        0.89,
+        0.9,
+        0.94,
+        1.07,
+        1.23,
+        1.09,
+        1.03,
+        0.99,
+        1.01,
+        0.95,
+        0.94,
+        0.95,
+        0.98,
+        1.02,
+        1.08,
+        1.11,
+        1,
+        0.96,
+        0.92,
+        0.9,
+    ]
+    await r.async_update_adjusted_average(0.66)
+    await r.async_update_top_price(0.86)
+    r.service.dtmodel.set_datetime(datetime(2023, 6, 20, 11, 3, 32))
+    await r.async_update_prices(p)
+    await r.service.max_min.async_update(0.4, peak, 7)
+    print(r.non_hours)
+    assert 1 > 2
+    # available = [k for k, v in r.service.max_min.model.input_hours.items() if v[1] > 0]
+    # r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 15, 0, 0))
+    # await r.service.max_min.async_update(0.4, peak, 7, car_connected=True)
+    # available2 = [k for k, v in r.service.max_min.model.input_hours.items() if v[1] > 0]
+    # assert available == available2
+    # r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 18, 0, 0))
+    # await r.service.max_min.async_update(0.4, peak, 7, car_connected=True)
+    # available3 = [k for k, v in r.service.max_min.model.input_hours.items() if v[1] > 0]
+    # assert available2 == available3
