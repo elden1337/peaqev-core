@@ -31,20 +31,6 @@ def get_offset_dict(normalized_hours: list):
     return ret
 
 
-def deviation_from_mean(prices: list[float]) -> dict[int, float]:
-    if not len(prices):
-        return {}
-    avg = mean(prices)
-    devi = stdev(prices)
-    deviation_dict = {}
-    for i, num in enumerate(prices):
-        deviation = (num - avg) / devi
-        if devi < 1:
-            deviation *= 0.5
-        deviation_dict[i] = round(deviation, 2)
-    return deviation_dict
-
-
 async def async_create_cautions(
     hourdict: dict,
     normalized_hourdict: dict,

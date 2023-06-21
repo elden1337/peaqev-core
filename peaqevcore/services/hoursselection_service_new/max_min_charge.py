@@ -129,6 +129,20 @@ class MaxMinCharge:
             min(min(1, expected_charge), self.model.original_input_hours[min_key][1]),
         )
 
+    def _service_caution_hours(self) -> dict:
+        return {
+            hp.dt: hp.permittance
+            for hp in self.parent.model.hours_prices
+            if not hp.passed and 0.0 < hp.permittance < 1.0
+        }
+
+    def _service_non_hours(self) -> list:
+        return [
+            hp.dt
+            for hp in self.parent.model.hours_prices
+            if not hp.passed and hp.permittance == 0.0
+        ]
+
     async def async_setup(
         self,
         max_charge: float,
@@ -142,9 +156,9 @@ class MaxMinCharge:
             return
         hour = self.parent.dtmodel.hour
         dt = self.parent.dtmodel.dt
-        _non_hours = self.parent.non_hours if non_hours is None else non_hours
+        _non_hours = self._service_non_hours() if non_hours is None else non_hours
         _dynamic_caution_hours = (
-            self.parent.dynamic_caution_hours
+            self._service_caution_hours()
             if dynamic_caution_hours is None
             else dynamic_caution_hours
         )

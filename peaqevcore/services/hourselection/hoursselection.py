@@ -6,6 +6,7 @@ from ...models.hourselection.hourselection_model import HourSelectionModel
 from ...models.hourselection.hourselection_options import HourSelectionOptions
 from ..hoursselection_service_new.hourselection_service import HourSelectionService
 from .hourselectionservice.hoursselection_helpers import convert_none_list
+from datetime import datetime, timedelta
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -51,8 +52,8 @@ class Hoursselection:
         return sorted(ret)
 
     @property
-    def caution_hours(self) -> list:
-        return [k.hour for k, v in self.service.dynamic_caution_hours.items()]
+    def caution_hours(self) -> list[datetime]:
+        return sorted(list(self.dynamic_caution_hours.keys()))
 
     @property
     def dynamic_caution_hours(self) -> dict:
@@ -65,14 +66,22 @@ class Hoursselection:
         return {k: ret[k] for k in keys}
 
     @property
-    def internal_non_hours(self) -> list:
+    def internal_non_hours(self) -> list[datetime]:
         self.service.update()
-        return self.service.non_hours
+        return [
+            hp.dt
+            for hp in self.service.model.hours_prices
+            if not hp.passed and hp.permittance == 0.0
+        ]
 
     @property
-    def internal_dynamic_caution_hours(self) -> dict:
+    def internal_dynamic_caution_hours(self) -> dict[datetime, float]:
         self.service.update()
-        return self.service.dynamic_caution_hours
+        return {
+            hp.dt: hp.permittance
+            for hp in self.service.model.hours_prices
+            if not hp.passed and 0.0 < hp.permittance < 1.0
+        }
 
     @property
     def future_hours(self) -> list:
