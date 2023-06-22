@@ -30,9 +30,7 @@ def set_offset_dict(prices: list[float], day: date) -> dict:
         case 47 | 48 | 49 | 188 | 192 | 196:
             today = prices[: len(prices) // 2]
             tomorrow = prices[len(prices) // 2 : :]
-            print(f"today: {today}")
-            print(f"tomorrow: {tomorrow}")
-    ret[day] = _deviation_from_mean(today, today)
+    ret[day] = _deviation_from_mean(today, prices)
     ret[day + timedelta(days=1)] = _deviation_from_mean(tomorrow, prices)
     # todo: handle interim
     return ret
