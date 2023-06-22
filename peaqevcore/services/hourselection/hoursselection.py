@@ -44,44 +44,25 @@ class Hoursselection:
         return ret
 
     @property
-    def non_hours(self) -> list:
-        if self.service.max_min.active:
-            ret = self.service.max_min.non_hours
-        else:
-            ret = self.internal_non_hours
-        return sorted(ret)
-
-    @property
     def caution_hours(self) -> list[datetime]:
         return sorted(list(self.dynamic_caution_hours.keys()))
 
     @property
-    def dynamic_caution_hours(self) -> dict:
-        if self.service.max_min.active:
-            ret = self.service.max_min.dynamic_caution_hours
-        else:
-            ret = self.internal_dynamic_caution_hours
+    def non_hours(self) -> list[datetime]:
+        self.service.update()
+        return [hp.dt for hp in self.service.future_hours if hp.permittance == 0.0]
+
+    @property
+    def dynamic_caution_hours(self) -> dict[datetime, float]:
+        self.service.update()
+        ret = {
+            hp.dt: hp.permittance
+            for hp in self.service.future_hours
+            if 0.0 < hp.permittance < 1.0
+        }
         keys = list(ret.keys())
         keys.sort()
         return {k: ret[k] for k in keys}
-
-    @property
-    def internal_non_hours(self) -> list[datetime]:
-        self.service.update()
-        return [
-            hp.dt
-            for hp in self.service.model.hours_prices
-            if not hp.passed and hp.permittance == 0.0
-        ]
-
-    @property
-    def internal_dynamic_caution_hours(self) -> dict[datetime, float]:
-        self.service.update()
-        return {
-            hp.dt: hp.permittance
-            for hp in self.service.model.hours_prices
-            if not hp.passed and 0.0 < hp.permittance < 1.0
-        }
 
     @property
     def future_hours(self) -> list:
@@ -133,29 +114,14 @@ class Hoursselection:
         await self.service.async_update_prices(self.prices, self.prices_tomorrow)
 
     async def async_get_average_kwh_price(self) -> Tuple[float | None, float | None]:
-        ret_dynamic = None
-        if self.service.max_min.active:
-            ret_dynamic = self.service.max_min.average_price
-            ret_static = self.service.average_kwh_price
-            return ret_static, ret_dynamic
-        else:
-            ret_static = mean(
-                [hp.permittance * hp.price for hp in self.service.future_hours]
-            )
-            try:
-                return round(ret_static, 2), ret_dynamic
-            except ZeroDivisionError as e:
-                _LOGGER.warning(
-                    f"get_average_kwh_price_core could not be calculated: {e}"
-                )
-            return 0, None
+        ret_static = self.service.average_kwh_price
+        ret_dynamic = self.service.max_min.average_price
+        return ret_static, ret_dynamic
 
     async def async_get_total_charge(
         self, currentpeak: float
     ) -> Tuple[float, float | None]:
-        ret_dynamic = None
-        if self.service.max_min.active:
-            ret_dynamic = self.service.max_min.total_charge
+        ret_dynamic = self.service.max_min.total_charge
         self.model.current_peak = currentpeak
         ret_static = sum(
             [hp.permittance * currentpeak for hp in self.service.future_hours]

@@ -17,21 +17,28 @@ class MaxMinCharge:
         self.active: bool = False
 
     @property
-    def total_charge(self) -> float:
-        return self.model.total_charge
+    def average_price(self) -> float | None:
+        if not self.active:
+            return None
+        return self.model.caluclate_average_price(
+            self.model.input_hours, self.total_charge
+        )
 
     @property
-    def average_price(self) -> float | None:
-        return self.model.average_price
+    def original_average_price(self) -> float | None:
+        return self.model.caluclate_average_price(
+            self.model.original_input_hours, self.original_total_charge
+        )
+
+    @property
+    def total_charge(self) -> float | None:
+        if not self.active:
+            return None
+        return self.model.calculate_total_charge(self.model.input_hours)
 
     @property
     def original_total_charge(self) -> float:
-        return sum(
-            [
-                hp.permittance * self.model.expected_hourly_charge
-                for hp in self.parent.future_hours
-            ]
-        )
+        return self.model.calculate_total_charge(self.parent.future_hours)
 
     @property
     def non_hours(self) -> list:
@@ -85,10 +92,19 @@ class MaxMinCharge:
             if _load > MINIMUM_DIFFERENCE and allow_decrease:
                 await self.async_decrease()
             elif _load < MINIMUM_DIFFERENCE * -1:
-                expected_charge = (desired - self.total_charge) / (peak - avg24)
+                expected_charge = self._set_expected_charge(desired, peak, avg24)
                 await self.async_increase(expected_charge)
-            if abs(_load) < MINIMUM_DIFFERENCE:
+            if any(
+                [
+                    abs(_load) < MINIMUM_DIFFERENCE,
+                    (self.total_charge or 0) > self.original_total_charge,
+                    (self.average_price or 0) > (self.original_average_price or 0),
+                ]
+            ):
                 break
+
+    def _set_expected_charge(self, desired, peak, avg24) -> float:
+        return (desired - self.total_charge) / (peak - avg24)
 
     async def async_initial_charge(self, avg24, peak) -> float:
         _avg24 = round((avg24 / 1000), 1)
