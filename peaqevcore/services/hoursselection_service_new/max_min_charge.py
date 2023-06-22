@@ -35,7 +35,6 @@ class MaxMinCharge:
 
     @property
     def non_hours(self) -> list:
-        print(self.parent.dtmodel.dt)
         return [
             k
             for k, v in self.model.input_hours.items()

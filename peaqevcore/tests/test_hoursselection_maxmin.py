@@ -609,3 +609,21 @@ async def test_230620_non_hours():
     # await r.service.max_min.async_update(0.4, peak, 7, car_connected=True)
     # available3 = [k for k, v in r.service.max_min.model.input_hours.items() if v[1] > 0]
     # assert available2 == available3
+
+
+@pytest.mark.asyncio
+async def test_230622_static_charge():
+    r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=1.5, min_price=0.0)
+    peak = 2.28
+    await r.async_update_adjusted_average(0.77)
+    await r.async_update_top_price(0.97)
+    r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 19, 0, 0))
+    await r.async_update_prices(P230412[0], P230412[1])
+    await r.service.max_min.async_setup(peak)
+    await r.service.max_min.async_update(0.4, peak, 7)
+    ret1 = await r.async_get_total_charge(peak)
+    deter = ret1[0]
+    await r.service.max_min.async_update(0.4, peak, 700)
+    ret2 = await r.async_get_total_charge(peak)
+    assert ret2[0] == deter
+    print(ret2)

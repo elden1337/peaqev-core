@@ -34,10 +34,12 @@ class HourSelectionService:
     @property
     def future_hours(self) -> list[HourPrice]:
         self.update()
+        for r in self.model.hours_prices:
+            print(r.dt, r.passed, r.permittance)
         ret = [hp for hp in self.model.hours_prices if not hp.passed]
-        if self.max_min.active:
-            for r in ret:
-                r.permittance = 0.0 if r.dt in self.max_min.non_hours else 1.0
+        # if self.max_min.active:
+        #     for r in ret:
+        #         r.permittance = 0.0 if r.dt in self.max_min.non_hours else 1.0
         return ret
 
     @property
@@ -137,8 +139,7 @@ class HourSelectionService:
                 prices_tomorrow, is_quarterly, self.dtmodel.hdate_tomorrow
             )
         )
-        await self.async_set_permittance(ret)
-        return ret
+        return await self.async_set_permittance(ret)
 
     def _set_hourprice_list(
         self, prices: list, is_quarterly: bool, datum: date
@@ -162,15 +163,20 @@ class HourSelectionService:
             )
         return ret
 
-    async def async_set_permittance(self, hour_prices: list[HourPrice]) -> None:
+    async def async_set_permittance(
+        self, hour_prices: list[HourPrice]
+    ) -> list[HourPrice]:
         prices = normalize_prices([hp.price for hp in hour_prices])
-        set_initial_permittance(
-            hour_prices,
-            self._set_price_mean(prices, self.model.adjusted_average),
-            stdev(prices),
+        hours_permitted = set_scooped_permittance(
+            set_initial_permittance(
+                hour_prices,
+                self._set_price_mean(prices, self.model.adjusted_average),
+                stdev(prices),
+            ),
+            self.options.cautionhour_type_enum,
         )
-        set_scooped_permittance(hour_prices, self.options.cautionhour_type_enum)
-        self._offset_dict = set_offset_dict(prices, hour_prices[0].day)
+        self._offset_dict = set_offset_dict(prices, hours_permitted[0].day)
+        return hours_permitted
 
     @staticmethod
     def _set_price_mean(prices: list[float], adjusted_average: float | None) -> float:
