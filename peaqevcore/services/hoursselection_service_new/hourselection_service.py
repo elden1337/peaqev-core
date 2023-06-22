@@ -79,7 +79,7 @@ class HourSelectionService:
     ):
         self.model.prices_today = prices  # clean first
         self.model.prices_tomorrow = prices_tomorrow  # clean first
-        if self._do_recalculate_prices(prices):
+        if self._do_recalculate_prices(prices, prices_tomorrow):
             self.model.hours_prices = await self.async_create_prices(
                 prices, prices_tomorrow
             )
@@ -90,10 +90,10 @@ class HourSelectionService:
         if len(self.model.hours_prices) > 0:
             await self.async_set_permittance(self.model.hours_prices)
 
-    def _do_recalculate_prices(self, prices) -> bool:
+    def _do_recalculate_prices(self, prices, prices_tomorrow) -> bool:
         if [
             hp.price for hp in self.model.hours_prices if hp.day == self.dtmodel.hdate
-        ] == prices:
+        ] == prices and len(prices_tomorrow) < 1:
             return False
         return True
 
