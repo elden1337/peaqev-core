@@ -3,10 +3,9 @@ from ...models.hourselection.cautionhourtype import CautionHourType
 from .models.hour_type import HourType
 
 
-@staticmethod
 def set_initial_permittance(
     hour_prices: list[HourPrice], price_mean: float, price_stdev: float
-) -> list[HourPrice]:
+) -> None:
     for hp in hour_prices:
         if hp.hour_type == HourType.BelowMin:
             hp.permittance = 1.0
@@ -20,13 +19,12 @@ def set_initial_permittance(
             hp.permittance = round(
                 1.0 - ((hp.price - price_mean + price_stdev) / (2 * price_stdev)), 2
             )
-    return hour_prices
+    # return hour_prices
 
 
-@staticmethod
 def set_scooped_permittance(
     hour_prices: list[HourPrice], caution_hour_type: CautionHourType
-) -> list[HourPrice]:
+) -> None:
     lo_cutoff = 0.4
     hi_cutoff = 0.75
     max_hours = 24  # todo: add support for 96 if quarterly
@@ -50,4 +48,4 @@ def set_scooped_permittance(
             hp.permittance = 1.0
         else:
             hp.permittance = round(hp.permittance, 2)
-    return hour_prices
+    # return hour_prices

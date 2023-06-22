@@ -39,6 +39,16 @@ class DateTimeModel:
         self._quarter = mock_quarter
         self._quarter_set = True
 
+    def is_passed(self, datum, hour, quarter) -> bool:
+        if datum == self.hdate_tomorrow:
+            return False
+        if self.hour > hour:
+            return True
+        elif self.hour == hour:
+            if self.quarter > quarter:
+                return True
+        return False
+
     @property
     def dt(self) -> datetime:
         return (

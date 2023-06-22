@@ -35,12 +35,13 @@ class HourSelectionService:
     @property
     def future_hours(self) -> list[HourPrice]:
         self.update()
-        for r in self.model.hours_prices:
-            print(r.dt, r.passed, r.permittance)
         ret = [hp for hp in self.model.hours_prices if not hp.passed]
-        # if self.max_min.active:
-        #     for r in ret:
-        #         r.permittance = 0.0 if r.dt in self.max_min.non_hours else 1.0
+        if self.max_min.active:
+            for r in ret:
+                if r in self.max_min.non_hours:
+                    r.permittance = 0.0
+                elif r.dt in self.max_min.dynamic_caution_hours.keys():
+                    r.permittance = self.max_min.dynamic_caution_hours[r.dt]
         return ret
 
     @property
@@ -116,16 +117,6 @@ class HourSelectionService:
             f"Length of pricelist must be either 23,24,25,92,96 or 100. Your length is {len(prices)}"
         )
 
-    def _is_passed(self, datum, hour, quarter) -> bool:
-        if datum == self.dtmodel.hdate_tomorrow:
-            return False
-        if self.dtmodel.hour > hour:
-            return True
-        elif self.dtmodel.hour == hour:
-            if self.dtmodel.quarter > quarter:
-                return True
-        return False
-
     async def async_create_hour_prices(
         self,
         prices: list[float],
@@ -156,7 +147,7 @@ class HourSelectionService:
                     hour=hour,
                     quarter=quarter,
                     price=p,
-                    passed=self._is_passed(datum, hour, quarter),
+                    passed=self.dtmodel.is_passed(datum, hour, quarter),
                     hour_type=HourPrice.set_hour_type(
                         self.options.absolute_top_price, self.options.min_price, p
                     ),
@@ -169,20 +160,32 @@ class HourSelectionService:
         self, hour_prices: list[HourPrice]
     ) -> list[HourPrice]:
         prices = normalize_prices([hp.price for hp in hour_prices])
-        hours_permitted = set_scooped_permittance(
-            set_initial_permittance(
-                hour_prices,
-                self._set_price_mean(prices, self.model.adjusted_average),
-                stdev(prices),
-            ),
+        set_initial_permittance(
+            hour_prices,
+            self._set_price_mean(prices, self.model.adjusted_average),
+            stdev(prices),
+        )
+        set_scooped_permittance(
+            hour_prices,
             self.options.cautionhour_type_enum,
         )
-        self._offset_dict = set_offset_dict(prices, hours_permitted[0].day)
-        return hours_permitted
+        self._offset_dict = set_offset_dict(prices, hour_prices[0].day)
+        self._block_nocturnal(hour_prices, self.options.blocknocturnal)
+        return hour_prices
 
     @staticmethod
     def _set_price_mean(prices: list[float], adjusted_average: float | None) -> float:
         # print(f"adj: {adjusted_average}")
         if not adjusted_average:
-            return mean(prices)
+            return mean(prices)  # type: ignore
         return mean([adjusted_average, mean(prices)])
+
+    @staticmethod
+    def _block_nocturnal(
+        hour_prices: list[HourPrice], block_nocturnal: bool = False
+    ) -> None:
+        blockhours = [23, 0, 1, 2, 3, 4, 5, 6]
+        if block_nocturnal:
+            for hp in hour_prices:
+                if hp.hour in blockhours:
+                    hp.permittance = 0.0

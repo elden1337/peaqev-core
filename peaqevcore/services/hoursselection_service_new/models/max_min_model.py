@@ -1,15 +1,12 @@
 from dataclasses import dataclass, field
-from typing import Tuple
-from datetime import datetime
+from .hour_price import HourPrice
 
 
 @dataclass
 class MaxMinModel:
     min_price: float
-    input_hours: dict[datetime, Tuple[float, float]] = field(default_factory=lambda: {})
-    original_input_hours: dict[datetime, Tuple[float, float]] = field(
-        default_factory=lambda: {}
-    )
+    input_hours: list[HourPrice] = field(default_factory=lambda: [])
+    original_input_hours: list[HourPrice] = field(default_factory=lambda: [])
     expected_hourly_charge: float = 0
 
     @property
@@ -26,15 +23,20 @@ class MaxMinModel:
 
     @staticmethod
     def _caluclate_average_price(
-        input: dict, total_charge: float, expected: float
+        input: list[HourPrice], total_charge: float, expected: float
     ) -> float | None:
         try:
-            first = sum([v[0] * v[1] * expected for k, v in input.items() if v[1] > 0])
+            first = sum(
+                [
+                    hp.permittance * hp.price * expected
+                    for hp in input
+                    if hp.permittance > 0
+                ]
+            )
             return round(first / total_charge, 2)
         except ZeroDivisionError as e:
             return None
 
     @staticmethod
-    def _calculate_total_charge(input: dict, expected: float) -> float:
-        ret = sum([v[1] * expected for k, v in input.items()])
-        return round(ret, 1)
+    def _calculate_total_charge(input: list[HourPrice], expected: float) -> float:
+        return round(sum([hp.permittance * expected for hp in input]), 1)

@@ -12,7 +12,7 @@ MINIMUM_DIFFERENCE = 0.1
 
 class MaxMinCharge:
     def __init__(self, service: HourSelectionService, min_price: float | None) -> None:
-        self.model = MaxMinModel(min_price=min_price)
+        self.model = MaxMinModel(min_price=min_price)  # type: ignore
         self.parent = service
         self.active: bool = False
 
@@ -36,17 +36,17 @@ class MaxMinCharge:
     @property
     def non_hours(self) -> list:
         return [
-            k
-            for k, v in self.model.input_hours.items()
-            if v[1] == 0 and k >= self.parent.dtmodel.dt
+            hp.dt
+            for hp in self.model.input_hours
+            if hp.permittance == 0 and hp.dt >= self.parent.dtmodel.dt
         ]
 
     @property
     def dynamic_caution_hours(self) -> dict:
         return {
-            k: v[1]
-            for k, v in self.model.input_hours.items()
-            if 0 < v[1] < 1 and k >= self.parent.dtmodel.dt
+            hp.dt: hp.permittance
+            for hp in self.model.input_hours
+            if 0 < hp.permittance < 1 and hp.dt >= self.parent.dtmodel.dt
         }
 
     async def async_allow_decrease(self, car_connected: bool | None = None) -> bool:
@@ -54,11 +54,10 @@ class MaxMinCharge:
             return all(
                 [
                     not car_connected,
-                    len([k for k, v in self.model.input_hours.items() if v[1] > 0])
-                    != 1,
+                    len([v for v in self.model.input_hours if v.permittance > 0]) != 1,
                 ]
             )
-        return len([k for k, v in self.model.input_hours.items() if v[1] > 0]) != 1
+        return len([v for v in self.model.input_hours if v.permittance > 0]) != 1
 
     async def async_update(
         self,
@@ -81,7 +80,7 @@ class MaxMinCharge:
     async def async_increase_decrease(
         self, desired, avg24, peak, allow_decrease: bool
     ) -> None:
-        for i in range(len(self.model.original_input_hours.items())):
+        for i in range(len(self.model.original_input_hours)):
             _load = self.total_charge - desired
             if _load > MINIMUM_DIFFERENCE and allow_decrease:
                 await self.async_decrease()
@@ -101,32 +100,32 @@ class MaxMinCharge:
 
     async def async_sum_charge(self, avg24, peak) -> float:
         total = 0
-        for k, v in self.model.input_hours.items():
-            total += (peak - avg24) * v[1]
+        for k in self.model.input_hours:
+            total += (peak - avg24) * k.permittance
         return total
 
     async def async_decrease(self):
-        max_key = max(
-            self.model.input_hours,
-            key=lambda k: self.model.input_hours[k][0]
-            if self.model.input_hours[k][1] != 0
-            and self.model.input_hours[k][0] > self.model.min_price
-            else -1,
-        )
-        self.model.input_hours[max_key] = (self.model.input_hours[max_key][0], 0)
+        filtered_hours = [
+            hour for hour in self.model.input_hours if 0 < hour.permittance <= 1
+        ]
+        if filtered_hours:
+            max_hour = max(filtered_hours, key=lambda hour: hour.price)
+            max_key = self.model.input_hours.index(max_hour)
+            self.model.input_hours[max_key].permittance = 0
 
     async def async_increase(self, expected_charge):
-        min_key = min(
-            self.model.input_hours,
-            key=lambda k: self.model.input_hours[k][0]
-            if self.model.input_hours[k][1] < 1
-            and self.model.original_input_hours[k][1] > 0
-            else 999,
-        )
-        self.model.input_hours[min_key] = (
-            self.model.input_hours[min_key][0],
-            min(min(1, expected_charge), self.model.original_input_hours[min_key][1]),
-        )
+        filtered_hours = [
+            hour for hour in self.model.input_hours if 0 < hour.permittance <= 1
+        ]
+        if filtered_hours:
+            min_hour = min(filtered_hours, key=lambda hour: hour.price)
+            min_key = self.model.input_hours.index(min_hour)
+            original_permittance = [
+                h for h in self.model.original_input_hours if h.dt == min_hour.dt
+            ][0].permittance
+            self.model.input_hours[min_key].permittance = min(
+                min(1, expected_charge), original_permittance
+            )
 
     def _service_caution_hours(self) -> dict:
         return {
@@ -167,90 +166,7 @@ class MaxMinCharge:
             if prices_tomorrow is None
             else prices_tomorrow
         )
-        ret_today, ret_tomorrow = await self.async_loop_nonhours(
-            dt, _non_hours, _prices, _prices_tomorrow
-        )
-        await self.async_loop_caution_hours(
-            dt,
-            _dynamic_caution_hours,
-            _prices,
-            _prices_tomorrow,
-            ret_today,
-            ret_tomorrow,
-        )
-        await self.async_add_available_hours(
-            dt, _prices, _prices_tomorrow, ret_today, ret_tomorrow
-        )
-        self.model.input_hours = self._sort_dicts(ret_today, ret_tomorrow)
+
+        self.model.input_hours = self.parent.future_hours
         self.model.original_input_hours = self.model.input_hours.copy()
         self.active = True
-
-    @staticmethod
-    async def async_add_available_hours(
-        dt: datetime,
-        prices: list,
-        prices_tomorrow: list,
-        ret_today: dict,
-        ret_tomorrow: dict,
-    ) -> None:
-        _hour = dt.hour
-        _range = (
-            len(prices) - dt.hour + len(prices_tomorrow)
-            if len(prices_tomorrow) > 0
-            else len(prices) - dt.hour
-        )
-
-        for i in range(_range):
-            if _hour < dt.hour and _hour not in ret_tomorrow.keys():
-                ret_tomorrow[
-                    (dt + timedelta(days=1))
-                    .replace(hour=_hour)
-                    .replace(minute=0)
-                    .replace(second=0)
-                ] = (
-                    prices_tomorrow[_hour],
-                    1,
-                )
-                # todo: must test this without valid prices tomorrow.
-            elif _hour >= dt.hour and _hour not in ret_today.keys():
-                ret_today[dt.replace(hour=_hour)] = (prices[_hour], 1)
-            _hour += 1
-            if _hour > 23:
-                _hour = 0
-
-    @staticmethod
-    async def async_loop_caution_hours(
-        dt: datetime,
-        caution_hours: dict,
-        prices: list,
-        prices_tomorrow: list,
-        ret_today: dict,
-        ret_tomorrow: dict,
-    ) -> None:
-        for k, v in caution_hours.items():
-            if k.day == dt.day and k.hour >= dt.hour:
-                ret_today[k] = (prices[k.hour], v)
-            elif len(prices_tomorrow) > 0:
-                ret_tomorrow[k] = (prices_tomorrow[k.hour], v)
-
-    @staticmethod
-    async def async_loop_nonhours(
-        dt: datetime, non_hours: list, prices: list, prices_tomorrow: list
-    ) -> Tuple[dict, dict]:
-        ret_today = {}
-        ret_tomorrow = {}
-        for n in non_hours:
-            if n.day == dt.day and n.hour >= dt.hour:
-                ret_today[n] = (prices[n.hour], 0)
-            elif len(prices_tomorrow) > 0:
-                ret_tomorrow[n] = (prices_tomorrow[n.hour], 0)
-        return ret_today, ret_tomorrow
-
-    @staticmethod
-    def _sort_dicts(ret_today: dict, ret_tomorrow: dict) -> dict:
-        ret = {}
-        for k in sorted(ret_today.keys()):
-            ret[k] = ret_today[k]
-        for k in sorted(ret_tomorrow.keys()):
-            ret[k] = ret_tomorrow[k]
-        return ret
