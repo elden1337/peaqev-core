@@ -72,7 +72,8 @@ async def test_offsets_230613():
     service = HourSelectionService(opt)
     service.dtmodel.set_datetime(datetime(2021, 1, 1, 14, 0, 0))
     await service.async_update_prices(_p.P230613[0], _p.P230613[1])
-    print(service.offset_dict)
+    #print(service.offset_dict)
+    assert 1 > 2
 
 
 @pytest.mark.asyncio
