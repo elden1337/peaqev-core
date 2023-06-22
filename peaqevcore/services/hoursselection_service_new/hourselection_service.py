@@ -1,9 +1,10 @@
 from .models.stop_string import AllowanceObj, set_allowance_obj
 from .models.datetime_model import DateTimeModel
 from .models.hour_price import HourPrice
+from .models.list_type import ListType
 from .models.hourselection_model import HourSelectionModel
-from statistics import stdev, mean, variance
-from datetime import date, datetime, timedelta
+from statistics import stdev, mean
+from datetime import date, datetime
 from ...models.hourselection.hourselection_options import HourSelectionOptions
 from .hourselection_calculations import normalize_prices
 from .offset_dict import get_offset_dict, set_offset_dict
@@ -159,6 +160,7 @@ class HourSelectionService:
                     hour_type=HourPrice.set_hour_type(
                         self.options.absolute_top_price, self.options.min_price, p
                     ),
+                    list_type=ListType.Quarterly if is_quarterly else ListType.Hourly,
                 )
             )
         return ret

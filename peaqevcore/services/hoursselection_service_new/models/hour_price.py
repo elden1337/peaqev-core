@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from datetime import date, datetime, time
 from .hour_type import HourType
+from .list_type import ListType
 from .datetime_model import DateTimeModel
 
 
@@ -15,6 +16,7 @@ class HourPrice:
     permittance: float = field(init=False)
     passed: bool = False
     hour_type: HourType = HourType.Regular
+    list_type: ListType = ListType.Hourly
 
     def __post_init__(self):
         assert 0 <= self.quarter <= 3, "Quarter must be between 0 and 3"
@@ -43,8 +45,13 @@ class HourPrice:
         elif dt.hdate == self.day:
             if self.hour < dt.hour:
                 self.passed = True
-            elif self.hour == dt.hour and self.quarter < dt.quarter:
-                print(f"{self.hour} {self.quarter} {dt.hour} {dt.quarter}")
+            elif all(
+                [
+                    self.hour == dt.hour,
+                    self.quarter < dt.quarter,
+                    self.list_type == ListType.Quarterly,
+                ]
+            ):
                 self.passed = True
         else:
             self.passed = False
