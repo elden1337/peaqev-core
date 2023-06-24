@@ -60,8 +60,9 @@ class MaxMinCharge:
         if car_connected is not None:
             return all(
                 [
-                    not car_connected,
-                    len([v for v in self.model.input_hours if v.permittance > 0]) != 1,
+                    # not car_connected,
+                    len([v for v in self.model.input_hours if v.permittance > 0])
+                    != 1,
                 ]
             )
         return len([v for v in self.model.input_hours if v.permittance > 0]) != 1
@@ -83,6 +84,20 @@ class MaxMinCharge:
         _avg24 = round((avg24 / 1000), 1)
         self.model.expected_hourly_charge = peak - _avg24
         await self.async_increase_decrease(_desired, _avg24, peak, allow_decrease)
+
+    #     self._set_earliest_cheaphour()
+
+    # def _set_earliest_cheaphour(self) -> None:
+    #     charge_hours = [h for h in self.model.input_hours if h.permittance > 0]
+    #     if charge_hours:
+    #         for i in enumerate(charge_hours):
+    #             earlier = [
+    #                 h for h in charge_hours if h.dt < i[1].dt and i[1].price == h.price
+    #             ]
+    #             if earlier:
+    #                 i[1].permittance = 0.0
+    #                 earlier[0].permittance = 1
+    # todo: fix this to get sequence of hours
 
     async def async_increase_decrease(
         self, desired, avg24, peak, allow_decrease: bool
@@ -127,7 +142,7 @@ class MaxMinCharge:
         if filtered_hours:
             max_hour = max(filtered_hours, key=lambda hour: hour.price)
             max_key = self.model.input_hours.index(max_hour)
-            self.model.input_hours[max_key].permittance = 0
+            self.model.input_hours[max_key].permittance = 0.0
 
     async def async_increase(self, expected_charge):
         filtered_hours = [

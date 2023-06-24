@@ -136,8 +136,35 @@ async def test_total_charge():
         top_price=2, min_price=0.05, cautionhour_type_enum=CautionHourType.SUAVE
     )
     service = HourSelectionService(opt)
-    service.dtmodel.set_datetime(datetime(2023, 6, 24, 20, 0, 0))
+    service.dtmodel.set_datetime(datetime(2023, 6, 24, 21, 0, 0))
     await service.async_update_prices(_p.P230624[0], _p.P230624[1])
+    assert [h.hour for h in service.future_hours if h.permittance > 0] == [
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+    ]
+
+
+@pytest.mark.asyncio
+async def test_total_charge_maxmin():
+    # should be three hours, two full and one almost full.
+    opt = HourSelectionOptions(
+        top_price=2, min_price=0.05, cautionhour_type_enum=CautionHourType.SUAVE
+    )
+    peak = 2.2
+    service = HourSelectionService(opt)
+    service.dtmodel.set_datetime(datetime(2023, 6, 24, 14, 0, 0))
+    await service.async_update_prices(_p.P230624[0], _p.P230624[1])
+    await service.max_min.async_setup(peak)
+    await service.max_min.async_update(520, peak, 5, car_connected=True)
+    service.dtmodel.set_datetime(datetime(2023, 6, 24, 21, 0, 0))
     for i in service.future_hours:
         print(i)
-    assert 1 > 2
+    assert [h.hour for h in service.future_hours if h.permittance > 0] == [
+        11,
+        12,
+        13,
+    ]

@@ -7,10 +7,7 @@ from .datetime_model import DateTimeModel
 
 @dataclass
 class HourPrice:
-    idx: str = field(init=False)
-    dt: datetime = field(init=False)
-    day: date = date.today()
-    hour: int = 0
+    dt: datetime = datetime.now()
     quarter: int = 0
     price: float = 0.0
     permittance: float = field(init=False)
@@ -18,18 +15,14 @@ class HourPrice:
     hour_type: HourType = HourType.Regular
     list_type: ListType = ListType.Hourly
 
+    @property
+    def hour(self) -> int:
+        return self.dt.hour
+
     def __post_init__(self):
         assert 0 <= self.quarter <= 3, "Quarter must be between 0 and 3"
-        assert 0 <= self.hour <= 23, "Hour must be between 0 and 23"
-        self.idx = f"{self.day}-{self.hour}-{self.quarter}"
+        assert 0 <= self.dt.hour <= 23, "Hour must be between 0 and 23"
         self.permittance = 1.0 if self.hour_type == HourType.BelowMin else 0.0
-        self.dt = self._create_dt_object()
-
-    def _create_dt_object(self) -> datetime:
-        return datetime.combine(
-            self.day,
-            time(hour=self.hour, minute=self.quarter * 15, second=0, microsecond=0),
-        )
 
     @staticmethod
     def set_hour_type(max_price, min_price, price):
@@ -40,9 +33,9 @@ class HourPrice:
         return HourType.Regular
 
     def set_passed(self, dt: DateTimeModel):
-        if dt.hdate > self.day:
+        if dt.hdate > self.dt.date():
             self.passed = True
-        elif dt.hdate == self.day:
+        elif dt.hdate == self.dt.date():
             if self.hour < dt.hour:
                 self.passed = True
             elif all(

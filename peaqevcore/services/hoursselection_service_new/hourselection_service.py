@@ -4,7 +4,7 @@ from .models.hour_price import HourPrice
 from .models.list_type import ListType
 from .models.hourselection_model import HourSelectionModel
 from statistics import stdev, mean
-from datetime import date, datetime
+from datetime import date, datetime, time
 from ...models.hourselection.hourselection_options import HourSelectionOptions
 from .hourselection_calculations import normalize_prices
 from .offset_dict import get_offset_dict, set_offset_dict
@@ -93,7 +93,9 @@ class HourSelectionService:
 
     def _do_recalculate_prices(self, prices, prices_tomorrow) -> bool:
         if [
-            hp.price for hp in self.model.hours_prices if hp.day == self.dtmodel.hdate
+            hp.price
+            for hp in self.model.hours_prices
+            if hp.dt.date() == self.dtmodel.hdate
         ] == prices and len(prices_tomorrow) < 1:
             return False
         return True
@@ -137,14 +139,18 @@ class HourSelectionService:
         self, prices: list, is_quarterly: bool, datum: date
     ) -> list[HourPrice]:
         ret = []
-        for idx, p in enumerate(prices):
+        for idx, p in enumerate(prices):  # type: ignore
             assert isinstance(p, (float, int))
             hour = int(idx / 4) if is_quarterly else idx
             quarter = idx % 4 if is_quarterly else 0
+            _dt = datetime.combine(
+                datum, time(hour=hour, minute=quarter * 15, second=0, microsecond=0)
+            )
             ret.append(
                 HourPrice(
-                    day=datum,
-                    hour=hour,
+                    dt=_dt,
+                    # day=datum,
+                    # hour=hour,
                     quarter=quarter,
                     price=p,
                     passed=self.dtmodel.is_passed(datum, hour, quarter),
@@ -170,7 +176,7 @@ class HourSelectionService:
             hour_prices,
             self.options.cautionhour_type_enum,
         )
-        self._offset_dict = set_offset_dict(prices, hour_prices[0].day)
+        self._offset_dict = set_offset_dict(prices, hour_prices[0].dt.date())
         self._block_nocturnal(hour_prices, self.options.blocknocturnal)
         return hour_prices
 
