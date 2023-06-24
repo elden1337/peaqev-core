@@ -162,8 +162,9 @@ class HourSelectionService:
         prices = normalize_prices([hp.price for hp in hour_prices])
         set_initial_permittance(
             hour_prices,
-            self._set_price_mean(prices, self.model.adjusted_average),
+            mean(prices),
             stdev(prices),
+            self.model.adjusted_average,
         )
         set_scooped_permittance(
             hour_prices,
@@ -172,13 +173,6 @@ class HourSelectionService:
         self._offset_dict = set_offset_dict(prices, hour_prices[0].day)
         self._block_nocturnal(hour_prices, self.options.blocknocturnal)
         return hour_prices
-
-    @staticmethod
-    def _set_price_mean(prices: list[float], adjusted_average: float | None) -> float:
-        # print(f"adj: {adjusted_average}")
-        if not adjusted_average:
-            return mean(prices)  # type: ignore
-        return mean([adjusted_average, mean(prices)])
 
     @staticmethod
     def _block_nocturnal(

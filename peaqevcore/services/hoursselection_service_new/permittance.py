@@ -1,25 +1,63 @@
 from .models.hour_price import HourPrice
 from ...models.hourselection.cautionhourtype import CautionHourType
 from .models.hour_type import HourType
+from statistics import mean
+
+
+# def set_initial_permittance(
+#     hour_prices: list[HourPrice], price_mean: float, price_stdev: float
+# ) -> None:
+#     for hp in hour_prices:
+#         print(hp.dt, hp.price, price_mean, price_stdev)
+#         if hp.hour_type == HourType.BelowMin:
+#             hp.permittance = 1.0
+#         elif hp.hour_type == HourType.AboveMax:
+#             hp.permittance = 0.0
+#         elif hp.price < price_mean - price_stdev:
+#             hp.permittance = 1.0
+#         elif hp.price > price_mean + price_stdev:
+#             hp.permittance = 0.0
+#         else:
+#             hp.permittance = round(
+#                 1.0 - ((hp.price - price_mean + price_stdev) / (2 * price_stdev)), 2
+#             )
+#     # return hour_prices
 
 
 def set_initial_permittance(
-    hour_prices: list[HourPrice], price_mean: float, price_stdev: float
+    hours: list[HourPrice],
+    price_mean: float,
+    price_stdev: float,
+    avg7: float | None = None,
 ) -> None:
-    for hp in hour_prices:
-        if hp.hour_type == HourType.BelowMin:
-            hp.permittance = 1.0
-        elif hp.hour_type == HourType.AboveMax:
-            hp.permittance = 0.0
-        elif hp.price < price_mean - price_stdev:
-            hp.permittance = 1.0
-        elif hp.price > price_mean + price_stdev:
-            hp.permittance = 0.0
+    scaling_factor = scale_permittance(price_stdev)
+    for hour in hours:
+        if hour.hour_type == HourType.BelowMin:
+            hour.permittance = 1.0
+        elif hour.hour_type == HourType.AboveMax:
+            hour.permittance = 0.0
         else:
-            hp.permittance = round(
-                1.0 - ((hp.price - price_mean + price_stdev) / (2 * price_stdev)), 2
+            diff_avg_price = price_mean - hour.price
+            diff_avg_7day_price = (avg7 or price_mean) - hour.price
+            hour.permittance = mean(
+                [
+                    max(0, min(1, diff_avg_price / (price_mean * scaling_factor))),
+                    max(
+                        0,
+                        min(
+                            1,
+                            diff_avg_7day_price
+                            / ((avg7 or price_mean) * scaling_factor),
+                        ),
+                    ),
+                ]
             )
-    # return hour_prices
+
+
+def scale_permittance(stdev: float) -> float:
+    if stdev == 0:
+        return 1.0
+    return max(0.1, min(1.0, 1.0 / (1.0 + stdev)))
 
 
 def set_scooped_permittance(

@@ -25,21 +25,13 @@ class AllowanceObj:
     def __post_init__(self):
         # set display name
         match self.prefix_type:
-            case AllowanceType.StoppedUntil:
+            case AllowanceType.StoppedUntil | AllowanceType.AllowedUntil:
                 self.display_name = f"{self.prefix_type.value}{self.__set_num_value(self.hour)}:{self.__set_num_value(self.quarter * 15)}."
-            case AllowanceType.AllowedUntil:
-                self.display_name = f"{self.prefix_type.value}{self.__set_num_value(self.hour)}:{self.__set_num_value(self.quarter * 15)}."
-            case AllowanceType.StoppedUntilTomorrow:
+            case AllowanceType.StoppedUntilTomorrow | AllowanceType.AllowedUntilTomorrow:
                 self.display_name = (
                     f"{self.prefix_type.value}{self.__set_num_value(self.hour)}:00."
                 )
-            case AllowanceType.AllowedUntilTomorrow:
-                self.display_name = (
-                    f"{self.prefix_type.value}{self.__set_num_value(self.hour)}:00."
-                )
-            case AllowanceType.StoppedUntilFurtherNotice:
-                self.display_name = self.prefix_type.value
-            case AllowanceType.AllowedUntilFurtherNotice:
+            case AllowanceType.StoppedUntilFurtherNotice | AllowanceType.AllowedUntilFurtherNotice:
                 self.display_name = self.prefix_type.value
 
     def __set_num_value(self, hour: int):

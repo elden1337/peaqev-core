@@ -53,6 +53,24 @@ async def test_last_nonhour_stopped_until():
 
 
 @pytest.mark.asyncio
+async def test_last_nonhour_stopped_until_tomorrow_blank():
+    opt = HourSelectionOptions(
+        top_price=2, min_price=0.05, cautionhour_type_enum=CautionHourType.SUAVE
+    )
+    service = HourSelectionService(opt)
+    service.dtmodel.set_datetime(datetime(2023, 5, 20, 14, 0, 0))
+    await service.async_update_prices(_p.P230520[0], _p.P230520[1])
+    assert service.allowance.prefix_type == AllowanceType.AllowedUntil
+    service.dtmodel.set_datetime(datetime(2023, 5, 20, 21, 0, 0))
+    print(service.stopped_string)
+    assert service.allowance.prefix_type == AllowanceType.AllowedUntilTomorrow
+    service.dtmodel.set_datetime(datetime(2023, 5, 21, 1, 0, 0))
+    await service.async_update_prices(_p.P230520[1], [])
+    print(service.stopped_string)
+    assert service.allowance.prefix_type == AllowanceType.AllowedUntil
+
+
+@pytest.mark.asyncio
 async def test_offsets_today_only():
     opt = HourSelectionOptions(
         top_price=2, min_price=0.05, cautionhour_type_enum=CautionHourType.SUAVE
@@ -91,100 +109,35 @@ async def test_230620():
     opt = HourSelectionOptions(
         top_price=1.5, min_price=0.05, cautionhour_type_enum=CautionHourType.AGGRESSIVE
     )
-    p = [
-        0.9,
-        0.9,
-        0.89,
-        0.89,
-        0.89,
-        0.9,
-        0.94,
-        1.07,
-        1.23,
-        1.09,
-        1.03,
-        0.99,
-        1.01,
-        0.95,
-        0.94,
-        0.95,
-        0.98,
-        1.02,
-        1.08,
-        1.11,
-        1,
-        0.96,
-        0.92,
-        0.9,
-    ]
     service = HourSelectionService(opt)
     service.dtmodel.set_datetime(datetime(2023, 6, 20, 11, 27, 0))
-    await service.async_update_prices(p)
+    await service.async_update_prices(_p.P230620[0])
     assert sum([x.permittance for x in service.future_hours]) > 2.0
 
 
 @pytest.mark.asyncio
 async def test_230620_230621():
-    p = [
-        0.9,
-        0.9,
-        0.89,
-        0.89,
-        0.89,
-        0.9,
-        0.94,
-        1.07,
-        1.23,
-        1.09,
-        1.03,
-        0.99,
-        1.01,
-        0.95,
-        0.94,
-        0.95,
-        0.98,
-        1.02,
-        1.08,
-        1.11,
-        1,
-        0.96,
-        0.92,
-        0.9,
-    ]
-    p2 = [
-        0.9,
-        0.83,
-        0.78,
-        0.79,
-        0.86,
-        0.91,
-        0.94,
-        1.06,
-        1.21,
-        1.1,
-        1.01,
-        0.95,
-        0.95,
-        0.94,
-        0.93,
-        0.94,
-        0.94,
-        0.95,
-        0.95,
-        0.94,
-        0.91,
-        0.9,
-        0.83,
-        0.74,
-    ]
     h = Hoursselection(
         absolute_top_price=1.5,
         min_price=0.05,
         cautionhour_type=CautionHourType.AGGRESSIVE.value,
     )
     h.service.dtmodel.set_datetime(datetime(2023, 6, 20, 22, 12, 0))
-    await h.service.async_update_prices(p, p2)
+    await h.service.async_update_prices(_p.P230620[0], _p.P230620[1])
     await h.service.max_min.async_setup(5)
     await h.service.max_min.async_update(0.4, 2.1, 5)
     print(await h.async_get_average_kwh_price())
+    # assert 1 > 2
+
+
+@pytest.mark.asyncio
+async def test_total_charge():
+    opt = HourSelectionOptions(
+        top_price=2, min_price=0.05, cautionhour_type_enum=CautionHourType.SUAVE
+    )
+    service = HourSelectionService(opt)
+    service.dtmodel.set_datetime(datetime(2023, 6, 24, 20, 0, 0))
+    await service.async_update_prices(_p.P230624[0], _p.P230624[1])
+    for i in service.future_hours:
+        print(i)
     assert 1 > 2
