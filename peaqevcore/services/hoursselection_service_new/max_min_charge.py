@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 from datetime import datetime, timedelta
+from ..hoursselection_service_new.models.hour_price import HourPrice
 
 if TYPE_CHECKING:
     from .hourselection_service import HourSelectionService
@@ -75,48 +76,36 @@ class MaxMinCharge:
         session_energy: float | None = None,
         car_connected: bool | None = None,
     ) -> None:
-        allow_decrease: bool = False
+        # allow_decrease: bool = False
         if await self.async_allow_decrease(car_connected):
-            allow_decrease = True
+            # allow_decrease = True
             await self.async_setup(max_charge=peak)
         _session = session_energy or 0
         _desired = max_desired - _session
         _avg24 = round((avg24 / 1000), 1)
         self.model.expected_hourly_charge = peak - _avg24
-        await self.async_increase_decrease(_desired, _avg24, peak, allow_decrease)
+        self.select_hours_for_charge(self.model.original_input_hours, _desired)
 
-    #     self._set_earliest_cheaphour()
-
-    # def _set_earliest_cheaphour(self) -> None:
-    #     charge_hours = [h for h in self.model.input_hours if h.permittance > 0]
-    #     if charge_hours:
-    #         for i in enumerate(charge_hours):
-    #             earlier = [
-    #                 h for h in charge_hours if h.dt < i[1].dt and i[1].price == h.price
-    #             ]
-    #             if earlier:
-    #                 i[1].permittance = 0.0
-    #                 earlier[0].permittance = 1
-    # todo: fix this to get sequence of hours
-
-    async def async_increase_decrease(
-        self, desired, avg24, peak, allow_decrease: bool
+    def select_hours_for_charge(
+        self, hours: list[HourPrice], desired_charge: float
     ) -> None:
-        for i in range(len(self.model.original_input_hours)):
-            _load = self.total_charge - desired
-            if _load > MINIMUM_DIFFERENCE and allow_decrease:
-                await self.async_decrease()
-            elif _load < MINIMUM_DIFFERENCE * -1:
-                expected_charge = self._set_expected_charge(desired, peak, avg24)
-                await self.async_increase(expected_charge)
-            if any(
-                [
-                    abs(_load) < MINIMUM_DIFFERENCE,
-                    (self.total_charge or 0) > self.original_total_charge,
-                    (self.average_price or 0) > (self.original_average_price or 0),
-                ]
-            ):
-                break
+        hours = [hour for hour in hours if hour.permittance != 0]
+        total_charge = 0
+        hours.sort(key=lambda x: x.price)
+        for hour in hours:
+            hour_charge = hour.permittance * self.model.expected_hourly_charge
+            # print(
+            #     f"test {hour.dt} with {hour.permittance}. Charge: {hour_charge}, total: {total_charge}"
+            # )
+            if total_charge + hour_charge <= desired_charge:
+                total_charge += hour_charge
+            elif total_charge + hour_charge > desired_charge:
+                perm = max(min(desired_charge - total_charge, 1), 0)
+                total_charge += hour_charge * perm
+                hour.permittance = perm
+            else:
+                hour.permittance = 0.0
+        self.model.input_hours = hours
 
     def _set_expected_charge(self, desired, peak, avg24) -> float:
         return (desired - self.total_charge) / (peak - avg24)
@@ -134,29 +123,6 @@ class MaxMinCharge:
         for k in self.model.input_hours:
             total += (peak - avg24) * k.permittance
         return total
-
-    async def async_decrease(self):
-        filtered_hours = [
-            hour for hour in self.model.input_hours if 0 < hour.permittance <= 1
-        ]
-        if filtered_hours:
-            max_hour = max(filtered_hours, key=lambda hour: hour.price)
-            max_key = self.model.input_hours.index(max_hour)
-            self.model.input_hours[max_key].permittance = 0.0
-
-    async def async_increase(self, expected_charge):
-        filtered_hours = [
-            hour for hour in self.model.input_hours if 0 < hour.permittance <= 1
-        ]
-        if filtered_hours:
-            min_hour = min(filtered_hours, key=lambda hour: hour.price)
-            min_key = self.model.input_hours.index(min_hour)
-            original_permittance = [
-                h for h in self.model.original_input_hours if h.dt == min_hour.dt
-            ][0].permittance
-            self.model.input_hours[min_key].permittance = min(
-                min(1, expected_charge), original_permittance
-            )
 
     def _service_caution_hours(self) -> dict:
         return {

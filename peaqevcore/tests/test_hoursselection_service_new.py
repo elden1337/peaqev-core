@@ -160,11 +160,9 @@ async def test_total_charge_maxmin():
     await service.async_update_prices(_p.P230624[0], _p.P230624[1])
     await service.max_min.async_setup(peak)
     await service.max_min.async_update(520, peak, 5, car_connected=True)
-    service.dtmodel.set_datetime(datetime(2023, 6, 24, 21, 0, 0))
-    for i in service.future_hours:
-        print(i)
-    assert [h.hour for h in service.future_hours if h.permittance > 0] == [
-        11,
-        12,
-        13,
-    ]
+    # service.dtmodel.set_datetime(datetime(2023, 6, 24, 21, 0, 0))
+    # for i in service.future_hours:
+    #     print(i)
+    print(service.max_min.total_charge)
+    assert [h.hour for h in service.future_hours if h.permittance > 0] == [14, 11]
+    assert service.max_min.total_charge == 4.9

@@ -60,16 +60,19 @@ class HourSelectionService:
 
     @property
     def average_kwh_price(self) -> float:
-        return round(
-            mean(
-                [
-                    hp.permittance * hp.price
-                    for hp in self.future_hours
-                    if hp.permittance > 0
-                ]
-            ),
-            2,
-        )
+        try:
+            return round(
+                mean(
+                    [
+                        hp.permittance * hp.price
+                        for hp in self.future_hours
+                        if hp.permittance > 0
+                    ]
+                ),
+                2,
+            )
+        except Exception:
+            return 0.0
 
     @property
     def offset_dict(self) -> dict:
