@@ -50,14 +50,14 @@ class Hoursselection:
     @property
     def non_hours(self) -> list[datetime]:
         self.service.update()
-        return [hp.dt for hp in self.service.future_hours if hp.permittance == 0.0]
+        return [hp.dt for hp in self.future_hours if hp.permittance == 0.0]
 
     @property
     def dynamic_caution_hours(self) -> dict[datetime, float]:
         self.service.update()
         ret = {
             hp.dt: hp.permittance
-            for hp in self.service.future_hours
+            for hp in self.future_hours
             if 0.0 < hp.permittance < 1.0
         }
         keys = list(ret.keys())

@@ -22,24 +22,30 @@ class MaxMinCharge:
         if not self.active:
             return None
         return self.model.caluclate_average_price(
-            self.model.input_hours, self.total_charge
+            self.model.input_hours, self.total_charge, self.parent.dtmodel.dt
         )
 
     @property
     def original_average_price(self) -> float | None:
         return self.model.caluclate_average_price(
-            self.model.original_input_hours, self.original_total_charge
+            self.model.original_input_hours,
+            self.original_total_charge,
+            self.parent.dtmodel.dt,
         )
 
     @property
     def total_charge(self) -> float | None:
         if not self.active:
             return None
-        return self.model.calculate_total_charge(self.model.input_hours)
+        return self.model.calculate_total_charge(
+            self.model.input_hours, self.parent.dtmodel.dt
+        )
 
     @property
     def original_total_charge(self) -> float:
-        return self.model.calculate_total_charge(self.parent.future_hours)
+        return self.model.calculate_total_charge(
+            self.parent.future_hours, self.parent.dtmodel.dt
+        )
 
     @property
     def non_hours(self) -> list:
