@@ -15,17 +15,11 @@ from .max_min_charge import MaxMinCharge
 class HourSelectionService:
     def __init__(self, options: HourSelectionOptions = HourSelectionOptions()):
         self.options = options
+        self.use_quarters: bool = False
         self.dtmodel = DateTimeModel()
         self.model = HourSelectionModel()
         self.max_min = MaxMinCharge(service=self, min_price=self.options.min_price)
         self._offset_dict: dict[datetime, dict] = {}
-
-    def update(self):
-        for hp in self.model.hours_prices:
-            hp.set_passed(self.dtmodel)
-
-    async def async_update(self):
-        self.update()
 
     @property
     def all_hours(self) -> list[HourPrice]:
@@ -35,14 +29,7 @@ class HourSelectionService:
     @property
     def future_hours(self) -> list[HourPrice]:
         self.update()
-        ret = [hp for hp in self.model.hours_prices if not hp.passed]
-        if self.max_min.active:
-            for r in ret:
-                if r in self.max_min.non_hours:
-                    r.permittance = 0.0
-                elif r.dt in self.max_min.dynamic_caution_hours.keys():
-                    r.permittance = self.max_min.dynamic_caution_hours[r.dt]
-        return ret
+        return self.get_future_hours()
 
     @property
     def passed_hours(self) -> list[HourPrice]:
@@ -60,6 +47,24 @@ class HourSelectionService:
 
     @property
     def average_kwh_price(self) -> float:
+        return self.get_average_kwh_price()
+
+    @property
+    def offset_dict(self) -> dict:
+        return get_offset_dict(self._offset_dict)
+
+    def update(self):
+        for hp in self.model.hours_prices:
+            hp.set_passed(self.dtmodel)
+        if len(self.get_future_hours()) >= 24:
+            set_scooped_permittance(
+                self.get_future_hours(), self.options.cautionhour_type_enum
+            )
+
+    async def async_update(self):
+        self.update()
+
+    def get_average_kwh_price(self) -> float:
         try:
             return round(
                 mean(
@@ -74,9 +79,15 @@ class HourSelectionService:
         except Exception:
             return 0.0
 
-    @property
-    def offset_dict(self) -> dict:
-        return get_offset_dict(self._offset_dict)
+    def get_future_hours(self) -> list[HourPrice]:
+        ret = [hp for hp in self.model.hours_prices if not hp.passed]
+        if self.max_min.active:
+            for r in ret:
+                if r in self.max_min.non_hours:
+                    r.permittance = 0.0
+                elif r.dt in self.max_min.dynamic_caution_hours.keys():
+                    r.permittance = self.max_min.dynamic_caution_hours[r.dt]
+        return ret
 
     async def async_update_prices(
         self, prices: list[float], prices_tomorrow: list[float] = []
@@ -129,6 +140,7 @@ class HourSelectionService:
         is_quarterly: bool = False,
     ) -> list:
         # todo: handle here first if prices or prices_tomorrow are 92 or 100 in length (dst shift)
+        self.use_quarters = is_quarterly
         ret = []
         ret.extend(self._set_hourprice_list(prices, is_quarterly, self.dtmodel.hdate))
         ret.extend(
@@ -152,8 +164,6 @@ class HourSelectionService:
             ret.append(
                 HourPrice(
                     dt=_dt,
-                    # day=datum,
-                    # hour=hour,
                     quarter=quarter,
                     price=p,
                     passed=self.dtmodel.is_passed(datum, hour, quarter),

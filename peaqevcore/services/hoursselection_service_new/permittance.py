@@ -4,26 +4,6 @@ from .models.hour_type import HourType
 from statistics import mean
 
 
-# def set_initial_permittance(
-#     hour_prices: list[HourPrice], price_mean: float, price_stdev: float
-# ) -> None:
-#     for hp in hour_prices:
-#         print(hp.dt, hp.price, price_mean, price_stdev)
-#         if hp.hour_type == HourType.BelowMin:
-#             hp.permittance = 1.0
-#         elif hp.hour_type == HourType.AboveMax:
-#             hp.permittance = 0.0
-#         elif hp.price < price_mean - price_stdev:
-#             hp.permittance = 1.0
-#         elif hp.price > price_mean + price_stdev:
-#             hp.permittance = 0.0
-#         else:
-#             hp.permittance = round(
-#                 1.0 - ((hp.price - price_mean + price_stdev) / (2 * price_stdev)), 2
-#             )
-#     # return hour_prices
-
-
 def set_initial_permittance(
     hours: list[HourPrice],
     price_mean: float,
@@ -66,6 +46,7 @@ def set_scooped_permittance(
     lo_cutoff = 0.4
     hi_cutoff = 0.75
     max_hours = 24  # todo: add support for 96 if quarterly
+    min_hours = 4
     match caution_hour_type:
         case CautionHourType.SUAVE:
             hi_cutoff = 0.7
@@ -77,13 +58,19 @@ def set_scooped_permittance(
         case CautionHourType.SCROOGE:
             lo_cutoff = 0.6
             max_hours = 8  # todo: add support for 32 if quarterly
+            min_hours = 0
 
     for hp in hour_prices:
-        _t = hp.permittance
         if hp.permittance <= lo_cutoff:
             hp.permittance = 0.0
         elif hp.permittance >= hi_cutoff:
             hp.permittance = 1.0
         else:
             hp.permittance = round(hp.permittance, 2)
-    # return hour_prices
+
+    if len([hp for hp in hour_prices if hp.permittance > 0.0]) < min_hours:
+        _t = [hp for hp in hour_prices if hp.list_type != HourType.AboveMax]
+        if len(_t):
+            _t.sort(key=lambda x: x.price)
+            for h in range(min_hours):
+                _t[h].permittance = 1.0 if _t[h].permittance == 0 else _t[h].permittance

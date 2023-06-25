@@ -184,3 +184,17 @@ async def test_now_hour_in_nonhours():
     assert service.dtmodel.dt.replace(minute=0, second=0, microsecond=0) in _
     assert service.max_min.average_price == 0.0
     assert service.max_min.total_charge == 0
+
+
+@pytest.mark.asyncio
+async def test_assure_future_charge():
+    opt = HourSelectionOptions(
+        top_price=3, min_price=0.05, cautionhour_type_enum=CautionHourType.SUAVE
+    )
+    peak = 2.2
+    service = HourSelectionService(opt)
+    service.dtmodel.set_datetime(datetime(2023, 6, 25, 14, 0, 0))
+    await service.async_update_prices(_p.P230625[0], _p.P230625[1])
+    service.dtmodel.set_datetime(datetime(2023, 6, 25, 20, 47, 35))
+    total_charge = sum([hp.permittance * peak for hp in service.future_hours])
+    assert total_charge == 1
