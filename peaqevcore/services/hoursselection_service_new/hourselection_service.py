@@ -95,15 +95,13 @@ class HourSelectionService:
         self.model.prices_today = prices  # clean first
         self.model.prices_tomorrow = prices_tomorrow  # clean first
         if self._do_recalculate_prices(prices, prices_tomorrow):
-            self.model.hours_prices = await self.async_create_prices(
-                prices, prices_tomorrow
-            )
+            await self.async_create_prices(prices, prices_tomorrow)
 
     async def async_update_adjusted_average(self, adjusted_average: float) -> None:
         self.model.adjusted_average = adjusted_average
         self.update()
         if len(self.model.hours_prices) > 0:
-            await self.async_set_permittance(self.model.hours_prices)
+            self._set_permittance()
 
     def _do_recalculate_prices(self, prices, prices_tomorrow) -> bool:
         if [
@@ -116,83 +114,63 @@ class HourSelectionService:
 
     async def async_create_prices(
         self, prices: list[float], prices_tomorrow: list[float] = []
-    ) -> list:
+    ) -> None:
         # todo: fix to allow 23, 24,25, 92, 96, 100 for dst-dates.
         self.model.hours_prices = []
         match len(prices):
             case 23 | 24 | 25:
-                return await self.async_create_hour_prices(
-                    prices, prices_tomorrow, False
+                await self.async_create_hour_prices(
+                    prices, prices_tomorrow, is_quarterly=False
                 )
             case 92 | 96 | 100:
-                return await self.async_create_hour_prices(
-                    prices, prices_tomorrow, True
+                await self.async_create_hour_prices(
+                    prices, prices_tomorrow, is_quarterly=True
                 )
-            case 0:
-                return []
-        raise ValueError(
-            f"Length of pricelist must be either 23,24,25,92,96 or 100. Your length is {len(prices)}"
-        )
+            case _:
+                raise ValueError(
+                    f"Length of pricelist must be either 23,24,25,92,96 or 100. Your length is {len(prices)}"
+                )
 
     async def async_create_hour_prices(
         self,
         prices: list[float],
         prices_tomorrow: list[float] = [],
         is_quarterly: bool = False,
-    ) -> list:
+    ) -> None:
         # todo: handle here first if prices or prices_tomorrow are 92 or 100 in length (dst shift)
         self.use_quarters = is_quarterly
-        ret = []
-        ret.extend(self._set_hourprice_list(prices, is_quarterly, self.dtmodel.hdate))
-        ret.extend(
-            self._set_hourprice_list(
-                prices_tomorrow, is_quarterly, self.dtmodel.hdate_tomorrow
-            )
+        self.model.set_hourprice_list(
+            prices,
+            self.options,
+            is_quarterly,
+            self.dtmodel.hdate,
+            self.dtmodel.is_passed,
         )
-        return await self.async_set_permittance(ret)
+        self.model.set_hourprice_list(
+            prices_tomorrow,
+            self.options,
+            is_quarterly,
+            self.dtmodel.hdate_tomorrow,
+            self.dtmodel.is_passed,
+        )
+        self._set_permittance()
 
-    def _set_hourprice_list(
-        self, prices: list, is_quarterly: bool, datum: date
-    ) -> list[HourPrice]:
-        ret = []
-        for idx, p in enumerate(prices):  # type: ignore
-            assert isinstance(p, (float, int))
-            hour = int(idx / 4) if is_quarterly else idx
-            quarter = idx % 4 if is_quarterly else 0
-            _dt = datetime.combine(
-                datum, time(hour=hour, minute=quarter * 15, second=0, microsecond=0)
-            )
-            ret.append(
-                HourPrice(
-                    dt=_dt,
-                    quarter=quarter,
-                    price=p,
-                    passed=self.dtmodel.is_passed(datum, hour, quarter),
-                    hour_type=HourPrice.set_hour_type(
-                        self.options.absolute_top_price, self.options.min_price, p
-                    ),
-                    list_type=ListType.Quarterly if is_quarterly else ListType.Hourly,
-                )
-            )
-        return ret
-
-    async def async_set_permittance(
-        self, hour_prices: list[HourPrice]
-    ) -> list[HourPrice]:
-        prices = normalize_prices([hp.price for hp in hour_prices])
+    def _set_permittance(self) -> None:
+        prices = normalize_prices([hp.price for hp in self.model.hours_prices])
         set_initial_permittance(
-            hour_prices,
+            self.model.hours_prices,
             mean(prices),
             stdev(prices),
             self.model.adjusted_average,
         )
         set_scooped_permittance(
-            hour_prices,
+            self.model.hours_prices,
             self.options.cautionhour_type_enum,
         )
-        self._offset_dict = set_offset_dict(prices, hour_prices[0].dt.date())
-        self._block_nocturnal(hour_prices, self.options.blocknocturnal)
-        return hour_prices
+        self._offset_dict = set_offset_dict(
+            prices, self.model.hours_prices[0].dt.date()
+        )
+        self._block_nocturnal(self.model.hours_prices, self.options.blocknocturnal)
 
     @staticmethod
     def _block_nocturnal(

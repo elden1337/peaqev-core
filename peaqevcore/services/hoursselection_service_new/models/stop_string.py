@@ -49,9 +49,9 @@ def set_allowance_obj(
     if not len([hp.dt for hp in future_hours if hp.permittance == 0.0]):
         return AllowanceObj(AllowanceType.AllowedUntilFurtherNotice)
     first_start = min([hp.dt for hp in future_hours if hp.permittance > 0.0])
-    _stopped = first_start != dtmodel._datetime
+    _stopped = first_start != dtmodel.dt
     if _stopped:
-        if first_start.date() > dtmodel._date:
+        if first_start.date() > dtmodel.hdate:
             return AllowanceObj(
                 AllowanceType.StoppedUntilTomorrow, hour=first_start.hour
             )
@@ -63,7 +63,7 @@ def set_allowance_obj(
             )
     else:
         first_stop = min([hp.dt for hp in future_hours if hp.permittance == 0.0])
-        if first_stop.date() > dtmodel._date:
+        if first_stop.date() > dtmodel.hdate:
             return AllowanceObj(
                 AllowanceType.AllowedUntilTomorrow, hour=first_stop.hour
             )
