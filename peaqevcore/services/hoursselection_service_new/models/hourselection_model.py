@@ -17,6 +17,7 @@ class HourSelectionModel:
     _hours_prices: list[HourPrice] = field(default_factory=list)
     offset_dict: dict[datetime, dict] = field(default_factory=dict)
     adjusted_average: float | None = None
+    use_quarters: bool = False
 
     @property
     def hours_prices(self) -> list[HourPrice]:
@@ -35,15 +36,14 @@ class HourSelectionModel:
         self,
         prices: list,
         service_options: HourSelectionOptions,
-        is_quarterly: bool,
         datum: date,
         is_passed_func: Callable,
     ) -> None:
         ret = []
         for idx, p in enumerate(prices):  # type: ignore
             assert isinstance(p, (float, int))
-            hour = int(idx / 4) if is_quarterly else idx
-            quarter = idx % 4 if is_quarterly else 0
+            hour = int(idx / 4) if self.use_quarters else idx
+            quarter = idx % 4 if self.use_quarters else 0
             ret.append(
                 HourPrice(
                     dt=self._get_dt(datum, hour, quarter),
@@ -53,7 +53,9 @@ class HourSelectionModel:
                     hour_type=HourPrice.set_hour_type(
                         service_options.absolute_top_price, service_options.min_price, p
                     ),
-                    list_type=ListType.Quarterly if is_quarterly else ListType.Hourly,
+                    list_type=ListType.Quarterly
+                    if self.use_quarters
+                    else ListType.Hourly,
                 )
             )
         if len(self.hours_prices) > 0:

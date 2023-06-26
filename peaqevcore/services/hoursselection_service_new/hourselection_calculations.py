@@ -1,6 +1,6 @@
 from statistics import mean, stdev
 import logging
-from ...models.hourselection.cautionhourtype import CautionHourType, MAX_HOURS
+from .models.hour_price import HourPrice
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -18,6 +18,16 @@ def normalize_prices(prices: list) -> list:
         divider = min_price if min_price > 0 else c
         ret.append(round(pp - divider, 3))
     return ret
+
+
+def block_nocturnal(
+    hour_prices: list[HourPrice], block_nocturnal: bool = False
+) -> None:
+    if block_nocturnal:
+        blockhours = [23, 0, 1, 2, 3, 4, 5, 6]
+        for hp in hour_prices:
+            if hp.hour in blockhours:
+                hp.permittance = 0.0
 
 
 def get_offset_dict(normalized_hours: list):
