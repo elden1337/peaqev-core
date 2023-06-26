@@ -43,6 +43,17 @@ def scale_permittance(stdev: float) -> float:
 def set_scooped_permittance(
     hour_prices: list[HourPrice], caution_hour_type: CautionHourType
 ) -> None:
+    opt = get_caution_options(caution_hour_type)
+    for hp in hour_prices:
+        if hp.permittance <= opt.get("lo_cutoff", 0.4):
+            hp.permittance = 0.0
+        elif hp.permittance >= opt.get("hi_cutoff", 0.75):
+            hp.permittance = 1.0
+        else:
+            hp.permittance = round(hp.permittance, 2)
+
+
+def get_caution_options(caution_hour_type: CautionHourType) -> dict:
     lo_cutoff = 0.4
     hi_cutoff = 0.75
     max_hours = 24  # todo: add support for 96 if quarterly
@@ -59,18 +70,23 @@ def set_scooped_permittance(
             lo_cutoff = 0.6
             max_hours = 8  # todo: add support for 32 if quarterly
             min_hours = 0
+    return {
+        "lo_cutoff": lo_cutoff,
+        "hi_cutoff": hi_cutoff,
+        "max_hours": max_hours,
+        "min_hours": min_hours,
+    }
 
-    for hp in hour_prices:
-        if hp.permittance <= lo_cutoff:
-            hp.permittance = 0.0
-        elif hp.permittance >= hi_cutoff:
-            hp.permittance = 1.0
-        else:
-            hp.permittance = round(hp.permittance, 2)
 
-    if len([hp for hp in hour_prices if hp.permittance > 0.0]) < min_hours:
+def set_min_allowed_hours(
+    hour_prices: list[HourPrice], caution_hour_type: CautionHourType
+) -> None:
+    opt = get_caution_options(caution_hour_type)
+    if len([hp for hp in hour_prices if hp.permittance > 0.0]) < opt.get(
+        "min_hours", 4
+    ):
         _t = [hp for hp in hour_prices if hp.list_type != HourType.AboveMax]
         if len(_t):
             _t.sort(key=lambda x: x.price)
-            for h in range(min_hours):
+            for h in range(opt.get("min_hours", 4)):
                 _t[h].permittance = 1.0 if _t[h].permittance == 0 else _t[h].permittance

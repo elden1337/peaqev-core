@@ -5,7 +5,11 @@ from .models.hourselection_model import HourSelectionModel
 from statistics import stdev, mean
 from ...models.hourselection.hourselection_options import HourSelectionOptions
 from .hourselection_calculations import normalize_prices, block_nocturnal
-from .permittance import set_initial_permittance, set_scooped_permittance
+from .permittance import (
+    set_initial_permittance,
+    set_scooped_permittance,
+    set_min_allowed_hours,
+)
 from .max_min_charge import MaxMinCharge
 
 
@@ -155,4 +159,9 @@ class HourSelectionService:
             self.model.hours_prices,
             self.options.cautionhour_type_enum,
         )
+        set_min_allowed_hours(
+            self.model.hours_prices,
+            self.options.cautionhour_type_enum,
+        )
+        print(f"last: {sum([h.permittance for h in self.model.hours_prices])}")
         self.model.set_offset_dict(prices, self.model.hours_prices[0].dt.date())
