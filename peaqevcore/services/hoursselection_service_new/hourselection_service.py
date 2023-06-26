@@ -118,6 +118,7 @@ class HourSelectionService:
         self, prices: list[float], prices_tomorrow: list[float] = []
     ) -> list:
         # todo: fix to allow 23, 24,25, 92, 96, 100 for dst-dates.
+        self.model.hours_prices = []
         match len(prices):
             case 23 | 24 | 25:
                 return await self.async_create_hour_prices(
