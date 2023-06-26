@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from .hour_price import HourPrice
 from datetime import date, datetime, time
 from .list_type import ListType
+from ..offset_dict import get_offset_dict, set_offset_dict
 
 
 @dataclass
@@ -14,6 +15,7 @@ class HourSelectionModel:
     prices_today: list[float] = field(default_factory=list)
     prices_tomorrow: list[float] = field(default_factory=list)
     _hours_prices: list[HourPrice] = field(default_factory=list)
+    offset_dict: dict[datetime, dict] = field(default_factory=dict)
     adjusted_average: float | None = None
 
     @property
@@ -64,3 +66,9 @@ class HourSelectionModel:
         return datetime.combine(
             datum, time(hour=hour, minute=quarter * 15, second=0, microsecond=0)
         )
+
+    def get_offset_dict(self) -> dict:
+        return get_offset_dict(self.offset_dict)
+
+    def set_offset_dict(self, prices: list[float], day: date) -> None:
+        self.offset_dict = set_offset_dict(prices, day)

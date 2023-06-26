@@ -1,13 +1,10 @@
 from .models.stop_string import AllowanceObj, set_allowance_obj
 from .models.datetime_model import DateTimeModel
 from .models.hour_price import HourPrice
-from .models.list_type import ListType
 from .models.hourselection_model import HourSelectionModel
 from statistics import stdev, mean
-from datetime import date, datetime, time
 from ...models.hourselection.hourselection_options import HourSelectionOptions
 from .hourselection_calculations import normalize_prices
-from .offset_dict import get_offset_dict, set_offset_dict
 from .permittance import set_initial_permittance, set_scooped_permittance
 from .max_min_charge import MaxMinCharge
 
@@ -19,7 +16,6 @@ class HourSelectionService:
         self.dtmodel = DateTimeModel()
         self.model = HourSelectionModel()
         self.max_min = MaxMinCharge(service=self, min_price=self.options.min_price)
-        self._offset_dict: dict[datetime, dict] = {}
 
     @property
     def all_hours(self) -> list[HourPrice]:
@@ -51,7 +47,7 @@ class HourSelectionService:
 
     @property
     def offset_dict(self) -> dict:
-        return get_offset_dict(self._offset_dict)
+        return self.model.get_offset_dict()
 
     def update(self):
         for hp in self.model.hours_prices:
@@ -167,9 +163,7 @@ class HourSelectionService:
             self.model.hours_prices,
             self.options.cautionhour_type_enum,
         )
-        self._offset_dict = set_offset_dict(
-            prices, self.model.hours_prices[0].dt.date()
-        )
+        self.model.set_offset_dict(prices, self.model.hours_prices[0].dt.date())
         self._block_nocturnal(self.model.hours_prices, self.options.blocknocturnal)
 
     @staticmethod
