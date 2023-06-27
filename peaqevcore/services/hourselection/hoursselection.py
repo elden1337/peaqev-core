@@ -106,9 +106,6 @@ class Hoursselection:
         await self.async_update_prices(self.prices, self.prices_tomorrow)
 
     async def async_update_prices(self, prices: list, prices_tomorrow: list = []):
-        max_min: bool = False
-        if any([self.prices != prices, self.prices_tomorrow != prices_tomorrow]):
-            max_min = True
         self.prices = prices
         self.prices_tomorrow = prices_tomorrow
         await self.service.async_update_prices(self.prices, self.prices_tomorrow)
