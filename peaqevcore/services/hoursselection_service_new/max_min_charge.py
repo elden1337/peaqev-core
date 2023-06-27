@@ -96,6 +96,8 @@ class MaxMinCharge:
         self, hours: list[HourPrice], desired_charge: float
     ) -> None:
         hours = [hour for hour in hours if hour.permittance != 0 and not hour.passed]
+        if self._get_charge_sum(hours) <= desired_charge:
+            return
         total_charge = 0
         _desired = min([desired_charge, self._get_charge_sum(hours)])
         hours.sort(key=lambda x: x.price)
