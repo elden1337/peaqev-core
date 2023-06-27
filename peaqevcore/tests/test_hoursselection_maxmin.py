@@ -506,7 +506,7 @@ async def test_230429_session_map_correct_cheapest():
     await r.service.max_min.async_update(0.46, peak, 8)
     r.service.dtmodel.set_datetime(datetime(2020, 2, 26, 16, 0, 0))
     available = [
-        k.hour for k, v in r.service.max_min.model.input_hours.items() if v[1] > 0
+        k.hour for k in r.service.max_min.model.input_hours if k.permittance > 0
     ]
     assert available == [11, 12, 13, 14]
 
@@ -524,8 +524,10 @@ async def test_230429_session_map_single_hour():
     await r.async_update_prices(P230429[0], P230429[1])
     await r.service.max_min.async_update(0.46, peak, 2.2)
     r.service.dtmodel.set_datetime(datetime(2020, 2, 29, 16, 0, 0))
-    available = [k for k, v in r.service.max_min.model.input_hours.items() if v[1] > 0]
-    assert available[0].hour == 14
+    available = [
+        k.hour for k in r.service.max_min.model.input_hours if k.permittance > 0
+    ]
+    assert available[0] == 14
     _date += timedelta(days=1)
     _date = _date.replace(hour=14)
     assert r.service.max_min.model.input_hours[_date][1] == 1
@@ -548,14 +550,20 @@ async def test_230512_car_connected():
     r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 14, 0, 0))
     await r.async_update_prices(P230512[0], P230512[1])
     await r.service.max_min.async_update(0.4, peak, 7)
-    available = [k for k, v in r.service.max_min.model.input_hours.items() if v[1] > 0]
+    available = [
+        k.hour for k in r.service.max_min.model.input_hours if k.permittance > 0
+    ]
     r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 15, 0, 0))
     await r.service.max_min.async_update(0.4, peak, 7, car_connected=True)
-    available2 = [k for k, v in r.service.max_min.model.input_hours.items() if v[1] > 0]
+    available2 = [
+        k.hour for k in r.service.max_min.model.input_hours if k.permittance > 0
+    ]
     assert available == available2
     r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 18, 0, 0))
     await r.service.max_min.async_update(0.4, peak, 7, car_connected=True)
-    available3 = [k for k, v in r.service.max_min.model.input_hours.items() if v[1] > 0]
+    available3 = [
+        k.hour for k in r.service.max_min.model.input_hours if k.permittance > 0
+    ]
     assert available2 == available3
 
 

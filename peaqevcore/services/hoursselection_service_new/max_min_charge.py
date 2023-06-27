@@ -95,18 +95,25 @@ class MaxMinCharge:
     def select_hours_for_charge(
         self, hours: list[HourPrice], desired_charge: float
     ) -> None:
-        hours = [hour for hour in hours if hour.permittance != 0]
+        hours = [hour for hour in hours if hour.permittance != 0 and not hour.passed]
         total_charge = 0
+        _desired = min(
+            [
+                desired_charge,
+                sum(
+                    [
+                        hour.permittance * self.model.expected_hourly_charge
+                        for hour in hours
+                        if not hour.passed
+                    ]
+                ),
+            ]
+        )
         hours.sort(key=lambda x: x.price)
         for hour in hours:
             hour_charge = hour.permittance * self.model.expected_hourly_charge
-            # print(
-            #     f"test {hour.dt} with {hour.permittance}. Charge: {hour_charge}, total: {total_charge}"
-            # )
-            if total_charge + hour_charge <= desired_charge:
-                total_charge += hour_charge
-            elif total_charge + hour_charge > desired_charge:
-                perm = max(min(desired_charge - total_charge, 1), 0)
+            if total_charge + hour_charge <= _desired:
+                perm = max(min(_desired - total_charge, 1), 0)
                 total_charge += hour_charge * perm
                 hour.permittance = perm
             else:
