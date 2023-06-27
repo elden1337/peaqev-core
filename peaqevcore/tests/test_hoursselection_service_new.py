@@ -196,5 +196,13 @@ async def test_assure_future_charge():
     service.dtmodel.set_datetime(datetime(2023, 6, 25, 14, 0, 0))
     await service.async_update_prices(_p.P230625[0], _p.P230625[1])
     service.dtmodel.set_datetime(datetime(2023, 6, 25, 20, 47, 35))
-    total_charge = sum([hp.permittance * peak for hp in service.future_hours])
-    assert total_charge == 1
+    assert sum([hp.permittance * peak for hp in service.future_hours]) == 2.2
+    for h in service.future_hours:
+        print(h.dt, h.permittance)
+    service.dtmodel.set_datetime(datetime(2023, 6, 26, 0, 0, 10))
+    await service.async_update_prices(_p.P230625[1])
+    print(f"test2: {sum([h.permittance * peak for h in service.future_hours])}")
+    for h in service.future_hours:
+        print(h.dt, h.permittance)
+    assert sum([hp.permittance * peak for hp in service.future_hours]) == 2.2
+    assert 1 > 2

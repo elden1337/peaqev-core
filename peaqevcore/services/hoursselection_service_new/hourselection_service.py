@@ -163,5 +163,4 @@ class HourSelectionService:
             self.model.hours_prices,
             self.options.cautionhour_type_enum,
         )
-        print(f"last: {sum([h.permittance for h in self.model.hours_prices])}")
         self.model.set_offset_dict(prices, self.model.hours_prices[0].dt.date())
