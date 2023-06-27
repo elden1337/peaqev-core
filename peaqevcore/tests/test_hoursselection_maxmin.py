@@ -605,13 +605,20 @@ async def test_230620_non_hours():
     await r.async_update_top_price(0.86)
     r.service.dtmodel.set_datetime(datetime(2023, 6, 20, 11, 3, 32))
     await r.async_update_prices(p)
+    print(
+        f"original_maxmin: {sum(h.permittance * (peak - 0.4)for h in r.service.max_min.model.original_input_hours)}, altered_max_min: {sum(h.permittance * (peak - 0.4) for h in r.service.max_min.model.input_hours)}, service: {sum(h.permittance * (peak - 0.4) for h in r.service.future_hours)}"
+    )
     await r.service.max_min.async_update(400, peak, 6)
     print(
-        sum(h.permittance * (peak - 0.4) for h in r.service.max_min.model.input_hours)
+        f"original_maxmin: {sum(h.permittance * (peak - 0.4)for h in r.service.max_min.model.original_input_hours)}, altered_max_min: {sum(h.permittance * (peak - 0.4) for h in r.service.max_min.model.input_hours)}, service: {sum(h.permittance * (peak - 0.4) for h in r.service.future_hours)}"
     )
     await r.service.max_min.async_update(400, peak, 4)
     print(
-        sum(h.permittance * (peak - 0.4) for h in r.service.max_min.model.input_hours)
+        f"original_maxmin: {sum(h.permittance * (peak - 0.4)for h in r.service.max_min.model.original_input_hours)}, altered_max_min: {sum(h.permittance * (peak - 0.4) for h in r.service.max_min.model.input_hours)}, service: {sum(h.permittance * (peak - 0.4) for h in r.service.future_hours)}"
+    )
+    await r.service.max_min.async_update(400, peak, 8)
+    print(
+        f"original_maxmin: {sum(h.permittance * (peak - 0.4)for h in r.service.max_min.model.original_input_hours)}, altered_max_min: {sum(h.permittance * (peak - 0.4) for h in r.service.max_min.model.input_hours)}, service: {sum(h.permittance * (peak - 0.4) for h in r.service.future_hours)}"
     )
     # print(r.non_hours)
     assert 1 > 2

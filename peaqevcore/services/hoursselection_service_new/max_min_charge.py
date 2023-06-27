@@ -2,6 +2,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from datetime import datetime, timedelta
 from ..hoursselection_service_new.models.hour_price import HourPrice
+from ..hoursselection_service_new.models.hour_type import HourType
+from ..hoursselection_service_new.models.list_type import ListType
+import copy
 
 if TYPE_CHECKING:
     from .hourselection_service import HourSelectionService
@@ -63,34 +66,23 @@ class MaxMinCharge:
             if 0 < hp.permittance < 1 and hp.dt >= self.parent.dtmodel.dt
         }
 
-    async def async_allow_decrease(self, car_connected: bool | None = None) -> bool:
-        if car_connected is not None:
-            return all(
-                [
-                    # not car_connected,
-                    len([v for v in self.model.input_hours if v.permittance > 0])
-                    != 1,
-                ]
-            )
-        return len([v for v in self.model.input_hours if v.permittance > 0]) != 1
-
     async def async_update(
         self,
         avg24,
         peak,
         max_desired: float,
         session_energy: float | None = None,
-        car_connected: bool | None = None,
+        car_connected: bool = False,
     ) -> None:
-        # allow_decrease: bool = False
-        if await self.async_allow_decrease(car_connected):
-            # allow_decrease = True
+        if not car_connected:
             await self.async_setup(max_charge=peak)
         _session = session_energy or 0
         _desired = max_desired - _session
         _avg24 = round((avg24 / 1000), 1)
         self.model.expected_hourly_charge = peak - _avg24
-        self.select_hours_for_charge(self.model.original_input_hours, _desired)
+        self.select_hours_for_charge(
+            copy.deepcopy(self.model.original_input_hours), _desired
+        )
 
     def select_hours_for_charge(
         self, hours: list[HourPrice], desired_charge: float
@@ -155,29 +147,11 @@ class MaxMinCharge:
     async def async_setup(
         self,
         max_charge: float,
-        non_hours: list | None = None,
-        dynamic_caution_hours: dict | None = None,
-        prices: list | None = None,
-        prices_tomorrow: list | None = None,
     ) -> None:
         if max_charge == 0:
             self.active = False
             return
-        # hour = self.parent.dtmodel.hour
-        # dt = self.parent.dtmodel.dt
-        # _non_hours = self._service_non_hours() if non_hours is None else non_hours
-        # _dynamic_caution_hours = (
-        #     self._service_caution_hours()
-        #     if dynamic_caution_hours is None
-        #     else dynamic_caution_hours
-        # )
-        # _prices = self.parent.model.prices_today if prices is None else prices
-        # _prices_tomorrow = (
-        #     self.parent.model.prices_tomorrow
-        #     if prices_tomorrow is None
-        #     else prices_tomorrow
-        # )
-
-        self.model.input_hours = self.parent.future_hours
-        self.model.original_input_hours = self.model.input_hours.copy()
-        self.active = True
+        if not self.active:
+            self.model.input_hours = copy.deepcopy(self.parent.future_hours)
+            self.model.original_input_hours = copy.deepcopy(self.model.input_hours)
+            self.active = True
