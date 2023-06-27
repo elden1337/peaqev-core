@@ -97,28 +97,27 @@ class MaxMinCharge:
     ) -> None:
         hours = [hour for hour in hours if hour.permittance != 0 and not hour.passed]
         total_charge = 0
-        _desired = min(
-            [
-                desired_charge,
-                sum(
-                    [
-                        hour.permittance * self.model.expected_hourly_charge
-                        for hour in hours
-                        if not hour.passed
-                    ]
-                ),
-            ]
-        )
+        _desired = min([desired_charge, self._get_charge_sum(hours)])
         hours.sort(key=lambda x: x.price)
         for hour in hours:
             hour_charge = hour.permittance * self.model.expected_hourly_charge
-            if total_charge + hour_charge <= _desired:
-                perm = max(min(_desired - total_charge, 1), 0)
-                total_charge += hour_charge * perm
-                hour.permittance = perm
-            else:
-                hour.permittance = 0.0
+            perm = min(
+                1, max((_desired - total_charge) / self.model.expected_hourly_charge, 0)
+            )
+            total_charge += hour_charge * perm
+            hour.permittance = round(perm, 2)
+            if self._get_charge_sum(hours) == desired_charge:
+                break
         self.model.input_hours = hours
+
+    def _get_charge_sum(self, hours: list[HourPrice]) -> float:
+        return sum(
+            [
+                hour.permittance * self.model.expected_hourly_charge
+                for hour in hours
+                if not hour.passed
+            ]
+        )
 
     def _set_expected_charge(self, desired, peak, avg24) -> float:
         return (desired - self.total_charge) / (peak - avg24)
@@ -162,20 +161,20 @@ class MaxMinCharge:
         if max_charge == 0:
             self.active = False
             return
-        hour = self.parent.dtmodel.hour
-        dt = self.parent.dtmodel.dt
-        _non_hours = self._service_non_hours() if non_hours is None else non_hours
-        _dynamic_caution_hours = (
-            self._service_caution_hours()
-            if dynamic_caution_hours is None
-            else dynamic_caution_hours
-        )
-        _prices = self.parent.model.prices_today if prices is None else prices
-        _prices_tomorrow = (
-            self.parent.model.prices_tomorrow
-            if prices_tomorrow is None
-            else prices_tomorrow
-        )
+        # hour = self.parent.dtmodel.hour
+        # dt = self.parent.dtmodel.dt
+        # _non_hours = self._service_non_hours() if non_hours is None else non_hours
+        # _dynamic_caution_hours = (
+        #     self._service_caution_hours()
+        #     if dynamic_caution_hours is None
+        #     else dynamic_caution_hours
+        # )
+        # _prices = self.parent.model.prices_today if prices is None else prices
+        # _prices_tomorrow = (
+        #     self.parent.model.prices_tomorrow
+        #     if prices_tomorrow is None
+        #     else prices_tomorrow
+        # )
 
         self.model.input_hours = self.parent.future_hours
         self.model.original_input_hours = self.model.input_hours.copy()

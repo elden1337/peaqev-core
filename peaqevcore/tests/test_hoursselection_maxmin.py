@@ -605,8 +605,15 @@ async def test_230620_non_hours():
     await r.async_update_top_price(0.86)
     r.service.dtmodel.set_datetime(datetime(2023, 6, 20, 11, 3, 32))
     await r.async_update_prices(p)
-    await r.service.max_min.async_update(0.4, peak, 7)
-    print(r.non_hours)
+    await r.service.max_min.async_update(400, peak, 6)
+    print(
+        sum(h.permittance * (peak - 0.4) for h in r.service.max_min.model.input_hours)
+    )
+    await r.service.max_min.async_update(400, peak, 4)
+    print(
+        sum(h.permittance * (peak - 0.4) for h in r.service.max_min.model.input_hours)
+    )
+    # print(r.non_hours)
     assert 1 > 2
     # available = [k for k, v in r.service.max_min.model.input_hours.items() if v[1] > 0]
     # r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 15, 0, 0))
