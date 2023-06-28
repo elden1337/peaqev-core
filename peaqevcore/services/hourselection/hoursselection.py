@@ -1,12 +1,11 @@
 import logging
-from statistics import mean
 from typing import Tuple
 from ...models.hourselection.cautionhourtype import CautionHourType
 from ...models.hourselection.hourselection_model import HourSelectionModel
 from ...models.hourselection.hourselection_options import HourSelectionOptions
 from ..hoursselection_service_new.hourselection_service import HourSelectionService
 from .hourselectionservice.hoursselection_helpers import convert_none_list
-from datetime import datetime, timedelta
+from datetime import datetime
 
 _LOGGER = logging.getLogger(__name__)
 
