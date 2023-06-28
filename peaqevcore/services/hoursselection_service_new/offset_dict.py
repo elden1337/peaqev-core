@@ -3,19 +3,10 @@ from .const import TODAY, TOMORROW
 from statistics import mean, stdev
 
 
-def get_offset_dict(offset_dict) -> dict:
-    vals = offset_dict.keys()
-    if len(vals) == 1:
-        return {TODAY: offset_dict.values(), TOMORROW: {}}
-    elif len(vals) == 2:
-        return {
-            TODAY: offset_dict[min(vals)],
-            TOMORROW: offset_dict[max(vals)],
-        }
-    # todo: log something here.
+def get_offset_dict(offset_dict, dt_now) -> dict:
     return {
-        TODAY: {},
-        TOMORROW: {},
+        TODAY: offset_dict.get(dt_now.date(), {}),
+        TOMORROW: offset_dict.get(dt_now.date() + timedelta(days=1), {}),
     }
 
 

@@ -51,7 +51,7 @@ class HourSelectionService:
 
     @property
     def offset_dict(self) -> dict:
-        return self.model.get_offset_dict()
+        return self.model.get_offset_dict(self.dtmodel.dt)
 
     def update(self):
         for hp in self.model.hours_prices:
@@ -169,4 +169,4 @@ class HourSelectionService:
             self.model.hours_prices,
             self.options.cautionhour_type_enum,
         )
-        self.model.set_offset_dict(prices, self.model.hours_prices[0].dt.date())
+        self.model.set_offset_dict(prices, self.dtmodel.dt.date())

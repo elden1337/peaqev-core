@@ -69,8 +69,8 @@ class HourSelectionModel:
             datum, time(hour=hour, minute=quarter * 15, second=0, microsecond=0)
         )
 
-    def get_offset_dict(self) -> dict:
-        return get_offset_dict(self.offset_dict)
+    def get_offset_dict(self, dt_date: datetime) -> dict:
+        return get_offset_dict(self.offset_dict, dt_date)
 
     def set_offset_dict(self, prices: list[float], day: date) -> None:
         self.offset_dict = set_offset_dict(prices, day)

@@ -206,3 +206,23 @@ async def test_assure_future_charge():
         print(h.dt, h.permittance)
     assert sum([hp.permittance * peak for hp in service.future_hours]) == 2.2
     assert 1 > 2
+
+
+@pytest.mark.asyncio
+async def test_offsets_update_midnight():
+    opt = HourSelectionOptions(
+        top_price=3, min_price=0.05, cautionhour_type_enum=CautionHourType.SUAVE
+    )
+    service = HourSelectionService(opt)
+    service.dtmodel.set_datetime(datetime(2023, 6, 25, 14, 0, 0))
+    await service.async_update_prices(_p.P230625[0], _p.P230625[1])
+    service.dtmodel.set_datetime(datetime(2023, 6, 25, 20, 47, 35))
+    assert len(service.offset_dict["today"]) == 24
+    offsets_tomorrow = service.offset_dict["tomorrow"]
+    assert len(offsets_tomorrow) == 24
+    service.dtmodel.set_datetime(datetime(2023, 6, 26, 0, 0, 10))
+    await service.async_update_prices(_p.P230625[1])
+    print(service.offset_dict)
+    assert len(service.offset_dict["today"]) == 24
+    assert len(service.offset_dict["tomorrow"]) == 0
+    assert service.offset_dict["today"] == offsets_tomorrow
