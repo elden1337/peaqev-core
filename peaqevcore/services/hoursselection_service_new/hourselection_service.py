@@ -69,8 +69,8 @@ class HourSelectionService:
             return mean(
                 [
                     hp.permittance * hp.price
-                    for hp in self.future_hours
-                    if hp.permittance > 0
+                    for hp in self.model.hours_prices
+                    if hp.permittance > 0 and not hp.passed
                 ]
             )
         except Exception:

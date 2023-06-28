@@ -121,7 +121,14 @@ class Hoursselection:
         ret_dynamic = self.service.max_min.total_charge
         self.model.current_peak = currentpeak
         ret_static = round(
-            sum([hp.permittance * currentpeak for hp in self.service.future_hours]), 1
+            sum(
+                [
+                    hp.permittance * currentpeak
+                    for hp in self.service.model.hours_prices
+                    if not hp.passed
+                ]
+            ),
+            1,
         )
         if ret_dynamic is not None:
             if ret_dynamic > ret_static:
