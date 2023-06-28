@@ -89,9 +89,11 @@ class MaxMinCharge:
     ) -> None:
         hours = [hour for hour in hours if hour.permittance != 0 and not hour.passed]
         if self._get_charge_sum(hours) <= desired_charge:
+            self.model.input_hours = copy.deepcopy(self.model.original_input_hours)
             return
         total_charge = 0
         _desired = min([desired_charge, self._get_charge_sum(hours)])
+        print(f"---- {_desired}")
         hours.sort(key=lambda x: x.price)
         for hour in hours:
             hour_charge = hour.permittance * self.model.expected_hourly_charge

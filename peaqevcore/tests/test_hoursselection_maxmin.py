@@ -642,10 +642,24 @@ async def test_230622_static_charge():
     r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 19, 0, 0))
     await r.async_update_prices(P230412[0], P230412[1])
     await r.service.max_min.async_setup(peak)
-    await r.service.max_min.async_update(0.4, peak, 7)
-    ret1 = await r.async_get_total_charge(peak)
-    deter = ret1[0]
-    await r.service.max_min.async_update(0.4, peak, 700)
+    await r.service.max_min.async_update(avg24=0.4, peak=peak, max_desired=7)
+    await r.service.max_min.async_update(avg24=0.4, peak=peak, max_desired=700)
     ret2 = await r.async_get_total_charge(peak)
-    assert ret2[0] == deter
-    print(ret2)
+    assert ret2[1] == ret2[0]
+
+
+@pytest.mark.asyncio
+async def test_230622_decrease_increase():
+    r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=1.5, min_price=0.0)
+    peak = 2.28
+    await r.async_update_adjusted_average(0.77)
+    await r.async_update_top_price(0.97)
+    r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 19, 0, 0))
+    await r.async_update_prices(P230412[0], P230412[1])
+    await r.service.max_min.async_setup(peak)
+    await r.service.max_min.async_update(avg24=400, peak=peak, max_desired=7)
+    ret1 = await r.async_get_total_charge(peak)
+    assert ret1[1] == 7
+    await r.service.max_min.async_update(avg24=400, peak=peak, max_desired=12)
+    ret2 = await r.async_get_total_charge(peak)
+    assert ret2[1] == 12
