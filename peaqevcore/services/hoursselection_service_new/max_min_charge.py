@@ -20,6 +20,7 @@ class MaxMinCharge:
         self.parent = service
         self.active: bool = False
         self.overflow: bool = False
+        self.current_peak: float | None = None
 
     @property
     def average_price(self) -> float | None:
@@ -28,7 +29,10 @@ class MaxMinCharge:
         if self.overflow:
             return self.original_average_price
         return self.model.caluclate_average_price(
-            self.model.input_hours, self.total_charge, self.parent.dtmodel.dt
+            self.model.input_hours,
+            self.total_charge,
+            self.parent.dtmodel.dt,
+            self.current_peak,
         )
 
     @property
@@ -37,6 +41,7 @@ class MaxMinCharge:
             self.model.original_input_hours,
             self.original_total_charge,
             self.parent.dtmodel.dt,
+            self.current_peak,
         )
 
     @property
@@ -46,13 +51,13 @@ class MaxMinCharge:
         if self.overflow:
             return self.original_total_charge
         return self.model.calculate_total_charge(
-            self.model.input_hours, self.parent.dtmodel.dt
+            self.model.input_hours, self.parent.dtmodel.dt, self.current_peak
         )
 
     @property
     def original_total_charge(self) -> float:
         return self.model.calculate_total_charge(
-            self.parent.future_hours, self.parent.dtmodel.dt
+            self.parent.future_hours, self.parent.dtmodel.dt, self.current_peak
         )
 
     @property
@@ -85,7 +90,7 @@ class MaxMinCharge:
         _desired = max_desired - _session
         _avg24 = round((avg24 / 1000), 1)
         self.model.expected_hourly_charge = peak - _avg24
-        print(_desired, self.original_total_charge)
+        self.current_peak = peak
         if _desired >= self.original_total_charge:
             self.overflow = True
             self.model.input_hours = copy.deepcopy(self.model.original_input_hours)
@@ -103,18 +108,23 @@ class MaxMinCharge:
         if self._get_charge_sum(hours) <= desired_charge:
             self.model.input_hours = copy.deepcopy(self.model.original_input_hours)
             return
-        total_charge = 0
-        _desired = min([desired_charge, self._get_charge_sum(hours)])
+        _total_charge: float = 0
+        _desired: float = min([desired_charge, self._get_charge_sum(hours)])
         hours.sort(key=lambda x: x.price)
         for hour in hours:
-            hour_charge = hour.permittance * self.model.expected_hourly_charge
-            perm = min(
-                1, max((_desired - total_charge) / self.model.expected_hourly_charge, 0)
+            if any([hour.passed, hour.permittance == 0, _total_charge >= _desired]):
+                hour.permittance = 0
+                continue
+            _hour_charge = hour.permittance * self.model.expected_hourly_charge
+            _perm = min(
+                1,
+                max((_desired - _total_charge) / self.model.expected_hourly_charge, 0),
             )
-            total_charge += hour_charge * perm
-            hour.permittance = round(perm, 2)
-            if self._get_charge_sum(hours) == desired_charge:
+            _total_charge += _hour_charge * _perm
+            hour.permittance = round(_perm, 2)
+            if self._get_charge_sum(hours) <= desired_charge:
                 break
+        print(f"total charge is: {self._get_charge_sum(hours)}")
         self.model.input_hours = hours
 
     def _get_charge_sum(self, hours: list[HourPrice]) -> float:
