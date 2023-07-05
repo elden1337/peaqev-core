@@ -663,3 +663,83 @@ async def test_230622_decrease_increase():
     await r.service.max_min.async_update(avg24=400, peak=peak, max_desired=12)
     ret2 = await r.async_get_total_charge(peak)
     assert ret2[1] == 12
+
+
+@pytest.mark.asyncio
+async def test_230622_decrease_increase_car_connected():
+    r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=1.5, min_price=0.0)
+    peak = 2.28
+    await r.async_update_adjusted_average(0.77)
+    await r.async_update_top_price(0.97)
+    r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 19, 0, 0))
+    await r.async_update_prices(P230412[0], P230412[1])
+    await r.service.max_min.async_setup(peak)
+    await r.service.max_min.async_update(
+        avg24=400, peak=peak, max_desired=7, car_connected=True
+    )
+    ret1 = await r.async_get_total_charge(peak)
+    assert ret1[1] == 7
+    await r.service.max_min.async_update(
+        avg24=400, peak=peak, max_desired=12, car_connected=True
+    )
+    ret2 = await r.async_get_total_charge(peak)
+    assert ret2[1] == 12
+
+
+@pytest.mark.asyncio
+async def test_230622_decrease_increase_total_charge():
+    r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=1.5, min_price=0.0)
+    peak = 2.28
+    await r.async_update_adjusted_average(0.77)
+    await r.async_update_top_price(0.97)
+    r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 19, 0, 0))
+    await r.async_update_prices(P230412[0], P230412[1])
+    await r.service.max_min.async_setup(peak)
+    await r.service.max_min.async_update(
+        avg24=400, peak=peak, max_desired=7, car_connected=True
+    )
+    ret1 = await r.async_get_total_charge(peak)
+    dyn1 = ret1[1] or 0
+    stat1 = ret1[0]
+    assert dyn1 <= ret1[0]
+    await r.service.max_min.async_update(
+        avg24=400, peak=peak, max_desired=12, car_connected=True
+    )
+    ret2 = await r.async_get_total_charge(peak)
+    assert ret2[0] == stat1
+    await r.service.max_min.async_update(
+        avg24=400, peak=peak, max_desired=300, car_connected=True
+    )
+    ret3 = await r.async_get_total_charge(peak)
+    assert ret3[1] == ret3[0]
+    assert ret3[0] == stat1
+
+
+@pytest.mark.asyncio
+async def test_230622_decrease_increase_avgprice():
+    r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=1.5, min_price=0.0)
+    peak = 2.28
+    await r.async_update_adjusted_average(0.77)
+    await r.async_update_top_price(0.97)
+    r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 19, 0, 0))
+    await r.async_update_prices(P230412[0], P230412[1])
+    await r.service.max_min.async_setup(peak)
+    await r.service.max_min.async_update(
+        avg24=400, peak=peak, max_desired=7, car_connected=True
+    )
+    ret1 = await r.async_get_average_kwh_price()
+    dyn1 = ret1[1] or 0.0
+    stat1 = ret1[0] or 0.0
+    assert dyn1 <= stat1
+    await r.service.max_min.async_update(
+        avg24=400, peak=peak, max_desired=12, car_connected=True
+    )
+    ret2 = await r.async_get_average_kwh_price()
+    assert ret2[0] == stat1
+    await r.service.max_min.async_update(
+        avg24=400, peak=peak, max_desired=300, car_connected=True
+    )
+    ret3 = await r.async_get_average_kwh_price()
+    assert ret3[1] == ret3[0]
+    # when overridden with more than available, the dynamic price should be the same as the static.
+    assert ret3[0] == stat1

@@ -78,12 +78,12 @@ class HourSelectionService:
 
     def get_future_hours(self) -> list[HourPrice]:
         ret = [hp for hp in self.model.hours_prices if not hp.passed]
-        if self.max_min.active:
-            for r in ret:
-                if r in self.max_min.non_hours:
-                    r.permittance = 0.0
-                elif r.dt in self.max_min.dynamic_caution_hours.keys():
-                    r.permittance = self.max_min.dynamic_caution_hours[r.dt]
+        # if self.max_min.active:
+        #     for r in ret:
+        #         if r in self.max_min.non_hours:
+        #             r.permittance = 0.0
+        #         elif r.dt in self.max_min.dynamic_caution_hours.keys():
+        #             r.permittance = self.max_min.dynamic_caution_hours[r.dt]
         return ret
 
     async def async_update_prices(

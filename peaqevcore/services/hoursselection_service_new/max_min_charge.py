@@ -19,11 +19,14 @@ class MaxMinCharge:
         self.model = MaxMinModel(min_price=min_price)  # type: ignore
         self.parent = service
         self.active: bool = False
+        self.overflow: bool = False
 
     @property
     def average_price(self) -> float | None:
         if not self.active:
             return None
+        if self.overflow:
+            return self.original_average_price
         return self.model.caluclate_average_price(
             self.model.input_hours, self.total_charge, self.parent.dtmodel.dt
         )
@@ -40,6 +43,8 @@ class MaxMinCharge:
     def total_charge(self) -> float | None:
         if not self.active:
             return None
+        if self.overflow:
+            return self.original_total_charge
         return self.model.calculate_total_charge(
             self.model.input_hours, self.parent.dtmodel.dt
         )
@@ -80,9 +85,16 @@ class MaxMinCharge:
         _desired = max_desired - _session
         _avg24 = round((avg24 / 1000), 1)
         self.model.expected_hourly_charge = peak - _avg24
-        self.select_hours_for_charge(
-            copy.deepcopy(self.model.original_input_hours), _desired
-        )
+        print(_desired, self.original_total_charge)
+        if _desired >= self.original_total_charge:
+            self.overflow = True
+            self.model.input_hours = copy.deepcopy(self.model.original_input_hours)
+            return
+        else:
+            self.overflow = False
+            self.select_hours_for_charge(
+                copy.deepcopy(self.model.original_input_hours), _desired
+            )
 
     def select_hours_for_charge(
         self, hours: list[HourPrice], desired_charge: float
@@ -93,7 +105,6 @@ class MaxMinCharge:
             return
         total_charge = 0
         _desired = min([desired_charge, self._get_charge_sum(hours)])
-        print(f"---- {_desired}")
         hours.sort(key=lambda x: x.price)
         for hour in hours:
             hour_charge = hour.permittance * self.model.expected_hourly_charge
@@ -117,14 +128,6 @@ class MaxMinCharge:
 
     def _set_expected_charge(self, desired, peak, avg24) -> float:
         return (desired - self.total_charge) / (peak - avg24)
-
-    async def async_initial_charge(self, avg24, peak) -> float:
-        _avg24 = round((avg24 / 1000), 1)
-        self.model.expected_hourly_charge = peak - _avg24
-        total = 24 * (peak - _avg24)  # todo: fix 24 to be dynamic
-        total -= len(self.non_hours) * (peak - _avg24)
-        total -= sum(self.dynamic_caution_hours.values()) * (peak - _avg24)
-        return total
 
     async def async_sum_charge(self, avg24, peak) -> float:
         total = 0
