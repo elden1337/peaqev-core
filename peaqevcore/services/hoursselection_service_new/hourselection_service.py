@@ -32,6 +32,12 @@ class HourSelectionService:
         return self.get_future_hours()
 
     @property
+    def display_future_hours(self) -> list[HourPrice]:
+        if self.max_min.active and not self.max_min.overflow:
+            return self.max_min.future_hours
+        return self.future_hours
+
+    @property
     def passed_hours(self) -> list[HourPrice]:
         self.update()
         return [hp for hp in self.model.hours_prices if hp.passed]
