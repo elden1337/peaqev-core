@@ -52,7 +52,7 @@ class MaxMinCharge:
 
     @property
     def future_hours(self) -> list:
-        return [hp.dt for hp in self.model.input_hours if not hp.passed]
+        return [hp for hp in self.model.input_hours if not hp.passed]
 
     @property
     def non_hours(self) -> list:
