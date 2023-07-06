@@ -51,8 +51,9 @@ class MaxMinCharge:
         return self.model.calculate_total_charge(self.parent.future_hours)
 
     @property
-    def future_hours(self) -> list:
-        return [hp for hp in self.model.input_hours if not hp.passed]
+    def future_hours(self) -> list[HourPrice]:
+        ret = [hp for hp in self.model.input_hours if not hp.passed]
+        return sorted(ret, key=lambda x: x.dt)
 
     @property
     def non_hours(self) -> list:

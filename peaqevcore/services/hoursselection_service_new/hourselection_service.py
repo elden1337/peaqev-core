@@ -49,7 +49,7 @@ class HourSelectionService:
 
     @property
     def allowance(self) -> AllowanceObj:
-        return set_allowance_obj(self.dtmodel, self.future_hours)
+        return set_allowance_obj(self.dtmodel, self.display_future_hours)
 
     @property
     def average_kwh_price(self) -> float:
