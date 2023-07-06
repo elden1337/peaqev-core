@@ -65,7 +65,7 @@ class Hoursselection:
 
     @property
     def future_hours(self) -> list:
-        return self.service.future_hours
+        return self.service.display_future_hours
 
     @property
     def prices(self) -> list:
