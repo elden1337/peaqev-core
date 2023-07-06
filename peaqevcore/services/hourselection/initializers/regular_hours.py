@@ -30,7 +30,12 @@ class RegularHours(Hours):
     def is_initialized(self) -> bool:
         return True
 
-    async def async_update_max_min(self, max_charge):
+    async def async_update_max_min(
+        self,
+        max_charge: float,
+        session_energy: float | None = None,
+        car_connected: bool = False,
+    ):
         pass
 
     @property

@@ -69,14 +69,16 @@ class HourSelectionService:
             return mean(
                 [
                     hp.permittance * hp.price
-                    for hp in self.model.hours_prices
-                    if hp.permittance > 0 and not hp.passed
+                    for hp in self.future_hours
+                    if hp.permittance > 0
                 ]
             )
         except Exception:
             return 0.0
 
     def get_future_hours(self) -> list[HourPrice]:
+        for hp in self.model.hours_prices:
+            hp.set_passed(self.dtmodel)
         ret = [hp for hp in self.model.hours_prices if not hp.passed]
         # if self.max_min.active:
         #     for r in ret:

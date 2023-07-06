@@ -149,5 +149,10 @@ class Hours:
         pass
 
     @abstractmethod
-    async def async_update_max_min(self, max_charge):
+    async def async_update_max_min(
+        self,
+        max_charge: float,
+        session_energy: float | None = None,
+        car_connected: bool = False,
+    ):
         pass

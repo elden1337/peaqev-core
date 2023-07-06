@@ -122,9 +122,13 @@ class Hoursselection:
     ) -> Tuple[float, float | None]:
         ret_dynamic = self.service.max_min.total_charge
         self.model.current_peak = currentpeak
-        # self.service.current_peak = currentpeak
+        _charge = (
+            self.service.max_min.model.expected_hourly_charge
+            if self.service.max_min.active
+            else currentpeak
+        )
         ret_static = round(
-            sum([hp.permittance * currentpeak for hp in self.service.future_hours]),
+            sum([hp.permittance * _charge for hp in self.service.future_hours]),
             1,
         )
         if ret_dynamic is not None:
