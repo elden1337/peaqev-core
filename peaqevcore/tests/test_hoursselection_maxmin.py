@@ -763,3 +763,47 @@ async def test_230622_update_prices():
     assert r.future_hours == [f for f in future2 if f.dt.date() == date(2023, 4, 13)]
     assert r.offsets["today"] == offsets2["tomorrow"]
     assert r.offsets["tomorrow"] == {}
+
+
+@pytest.mark.asyncio
+async def test_230709_wrong_cheapest():
+    r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=1.5, min_price=0.0)
+    peak = 1.6
+    p = [
+        0.87,
+        0.8,
+        0.73,
+        0.7,
+        0.69,
+        0.72,
+        0.79,
+        0.88,
+        0.9,
+        0.9,
+        0.9,
+        0.77,
+        0.61,
+        0.41,
+        0.41,
+        0.7,
+        0.94,
+        0.94,
+        0.97,
+        0.98,
+        0.95,
+        0.92,
+        0.91,
+        0.9,
+    ]
+    await r.async_update_adjusted_average(0.77)
+    await r.async_update_top_price(0.97)
+    r.service.dtmodel.set_datetime(datetime(2023, 7, 9, 0, 0, 15))
+    await r.async_update_prices(p)
+    await r.service.max_min.async_setup(peak)
+    await r.service.max_min.async_update(
+        avg24=400, peak=peak, max_desired=5, car_connected=True
+    )
+    # for f in r.future_hours:
+    #     perm = "-" if f.permittance == 0 else f.permittance
+    #     print(f.dt, f.price, perm)
+    # assert 1 > 2
