@@ -5,7 +5,7 @@ if TYPE_CHECKING:
     from ....models.hourselection.hourselection_options import HourSelectionOptions
 from dataclasses import dataclass, field
 from .hour_price import HourPrice
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 from .list_type import ListType
 from ..offset_dict import get_offset_dict, set_offset_dict
 
@@ -44,20 +44,18 @@ class HourSelectionModel:
             assert isinstance(p, (float, int))
             hour = int(idx / 4) if self.use_quarters else idx
             quarter = idx % 4 if self.use_quarters else 0
-            ret.append(
-                HourPrice(
-                    dt=self._get_dt(datum, hour, quarter),
-                    quarter=quarter,
-                    price=p,
-                    passed=is_passed_func(datum, hour, quarter),
-                    hour_type=HourPrice.set_hour_type(
-                        service_options.absolute_top_price, service_options.min_price, p
-                    ),
-                    list_type=ListType.Quarterly
-                    if self.use_quarters
-                    else ListType.Hourly,
-                )
+            rret = HourPrice(
+                dt=self._get_dt(datum, hour, quarter),
+                quarter=quarter,
+                price=p,
+                passed=is_passed_func(datum, hour, quarter),
+                hour_type=HourPrice.set_hour_type(
+                    service_options.absolute_top_price, service_options.min_price, p
+                ),
+                list_type=ListType.Quarterly if self.use_quarters else ListType.Hourly,
             )
+            if rret not in self.hours_prices:
+                ret.append(rret)
         if len(self.hours_prices) > 0:
             self.hours_prices.extend(ret)
         else:
@@ -73,4 +71,11 @@ class HourSelectionModel:
         return get_offset_dict(self.offset_dict, dt_date)
 
     def set_offset_dict(self, prices: list[float], day: date) -> None:
+        if all(
+            [
+                day in self.offset_dict.keys(),
+                day - timedelta(days=1) in self.offset_dict.keys(),
+            ]
+        ):
+            return
         self.offset_dict = set_offset_dict(prices, day)

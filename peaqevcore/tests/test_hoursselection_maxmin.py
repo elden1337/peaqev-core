@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 import pytest
 import statistics as stat
 from ..services.hourselection.hoursselection import Hoursselection as h
@@ -729,3 +729,37 @@ async def test_230622_decrease_increase_avgprice():
     assert ret3[1] == ret3[0]
     # when overridden with more than available, the dynamic price should be the same as the static.
     assert ret3[0] == stat1
+
+
+@pytest.mark.asyncio
+async def test_230622_update_prices():
+    r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=1.5, min_price=0.0)
+    peak = 2.28
+    await r.async_update_adjusted_average(0.77)
+    await r.async_update_top_price(0.97)
+    r.service.dtmodel.set_datetime(datetime(2023, 4, 12, 0, 0, 15))
+    await r.async_update_prices(P230412[0])
+    await r.service.max_min.async_setup(peak)
+    await r.service.max_min.async_update(
+        avg24=400, peak=peak, max_desired=5, car_connected=True
+    )
+    assert len(r.offsets["today"]) == 24
+    assert r.offsets["tomorrow"] == {}
+    r.service.dtmodel.set_datetime(datetime(2023, 4, 12, 13, 26, 15))
+    await r.async_update_prices(P230412[0], P230412[1])
+    await r.service.max_min.async_update(
+        avg24=400, peak=peak, max_desired=5, car_connected=True
+    )
+    future2 = r.future_hours
+    offsets2 = r.offsets
+    assert len(r.offsets["today"]) == 24
+    assert len(r.offsets["tomorrow"]) == 24
+    r.service.dtmodel.set_datetime(datetime(2023, 4, 13, 0, 0, 2))
+    await r.async_update_prices(P230412[1])
+    await r.async_update_adjusted_average(0.74)
+    await r.service.max_min.async_update(
+        avg24=400, peak=peak, max_desired=5, car_connected=True
+    )
+    assert r.future_hours == [f for f in future2 if f.dt.date() == date(2023, 4, 13)]
+    assert r.offsets["today"] == offsets2["tomorrow"]
+    assert r.offsets["tomorrow"] == {}

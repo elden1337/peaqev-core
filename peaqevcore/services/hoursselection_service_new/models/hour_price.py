@@ -24,6 +24,9 @@ class HourPrice:
         assert 0 <= self.dt.hour <= 23, "Hour must be between 0 and 23"
         self.permittance = 1.0 if self.hour_type == HourType.BelowMin else 0.0
 
+    def __eq__(self, other):
+        return all([self.dt == other.dt, self.price == other.price])
+
     @staticmethod
     def set_hour_type(max_price, min_price, price):
         if price > max_price:

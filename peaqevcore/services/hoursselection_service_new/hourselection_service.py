@@ -85,14 +85,7 @@ class HourSelectionService:
     def get_future_hours(self) -> list[HourPrice]:
         for hp in self.model.hours_prices:
             hp.set_passed(self.dtmodel)
-        ret = [hp for hp in self.model.hours_prices if not hp.passed]
-        # if self.max_min.active:
-        #     for r in ret:
-        #         if r in self.max_min.non_hours:
-        #             r.permittance = 0.0
-        #         elif r.dt in self.max_min.dynamic_caution_hours.keys():
-        #             r.permittance = self.max_min.dynamic_caution_hours[r.dt]
-        return ret
+        return [hp for hp in self.model.hours_prices if not hp.passed]
 
     async def async_update_prices(
         self, prices: list[float], prices_tomorrow: list[float] = []
@@ -100,10 +93,12 @@ class HourSelectionService:
         self.model.prices_today = prices  # clean first
         self.model.prices_tomorrow = prices_tomorrow  # clean first
         if self._do_recalculate_prices(prices, prices_tomorrow):
+            print(f"will recalculate for {len(prices)} and {len(prices_tomorrow)}")
             self._create_prices(prices, prices_tomorrow)
             if self.max_min.active:
                 self.max_min.get_hours()
         else:
+            print(f"will not recalculate for {len(prices)} and {len(prices_tomorrow)}")
             await self.async_update()
 
     async def async_update_adjusted_average(self, adjusted_average: float) -> None:
@@ -162,7 +157,14 @@ class HourSelectionService:
         block_nocturnal(self.model.hours_prices, self.options.blocknocturnal)
 
     def _set_permittance(self) -> None:
-        prices = normalize_prices([hp.price for hp in self.model.hours_prices])
+        prices = normalize_prices(
+            [
+                hp.price
+                for hp in self.model.hours_prices
+                if hp.dt.date() >= self.dtmodel.hdate
+            ]
+        )
+        self.model.set_offset_dict(prices, self.dtmodel.dt.date())
         set_initial_permittance(
             self.model.hours_prices,
             mean(prices),
@@ -177,4 +179,3 @@ class HourSelectionService:
             self.model.hours_prices,
             self.options.cautionhour_type_enum,
         )
-        self.model.set_offset_dict(prices, self.dtmodel.dt.date())
