@@ -1,7 +1,7 @@
 from .models.hour_price import HourPrice
 from ...models.hourselection.cautionhourtype import CautionHourType
 from .models.hour_type import HourType
-from statistics import mean
+from statistics import mean, stdev
 
 LOCUTOFF = "lo_cutoff"
 HICUTOFF = "hi_cutoff"
@@ -9,38 +9,43 @@ MAXHOURS = "max_hours"
 MINHOURS = "min_hours"
 
 
+def _set_max_permittance(hour_price: HourPrice,average:float, avg7: float|None) -> float:
+    return 1.0
+
+
+def _set_min_permittance(hour_price: HourPrice,average:float, avg7: float|None) -> float:
+    return 0.0
+
+
+def _calculate_score(hour: HourPrice, average:float, avg7: float|None) -> float:
+    if avg7 is None:
+        return 1.0 if hour.price < average else 0.0
+    else:
+        ceil = max(average, avg7)
+        floor = min(average, avg7)
+        return round(0.4 + 0.6 * (ceil - hour.price) / (ceil - floor),2)
+
+
+HOURTYPECONVERSION = {
+    HourType.BelowMin: _set_max_permittance,
+    HourType.AboveMax: _set_min_permittance,
+    HourType.Regular: _calculate_score
+}
+
+
 def set_initial_permittance(
     hours: list[HourPrice],
-    price_mean: float,
-    price_stdev: float,
     avg7: float | None = None,
 ) -> None:
-    scaling_factor = scale_permittance(price_stdev)
+    #scaling_factor = scale_permittance(stdev([h.price for h in hours]))
     for hour in hours:
-        if hour.hour_type == HourType.BelowMin:
-            hour.permittance = 1.0
-        elif hour.hour_type == HourType.AboveMax:
-            hour.permittance = 0.0
-        else:
-            diff_avg_price = price_mean - hour.price
-            diff_avg_7day_price = (avg7 or price_mean) - hour.price
-            avg_permittance = max(
-                0, min(1, diff_avg_price / (price_mean * scaling_factor))
-            )
-            avg_7day_permittance = max(
-                0,
-                min(
-                    1,
-                    diff_avg_7day_price / ((avg7 or price_mean) * scaling_factor),
-                ),
-            )
-            hour.permittance = mean([avg_permittance, avg_7day_permittance])
+        hour.permittance = HOURTYPECONVERSION[hour.hour_type](hour, average=mean([h.price for h in hours]), avg7 = avg7)
 
 
-def scale_permittance(stdev: float) -> float:
-    if stdev == 0:
-        return 1.0
-    return max(0.1, min(1.0, 1.0 / (1.0 + stdev)))
+# def scale_permittance(stdev: float) -> float:
+#     if stdev == 0:
+#         return 1.0
+#     return max(0.1, min(1.0, 1.0 / (1.0 + stdev)))
 
 
 def set_scooped_permittance(

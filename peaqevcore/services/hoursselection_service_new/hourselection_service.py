@@ -165,8 +165,6 @@ class HourSelectionService:
         self.model.set_offset_dict(prices, self.dtmodel.dt.date())
         set_initial_permittance(
             self.model.hours_prices,
-            mean(prices),
-            stdev(prices),
             self.model.adjusted_average,
         )
         set_scooped_permittance(
