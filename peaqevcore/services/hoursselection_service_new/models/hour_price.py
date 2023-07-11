@@ -36,18 +36,12 @@ class HourPrice:
         return HourType.Regular
 
     def set_passed(self, dt: DateTimeModel):
+        passed = False
         if dt.hdate > self.dt.date():
-            self.passed = True
-        elif dt.hdate == self.dt.date():
+            passed = True
+        elif dt.hdate == self.dt.date() and self.hour <= dt.hour:
             if self.hour < dt.hour:
-                self.passed = True
-            elif all(
-                [
-                    self.hour == dt.hour,
-                    self.quarter < dt.quarter,
-                    self.list_type == ListType.Quarterly,
-                ]
-            ):
-                self.passed = True
-        else:
-            self.passed = False
+                passed = True
+            elif self.quarter < dt.quarter and self.list_type == ListType.Quarterly:
+                passed = True
+        self.passed = passed
