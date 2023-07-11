@@ -4,6 +4,7 @@ import statistics as stat
 from ..services.hourselection.hoursselection import Hoursselection as h
 from ..models.hourselection.cautionhourtype import CautionHourType, VALUES_CONVERSION
 from ..models.hourselection.topprice_type import TopPriceType
+from .prices import *
 
 P230412 = [
     [
@@ -807,3 +808,17 @@ async def test_230709_wrong_cheapest():
     #     perm = "-" if f.permittance == 0 else f.permittance
     #     print(f.dt, f.price, perm)
     # assert 1 > 2
+
+@pytest.mark.asyncio
+async def test_230711_new_algorithm():
+    test = [CautionHourType.SUAVE, CautionHourType.INTERMEDIATE, CautionHourType.AGGRESSIVE]
+    for t in test:
+        r = h(cautionhour_type=t, absolute_top_price=1.5, min_price=0.0)
+        await r.async_update_adjusted_average(0.91)
+        r.service.dtmodel.set_datetime(datetime(2023, 7, 11, 20, 35, 15))
+        await r.async_update_prices(P230711[0], P230711[1])
+        print(f"CautionHourType: {t}")
+        for f in r.future_hours:
+            perm = "-" if f.permittance == 0 else f.permittance
+            print(f"{f.dt}; {f.price}; {perm}")
+    assert 1 > 2

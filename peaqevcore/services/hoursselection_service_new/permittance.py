@@ -23,7 +23,13 @@ def _calculate_score(hour: HourPrice, average:float, avg7: float|None) -> float:
     else:
         ceil = max(average, avg7)
         floor = min(average, avg7)
-        return round(0.4 + 0.6 * (ceil - hour.price) / (ceil - floor),2)
+        if hour.price >= ceil:
+            return 0.0
+        elif hour.price <= floor:
+            return 1.0
+        else:
+            return round(0.3 + 0.7 * (ceil - hour.price) / (ceil - floor),2)
+        
 
 
 HOURTYPECONVERSION = {
@@ -38,7 +44,8 @@ def set_initial_permittance(
     avg7: float | None = None,
 ) -> None:
     for hour in hours:
-        hour.permittance = HOURTYPECONVERSION[hour.hour_type](hour, average=mean([h.price for h in hours if not h.passed]), avg7 = avg7)
+        if not hour.passed:
+            hour.permittance = HOURTYPECONVERSION[hour.hour_type](hour, average=mean([h.price for h in hours if not h.passed]), avg7 = avg7)
 
 
 def set_scooped_permittance(
@@ -46,12 +53,13 @@ def set_scooped_permittance(
 ) -> None:
     opt = _get_caution_options(caution_hour_type)
     for hp in hour_prices:
-        if hp.permittance <= opt.get(LOCUTOFF, 0.4):
-            hp.permittance = 0.0
-        elif hp.permittance >= opt.get(HICUTOFF, 0.75):
-            hp.permittance = 1.0
-        else:
-            hp.permittance = round(hp.permittance, 2)
+        if not hp.passed:
+            if hp.permittance <= opt.get(LOCUTOFF, 0.4):
+                hp.permittance = 0.0
+            elif hp.permittance >= opt.get(HICUTOFF, 0.75):
+                hp.permittance = 1.0
+            else:
+                hp.permittance = round(hp.permittance, 2)
 
 
 def set_min_allowed_hours(
@@ -65,7 +73,7 @@ def set_min_allowed_hours(
         _t = [
             hp
             for hp in hour_prices
-            if hp.list_type != HourType.AboveMax
+            if hp.hour_type != HourType.AboveMax
             and not hp.passed
             and hp.permittance < 1
         ]
@@ -76,20 +84,20 @@ def set_min_allowed_hours(
 
 
 def _get_caution_options(caution_hour_type: CautionHourType) -> dict:
-    lo_cutoff = 0.4
-    hi_cutoff = 0.75
+    lo_cutoff = 0.5
+    hi_cutoff = 0.8
     max_hours = 24  # todo: add support for 96 if quarterly
     min_hours = 4
     match caution_hour_type:
         case CautionHourType.SUAVE:
             hi_cutoff = 0.7
         case CautionHourType.INTERMEDIATE:
-            lo_cutoff = 0.5
+            lo_cutoff = 0.55
             hi_cutoff = 0.7
         case CautionHourType.AGGRESSIVE:
-            lo_cutoff = 0.6
+            lo_cutoff = 0.65
         case CautionHourType.SCROOGE:
-            lo_cutoff = 0.6
+            lo_cutoff = 0.65
             max_hours = 8  # todo: add support for 32 if quarterly
             min_hours = 0
     return {
