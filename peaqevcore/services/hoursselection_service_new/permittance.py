@@ -37,15 +37,8 @@ def set_initial_permittance(
     hours: list[HourPrice],
     avg7: float | None = None,
 ) -> None:
-    #scaling_factor = scale_permittance(stdev([h.price for h in hours]))
     for hour in hours:
-        hour.permittance = HOURTYPECONVERSION[hour.hour_type](hour, average=mean([h.price for h in hours]), avg7 = avg7)
-
-
-# def scale_permittance(stdev: float) -> float:
-#     if stdev == 0:
-#         return 1.0
-#     return max(0.1, min(1.0, 1.0 / (1.0 + stdev)))
+        hour.permittance = HOURTYPECONVERSION[hour.hour_type](hour, average=mean([h.price for h in hours if not h.passed]), avg7 = avg7)
 
 
 def set_scooped_permittance(
