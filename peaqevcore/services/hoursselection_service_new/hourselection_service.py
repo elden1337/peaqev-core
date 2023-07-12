@@ -4,7 +4,7 @@ from .models.hour_price import HourPrice
 from .models.hourselection_model import HourSelectionModel
 from statistics import stdev, mean
 from ...models.hourselection.hourselection_options import HourSelectionOptions
-from .hourselection_calculations import normalize_prices, block_nocturnal
+from .hourselection_calculations import normalize_prices
 from .permittance import (
     set_initial_permittance,
     set_scooped_permittance,
@@ -152,7 +152,6 @@ class HourSelectionService:
             self.dtmodel.is_passed,
         )
         self._set_permittance()
-        block_nocturnal(self.model.hours_prices, self.options.blocknocturnal)
 
     def _set_permittance(self) -> None:
         prices = normalize_prices(

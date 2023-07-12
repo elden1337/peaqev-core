@@ -19,17 +19,6 @@ def normalize_prices(prices: list) -> list:
         ret.append(round(pp - divider, 3))
     return ret
 
-
-def block_nocturnal(
-    hour_prices: list[HourPrice], block_nocturnal: bool = False
-) -> None:
-    if block_nocturnal:
-        blockhours = [23, 0, 1, 2, 3, 4, 5, 6]
-        for hp in hour_prices:
-            if hp.hour in blockhours:
-                hp.permittance = 0.0
-
-
 def get_offset_dict(normalized_hours: list):
     ret = {}
     _prices = [p - min(normalized_hours) for p in normalized_hours]

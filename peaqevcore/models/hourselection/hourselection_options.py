@@ -28,7 +28,6 @@ class HourSelectionOptions:
     dynamic_top_price: float = 0  # move to separate file
     top_price_type: TopPriceType = field(default_factory=lambda: TopPriceType.Unset)
     min_price: float = 0
-    blocknocturnal: bool = False
     absolute_top_price: float = field(init=False)  # move to separate file
 
     def __post_init__(self):
