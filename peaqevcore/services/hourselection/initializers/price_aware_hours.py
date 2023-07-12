@@ -92,7 +92,7 @@ class PriceAwareHours(Hours):
 
     @property
     def stopped_string(self) -> str:
-        return self._core.service.stopped_string
+        return self._core.service.allowance.display_name
 
     @property
     def offsets(self) -> dict:

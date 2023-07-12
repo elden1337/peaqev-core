@@ -62,11 +62,11 @@ async def test_last_nonhour_stopped_until_tomorrow_blank():
     await service.async_update_prices(_p.P230520[0], _p.P230520[1])
     assert service.allowance.prefix_type == AllowanceType.AllowedUntil
     service.dtmodel.set_datetime(datetime(2023, 5, 20, 21, 0, 0))
-    print(service.stopped_string)
+    #print(service.stopped_string)
     assert service.allowance.prefix_type == AllowanceType.AllowedUntilTomorrow
     service.dtmodel.set_datetime(datetime(2023, 5, 21, 1, 0, 0))
     await service.async_update_prices(_p.P230520[1], [])
-    print(service.stopped_string)
+    #print(service.stopped_string)
     assert service.allowance.prefix_type == AllowanceType.AllowedUntil
 
 

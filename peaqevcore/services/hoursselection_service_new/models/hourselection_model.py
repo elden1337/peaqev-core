@@ -79,3 +79,8 @@ class HourSelectionModel:
         ):
             return
         self.offset_dict = set_offset_dict(prices, day)
+
+    def get_future_hours(self, dtmodel) -> list[HourPrice]:
+        for hp in self.hours_prices:
+            hp.set_passed(dtmodel)
+        return [hp for hp in self.hours_prices if not hp.passed]

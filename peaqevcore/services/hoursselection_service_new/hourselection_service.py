@@ -2,9 +2,8 @@ from .models.stop_string import AllowanceObj, set_allowance_obj
 from .models.datetime_model import DateTimeModel
 from .models.hour_price import HourPrice
 from .models.hourselection_model import HourSelectionModel
-from statistics import stdev, mean
 from ...models.hourselection.hourselection_options import HourSelectionOptions
-from .hourselection_calculations import normalize_prices
+from .hourselection_calculations import normalize_prices, do_recalculate_prices, get_average_kwh_price
 from .permittance import (
     set_initial_permittance,
     set_scooped_permittance,
@@ -29,7 +28,7 @@ class HourSelectionService:
     @property
     def future_hours(self) -> list[HourPrice]:
         self.update()
-        return self.get_future_hours()
+        return self.model.get_future_hours(self.dtmodel)
 
     @property
     def display_future_hours(self) -> list[HourPrice]:
@@ -38,22 +37,13 @@ class HourSelectionService:
         return self.future_hours
 
     @property
-    def passed_hours(self) -> list[HourPrice]:
-        self.update()
-        return [hp for hp in self.model.hours_prices if hp.passed]
-
-    @property
-    def stopped_string(self) -> str:
-        self.update()
-        return self.allowance.display_name
-
-    @property
     def allowance(self) -> AllowanceObj:
+        self.update()
         return set_allowance_obj(self.dtmodel, self.display_future_hours)
 
     @property
     def average_kwh_price(self) -> float:
-        return round(self.get_average_kwh_price(), 2)
+        return round(get_average_kwh_price(self.future_hours), 2)
 
     @property
     def offset_dict(self) -> dict:
@@ -62,37 +52,20 @@ class HourSelectionService:
     def update(self):
         for hp in self.model.hours_prices:
             hp.set_passed(self.dtmodel)
-        if len(self.get_future_hours()) >= 24:
+        if len(self.model.get_future_hours(self.dtmodel)) >= 24:
             set_scooped_permittance(
-                self.get_future_hours(), self.options.cautionhour_type_enum
+                self.model.get_future_hours(self.dtmodel), self.options.cautionhour_type_enum
             )
 
     async def async_update(self):
         self.update()
-
-    def get_average_kwh_price(self) -> float:
-        try:
-            return mean(
-                [
-                    hp.permittance * hp.price
-                    for hp in self.future_hours
-                    if hp.permittance > 0
-                ]
-            )
-        except Exception:
-            return 0.0
-
-    def get_future_hours(self) -> list[HourPrice]:
-        for hp in self.model.hours_prices:
-            hp.set_passed(self.dtmodel)
-        return [hp for hp in self.model.hours_prices if not hp.passed]
 
     async def async_update_prices(
         self, prices: list[float], prices_tomorrow: list[float] = []
     ):
         self.model.prices_today = prices  # clean first
         self.model.prices_tomorrow = prices_tomorrow  # clean first
-        if self._do_recalculate_prices(prices, prices_tomorrow):
+        if do_recalculate_prices(prices=prices, prices_tomorrow=prices_tomorrow, hours_prices=self.model.hours_prices, hdate=self.dtmodel.hdate):
             self._create_prices(prices, prices_tomorrow)
             if self.max_min.active:
                 self.max_min.get_hours()
@@ -106,15 +79,6 @@ class HourSelectionService:
             self._set_permittance()
         else:
             await self.async_update()
-
-    def _do_recalculate_prices(self, prices, prices_tomorrow) -> bool:
-        if [
-            hp.price
-            for hp in self.model.hours_prices
-            if hp.dt.date() == self.dtmodel.hdate
-        ] == prices and len(prices_tomorrow) < 1:
-            return False
-        return True
 
     def _create_prices(
         self, prices: list[float], prices_tomorrow: list[float] = []

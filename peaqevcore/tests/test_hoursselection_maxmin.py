@@ -452,7 +452,7 @@ async def test_230426_session_decrease():
         22,
         23,
     ]
-    print(r.service.stopped_string)
+    print(r.stopped_string)
     assert r.service.max_min.total_charge == 3.2
 
 

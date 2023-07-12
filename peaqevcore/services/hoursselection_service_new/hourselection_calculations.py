@@ -1,6 +1,7 @@
 from statistics import mean, stdev
 import logging
 from .models.hour_price import HourPrice
+from datetime import date
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -19,36 +20,25 @@ def normalize_prices(prices: list) -> list:
         ret.append(round(pp - divider, 3))
     return ret
 
-def get_offset_dict(normalized_hours: list):
-    ret = {}
-    _prices = [p - min(normalized_hours) for p in normalized_hours]
-    average_val = mean(_prices)
-    for i in range(0, len(_prices)):
-        # todo: fix this to accommodate quarters also
+
+def do_recalculate_prices(prices: list[float], prices_tomorrow: list[float]|None, hours_prices: list[HourPrice], hdate: date) -> bool:
+        if [
+            hp.price
+            for hp in hours_prices
+            if hp.dt.date() == hdate
+        ] == prices and len(prices_tomorrow) < 1:
+            return False
+        return True
+
+
+def get_average_kwh_price(future_hours: list[HourPrice]) -> float:
         try:
-            ret[i] = round((_prices[i] / average_val) - 1, 2)
-        except:
-            ret[i] = 1
-    return ret
-
-
-def deviation_from_mean(prices: list[float]) -> dict[int, float]:
-    if not len(prices):
-        return {}
-    avg = mean(prices)
-    devi = stdev(prices)
-    deviation_dict = {}
-    for i, num in enumerate(prices):
-        deviation = (num - avg) / devi
-        if devi < 1:
-            deviation *= 0.5
-        deviation_dict[i] = round(deviation, 2)
-    return deviation_dict
-
-
-async def async_discard_excessive_hours(hours: dict):
-    """There should always be at least four regular hours before absolute_top_price kicks in."""
-    while len(hours) >= 20:
-        to_pop = dict(sorted(hours.items(), key=lambda item: item[1]["val"]))
-        hours.pop(list(to_pop.keys())[0])
-    return hours
+            return mean(
+                [
+                    hp.permittance * hp.price
+                    for hp in future_hours
+                    if hp.permittance > 0
+                ]
+            )
+        except Exception:
+            return 0.0
