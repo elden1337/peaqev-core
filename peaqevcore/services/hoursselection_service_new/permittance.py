@@ -50,7 +50,7 @@ def set_min_allowed_hours(
             and hp.permittance < 1
         ]
         if len(_t):
-            _t.sort(key=lambda x: x.price)
+            _t.sort(key=lambda x: (x.price,x.dt))
             for h in range((opt.get(MINHOURS, 4) - available_len)):
                 _t[h].permittance = 1.0
 
