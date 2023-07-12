@@ -86,7 +86,7 @@ class MaxMinCharge:
         _total_charge: float = 0
         _desired: float = min([desired_charge, _original_charge])
         while _total_charge < _desired:
-            hours.sort(key=lambda x: x.price)
+            hours.sort(key=lambda x: (x.price,x.dt))
             for hour in hours:
                 if any([hour.passed, hour.permittance == 0, _total_charge >= _desired]):
                     hour.permittance = 0
