@@ -55,6 +55,7 @@ class HourSelectionServiceModel:
     def set_hourprice_lists(self, prices:list, prices_tomorrow:list, service_options:HourSelectionOptions, datum:date, datum_tomorrow:date, is_passed_func:Callable) -> None:
         self.set_hourprice_list(prices, service_options, datum, is_passed_func)
         self.set_hourprice_list(prices_tomorrow, service_options, datum_tomorrow, is_passed_func)
+        self.hours_prices.sort(key=lambda x:x.dt)
 
     def set_hourprice_list(
         self,
