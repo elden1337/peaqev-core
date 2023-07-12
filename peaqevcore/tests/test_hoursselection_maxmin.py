@@ -2,7 +2,7 @@ from datetime import date, datetime, timedelta
 import pytest
 import statistics as stat
 from ..services.hourselection.hoursselection import Hoursselection as h
-from ..models.hourselection.cautionhourtype import CautionHourType, VALUES_CONVERSION
+from ..models.hourselection.cautionhourtype import CautionHourType
 from ..models.hourselection.topprice_type import TopPriceType
 from .prices import *
 
@@ -452,7 +452,7 @@ async def test_230426_session_decrease():
         22,
         23,
     ]
-    print(r.stopped_string)
+    #print(r.stopped_string)
     assert r.service.max_min.total_charge == 3.2
 
 

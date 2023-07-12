@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from typing import List
-from .hours_model import HoursModel
+#from .hours_model import HoursModel
 from .hourselection_options import HourSelectionOptions
 import logging
 
@@ -13,7 +13,7 @@ class HourSelectionModel:
     prices_tomorrow: List[float] = field(default_factory=lambda: [])
     adjusted_average: float | None = None
     current_peak: float = 0.0
-    hours: HoursModel = field(default_factory=lambda: HoursModel())
+    #hours: HoursModel = field(default_factory=lambda: HoursModel())
     options: HourSelectionOptions = field(
         default_factory=lambda: HourSelectionOptions()
     )
@@ -22,7 +22,6 @@ class HourSelectionModel:
         self.validate()
 
     def validate(self):
-        assert 0 < self.options.cautionhour_type <= 1
         assert isinstance(self.prices_today, list)
         assert isinstance(self.prices_tomorrow, list)
 

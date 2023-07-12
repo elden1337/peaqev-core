@@ -24,7 +24,6 @@ class Hoursselection:
         )
         self.model = HourSelectionModel(
             options=HourSelectionOptions(
-                cautionhour_type=CautionHourType.get_num_value(cautionhour_type),
                 cautionhour_type_enum=self.cautionhour_type_enum,
                 min_price=min_price,
                 top_price=absolute_top_price

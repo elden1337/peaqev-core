@@ -22,7 +22,6 @@ from calendar import monthrange
 @dataclass(frozen=False)
 class HourSelectionOptions:
     cautionhour_type_enum: CautionHourType = CautionHourType.SUAVE
-    cautionhour_type: float = 0
     top_price: float = 0  # move to separate file
     fixed_top_price: float = 0  # move to separate file
     dynamic_top_price: float = 0  # move to separate file

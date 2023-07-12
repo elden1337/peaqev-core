@@ -13,9 +13,6 @@ class PriceAwareHours(Hours):
     def __init__(self, hub):
         self._hub = hub
         self.timer = Timer()
-        self._cautionhour_type = CautionHourType.get_num_value(
-            hub.options.price.cautionhour_type
-        )
         self._cautionhour_type_string = hub.options.price.cautionhour_type
         self._core = core_hours(
             absolute_top_price=self._set_absolute_top_price(
