@@ -4,7 +4,7 @@ from ...models.hourselection.cautionhourtype import CautionHourType
 from ...models.hourselection.hourselection_model import HourSelectionModel
 from ...models.hourselection.hourselection_options import HourSelectionOptions
 from ..hoursselection_service_new.hourselection_service import HourSelectionService
-from .hourselectionservice.hoursselection_helpers import convert_none_list
+
 from datetime import datetime
 
 _LOGGER = logging.getLogger(__name__)
@@ -66,22 +66,11 @@ class Hoursselection:
 
     @property
     def prices(self) -> list:
-        return self.model.prices_today
-
-    @prices.setter
-    def prices(self, val):
-        self.model.prices_today = val
-        if self.prices == self.prices_tomorrow:
-            self.prices_tomorrow = []
+        return self.service.model.prices_today
 
     @property
     def prices_tomorrow(self) -> list:
-        return self.model.prices_tomorrow
-
-    @prices_tomorrow.setter
-    def prices_tomorrow(self, val):
-        ret = convert_none_list(val)
-        self.model.prices_tomorrow = ret
+        return self.service.model.prices_tomorrow
 
     @property
     def adjusted_average(self):
@@ -93,18 +82,14 @@ class Hoursselection:
             self.model.adjusted_average = val
 
     async def async_update_adjusted_average(self, val):
-        # self.adjusted_average = val
         await self.service.async_update_adjusted_average(val)
-        # await self.async_update_prices(self.prices, self.prices_tomorrow)
-
+        
     async def async_update_top_price(self, dyn_top_price=None) -> None:
         await self.model.options.async_set_absolute_top_price(dyn_top_price)
         await self.async_update_prices(self.prices, self.prices_tomorrow)
 
     async def async_update_prices(self, prices: list, prices_tomorrow: list = []):
-        self.prices = prices
-        self.prices_tomorrow = prices_tomorrow
-        await self.service.async_update_prices(self.prices, self.prices_tomorrow)
+        await self.service.async_update_prices(prices, prices_tomorrow)
 
     async def async_get_average_kwh_price(self) -> Tuple[float | None, float | None]:
         ret_static = self.service.average_kwh_price

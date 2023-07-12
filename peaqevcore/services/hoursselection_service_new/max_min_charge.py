@@ -2,16 +2,14 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from datetime import datetime, timedelta
 from ..hoursselection_service_new.models.hour_price import HourPrice
-from ..hoursselection_service_new.models.hour_type import HourType
-from ..hoursselection_service_new.models.list_type import ListType
+#from ..hoursselection_service_new.models.hour_type import HourType
+#from ..hoursselection_service_new.models.list_type import ListType
 import copy
 
 if TYPE_CHECKING:
     from .hourselection_service import HourSelectionService
-from typing import Tuple
+#from typing import Tuple
 from .models.max_min_model import MaxMinModel
-
-MINIMUM_DIFFERENCE = 0.1
 
 
 class MaxMinCharge:
@@ -50,26 +48,11 @@ class MaxMinCharge:
     def original_total_charge(self) -> float:
         return self.model.calculate_total_charge(self.parent.future_hours)
 
-    @property
-    def future_hours(self) -> list[HourPrice]:
+    def future_hours(self, dtmodel) -> list[HourPrice]:
+        for hp in self.model.input_hours:
+            hp.set_passed(dtmodel)
         ret = [hp for hp in self.model.input_hours if not hp.passed]
         return sorted(ret, key=lambda x: x.dt)
-
-    @property
-    def non_hours(self) -> list:
-        return [
-            hp.dt
-            for hp in self.model.input_hours
-            if hp.permittance == 0 and not hp.passed
-        ]
-
-    @property
-    def dynamic_caution_hours(self) -> dict:
-        return {
-            hp.dt: hp.permittance
-            for hp in self.model.input_hours
-            if 0 < hp.permittance < 1 and not hp.passed
-        }
 
     async def async_update(
         self,
@@ -139,20 +122,6 @@ class MaxMinCharge:
         for k in self.model.input_hours:
             total += (peak - avg24) * k.permittance
         return total
-
-    def _service_caution_hours(self) -> dict:
-        return {
-            hp.dt: hp.permittance
-            for hp in self.parent.model.hours_prices
-            if not hp.passed and 0.0 < hp.permittance < 1.0
-        }
-
-    def _service_non_hours(self) -> list:
-        return [
-            hp.dt
-            for hp in self.parent.model.hours_prices
-            if not hp.passed and hp.permittance == 0.0
-        ]
 
     async def async_setup(
         self,

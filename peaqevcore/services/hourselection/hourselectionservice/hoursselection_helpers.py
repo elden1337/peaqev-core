@@ -1,8 +1,5 @@
-import statistics as stat
 import logging
 from typing import Any
-from ....models.hourselection.hourobjects.hourobject import HourObject
-
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -65,12 +62,3 @@ def _make_array_from_empty(input: str) -> list:
             pass
     return []
 
-
-# async def async_try_remove(value, collection: list|dict):
-#     if isinstance(collection, dict):
-#         if value in collection.keys():
-#             collection.pop(value)
-#     elif isinstance(collection, list):
-#         if value in collection:
-#             collection.remove(value)
-#     return collection

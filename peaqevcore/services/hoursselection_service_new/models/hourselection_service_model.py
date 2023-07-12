@@ -7,13 +7,14 @@ from dataclasses import dataclass, field
 from .hour_price import HourPrice
 from datetime import date, datetime, time, timedelta
 from .list_type import ListType
+from ...hourselection.hourselectionservice.hoursselection_helpers import convert_none_list
 from ..offset_dict import get_offset_dict, set_offset_dict
 
 
 @dataclass
-class HourSelectionModel:
-    prices_today: list[float] = field(default_factory=list)
-    prices_tomorrow: list[float] = field(default_factory=list)
+class HourSelectionServiceModel:
+    _prices_today: list[float] = field(default_factory=list)
+    _prices_tomorrow: list[float] = field(default_factory=list)
     _hours_prices: list[HourPrice] = field(default_factory=list)
     offset_dict: dict[datetime, dict] = field(default_factory=dict)
     adjusted_average: float | None = None
@@ -31,6 +32,29 @@ class HourSelectionModel:
                 self._hours_prices.sort(key=lambda x: x.dt)
         else:
             self._hours_prices = []
+
+    @property
+    def prices_today(self) -> list:
+        return self._prices_today
+
+    @prices_today.setter
+    def prices_today(self, val):
+        self._prices_today = val
+        if self._prices_today == self.prices_tomorrow:
+            self.prices_tomorrow = []
+
+    @property
+    def prices_tomorrow(self) -> list:
+        return self._prices_tomorrow
+
+    @prices_tomorrow.setter
+    def prices_tomorrow(self, val):
+        ret = convert_none_list(val)
+        self._prices_tomorrow = ret
+
+    def set_hourprice_lists(self, prices:list, prices_tomorrow:list, service_options:HourSelectionOptions, datum:date, datum_tomorrow:date, is_passed_func:Callable) -> None:
+        self.set_hourprice_list(prices, service_options, datum, is_passed_func)
+        self.set_hourprice_list(prices_tomorrow, service_options, datum_tomorrow, is_passed_func)
 
     def set_hourprice_list(
         self,
@@ -61,12 +85,6 @@ class HourSelectionModel:
         else:
             self.hours_prices = ret
 
-    @staticmethod
-    def _get_dt(datum: date, hour: int, quarter: int) -> datetime:
-        return datetime.combine(
-            datum, time(hour=hour, minute=quarter * 15, second=0, microsecond=0)
-        )
-
     def get_offset_dict(self, dt_date: datetime) -> dict:
         return get_offset_dict(self.offset_dict, dt_date)
 
@@ -84,3 +102,9 @@ class HourSelectionModel:
         for hp in self.hours_prices:
             hp.set_passed(dtmodel)
         return [hp for hp in self.hours_prices if not hp.passed]
+
+    @staticmethod
+    def _get_dt(datum: date, hour: int, quarter: int) -> datetime:
+        return datetime.combine(
+            datum, time(hour=hour, minute=quarter * 15, second=0, microsecond=0)
+        )

@@ -1,7 +1,7 @@
 from .models.stop_string import AllowanceObj, set_allowance_obj
 from .models.datetime_model import DateTimeModel
 from .models.hour_price import HourPrice
-from .models.hourselection_model import HourSelectionModel
+from .models.hourselection_service_model import HourSelectionServiceModel
 from ...models.hourselection.hourselection_options import HourSelectionOptions
 from .hourselection_calculations import normalize_prices, do_recalculate_prices, get_average_kwh_price
 from .permittance import (
@@ -15,9 +15,8 @@ from .max_min_charge import MaxMinCharge
 class HourSelectionService:
     def __init__(self, options: HourSelectionOptions = HourSelectionOptions()):
         self.options = options
-        self.use_quarters: bool = False
         self.dtmodel = DateTimeModel()
-        self.model = HourSelectionModel()
+        self.model = HourSelectionServiceModel()
         self.max_min = MaxMinCharge(service=self, min_price=self.options.min_price)
 
     @property
@@ -33,7 +32,7 @@ class HourSelectionService:
     @property
     def display_future_hours(self) -> list[HourPrice]:
         if self.max_min.active and not self.max_min.overflow:
-            return self.max_min.future_hours
+            return self.max_min.future_hours(self.dtmodel)
         return self.future_hours
 
     @property
@@ -103,18 +102,7 @@ class HourSelectionService:
     ) -> None:
         # todo: handle here first if prices or prices_tomorrow are 92 or 100 in length (dst shift)
         self.model.use_quarters = is_quarterly
-        self.model.set_hourprice_list(
-            prices,
-            self.options,
-            self.dtmodel.hdate,
-            self.dtmodel.is_passed,
-        )
-        self.model.set_hourprice_list(
-            prices_tomorrow,
-            self.options,
-            self.dtmodel.hdate_tomorrow,
-            self.dtmodel.is_passed,
-        )
+        self.model.set_hourprice_lists(prices, prices_tomorrow, self.options, self.dtmodel.hdate, self.dtmodel.hdate_tomorrow, self.dtmodel.is_passed)
         self._set_permittance()
 
     def _set_permittance(self) -> None:
