@@ -13,11 +13,17 @@ def set_initial_permittance(
     avg7: float | None = None,
 ) -> None:
     avg = mean([h.price for h in hours if not h.passed])
-    ceil = max(avg, avg7) if avg7 is not None else avg
+    ceil = mean([avg, avg7]) if avg7 is not None else avg
     floor = min(avg, avg7) if avg7 is not None else 0
-    get_perm = lambda hour: (hour.price < ceil) * (0.3 + 0.7 * (ceil - hour.price) / (ceil - floor)) + (hour.price >= ceil) * 0.0 + (floor is not None) * (hour.price <= floor) * 1.0
+    get_perm = lambda hour: (hour.price < ceil) * (0.2 + 0.8 * (ceil - hour.price) / (ceil - floor))
     for hour in hours:
-        hour.permittance = get_perm(hour)
+        if not hour.passed:
+            if hour.price < floor:
+                hour.permittance = 1.0
+            elif hour.price > ceil:
+                hour.permittance = 0.0
+            else:
+                hour.permittance = get_perm(hour)
 
 
 def set_scooped_permittance(
@@ -66,7 +72,7 @@ def _get_caution_options(caution_hour_type: CautionHourType, is_quarterly:bool =
             hi_cutoff = 0.7
         case CautionHourType.INTERMEDIATE:
             lo_cutoff = 0.55
-            hi_cutoff = 0.7
+            hi_cutoff = 0.75
         case CautionHourType.AGGRESSIVE:
             lo_cutoff = 0.65
         case CautionHourType.SCROOGE:
@@ -89,7 +95,6 @@ def discard_peaks(hour_prices: list[HourPrice]) -> None:
 def _set_peak_permittance(hour_prices: list[HourPrice]) -> None:
     for i in range(1, len(hour_prices) - 1):
         if hour_prices[i].price > hour_prices[i-1].price and hour_prices[i].price > hour_prices[i+1].price:
-            print("discarding 1")
             if hour_prices[i].hour_type != HourType.BelowMin:
                 hour_prices[i].permittance = 0.0
 
@@ -99,7 +104,6 @@ def _set_peak_permittance_adjacent(hour_prices: list[HourPrice]) -> None:
     for i in range(1, len(hour_prices) - 1):
         if hour_prices[i].price > hour_prices[i-1].price and hour_prices[i].price > hour_prices[i+1].price:
             if hour_prices[i].price - hour_prices[i-1].price > std_dev and hour_prices[i].price - hour_prices[i+1].price > std_dev:
-                print("discarding 2")
                 if hour_prices[i].hour_type != HourType.BelowMin:
                     hour_prices[i].permittance = 0.0 
                 if hour_prices[i-1].hour_type != HourType.BelowMin:

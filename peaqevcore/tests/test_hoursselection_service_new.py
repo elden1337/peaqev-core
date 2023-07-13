@@ -218,3 +218,17 @@ async def test_offsets_update_midnight():
     assert len(service.offset_dict["today"]) == 24
     assert len(service.offset_dict["tomorrow"]) == 0
     assert service.offset_dict["today"] == offsets_tomorrow
+
+@pytest.mark.asyncio
+async def test_shallow_curve():
+    opt = HourSelectionOptions(
+        top_price=1.5, min_price=0.05, cautionhour_type_enum=CautionHourType.INTERMEDIATE
+    )
+    service = HourSelectionService(opt)
+    service.dtmodel.set_datetime(datetime(2023, 7, 13, 20, 30, 0))
+    await service.async_update_prices(_p.P230713[0], _p.P230713[1])
+    await service.async_update_adjusted_average(0.87)
+    for h in service.future_hours:
+        print(f"{h.dt} ({h.permittance}) - {h.price}")
+    print(sum([h.price for h in service.future_hours])/len(service.future_hours))
+    assert 1 > 2

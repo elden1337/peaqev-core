@@ -66,20 +66,12 @@ class PriceAwareHours(Hours):
     def prices(self) -> list:
         return self._core.prices
 
-    @prices.setter
-    def prices(self, val):
-        self._core.prices = val
-
     @property
     def prices_tomorrow(self) -> list:
         return self._core.prices_tomorrow
 
-    @prices_tomorrow.setter
-    def prices_tomorrow(self, val):
-        self._core.prices_tomorrow = val
-
     @property
-    def adjusted_average(self) -> float:
+    def adjusted_average(self) -> float|None:
         return self._core.adjusted_average
 
     @adjusted_average.setter
