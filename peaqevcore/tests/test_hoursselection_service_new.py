@@ -7,7 +7,7 @@ from ..services.hoursselection_service_new.hourselection_service import (
     HourSelectionService,
 )
 from ..models.hourselection.hourselection_options import HourSelectionOptions
-from ..models.hourselection.cautionhourtype import CautionHourType, VALUES_CONVERSION
+from ..models.hourselection.cautionhourtype import CautionHourType
 from ..models.hourselection.topprice_type import TopPriceType
 import peaqevcore.tests.prices as _p
 from datetime import date, timedelta, datetime
@@ -145,6 +145,7 @@ async def test_total_charge():
         13,
         14,
         15,
+        16
     ]
 
 
@@ -160,12 +161,8 @@ async def test_total_charge_maxmin():
     await service.async_update_prices(_p.P230624[0], _p.P230624[1])
     await service.max_min.async_setup(peak)
     await service.max_min.async_update(520, peak, 5, car_connected=True)
-    # service.dtmodel.set_datetime(datetime(2023, 6, 24, 21, 0, 0))
-    # for i in service.future_hours:
-    #     print(i)
-    print(service.max_min.total_charge)
-    assert [h.hour for h in service.future_hours if h.permittance > 0] == [14, 11]
-    assert service.max_min.total_charge == 4.9
+    assert [h.hour for h in service.display_future_hours if h.permittance > 0] == [14, 11,12]
+    assert service.max_min.total_charge == 5
 
 
 @pytest.mark.asyncio
@@ -182,8 +179,8 @@ async def test_now_hour_in_nonhours():
     service.dtmodel.set_datetime(datetime(2023, 6, 25, 20, 47, 35))
     _ = [hp.dt for hp in service.future_hours if hp.permittance == 0.0]
     assert service.dtmodel.dt.replace(minute=0, second=0, microsecond=0) in _
-    assert service.max_min.average_price == 0.0
-    assert service.max_min.total_charge == 0
+    assert service.max_min.average_price == 0.27
+    assert service.max_min.total_charge == 5
 
 
 @pytest.mark.asyncio
@@ -197,15 +194,10 @@ async def test_assure_future_charge():
     await service.async_update_prices(_p.P230625[0], _p.P230625[1])
     service.dtmodel.set_datetime(datetime(2023, 6, 25, 20, 47, 35))
     assert sum([hp.permittance * peak for hp in service.future_hours]) == 2.2
-    for h in service.future_hours:
-        print(h.dt, h.permittance)
     service.dtmodel.set_datetime(datetime(2023, 6, 26, 0, 0, 10))
     await service.async_update_prices(_p.P230625[1])
-    print(f"test2: {sum([h.permittance * peak for h in service.future_hours])}")
-    for h in service.future_hours:
-        print(h.dt, h.permittance)
     assert sum([hp.permittance * peak for hp in service.future_hours]) == 2.2
-    assert 1 > 2
+    #assert 1 > 2
 
 
 @pytest.mark.asyncio

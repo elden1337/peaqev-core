@@ -1,7 +1,7 @@
 from .models.hour_price import HourPrice
 from ...models.hourselection.cautionhourtype import CautionHourType
 from .models.hour_type import HourType
-from statistics import mean
+from statistics import mean, stdev
 
 LOCUTOFF = "lo_cutoff"
 HICUTOFF = "hi_cutoff"
@@ -14,7 +14,7 @@ def set_initial_permittance(
 ) -> None:
     avg = mean([h.price for h in hours if not h.passed])
     ceil = max(avg, avg7) if avg7 is not None else avg
-    floor = min(avg, avg7) if avg7 is not None else None
+    floor = min(avg, avg7) if avg7 is not None else 0
     get_perm = lambda hour: (hour.price < ceil) * (0.3 + 0.7 * (ceil - hour.price) / (ceil - floor)) + (hour.price >= ceil) * 0.0 + (floor is not None) * (hour.price <= floor) * 1.0
     for hour in hours:
         hour.permittance = get_perm(hour)
@@ -53,7 +53,7 @@ def set_min_allowed_hours(
             _t.sort(key=lambda x: (x.price,x.dt))
             for h in range((opt.get(MINHOURS, 4) - available_len)):
                 _t[h].permittance = 1.0
-
+    discard_peaks(hour_prices)
 
 def _get_caution_options(caution_hour_type: CautionHourType, is_quarterly:bool = False) -> dict[str,float]:
     _quarters = 4 if is_quarterly else 1
@@ -79,3 +79,34 @@ def _get_caution_options(caution_hour_type: CautionHourType, is_quarterly:bool =
         MAXHOURS: max_hours,
         MINHOURS: min_hours,
     }
+
+def discard_peaks(hour_prices: list[HourPrice]) -> None:
+    if _is_pointy(hour_prices):
+        _set_peak_permittance_adjacent(hour_prices)
+    else:
+        _set_peak_permittance(hour_prices)
+
+def _set_peak_permittance(hour_prices: list[HourPrice]) -> None:
+    for i in range(1, len(hour_prices) - 1):
+        if hour_prices[i].price > hour_prices[i-1].price and hour_prices[i].price > hour_prices[i+1].price:
+            print("discarding 1")
+            if hour_prices[i].hour_type != HourType.BelowMin:
+                hour_prices[i].permittance = 0.0
+
+def _set_peak_permittance_adjacent(hour_prices: list[HourPrice]) -> None:
+    prices = [hour.price for hour in hour_prices]
+    std_dev = stdev(prices)
+    for i in range(1, len(hour_prices) - 1):
+        if hour_prices[i].price > hour_prices[i-1].price and hour_prices[i].price > hour_prices[i+1].price:
+            if hour_prices[i].price - hour_prices[i-1].price > std_dev and hour_prices[i].price - hour_prices[i+1].price > std_dev:
+                print("discarding 2")
+                if hour_prices[i].hour_type != HourType.BelowMin:
+                    hour_prices[i].permittance = 0.0 
+                if hour_prices[i-1].hour_type != HourType.BelowMin:
+                    hour_prices[i-1].permittance = 0.0
+                if hour_prices[i+1].hour_type != HourType.BelowMin:
+                    hour_prices[i+1].permittance = 0.0
+
+def _is_pointy(hour_prices:list[HourPrice]) -> bool:
+    _prices = [hp.price for hp in hour_prices]
+    return mean(_prices) < max(_prices) - min(_prices)
