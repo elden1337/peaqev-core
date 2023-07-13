@@ -35,7 +35,7 @@ def get_average_kwh_price(future_hours: list[HourPrice]) -> float:
         try:
             return mean(
                 [
-                    hp.permittance * hp.price
+                    hp.price
                     for hp in future_hours
                     if hp.permittance > 0
                 ]

@@ -15,7 +15,6 @@ def set_initial_permittance(
     avg = mean([h.price for h in hours if not h.passed])
     ceil = mean([avg, avg7]) if avg7 is not None else avg
     floor = min(avg, avg7) if avg7 is not None else 0
-    get_perm = lambda hour: (hour.price < ceil) * (0.2 + 0.8 * (ceil - hour.price) / (ceil - floor))
     for hour in hours:
         if not hour.passed:
             if hour.price < floor:
@@ -23,7 +22,7 @@ def set_initial_permittance(
             elif hour.price > ceil:
                 hour.permittance = 0.0
             else:
-                hour.permittance = get_perm(hour)
+                hour.permittance = (hour.price < ceil) * (0.2 + 0.8 * (ceil - hour.price) / (ceil - floor))
 
 
 def set_scooped_permittance(

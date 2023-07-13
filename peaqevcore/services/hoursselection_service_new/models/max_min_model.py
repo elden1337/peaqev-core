@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from .hour_price import HourPrice
 from datetime import datetime
-
+from statistics import mean
 
 @dataclass
 class MaxMinModel:
@@ -15,17 +15,17 @@ class MaxMinModel:
         total_charge: float | None,
         peak: float | None,
     ) -> float | None:
-        _total = total_charge or 0
-        _peak = peak or self.expected_hourly_charge
+        #_total = total_charge or 0
+        #_peak = peak or self.expected_hourly_charge
         try:
-            first = sum(
+            first = mean(
                 [
-                    hp.permittance * hp.price * _peak
+                    hp.price
                     for hp in input
                     if hp.permittance > 0 and not hp.passed
                 ]
             )
-            return round(first / _total, 2)
+            return round(first, 2)
         except ZeroDivisionError as e:
             return 0.0
 
