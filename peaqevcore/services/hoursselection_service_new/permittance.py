@@ -43,10 +43,12 @@ def set_min_allowed_hours(
     hour_prices: list[HourPrice], caution_hour_type: CautionHourType
 ) -> None:
     opt = _get_caution_options(caution_hour_type)
+    available_len = 0
+    _min_hours = opt.get(MINHOURS, 4)
     available_len = len(
         [hp for hp in hour_prices if hp.permittance == 1 and not hp.passed]
     )
-    if available_len < opt.get(MINHOURS, 4):
+    if available_len < _min_hours:
         _t = [
             hp
             for hp in hour_prices
@@ -56,7 +58,7 @@ def set_min_allowed_hours(
         ]
         if len(_t):
             _t.sort(key=lambda x: (x.price,x.dt))
-            for h in range((opt.get(MINHOURS, 4) - available_len)):
+            for h in range(0,int(_min_hours - available_len)):
                 _t[h].permittance = 1.0
     discard_peaks(hour_prices)
 
