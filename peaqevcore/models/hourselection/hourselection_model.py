@@ -9,8 +9,6 @@ _LOGGER = logging.getLogger(__name__)
 
 @dataclass(frozen=False)
 class HourSelectionModel:
-    #prices_today: List[float] = field(default_factory=lambda: [])
-    #prices_tomorrow: List[float] = field(default_factory=lambda: [])
     adjusted_average: float | None = None
     current_peak: float = 0.0
     options: HourSelectionOptions = field(
@@ -21,9 +19,6 @@ class HourSelectionModel:
         self.validate()
 
     def validate(self):
-        #assert isinstance(self.prices_today, list)
-        #assert isinstance(self.prices_tomorrow, list)
-
         if isinstance(self.adjusted_average, (int, float)):
             assert self.adjusted_average >= 0
         else:
