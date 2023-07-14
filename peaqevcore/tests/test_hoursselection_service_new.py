@@ -62,13 +62,11 @@ async def test_last_nonhour_stopped_until_tomorrow_blank():
     await service.async_update_prices(_p.P230520[0], _p.P230520[1])
     assert service.allowance.prefix_type == AllowanceType.AllowedUntil
     service.dtmodel.set_datetime(datetime(2023, 5, 20, 21, 0, 0))
-    #print(service.stopped_string)
-    assert service.allowance.prefix_type == AllowanceType.AllowedUntilTomorrow
+    assert service.allowance.prefix_type == AllowanceType.StoppedUntil
     service.dtmodel.set_datetime(datetime(2023, 5, 21, 1, 0, 0))
     await service.async_update_prices(_p.P230520[1], [])
-    #print(service.stopped_string)
     assert service.allowance.prefix_type == AllowanceType.AllowedUntil
-
+    
 
 @pytest.mark.asyncio
 async def test_offsets_today_only():
@@ -228,7 +226,5 @@ async def test_shallow_curve():
     service.dtmodel.set_datetime(datetime(2023, 7, 13, 20, 30, 0))
     await service.async_update_prices(_p.P230713[0], _p.P230713[1])
     await service.async_update_adjusted_average(0.87)
-    for h in service.future_hours:
-        print(f"{h.dt} ({h.permittance}) - {h.price}")
-    print(sum([h.price for h in service.future_hours])/len(service.future_hours))
-    assert 1 > 2
+    assert [h.hour for h in service.future_hours if h.permittance == 0] == [20,21,9,19]
+    
