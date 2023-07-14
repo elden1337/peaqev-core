@@ -13,17 +13,13 @@ class PriceAwareHours(Hours):
     def __init__(self, hub):
         self._hub = hub
         self.timer = Timer()
-        self._cautionhour_type = CautionHourType.get_num_value(
-            hub.options.price.cautionhour_type
-        )
         self._cautionhour_type_string = hub.options.price.cautionhour_type
         self._core = core_hours(
             absolute_top_price=self._set_absolute_top_price(
                 hub.options.price.top_price
             ),
             min_price=hub.options.price.min_price,
-            cautionhour_type=self._cautionhour_type_string,
-            blocknocturnal=hub.options.blocknocturnal,
+            cautionhour_type=self._cautionhour_type_string
         )
         self._hass = hub.state_machine
         self._prices = []
@@ -55,6 +51,10 @@ class PriceAwareHours(Hours):
         return self._core.caution_hours
 
     @property
+    def future_hours(self) -> list:
+        return self._core.future_hours
+
+    @property
     def absolute_top_price(self):
         return self._core.model.options.absolute_top_price
 
@@ -66,26 +66,22 @@ class PriceAwareHours(Hours):
     def prices(self) -> list:
         return self._core.prices
 
-    @prices.setter
-    def prices(self, val):
-        self._core.prices = val
-
     @property
     def prices_tomorrow(self) -> list:
         return self._core.prices_tomorrow
 
-    @prices_tomorrow.setter
-    def prices_tomorrow(self, val):
-        self._core.prices_tomorrow = val
-
     @property
-    def adjusted_average(self) -> float:
+    def adjusted_average(self) -> float|None:
         return self._core.adjusted_average
 
     @adjusted_average.setter
     def adjusted_average(self, val):
         if isinstance(val, (float, int)):
             self._core.adjusted_average = val
+
+    @property
+    def stopped_string(self) -> str:
+        return self._core.service.allowance.display_name
 
     @property
     def offsets(self) -> dict:
@@ -147,9 +143,9 @@ class PriceAwareHours(Hours):
         session_energy: float | None = None,
         car_connected: bool = False,
     ):
-        if not self._core.max_min.active:
-            await self._core.max_min.async_setup(max_charge)
-        await self._core.max_min.async_update(
+        if not self._core.service.max_min.active:
+            await self._core.service.max_min.async_setup(max_charge)
+        await self._core.service.max_min.async_update(
             avg24=self._hub.sensors.powersensormovingaverage24.value,
             peak=self._hub.sensors.current_peak.value,
             max_desired=max_charge,

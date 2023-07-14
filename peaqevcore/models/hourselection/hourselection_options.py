@@ -1,3 +1,8 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+from ...models.hourselection.cautionhourtype import CautionHourType
+
 import logging
 from dataclasses import dataclass, field
 from .topprice_type import TopPriceType
@@ -16,13 +21,12 @@ from calendar import monthrange
 
 @dataclass(frozen=False)
 class HourSelectionOptions:
-    cautionhour_type: float = 0
+    cautionhour_type_enum: CautionHourType = CautionHourType.SUAVE
     top_price: float = 0  # move to separate file
     fixed_top_price: float = 0  # move to separate file
     dynamic_top_price: float = 0  # move to separate file
     top_price_type: TopPriceType = field(default_factory=lambda: TopPriceType.Unset)
     min_price: float = 0
-    blocknocturnal: bool = False
     absolute_top_price: float = field(init=False)  # move to separate file
 
     def __post_init__(self):
