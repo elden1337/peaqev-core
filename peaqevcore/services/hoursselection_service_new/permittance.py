@@ -76,6 +76,7 @@ def _get_caution_options(caution_hour_type: CautionHourType, is_quarterly:bool =
             hi_cutoff = 0.75
         case CautionHourType.AGGRESSIVE:
             lo_cutoff = 0.65
+            max_hours = 20 * _quarters
         case CautionHourType.SCROOGE:
             lo_cutoff = 0.65
             max_hours = 8 * _quarters
