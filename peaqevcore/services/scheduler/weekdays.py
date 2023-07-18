@@ -29,5 +29,6 @@ class WeekdayTranslation:
 
 # testdays = [1,3,5]
 # schema = WeekdayTranslation.set_days(testdays)
+# print(schema)
 # print(WeekdayTranslation.get_days(schema))
 
