@@ -17,17 +17,14 @@ class MaxMinModel:
     ) -> float | None:
         #_total = total_charge or 0
         #_peak = peak or self.expected_hourly_charge
-        try:
-            first = mean(
-                [
-                    hp.price
-                    for hp in input
-                    if hp.permittance > 0 and not hp.passed
-                ]
-            )
-            return round(first, 2)
-        except ZeroDivisionError as e:
-            return 0.0
+        result = [
+                hp.price
+                for hp in input
+                if hp.permittance > 0 and not hp.passed
+            ]
+        if len(result):
+            return round(mean(result),2)
+        return 0.0
 
     def calculate_total_charge(self, input: list[HourPrice]) -> float:
         return round(
