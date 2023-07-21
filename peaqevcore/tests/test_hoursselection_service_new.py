@@ -228,3 +228,14 @@ async def test_shallow_curve():
     await service.async_update_adjusted_average(0.87)
     assert [h.hour for h in service.future_hours if h.permittance == 0] == [20,21,9,19]
     
+
+@pytest.mark.asyncio
+async def test_230721():
+    opt = HourSelectionOptions(
+        top_price=1.5, min_price=0.05, cautionhour_type_enum=CautionHourType.INTERMEDIATE
+    )
+    service = HourSelectionService(opt)
+    service.dtmodel.set_datetime(datetime(2023, 7, 21, 19, 56, 0))
+    await service.async_update_prices(_p.P230721[0], _p.P230721[1])
+    await service.async_update_adjusted_average(0.47)
+    assert [h.hour for h in service.future_hours if h.permittance > 0] == [0,1,2,3,4,5,6,7,11,12,13,14,15,16,23]
