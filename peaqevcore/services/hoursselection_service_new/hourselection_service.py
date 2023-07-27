@@ -10,7 +10,7 @@ from .permittance import (
     set_blank_permittance,
     set_min_allowed_hours,
 )
-from statistics import stdev
+from statistics import stdev, mean
 from .max_min_charge import MaxMinCharge
 
 
@@ -116,7 +116,7 @@ class HourSelectionService:
             ]
         )
         self.model.set_offset_dict(prices, self.dtmodel.dt.date())
-        if stdev([h.price for h in self.model.hours_prices]) > 0.05:
+        if not self.is_flat([h.price for h in self.model.hours_prices if not h.passed]):
             set_initial_permittance(
                 self.model.hours_prices,
                 self.model.adjusted_average,
@@ -131,3 +131,8 @@ class HourSelectionService:
             self.model.hours_prices,
             self.options.cautionhour_type_enum,
         )
+
+    @staticmethod
+    def is_flat(prices: list[float]) -> bool:
+        """if the fsd is below a score of 8(%) it is considered flat"""
+        return stdev(prices)*100/mean(prices) < 8
