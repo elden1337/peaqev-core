@@ -239,3 +239,24 @@ async def test_230721():
     await service.async_update_prices(_p.P230721[0], _p.P230721[1])
     await service.async_update_adjusted_average(0.47)
     assert [h.hour for h in service.future_hours if h.permittance > 0] == [0,1,2,3,4,5,6,7,11,12,13,14,15,16,23]
+
+
+@pytest.mark.asyncio
+async def test_offsets():
+    opt = HourSelectionOptions(
+        top_price=1.5, min_price=0.05, cautionhour_type_enum=CautionHourType.INTERMEDIATE
+    )
+    service = HourSelectionService(opt)
+    service.dtmodel.set_datetime(datetime(2023, 7, 21, 0, 0, 2))
+    await service.async_update_prices(_p.P230721[0])
+    assert len(service.offset_dict["today"]) == 24
+    assert len(service.offset_dict["tomorrow"]) == 0
+    service.dtmodel.set_datetime(datetime(2023, 7, 21, 13, 56, 0))
+    await service.async_update_prices(_p.P230721[0], _p.P230721[1])
+    assert len(service.offset_dict["today"]) == 24
+    assert len(service.offset_dict["tomorrow"]) == 24
+    service.dtmodel.set_datetime(datetime(2023, 7, 22, 0, 1, 0))
+    await service.async_update_prices(_p.P230721[1])
+    await service.async_update_adjusted_average(0.47)
+    assert len(service.offset_dict["today"]) == 24
+    assert len(service.offset_dict["tomorrow"]) == 0

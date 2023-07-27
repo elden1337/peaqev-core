@@ -8,6 +8,11 @@ HICUTOFF = "hi_cutoff"
 MAXHOURS = "max_hours"
 MINHOURS = "min_hours"
 
+def set_blank_permittance(hour_prices: list[HourPrice]) -> None:
+    for hour in hour_prices:
+        if hour.hour_type != HourType.AboveMax:
+            hour.permittance = 1.0
+
 def set_initial_permittance(
     hours: list[HourPrice],
     avg7: float | None = None,

@@ -7,6 +7,7 @@ from .hourselection_calculations import normalize_prices, do_recalculate_prices,
 from .permittance import (
     set_initial_permittance,
     set_scooped_permittance,
+    set_blank_permittance,
     set_min_allowed_hours,
 )
 from statistics import stdev
@@ -121,7 +122,7 @@ class HourSelectionService:
                 self.model.adjusted_average,
             )
         else:
-            [h.permittance = 1.0 for h in self.model.hours_prices if h.hour_type != hourtypes.AboveMax]
+            set_blank_permittance(self.model.hours_prices)
         set_scooped_permittance(
             self.model.hours_prices,
             self.options.cautionhour_type_enum,
