@@ -9,6 +9,7 @@ from .permittance import (
     set_scooped_permittance,
     set_min_allowed_hours,
 )
+from statistics import stdev
 from .max_min_charge import MaxMinCharge
 
 
@@ -114,10 +115,13 @@ class HourSelectionService:
             ]
         )
         self.model.set_offset_dict(prices, self.dtmodel.dt.date())
-        set_initial_permittance(
-            self.model.hours_prices,
-            self.model.adjusted_average,
-        )
+        if stdev([h.price for h in self.model.hours_prices]) > 0.05:
+            set_initial_permittance(
+                self.model.hours_prices,
+                self.model.adjusted_average,
+            )
+        else:
+            [h.permittance = 1.0 for h in self.model.hours_prices if h.hour_type != hourtypes.AboveMax]
         set_scooped_permittance(
             self.model.hours_prices,
             self.options.cautionhour_type_enum,
