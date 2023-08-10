@@ -75,7 +75,8 @@ def _get_caution_options(caution_hour_type: CautionHourType, is_quarterly:bool =
     min_hours = 4
     match caution_hour_type:
         case CautionHourType.SUAVE:
-            hi_cutoff = 0.7
+            lo_cutoff = 0.2
+            hi_cutoff = 0.5
         case CautionHourType.INTERMEDIATE:
             lo_cutoff = 0.55
             hi_cutoff = 0.75
