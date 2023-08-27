@@ -1,5 +1,5 @@
 from .models.hour_price import HourPrice
-from ...models.hourselection.cautionhourtype import CautionHourType
+from ...common.enums.cautionhourtype import CautionHourType
 from .models.hour_type import HourType
 from statistics import mean, stdev
 

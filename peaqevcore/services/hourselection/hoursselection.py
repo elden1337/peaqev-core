@@ -1,6 +1,6 @@
 import logging
 from typing import Tuple
-from ...models.hourselection.cautionhourtype import CautionHourType
+from ...common.enums.cautionhourtype import CautionHourType
 from ...models.hourselection.hourselection_model import HourSelectionModel
 from ...models.hourselection.hourselection_options import HourSelectionOptions
 from ..hoursselection_service_new.hourselection_service import HourSelectionService

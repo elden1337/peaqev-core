@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from ...models.chargertype.servicecalls_dto import ServiceCallsDTO
 from ...models.chargertype.servicecalls_options import ServiceCallsOptions
 from ...models.chargertype.calltype import CallType
-from ...models.chargertype.calltype_enum import CallTypes
+from ...common.enums.calltype_enum import CallTypes
 from .const import (
     DOMAIN,
     PARAMS

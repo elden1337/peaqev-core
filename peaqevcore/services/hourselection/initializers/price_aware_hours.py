@@ -2,7 +2,7 @@ import logging
 from typing import Tuple
 from .hoursbase import Hours
 from ..hoursselection import Hoursselection as core_hours
-from ....models.hourselection.cautionhourtype import CautionHourType
+from ....common.enums.cautionhourtype import CautionHourType
 from ...timer.timer import Timer
 from ...scheduler.scheduler_facade import SchedulerFacade
 

@@ -2,7 +2,7 @@ from datetime import date, datetime, timedelta
 import pytest
 import statistics as stat
 from ..services.hourselection.hoursselection import Hoursselection as h
-from ..models.hourselection.cautionhourtype import CautionHourType
+from ..common.enums.cautionhourtype import CautionHourType
 from ..models.hourselection.topprice_type import TopPriceType
 from .prices import *
 
@@ -809,27 +809,50 @@ async def test_230709_wrong_cheapest():
     #     print(f.dt, f.price, perm)
     # assert 1 > 2
 
-@pytest.mark.asyncio
-async def test_230711_new_algorithm():
-    test = [CautionHourType.SUAVE, CautionHourType.INTERMEDIATE, CautionHourType.AGGRESSIVE]
-    for t in test:
-        r = h(cautionhour_type=t, absolute_top_price=1.5, min_price=0.0)
-        await r.async_update_adjusted_average(0.91)
-        r.service.dtmodel.set_datetime(datetime(2023, 7, 11, 20, 35, 15))
-        await r.async_update_prices(P230711[0], P230711[1])
-        print(f"CautionHourType: {t}")
-        for f in r.future_hours:
-            perm = "-" if f.permittance == 0 else f.permittance
-            print(f"{f.dt}; {f.price}; {perm}")
-    assert 1 > 2
+# @pytest.mark.asyncio
+# async def test_230711_new_algorithm():
+#     test = [CautionHourType.SUAVE, CautionHourType.INTERMEDIATE, CautionHourType.AGGRESSIVE]
+#     for t in test:
+#         r = h(cautionhour_type=t, absolute_top_price=1.5, min_price=0.0)
+#         await r.async_update_adjusted_average(0.91)
+#         r.service.dtmodel.set_datetime(datetime(2023, 7, 11, 20, 35, 15))
+#         await r.async_update_prices(P230711[0], P230711[1])
+#         print(f"CautionHourType: {t}")
+#         for f in r.future_hours:
+#             perm = "-" if f.permittance == 0 else f.permittance
+#             print(f"{f.dt}; {f.price}; {perm}")
+#     assert 1 > 2
+
+# @pytest.mark.asyncio
+# async def test_230711_same_hour():
+#     r = h(cautionhour_type=CautionHourType.INTERMEDIATE, absolute_top_price=1.5, min_price=0.0)
+#     await r.async_update_adjusted_average(0.91)
+#     r.service.dtmodel.set_datetime(datetime(2023, 7, 11, 21, 49, 15))
+#     await r.async_update_prices(P230711[0], P230711[1])
+#     for f in r.future_hours:
+#         perm = "-" if f.permittance == 0 else f.permittance
+#         print(f"{f.dt}; {f.price}; {perm}")
+#     assert 1 > 2
 
 @pytest.mark.asyncio
-async def test_230711_same_hour():
+async def test_230821_not_picking_cheapest_range():
+    peak = 1.76
     r = h(cautionhour_type=CautionHourType.INTERMEDIATE, absolute_top_price=1.5, min_price=0.0)
-    await r.async_update_adjusted_average(0.91)
-    r.service.dtmodel.set_datetime(datetime(2023, 7, 11, 21, 49, 15))
-    await r.async_update_prices(P230711[0], P230711[1])
-    for f in r.future_hours:
-        perm = "-" if f.permittance == 0 else f.permittance
-        print(f"{f.dt}; {f.price}; {perm}")
+    await r.async_update_adjusted_average(0.43)
+    r.service.dtmodel.set_datetime(datetime(2023, 8, 21, 21, 40, 0))
+    await r.async_update_prices(P230821, P230822)
+    await r.service.max_min.async_setup(peak)
+
+    base = 350
+    while base <= 500:
+        await r.service.max_min.async_update(
+            avg24=base, peak=peak, max_desired=9, car_connected=True
+        )
+        
+        for f in r.future_hours:
+            if f.dt in [datetime(2023, 8, 21, 22, 0, 0),datetime(2023, 8, 21, 23, 0, 0),datetime(2023, 8, 22, 0, 0, 0)]:
+                perm = "-" if f.permittance == 0 else f.permittance
+                print(f"{f.dt}; {f.price}; {perm} (base: {base})")
+        print('-------')
+        base += 25
     assert 1 > 2

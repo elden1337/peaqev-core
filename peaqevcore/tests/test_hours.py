@@ -2,7 +2,7 @@ import pytest
 import statistics as stat
 from ..services.hourselection.initializers.regular_hours import RegularHours
 from ..services.hourselection.initializers.price_aware_hours import PriceAwareHours
-#from ..models.hourselection.cautionhourtype import CautionHourType
+
 
 
 class MockOptions:

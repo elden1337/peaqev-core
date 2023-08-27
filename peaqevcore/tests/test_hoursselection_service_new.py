@@ -7,7 +7,7 @@ from ..services.hoursselection_service_new.hourselection_service import (
     HourSelectionService,
 )
 from ..models.hourselection.hourselection_options import HourSelectionOptions
-from ..models.hourselection.cautionhourtype import CautionHourType
+from ..common.enums.cautionhourtype import CautionHourType
 from ..models.hourselection.topprice_type import TopPriceType
 import peaqevcore.tests.prices as _p
 from datetime import date, timedelta, datetime

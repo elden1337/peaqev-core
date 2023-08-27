@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from ...models.hourselection.cautionhourtype import CautionHourType
+from ...common.enums.cautionhourtype import CautionHourType
 
 import logging
 from dataclasses import dataclass, field
