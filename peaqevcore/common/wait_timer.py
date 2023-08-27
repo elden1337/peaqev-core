@@ -1,10 +1,10 @@
 import time
 
 class WaitTimer:
-    def __init__(self, timeout: int):
+    def __init__(self, timeout: int, init_now: bool = True):
         self._timeout = timeout
         self._base_timeout = timeout
-        self._last_update = time.time()
+        self._last_update = time.time() if init_now else 0
 
     @property
     def timeout(self) -> int:
