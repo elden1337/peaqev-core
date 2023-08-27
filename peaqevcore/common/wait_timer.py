@@ -4,7 +4,7 @@ class WaitTimer:
     def __init__(self, timeout: int):
         self._timeout = timeout
         self._base_timeout = timeout
-        self._last_update = 0
+        self._last_update = time.time()
 
     @property
     def timeout(self) -> int:
