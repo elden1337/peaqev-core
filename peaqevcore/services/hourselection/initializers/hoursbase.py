@@ -56,14 +56,14 @@ class Hours:
     def caution_hours(self, val):
         pass
 
-    @property
-    @abstractmethod
-    def nordpool_entity(self):
-        pass
+    # @property
+    # @abstractmethod
+    # def entity(self):
+    #     pass
 
-    @abstractmethod
-    def update_nordpool(self) -> None:
-        pass
+    # @abstractmethod
+    # def update_spotprice(self) -> None:
+    #     pass
 
     @abstractmethod
     async def async_update_top_price(self, dyn_top_price) -> None:
