@@ -36,6 +36,7 @@ class RegularHours(Hours):
         max_charge: float,
         session_energy: float | None = None,
         car_connected: bool = False,
+        limiter: float = 0.0
     ):
         pass
 

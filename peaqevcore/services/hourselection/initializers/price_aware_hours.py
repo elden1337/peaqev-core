@@ -142,6 +142,7 @@ class PriceAwareHours(Hours):
         max_charge: float,
         session_energy: float | None = None,
         car_connected: bool = False,
+        limiter: float = 0.0
     ):
         if not self._core.service.max_min.active:
             await self._core.service.max_min.async_setup(max_charge)
@@ -151,4 +152,5 @@ class PriceAwareHours(Hours):
             max_desired=max_charge,
             session_energy=session_energy,
             car_connected=car_connected,
+            limiter=limiter
         )

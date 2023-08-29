@@ -61,6 +61,7 @@ class MaxMinCharge:
         max_desired: float,
         session_energy: float | None = None,
         car_connected: bool = False,
+        limiter: float = 0.0
     ) -> None:
         if not car_connected:
             await self.async_setup(max_charge=peak)
@@ -78,6 +79,17 @@ class MaxMinCharge:
             self.select_hours_for_charge(
                 copy.deepcopy(self.parent.future_hours), _desired
             )
+            if self._price_is_too_similar(limiter):
+                self.overflow = True
+                self.get_hours()
+                return
+
+    def _price_is_too_similar(self, limiter: float) -> bool:
+        original = getattr(self, "original_average_price",0)
+        adjusted = getattr(self, "average_price",0)
+        if original > 0 and adjusted > 0:
+            return original - adjusted < limiter
+        return False
 
     def select_hours_for_charge(
         self, hours: list[HourPrice], desired_charge: float
