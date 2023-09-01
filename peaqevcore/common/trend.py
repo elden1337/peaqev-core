@@ -63,7 +63,9 @@ class Gradient:
     def set_gradient(self):
         self._remove_from_list()
         temps = self._readings
-        if len(temps) - 1 > 0:
+        if len(temps) == 1:
+            self._gradient = 0
+        elif len(temps) - 1 > 0:
             try:
                 x = (temps[-1][1] - temps[0][1]) / ((time.time() - temps[0][0]) / 3600)
                 self._gradient = x
@@ -86,7 +88,7 @@ class Gradient:
             x for x in self._readings if time.time() - int(x[0]) > self._max_age
         )
         for i in gen:
-            if len(self._readings) > 2:
+            if len(self._readings) > 1:
                 # Always keep two readings to be able to calc trend
                 self._readings.remove(i)
 
