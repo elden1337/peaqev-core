@@ -83,11 +83,6 @@ class LocaleQuery(ILocaleQuery):
         self._observed_peak_value: float = 0
         self._charged_peak_value: float = 0
 
-    # def reset(self) -> None:
-    #     self._peaks.reset()
-    #     self._observed_peak_value = 0
-    #     self._charged_peak_value = 0
-
     @property
     def peaks(self) -> PeaksModel:
         if self._peaks.is_dirty:
@@ -182,15 +177,12 @@ class LocaleQuery(ILocaleQuery):
 
     async def async_set_update_for_groupby(self, new_val, dt):
         if self.sum_counter.groupby in [TimePeriods.Daily, TimePeriods.UnSet]:
-            # todo: check this if it breaks the updatehour
             _datekeys = [k for k in self.peaks.p.keys() if dt[0] in k]
+            _LOGGER.debug(f"datekeys: {_datekeys}")
             if len(_datekeys):
                 if new_val > self.peaks.p.get(_datekeys[0]):
                     await self.peaks.async_pop_key(_datekeys[0])
-                    await self.peaks.async_add_kv_pair(dt, new_val)
-            # todo: check this if it breaks the updatehour
-            else:
-                await self.peaks.async_add_kv_pair(dt, new_val)
+            await self.peaks.async_add_kv_pair(dt, new_val)
         elif self.sum_counter.groupby == TimePeriods.Hourly:
             if dt in self._peaks.p.keys():
                 if new_val > self.peaks.p.get(dt):

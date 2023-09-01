@@ -46,58 +46,9 @@ class PeaksModel:
             return 0
         return sum(self._p.values()) / len(self._p)
 
-    # def set_init_dict(self, dict_data: dict, dt=datetime.now()) -> None:
-    #     ppdict = dict()
-    #     self._m = dict_data.get("m")
-    #     if dt.month != self.m:
-    #         self.reset()
-    #     else:
-    #         for pp in dict_data.get("p"):
-    #             tkeys = pp.split("h")
-    #             ppkey = (int(tkeys[0]), int(tkeys[1]))
-    #             ppdict[ppkey] = dict_data.get("p").get(pp)
-    #         if len(self._p):
-    #             self._p = dict(self._p.items() | ppdict.items())
-    #         else:
-    #             self._p = ppdict
-    #         self._m = dict_data.get("m")
-    #         self.is_dirty = True
-
-    # def add_kv_pair(self, key: any, value: any) -> dict:
-    #     try:
-    #         self._p[key] = value
-    #         return self._p
-    #     except KeyError:
-    #         raise Exception(f"Invalid key '{key}'")
-    #     except ValueError:
-    #         raise Exception(f"Invalid value '{value}'")
-
-    # def set_month(self, value: int) -> None:
-    #     if value:
-    #         self._m = value
-
     def remove_min(self) -> dict:
         self._p.pop(min(self._p, key=self._p.get))
         return self._p
-
-    # def pop_key(self, key: any) -> dict:
-    #     if key:
-    #         try:
-    #             self._p.pop(key)
-    #             return self._p
-    #         except KeyError:
-    #             raise Exception(f"Key '{key}' does not exist.")
-    #     raise Exception("Expected key but received none.")
-
-    # def reset(self) -> None:
-    #     self._m = datetime.now().month
-    #     self.is_dirty = False
-    #     self._p = {}
-
-    # def clear(self) -> None:
-    #     self._p.clear()
-
-    # -------------
 
     async def async_set_init_dict(self, dict_data: dict, dt=datetime.now()) -> None:
         ppdict = dict()
