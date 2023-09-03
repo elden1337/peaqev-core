@@ -24,22 +24,29 @@ class CurrentPeak(HubMember):
         _val = self._set_value(val)
         if type(_val) is float:
             self.update(_val)
+            self._value = _val
+        else:
+            _LOGGER.error(f"Error in setting value: {val}")
 
     @property
     def history(self) -> dict:
         return self._history
 
     def _get_peak(self) -> float:
-        """this one returns the peak which is either the monthly historic peak or the current peak"""
-        options_start = self._options_peaks.get(datetime.now().month, self._options_peaks.get(str(datetime.now().month), 0))
-        _past_key = self._make_key(datetime.now().year - 1)
-        if not self._active or _past_key not in self._history:
-            return max(options_start, self._history.get(self._make_key(), 0))
-        return max(
-            options_start, 
-            self._history[_past_key] * EXPORT_FACTOR, 
-            self._history.get(self._make_key(), 0)
-            )
+        try:
+            """this one returns the peak which is either the monthly historic peak or the current peak"""
+            options_start = self._options_peaks.get(datetime.now().month, self._options_peaks.get(str(datetime.now().month), 0))
+            _past_key = self._make_key(datetime.now().year - 1)
+            if not self._active or _past_key not in self._history:
+                return max(options_start, self._history.get(self._make_key(), 0))
+            return max(
+                options_start, 
+                self._history[_past_key] * EXPORT_FACTOR, 
+                self._history.get(self._make_key(), 0)
+                )
+        except Exception as e:
+            _LOGGER.error(f"Error in get_peak: {e}")
+            return 0
     
     @staticmethod
     def _make_key(year = datetime.now().year) -> str:
@@ -105,9 +112,3 @@ class CurrentPeak(HubMember):
         except Exception as e:
             validation_errors.append(f"Error with month ({e}): {monthkey}")
             return False
-
-    
-
-    
-
-    
