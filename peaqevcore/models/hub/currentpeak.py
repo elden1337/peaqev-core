@@ -1,7 +1,6 @@
 import logging
 from datetime import datetime
 from .hubmember import HubMember
-from .const import CURRENTPEAKSENSOR
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -15,16 +14,11 @@ class CurrentPeak(HubMember):
         self._active: bool = options_use_history
         super().__init__(data_type, initval)
 
-    @HubMember.value.getter
-    def value(self): # pylint:disable=invalid-overridden-method
-        return self._get_peak()
-
     @HubMember.value.setter
     def value(self, val): # pylint:disable=invalid-overridden-method
         _val = self._set_value(val)
         if type(_val) is float:
-            self.update(_val)
-            self._value = _val
+            self.update_history(_val)
         else:
             _LOGGER.error(f"Error in setting value: {val}")
 
@@ -53,11 +47,12 @@ class CurrentPeak(HubMember):
         return f"{str(year)}_{str(datetime.now().month)}"
 
     async def async_update(self, peak: float) -> None:
-        self.update(peak)
+        self.update_history(peak)
 
-    def update(self, peak: float) -> None:
+    def update_history(self, peak: float) -> None:
         _key = self._make_key()
         self._history[_key] = max(self._history.get(_key, 0), peak)
+        self._value = self._get_peak()
 
     def import_from_service(self, importdto: dict) -> dict:
         """Import the dict passed from service or on loading hass"""
@@ -75,6 +70,7 @@ class CurrentPeak(HubMember):
         else:
             ret["status"] = "OK"
             ret["errors"] = ["No errors"]
+        self._value = self._get_peak()
         return ret
 
     def _validate_value(self, monthkey: str, value: any, validation_errors: list) -> bool: # type: ignore
