@@ -83,6 +83,11 @@ class CurrentPeak(HubMember):
 
     def _validate_value(self, monthkey: str, value: any, validation_errors: list) -> bool: # type: ignore
         """check if value is valid"""
+        if isinstance(value, list):
+            for _value in value:
+                if not self._validate_value(monthkey, _value, validation_errors):
+                    return False
+            return True
         try:
             _value = float(value)
             if _value < 0:
