@@ -25,20 +25,20 @@ class CurrentPeak(HubMember):
 
     def _get_peak(self) -> float:
         try:
-            """this one returns the peak which is either the monthly historic peak or the current peak"""
             options_start = self._options_peaks.get(datetime.now().month, self._options_peaks.get(str(datetime.now().month), 0))
-            _past_key = self._make_key(datetime.now().year - 1)
-            _current_mean = mean(self._history.get(self._make_key(), [0]))
-            if _current_mean > options_start:
-                #print("current mean is higher than options_start")
-                ret = min(self._history.get(self._make_key(),[0]))
-                return ret
+            past_key = self._make_key(datetime.now().year - 1)
+            current_key = self._make_key()
+            past_mean = mean(self._history.get(past_key, [0]))
+            current_mean = mean(self._history.get(current_key, [0]))
+            max_mean = max(past_mean, current_mean)
+            if max_mean == past_mean and past_mean > options_start:
+                print(f"returning last years * factor. past_mean = {past_mean}, options_start = {options_start}, current_mean = {current_mean} given values {self._history.get(current_key, [0])}")
+                return min(self._history[past_key]) * EXPORT_FACTOR
+            elif max_mean == current_mean and current_mean > options_start:
+                print("returning current mean")
+                return min(self._history[current_key])
             else:
-                if _past_key in self.history:
-                    if mean(self._history[_past_key]) > options_start:
-                        #print("past mean is higher than options_start")
-                        return min(self._history[_past_key]) * EXPORT_FACTOR
-                #print("current mean is lower than options_start")
+                print("returning options start")
                 return options_start
         except Exception as e:
             _LOGGER.error(f"Error in get_peak: {e}")
