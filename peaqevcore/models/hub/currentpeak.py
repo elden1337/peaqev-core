@@ -16,8 +16,8 @@ class CurrentPeak(HubMember):
 
     @HubMember.value.setter
     def value(self, val): # pylint:disable=invalid-overridden-method
-        _val = self._set_value(val)
-        self.update_history([_val])
+        self._value = val
+        self.update_history([val] if not isinstance(val, list) else val)
 
     @property
     def history(self) -> dict:
