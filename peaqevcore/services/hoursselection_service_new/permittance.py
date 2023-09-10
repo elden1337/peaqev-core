@@ -16,13 +16,16 @@ def set_blank_permittance(hour_prices: list[HourPrice]) -> None:
 def set_initial_permittance(
     hours: list[HourPrice],
     avg7: float | None = None,
+    non_hours: list[int] = []
 ) -> None:
     avg = mean([h.price for h in hours if not h.passed])
     ceil = mean([avg, avg7]) if avg7 is not None else avg
     floor = min(avg, avg7) if avg7 is not None else 0
     for hour in hours:
         if not hour.passed:
-            if hour.price < floor:
+            if hour.dt.hour in non_hours:
+                hour.permittance = 0.0
+            elif hour.price < floor:
                 hour.permittance = 1.0
             elif hour.price > ceil:
                 hour.permittance = 0.0

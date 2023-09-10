@@ -120,6 +120,7 @@ class HourSelectionService:
             set_initial_permittance(
                 self.model.hours_prices,
                 self.model.adjusted_average,
+                self.options.non_hours
             )
         else:
             set_blank_permittance(self.model.hours_prices)

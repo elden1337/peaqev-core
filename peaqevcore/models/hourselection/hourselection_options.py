@@ -28,6 +28,7 @@ class HourSelectionOptions:
     top_price_type: TopPriceType = field(default_factory=lambda: TopPriceType.Unset)
     min_price: float = 0
     absolute_top_price: float = field(init=False)  # move to separate file
+    non_hours: list[int] = field(default_factory=lambda: [])
 
     def __post_init__(self):
         self.fixed_top_price = self.top_price

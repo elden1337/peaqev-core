@@ -16,6 +16,7 @@ class Hoursselection:
         absolute_top_price: float = 0,
         min_price: float = 0,
         cautionhour_type: str | CautionHourType = CautionHourType.SUAVE.value,
+        non_hours: list[int] = []
     ):
         self.cautionhour_type_enum = (
             CautionHourType(cautionhour_type.lower())
@@ -26,7 +27,8 @@ class Hoursselection:
             options=HourSelectionOptions(
                 cautionhour_type_enum=self.cautionhour_type_enum,
                 min_price=min_price,
-                top_price=absolute_top_price
+                top_price=absolute_top_price,
+                non_hours=non_hours
             )
         )
         self.model.validate()
