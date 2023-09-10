@@ -20,7 +20,7 @@ class PriceAwareHours(Hours):
             ),
             min_price=hub.options.price.min_price,
             cautionhour_type=self._cautionhour_type_string,
-            non_hours=hub.options.price.nonhours
+            non_hours=hub.options.nonhours
         )
         self._hass = hub.state_machine
         self._prices = []
