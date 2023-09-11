@@ -1,3 +1,4 @@
+from datetime import timedelta
 from .models.stop_string import AllowanceObj, set_allowance_obj
 from .models.datetime_model import DateTimeModel
 from .models.hour_price import HourPrice
@@ -50,13 +51,14 @@ class HourSelectionService:
     def offset_dict(self) -> dict:
         return self.model.get_offset_dict(self.dtmodel.dt)
 
-    def update(self):
-        for hp in self.model.hours_prices:
-            hp.set_passed(self.dtmodel)
+    def update(self):  
+        self.model.hours_prices = [hp for hp in self.model.hours_prices if hp.dt.date() >= self.dtmodel.hdate]        
+        for hp in self.model.hours_prices:            
+            hp.set_passed(self.dtmodel)        
         if len(self.model.get_future_hours(self.dtmodel)) >= 24:
             set_scooped_permittance(
                 self.model.get_future_hours(self.dtmodel), self.options.cautionhour_type_enum
-            )
+            )        
 
     async def async_update(self):
         self.update()
@@ -67,10 +69,12 @@ class HourSelectionService:
         self.model.prices_today = prices  # clean first
         self.model.prices_tomorrow = prices_tomorrow  # clean first
         if do_recalculate_prices(prices=prices, prices_tomorrow=prices_tomorrow, hours_prices=self.model.hours_prices, hdate=self.dtmodel.hdate):
+            print(f"do recalculate prices {len(prices)} {len(prices_tomorrow)}")
             self._create_prices(prices, prices_tomorrow)
             if self.max_min.active:
                 self.max_min.get_hours()
         else:
+            print(f"NOT recalculate prices {len(prices)} {len(prices_tomorrow)}")
             await self.async_update()
 
     async def async_update_adjusted_average(self, adjusted_average: float) -> None:

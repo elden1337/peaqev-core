@@ -260,3 +260,28 @@ async def test_offsets():
     await service.async_update_adjusted_average(0.47)
     assert len(service.offset_dict["today"]) == 24
     assert len(service.offset_dict["tomorrow"]) == 0
+
+
+@pytest.mark.asyncio
+async def test_last_hour_after_midnight():
+    opt = HourSelectionOptions(
+        top_price=1.5, min_price=0.05, cautionhour_type_enum=CautionHourType.SUAVE
+    )
+    service = HourSelectionService(opt)
+    service.dtmodel.set_datetime(datetime(2023, 7, 21, 0, 0, 2))
+    await service.async_update_prices(_p.P230721[0])
+    assert service.all_hours[-1].hour == 23
+    assert service.all_hours[-1].dt.day == 21
+    assert len(service.all_hours) == 24
+    service.dtmodel.set_datetime(datetime(2023, 7, 21, 13, 56, 0))
+    await service.async_update_prices(_p.P230721[0], _p.P230721[1])
+    assert service.all_hours[-1].hour == 23
+    assert service.all_hours[-1].dt.day == 22
+    assert len(service.all_hours) == 48
+    service.dtmodel.set_datetime(datetime(2023, 7, 22, 0, 1, 0))
+    await service.async_update_prices(_p.P230721[1], [])
+    await service.async_update_adjusted_average(0.47)
+    assert len(service.all_hours) == 24
+    assert service.all_hours[-1].hour == 23
+    assert service.all_hours[-1].dt.day == 22
+    
