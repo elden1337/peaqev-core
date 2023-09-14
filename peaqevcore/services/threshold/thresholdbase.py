@@ -22,8 +22,7 @@ ALGORITHM_INPUTS = {
 
 
 async def async_calculate_algorithm_inputs(type: str, minute: int) -> float:
-    inputs = ALGORITHM_INPUTS[type]
-    return round((((minute + pow(inputs[0], minute)) * inputs[1]) + inputs[2]) * 100, 2)
+    return _calculate_algorithm_inputs(type, minute)
 
 
 def _calculate_algorithm_inputs(type: str, minute: int) -> float:

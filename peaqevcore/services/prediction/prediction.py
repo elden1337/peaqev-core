@@ -17,11 +17,13 @@ class Prediction:
         """This method does allow for negative energy, ie from solar panels being read."""
         _now_min = now_min or datetime.now().minute
         _now_sec = now_sec or datetime.now().second
-
+        errors = []
         if _now_min not in range(0, 60):
-            raise ValueError(f"Value 'now_min' ({_now_min}) must be between (0..60]")
+            errors.append(f"Value 'now_min' ({_now_min}) cannot be < 0 or greater than 59")
         if _now_sec not in range(0, 60):
-            raise ValueError(f"Value 'now_max' ({_now_sec}) must be between (0..60]")
+            errors.append(f"Value 'now_sec' ({_now_sec}) cannot be < 0 or greater than 59")
+        if errors:
+            raise ValueError(f"errors: {errors}")
 
         minute = await async_convert_quarterly_minutes(_now_min, is_quarterly)
 
@@ -101,3 +103,7 @@ class Prediction:
         elif predicted_energy <= 0.0 or predicted_energy is None:
             return 0
         return round((predicted_energy / peak) * 100, 2)
+
+
+
+

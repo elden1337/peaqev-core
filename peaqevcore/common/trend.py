@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 
 _LOGGER = logging.getLogger(__name__)
 
+MIN_SAMPLES = 2
 
 def dt_from_epoch(epoch: int) -> str:
     return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(epoch))
@@ -13,7 +14,7 @@ class Gradient:
         self, max_age: int, max_samples: int, precision: int = 2, ignore: int|None = None
     ):
         self._init_time = time.time()
-        self._readings = []
+        self._samples = []
         self._gradient = 0
         self._max_age = max_age
         self._max_samples = max_samples
@@ -33,27 +34,27 @@ class Gradient:
 
     @property
     def samples(self) -> int:
-        return len(self._readings)
+        return len(self._samples)
 
     @property
     def samples_raw(self) -> list:
-        return self._readings
+        return self._samples
 
     @samples_raw.setter
     def samples_raw(self, lst):
-        self._readings.extend(lst)
+        self._samples.extend(lst)
         self.set_gradient()
 
     @property
     def oldest_sample(self) -> str:
-        if len(self._readings) > 0:
-            return dt_from_epoch(self._readings[0][0])
+        if len(self._samples) > 0:
+            return dt_from_epoch(self._samples[0][0])
         return str(datetime.min)
 
     @property
     def newest_sample(self) -> str:
-        if len(self._readings) > 0:
-            return dt_from_epoch(self._readings[-1][0])
+        if len(self._samples) > 0:
+            return dt_from_epoch(self._samples[-1][0])
         return str(datetime.min)
 
     @property
@@ -62,12 +63,12 @@ class Gradient:
 
     def set_gradient(self):
         self._remove_from_list()
-        temps = self._readings
-        if len(temps) == 1:
+        values = self._samples
+        if len(values) == 1:
             self._gradient = 0
-        elif len(temps) - 1 > 0:
+        elif len(values) - 1 > 0:
             try:
-                x = (temps[-1][1] - temps[0][1]) / ((time.time() - temps[0][0]) / 3600)
+                x = (values[-1][1] - values[0][1]) / ((time.time() - values[0][0]) / 3600)
                 self._gradient = x
             except ZeroDivisionError as e:
                 _LOGGER.warning({e})
@@ -75,22 +76,20 @@ class Gradient:
 
     def add_reading(self, val: float, t: float = time.time()):
         if self._ignore is None or self._ignore < val:
-            self._readings.append((int(t), round(val, 3)))
+            self._samples.append((int(t), round(val, 3)))
             self._latest_update = time.time()
             self._remove_from_list()
             self.set_gradient()
 
     def _remove_from_list(self):
         """Removes overflowing number of samples and old samples from the list."""
-        while len(self._readings) > self._max_samples:
-            self._readings.pop(0)
-        gen = (
-            x for x in self._readings if time.time() - int(x[0]) > self._max_age
-        )
-        for i in gen:
-            if len(self._readings) > 1:
+        while len(self._samples) > self._max_samples:
+            self._samples.pop(0)
+        old_samples = (x for x in self._samples if time.time() - int(x[0]) > self._max_age)
+        for i in old_samples:
+            if len(self._samples) > MIN_SAMPLES:
                 # Always keep two readings to be able to calc trend
-                self._readings.remove(i)
+                self._samples.remove(i)
 
     async def async_set_gradient(self):
        self.set_gradient()
@@ -102,40 +101,34 @@ class Gradient:
         self._remove_from_list()
 
     def predicted_time_at_value(self, target_value: float) -> datetime|None:
-        if self._gradient is None or len(self._readings) < 2:
+        if self._gradient is None or len(self._samples) < 2:
             return None
         current_gradient = self._gradient
         if current_gradient == 0 or all([
             target_value < 0,
-            self._readings[-1][1] > 0,
+            self._samples[-1][1] > 0,
             current_gradient > 0
             ]):
             return None
-        time_diff = timedelta(hours=(target_value - self._readings[-1][1]) / current_gradient)
+        time_diff = timedelta(hours=(target_value - self._samples[-1][1]) / current_gradient)
         return datetime.now() + time_diff
         
     def predicted_value_at_time(self, target_time: datetime) -> float|None:
-        if self._gradient is None or target_time < datetime.now() or len(self._readings) < 2:
+        if self._gradient is None or target_time < datetime.now() or len(self._samples) < 2:
             return None
         current_gradient = self._gradient
         if current_gradient == 0:
             return None
         time_diff = target_time - datetime.now()
-        expected_value = self._readings[-1][1] + (current_gradient * time_diff.total_seconds() / 3600)
+        expected_value = self._samples[-1][1] + (current_gradient * time_diff.total_seconds() / 3600)
         return round(expected_value,self._precision)
 
 
-# tt = Gradient(max_age=300, max_samples=10, precision=2, ignore=None)
-# tt.add_reading(867, time.time()-120)
-# tt.add_reading(832, time.time()-100)
-# tt.add_reading(629, time.time()-83)
-# tt.add_reading(649, time.time()-75)
-# tt.add_reading(639, time.time()-70)
-# tt.add_reading(438, time.time()-60)
-# tt.add_reading(457, time.time()-50)
-# tt.add_reading(656, time.time()-40)
-# tt.add_reading(664, time.time()-30)
-# tt.add_reading(636, time.time()-20)
-# print(f"gradient: {tt.gradient}")
-# print(tt.predicted_time_at_value(-50))
-# print(tt.predicted_value_at_time(datetime.now() + timedelta(minutes=6)))
+tt = Gradient(max_age=300, max_samples=10, precision=2, ignore=None)
+tt.add_reading(50.3, time.time()-3000)
+tt.add_reading(50.2, time.time()-2500)
+tt.add_reading(50.2, time.time()-2000)
+tt.add_reading(50.2, time.time()-1500)
+tt.add_reading(50.1, time.time()-1000)
+tt.add_reading(49, time.time()-50)
+print(f"gradient: {tt.gradient}")
