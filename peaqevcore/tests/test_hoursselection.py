@@ -1,7 +1,8 @@
 # from datetime import date, datetime
-# import pytest
+from datetime import datetime
+import pytest
 # import statistics as stat
-# from ..services.hourselection.hoursselection import Hoursselection as h
+from ..services.hourselection.hoursselection import Hoursselection as h
 # from ..services.hourselection.hourselectionservice.hourselection_calculations import (
 #     async_create_cautions,
 #     normalize_prices,
@@ -9,7 +10,7 @@
 # from ..services.hourselection.hourselectionservice.hoursselection_helpers import (
 #     async_create_dict,
 # )
-# from ..models.hourselection.cautionhourtype import CautionHourType, VALUES_CONVERSION
+from ..common.enums.cautionhourtype import CautionHourType
 # from ..models.hourselection.topprice_type import TopPriceType
 # from .prices import *
 
@@ -40,6 +41,20 @@
 #     await r.async_update_prices(prices)
 #     assert r.caution_hours == [22]
 
+@pytest.mark.asyncio
+async def test_three_updates_correct_length():
+    prices = [0.22,0.21,0.21,0.2,0.21,0.22,0.22,0.23,0.23,0.24,0.24,0.23,0.23,0.22,0.21,0.21,0.22,0.22,0.21,0.19,0.15,0.12,0.08,0.08]
+    prices_tomorrow = [0.08,0.08,0.06,0.06,0.06,0.08,0.11,0.12,0.12,0.12,0.12,0.1,0.06,0.06,0.05,0.05,0.08,0.08,0.08,0.08,0.08,0.08,0.07,0.05]
+    r = h(cautionhour_type=CautionHourType.SUAVE)
+    r.service.dtmodel.set_datetime(datetime(2021, 1, 1, 0, 0, 0))
+    await r.async_update_prices(prices)
+    assert len(r.future_hours) == 24
+    r.service.dtmodel.set_datetime(datetime(2021, 1, 1, 13, 0, 0))
+    await r.async_update_prices(prices, prices_tomorrow)
+    assert len(r.future_hours) == 35
+    r.service.dtmodel.set_datetime(datetime(2021, 1, 2, 0, 0, 0))
+    await r.async_update_prices(prices_tomorrow)
+    assert len(r.future_hours) == 24
 
 # @pytest.mark.asyncio
 # async def test_mockprices1_caution_hours_per_type():

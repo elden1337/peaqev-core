@@ -856,3 +856,26 @@ async def test_230821_not_picking_cheapest_range():
         print('-------')
         base += 25
     assert 1 > 2
+
+
+@pytest.mark.asyncio
+async def test_resetting_maxmin_three_updates():
+    peak = 1.76
+    r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=1.5, min_price=0.0)
+    await r.async_update_adjusted_average(0.43)
+    r.service.dtmodel.set_datetime(datetime(2023, 8, 21, 0, 0, 4))
+    await r.async_update_prices(P230821)
+    await r.service.max_min.async_setup(peak)
+    await r.service.max_min.async_update(avg24=350, peak=peak, max_desired=9, car_connected=True)
+    assert all([x.dt.day == 21 for x in r.future_hours])
+    r.service.dtmodel.set_datetime(datetime(2023, 8, 21, 13, 40, 0))
+    await r.async_update_prices(P230821, P230822)
+    await r.service.max_min.async_update(avg24=350, peak=peak, max_desired=9, car_connected=True)
+    print(len(r.service.all_hours))
+    r.service.dtmodel.set_datetime(datetime(2023, 8, 22, 0, 1, 0))
+    await r.async_update_prices(P230822, [])
+    await r.service.max_min.async_update(avg24=350, peak=peak, max_desired=9, car_connected=True)
+    assert all([x.dt.day == 22 for x in r.future_hours])
+    print(sum([x.permittance for x in r.future_hours]))
+    print(await r.async_get_total_charge(1.76))
+    assert 1 > 2

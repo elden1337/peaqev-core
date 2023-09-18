@@ -38,6 +38,25 @@ async def test_passed_hours_empty_seq():
     service.dtmodel.set_datetime(datetime(2021, 1, 3, 0, 0, 0))
     assert len(service.future_hours) == 0
 
+@pytest.mark.asyncio
+async def test_all_hours_three_price_updates():
+    prices = [0.22,0.21,0.21,0.2,0.21,0.22,0.22,0.23,0.23,0.24,0.24,0.23,0.23,0.22,0.21,0.21,0.22,0.22,0.21,0.19,0.15,0.12,0.08,0.08]
+    prices_tomorrow = [0.08,0.08,0.06,0.06,0.06,0.08,0.11,0.12,0.12,0.12,0.12,0.1,0.06,0.06,0.05,0.05,0.08,0.08,0.08,0.08,0.08,0.08,0.07,0.05]
+    opt = HourSelectionOptions(
+        top_price=2, min_price=0.05, cautionhour_type_enum=CautionHourType.SUAVE
+    )
+    service = HourSelectionService(opt)
+    service.dtmodel.set_datetime(datetime(2021, 1, 1, 0, 0, 5))
+    await service.async_update_prices(prices, [])
+    assert len(service.all_hours) == 24
+    service.dtmodel.set_datetime(datetime(2021, 1, 1, 13, 33, 0))
+    await service.async_update_prices(prices, prices_tomorrow)
+    assert len(service.all_hours) == 48
+    service.dtmodel.set_datetime(datetime(2021, 1, 2, 0, 0, 33))
+    await service.async_update_prices(prices_tomorrow, [])
+    assert len(service.all_hours) == 24
+    assert len(service.future_hours) == 24
+
 
 @pytest.mark.asyncio
 async def test_last_nonhour_stopped_until():
