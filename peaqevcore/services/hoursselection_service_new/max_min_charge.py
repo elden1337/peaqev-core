@@ -143,9 +143,10 @@ class MaxMinCharge:
             self.active = False
             return
         if not self.active:
-            self.get_hours()
             self.active = True
+            self.get_hours()
 
     def get_hours(self) -> None:
-        self.model.input_hours = copy.deepcopy(self.parent.future_hours)
+        if self.active:
+            self.model.input_hours = copy.deepcopy(self.parent.future_hours)
         # self.model.original_input_hours = copy.deepcopy(self.model.input_hours)

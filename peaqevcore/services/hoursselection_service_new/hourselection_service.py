@@ -71,11 +71,10 @@ class HourSelectionService:
         if do_recalculate_prices(prices=prices, prices_tomorrow=prices_tomorrow, hours_prices=self.model.hours_prices, hdate=self.dtmodel.hdate):
             print(f"do recalculate prices {len(prices)} {len(prices_tomorrow)}")
             self._create_prices(prices, prices_tomorrow)
-            if self.max_min.active:
-                self.max_min.get_hours()
         else:
             print(f"NOT recalculate prices {len(prices)} {len(prices_tomorrow)}")
             await self.async_update()
+        self.max_min.get_hours()
 
     async def async_update_adjusted_average(self, adjusted_average: float) -> None:
         self.model.adjusted_average = adjusted_average
