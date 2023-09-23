@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Callable
+import logging
 
 if TYPE_CHECKING:
     from ....models.hourselection.hourselection_options import HourSelectionOptions
@@ -10,6 +11,8 @@ from .list_type import ListType
 from ...hourselection.hourselectionservice.hoursselection_helpers import convert_none_list
 from ..offset_dict import get_offset_dict, set_offset_dict
 
+
+_LOGGER = logging.getLogger(__name__)
 
 @dataclass
 class HourSelectionServiceModel:
@@ -57,6 +60,12 @@ class HourSelectionServiceModel:
         self.set_hourprice_list(prices_tomorrow, service_options, datum_tomorrow, is_passed_func)
         self.hours_prices.sort(key=lambda x:x.dt)
 
+    def update_hour_types(self, service_options: HourSelectionOptions) -> None:
+        for h in self.hours_prices:
+            h.hour_type = HourPrice.set_hour_type(
+                service_options.absolute_top_price, service_options.min_price, h.price
+            )
+
     def set_hourprice_list(
         self,
         prices: list,
@@ -79,8 +88,12 @@ class HourSelectionServiceModel:
                 ),
                 list_type=ListType.Quarterly if self.use_quarters else ListType.Hourly,
             )
-            if rret not in self.hours_prices:
+            if rret.dt not in [h.dt for h in self.hours_prices]:
                 ret.append(rret)
+            else:
+                idx = self.hours_prices.index([h for h in self.hours_prices if h.dt == rret.dt][0])
+                self.hours_prices[idx] = rret
+                _LOGGER.error(f"Duplicate hourprice {rret.dt} detected and fixed.")
         if len(self.hours_prices) > 0:
             self.hours_prices.extend(ret)
         else:

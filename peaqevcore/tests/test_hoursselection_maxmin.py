@@ -305,10 +305,11 @@ async def test_230412_maxmin_active_total_charge():
 async def test_230412_maxmin_active_decrease_suave():
     r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=30, min_price=0.0)
     peak = 2.28
+    
     await r.async_update_adjusted_average(0.77)
-    await r.async_update_top_price(0.97)
+    await r.async_update_top_price(0.97)    
     r.service.dtmodel.set_datetime(datetime(2020, 2, 12, 19, 0, 0))
-    await r.async_update_prices(P230412[0], P230412[1])
+    await r.async_update_prices(prices=P230412[0], prices_tomorrow=P230412[1])
     initial_charge = await r.async_get_total_charge(peak)
     await r.service.max_min.async_setup(100)
     assert r.service.max_min.active is True
@@ -374,6 +375,24 @@ async def test_230412_fixed_price():
     ret = await r.async_get_average_kwh_price()
     assert ret == (0.31, 0.06)
 
+
+@pytest.mark.asyncio
+async def test_230426_session_decrease_2():
+    r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=30, min_price=0.0)
+    peak = 2.28
+    await r.async_update_adjusted_average(0.77)
+    await r.async_update_top_price(0.89)
+    r.service.dtmodel.set_datetime(datetime(2020, 2, 26, 0, 0, 0))
+    await r.async_update_prices(P230426[0])
+    r.service.dtmodel.set_datetime(datetime(2020, 2, 26, 13, 0, 0))
+    await r.async_update_prices(P230426[0], P230426[1])
+    await r.service.max_min.async_setup(peak)
+    await r.service.max_min.async_update(0.7, 2.28, 5)
+    r.service.dtmodel.set_datetime(datetime(2020, 2, 26, 18, 0, 0))
+    await r.service.max_min.async_update(0.5, 2.28, 3.2)
+    r.service.dtmodel.set_datetime(datetime(2020, 2, 27, 0, 0, 0))
+    await r.async_update_prices(P230426[1])
+    assert 1 > 2
 
 @pytest.mark.asyncio
 async def test_230426_session_decrease():

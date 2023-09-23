@@ -88,7 +88,7 @@ class Hoursselection:
         
     async def async_update_top_price(self, dyn_top_price=None) -> None:
         await self.model.options.async_set_absolute_top_price(dyn_top_price)
-        await self.async_update_prices(self.prices, self.prices_tomorrow)
+        self.service.model.update_hour_types(self.model.options)
 
     async def async_update_prices(self, prices: list, prices_tomorrow: list = []):
         await self.service.async_update_prices(prices, prices_tomorrow)

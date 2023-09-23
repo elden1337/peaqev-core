@@ -1,4 +1,5 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
+import logging
 from .models.stop_string import AllowanceObj, set_allowance_obj
 from .models.datetime_model import DateTimeModel
 from .models.hour_price import HourPrice
@@ -14,6 +15,7 @@ from .permittance import (
 from statistics import stdev, mean
 from .max_min_charge import MaxMinCharge
 
+_LOGGER = logging.getLogger(__name__)
 
 class HourSelectionService:
     def __init__(self, options: HourSelectionOptions = HourSelectionOptions()):
@@ -53,6 +55,10 @@ class HourSelectionService:
 
     def update(self):  
         self.model.hours_prices = [hp for hp in self.model.hours_prices if hp.dt.date() >= self.dtmodel.hdate]        
+        # if len(self.model.hours_prices) > 1:
+        #     print(f"hourseelection_service.model.hours_prices now has a len of {len(self.model.hours_prices)}. the oldest is {self.model.hours_prices[0].dt} and the newest is {self.model.hours_prices[-1].dt}")
+        # else:
+        #     raise Exception (f"hourseelection_service.model.hours_prices now has a len of {len(self.model.hours_prices)}. the oldest is {self.model.hours_prices[0].dt} and the newest is {self.model.hours_prices[-1].dt}")
         for hp in self.model.hours_prices:            
             hp.set_passed(self.dtmodel)        
         if len(self.model.get_future_hours(self.dtmodel)) >= 24:
@@ -63,16 +69,28 @@ class HourSelectionService:
     async def async_update(self):
         self.update()
 
-    async def async_update_prices(
-        self, prices: list[float], prices_tomorrow: list[float] = []
-    ):
+    def clean_prices(self, prices, prices_tomorrow) -> dict:
+        expected_date = self.dtmodel.hdate
+        price_dict: dict = {}
+        for idx, i in enumerate(prices):
+            price_dict[datetime(expected_date.year, expected_date.month, expected_date.day, idx, 0, 0)] = i
+        if len(prices_tomorrow):
+            expected_date = self.dtmodel.hdate_tomorrow
+            for idx, i in enumerate(prices_tomorrow):
+                price_dict[datetime(expected_date.year, expected_date.month, expected_date.day, idx, 0, 0)] = i
+        return price_dict
+
+    async def async_update_prices(self, prices: list[float], prices_tomorrow: list[float] = []):
+        price_dict = self.clean_prices(prices, prices_tomorrow)
         self.model.prices_today = prices  # clean first
         self.model.prices_tomorrow = prices_tomorrow  # clean first
-        if do_recalculate_prices(prices=prices, prices_tomorrow=prices_tomorrow, hours_prices=self.model.hours_prices, hdate=self.dtmodel.hdate):
+        if do_recalculate_prices(price_dict=price_dict, hours_prices=self.model.hours_prices, hdate=self.dtmodel.hdate):
             print(f"do recalculate prices {len(prices)} {len(prices_tomorrow)}")
+            _LOGGER.debug(f"do recalculate prices {len(prices)} {len(prices_tomorrow)}")
             self._create_prices(prices, prices_tomorrow)
         else:
             print(f"NOT recalculate prices {len(prices)} {len(prices_tomorrow)}")
+            _LOGGER.debug(f"NOT recalculate prices {len(prices)} {len(prices_tomorrow)}")
             await self.async_update()
         self.max_min.get_hours()
 

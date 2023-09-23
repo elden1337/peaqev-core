@@ -25,5 +25,23 @@ def test_regular_hours_non_initialized():
     assert hasattr(h, 'scheduler') == True
 
 
-
-
+@pytest.mark.asyncio
+async def test_price_aware_update_prices():
+    options = MockOptions([0,1,2], [23])
+    hub = MockHub(options)
+    h = PriceAwareHours(hub)
+    await h.async_update_prices()
+    assert h.is_initialized == True
+    assert hasattr(h, 'timer') == True
+    assert hasattr(h, 'scheduler') == True
+    assert hasattr(h, 'prices') == True
+    assert hasattr(h, 'prices_tomorrow') == True
+    assert hasattr(h, 'future_hours') == True
+    assert hasattr(h, 'non_hours') == True
+    assert hasattr(h, 'caution_hours') == True
+    assert hasattr(h, 'dynamic_caution_hours') == True
+    assert hasattr(h, 'cautionhour_type_string') == True
+    assert hasattr(h, 'absolute_top_price') == True
+    assert hasattr(h, 'min_price') == True
+    assert hasattr(h, 'options') == True
+    assert hasattr(h, 'scheduler') == True

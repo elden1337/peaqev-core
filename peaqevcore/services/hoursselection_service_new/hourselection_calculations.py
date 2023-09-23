@@ -20,15 +20,27 @@ def normalize_prices(prices: list) -> list:
         ret.append(round(pp - divider, 3))
     return ret
 
-
-def do_recalculate_prices(prices: list[float], prices_tomorrow: list[float]|None, hours_prices: list[HourPrice], hdate: date) -> bool:
-        if [
-            hp.price
-            for hp in hours_prices
-            if hp.dt.date() == hdate
-        ] == prices and len(prices_tomorrow) < 1:
-            return False
+def do_recalculate_prices(price_dict: dict, hours_prices: list[HourPrice], hdate: date) -> bool:
+    if len(hours_prices) < 1:
         return True
+    for d in price_dict.items():
+        if d[0] not in [hp.dt for hp in hours_prices]:
+            # print(f"{d[0]} is not in hours_prices")
+            # print(f"hours_prices is {hours_prices}")
+            return True
+    return False
+    
+# def do_recalculate_prices(price_dict: dict, hours_prices: list[HourPrice], hdate: date) -> bool:
+#         if any([hp.dt.date() == hdate for hp in hours_prices]):
+#         if [
+#             hp.price
+#             for hp in hours_prices
+#             if hp.dt.date() == hdate
+#         ] == prices and len(prices_tomorrow) < 1:
+#             print("prices are the same as the previous day, so we will not recalculate")
+#             """We should not recalculate prices if they are the same as the previous day"""
+#             return False
+#         return True
 
 
 def get_average_kwh_price(future_hours: list[HourPrice]) -> float:

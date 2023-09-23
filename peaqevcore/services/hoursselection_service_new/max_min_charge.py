@@ -2,13 +2,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from datetime import datetime, timedelta
 from ..hoursselection_service_new.models.hour_price import HourPrice
-#from ..hoursselection_service_new.models.hour_type import HourType
-#from ..hoursselection_service_new.models.list_type import ListType
 import copy
-
 if TYPE_CHECKING:
     from .hourselection_service import HourSelectionService
-#from typing import Tuple
 from .models.max_min_model import MaxMinModel
 
 

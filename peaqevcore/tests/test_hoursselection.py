@@ -56,6 +56,29 @@ async def test_three_updates_correct_length():
     await r.async_update_prices(prices_tomorrow)
     assert len(r.future_hours) == 24
 
+
+@pytest.mark.asyncio
+async def test_three_updates_correct_dt():
+    prices_20_sent = [[0.055, 0.053, 0.056, 0.061, 0.067, 0.078, 0.092, 0.108, 0.123, 0.136, 0.13, 0.112, 0.111, 0.105, 0.104, 0.1, 0.097, 0.093, 0.094, 0.093, 0.087, 0.079, 0.078, 0.075], [0.078, 0.078, 0.078, 0.078, 0.078, 0.082, 0.081, 0.093, 0.112, 0.124, 0.134, 0.135, 0.129, 0.128, 0.132, 0.146, 0.152, 0.167, 0.181, 0.169, 0.152, 0.151, 0.134, 0.118]]
+    prices_0_sent = [[0.078, 0.078, 0.078, 0.078, 0.078, 0.082, 0.081, 0.093, 0.112, 0.124, 0.134, 0.135, 0.129, 0.128, 0.132, 0.146, 0.152, 0.167, 0.181, 0.169, 0.152, 0.151, 0.134, 0.118], []]
+    prices_13_sent = [[0.078, 0.078, 0.078, 0.078, 0.078, 0.082, 0.081, 0.093, 0.112, 0.124, 0.134, 0.135, 0.129, 0.128, 0.132, 0.146, 0.152, 0.167, 0.181, 0.169, 0.152, 0.151, 0.134, 0.118], [0.108, 0.103, 0.098, 0.093, 0.092, 0.095, 0.094, 0.105, 0.117, 0.119, 0.094, 0.091, 0.078, 0.039, 0.049, 0.078, 0.145, 0.191, 0.2, 0.195, 0.16, 0.146, 0.119, 0.1]]
+    r = h(cautionhour_type=CautionHourType.SUAVE)
+    r.service.dtmodel.set_datetime(datetime(2023, 9, 22, 20, 40, 0))
+    await r.async_update_prices(prices_20_sent[0], prices_20_sent[1])
+    assert r.future_hours[0].dt == datetime(2023, 9, 22, 20, 0)
+    assert r.future_hours[0].price == 0.087
+    r.service.dtmodel.set_datetime(datetime(2023, 9, 23, 0, 0, 5))
+    await r.async_update_top_price(0.35)
+    r.service.dtmodel.set_datetime(datetime(2023, 9, 23, 0, 0, 26))
+    await r.async_update_prices(prices_0_sent[0], prices_0_sent[1])
+    assert r.future_hours[0].dt == datetime(2023, 9, 23, 0, 0)
+    assert r.future_hours[0].price == 0.078
+    assert not any([f for f in r.future_hours if f.dt.day == 22])
+    r.service.dtmodel.set_datetime(datetime(2023, 9, 23, 13, 26, 0))
+    await r.async_update_prices(prices_13_sent[0], prices_13_sent[1])
+    assert r.future_hours[0].dt == datetime(2023, 9, 23, 13, 0)
+    assert r.future_hours[0].price == 0.128
+
 # @pytest.mark.asyncio
 # async def test_mockprices1_caution_hours_per_type():
 #     r = h(cautionhour_type=CautionHourType.AGGRESSIVE)
