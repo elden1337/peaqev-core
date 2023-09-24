@@ -93,7 +93,7 @@ class HourSelectionServiceModel:
             else:
                 idx = self.hours_prices.index([h for h in self.hours_prices if h.dt == rret.dt][0])
                 self.hours_prices[idx] = rret
-                _LOGGER.error(f"Duplicate hourprice {rret.dt} detected and fixed.")
+                #_LOGGER.error(f"Duplicate hourprice {rret.dt} detected and fixed.")
         if len(self.hours_prices) > 0:
             self.hours_prices.extend(ret)
         else:
