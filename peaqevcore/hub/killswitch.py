@@ -16,7 +16,7 @@ class KillSwitch:
         self._bound_sensor: str = sensor
         self._last_update: float = time.time()
         self._grace_period: bool = False
-        self._grace_period_start: int = 0
+        self._grace_period_start: float = 0
         self._is_dead: bool = False
 
     @property
@@ -33,6 +33,7 @@ class KillSwitch:
             if time.time() - self._grace_period_start > self._grace_interval:
                 self._is_dead = True
                 #self.__init__(self._bound_sensor, self._update_interval, self._grace_interval)
+                _LOGGER.warning(f"{datetime.now()} - Peaqev killswitch has broken circuit. The sensor {self._bound_sensor} has not been updated for {self._grace_interval} seconds.")
         elif time.time() - self._last_update > self._update_interval:
             _LOGGER.warning(f"{datetime.now()} - Caution! The sensor {self._bound_sensor} has not been updated for {self._update_interval} seconds. In {self._grace_interval} seconds the charger will be stopped unless this sensor comes alive again.")
             self._grace_period = True
@@ -53,14 +54,14 @@ class KillSwitch:
     
 
 
-# k = KillSwitch("magnus_sensor", 3, 6)
-# k.update()
-# time.sleep(1)
-# k.check()
-# k.update()
-# time.sleep(4)
-# k.check()
-# time.sleep(5)
-# k.check()
-# time.sleep(2)
-# k.check()
+k = KillSwitch("magnus_sensor", 3, 6)
+k.update()
+time.sleep(1)
+k.check
+k.update()
+time.sleep(4)
+k.check
+time.sleep(5)
+k.check
+time.sleep(2)
+k.check

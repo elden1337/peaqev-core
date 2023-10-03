@@ -49,7 +49,7 @@ class Power:
     @property
     def car_power(self) -> int:
         try:
-            ret = int(self._total.value - self._house.value)
+            ret = int(self._total.value - self._house.value) #type: ignore
             return max(0, ret)
         except:
             return 0
@@ -63,33 +63,25 @@ class Power:
 
     async def async_update(self, carpowersensor_value=0, config_sensor_value=None):
         self.update(carpowersensor_value, config_sensor_value)
-        # if self._powersensor_includes_car is True:
-        #     if config_sensor_value is not None:
-        #         self.total.value = config_sensor_value
-        #     new_val = (float(self.total.value) - float(carpowersensor_value))
-        #     if new_val != self.house.value:
-        #         await self.killswitch.async_update()
-        #     self.house.value = new_val
-        # else:
-        #     if config_sensor_value is not None:
-        #         self.house.value = config_sensor_value
-        #     new_val = (float(self.house.value) + float(carpowersensor_value))
-        #     if new_val != self.total.value:
-        #         await self.killswitch.async_update()
-        #     self.total.value = new_val
 
     def update(self, carpowersensor_value=0, config_sensor_value=None):
+        if not isinstance(carpowersensor_value, float|int):
+            _LOGGER.warning(
+                f"Power.update called with invalid value: {carpowersensor_value}"
+            )
+            return
+        
         if self._powersensor_includes_car is True:
             if config_sensor_value is not None:
                 self.total.value = config_sensor_value
-            new_val = float(self.total.value) - float(carpowersensor_value)
+            new_val = float(self.total.value) - float(carpowersensor_value) #type: ignore
             if new_val != self.house.value:
                 self.killswitch.update()
             self.house.value = new_val
         else:
             if config_sensor_value is not None:
                 self.house.value = config_sensor_value
-            new_val = float(self.house.value) + float(carpowersensor_value)
+            new_val = float(self.house.value) + float(carpowersensor_value) #type: ignore
             if new_val != self.total.value:
                 self.killswitch.update()
             self.total.value = new_val
