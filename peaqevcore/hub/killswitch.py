@@ -26,6 +26,10 @@ class KillSwitch:
     @property
     def is_dead(self) -> bool:
         return self._is_dead
+    
+    @property
+    def is_caution(self) -> bool:
+        return self._grace_period
 
     @property
     def check(self):
@@ -46,22 +50,20 @@ class KillSwitch:
         self._grace_period_start = 0
 
     async def async_update(self):
-        self._last_update = time.time()
-        self._grace_period = False
-        self._is_dead = False
-        self._grace_period_start = 0
-
+        self.update()
+        
     
 
 
-k = KillSwitch("magnus_sensor", 3, 6)
-k.update()
-time.sleep(1)
-k.check
-k.update()
-time.sleep(4)
-k.check
-time.sleep(5)
-k.check
-time.sleep(2)
-k.check
+# k = KillSwitch("magnus_sensor", 3, 6)
+# k.update()
+# time.sleep(1)
+# k.check
+# k.update()
+# time.sleep(4)
+# k.check
+# time.sleep(5)
+# k.check
+# time.sleep(2)
+# k.check
+# print(k.is_dead)
