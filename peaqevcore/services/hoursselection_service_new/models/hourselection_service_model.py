@@ -103,7 +103,7 @@ class HourSelectionServiceModel:
     def get_offset_dict(self, dt_date: datetime) -> dict:
         return get_offset_dict(self.offset_dict, dt_date)
 
-    def set_offset_dict(self, prices: list[float], day: date) -> None:
+    def set_offset_dict(self, prices: list[float], day: date, min_price: float) -> None:
         if all(
             [
                 day in self.offset_dict.keys(),
@@ -111,7 +111,7 @@ class HourSelectionServiceModel:
             ]
         ):
             return
-        self.offset_dict = set_offset_dict(prices, day)
+        self.offset_dict = set_offset_dict(prices, day, min_price)
 
     def get_future_hours(self, dtmodel) -> list[HourPrice]:
         for hp in self.hours_prices:

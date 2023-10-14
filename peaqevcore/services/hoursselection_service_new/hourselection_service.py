@@ -136,7 +136,7 @@ class HourSelectionService:
                 if hp.dt.date() >= self.dtmodel.hdate
             ]
         )
-        self.model.set_offset_dict(prices, self.dtmodel.dt.date())
+        self.model.set_offset_dict(prices, self.dtmodel.dt.date(), self.options.min_price)
         if not self.is_flat([h.price for h in self.model.hours_prices if not h.passed]):
             set_initial_permittance(
                 self.model.hours_prices,

@@ -10,7 +10,7 @@ def get_offset_dict(offset_dict, dt_now) -> dict:
     }
 
 
-def set_offset_dict(prices: list[float], day: date) -> dict:
+def set_offset_dict(prices: list[float], day: date, min_price: float) -> dict:
     ret = {}
     _len = len(prices)
     today: list = []
@@ -21,12 +21,12 @@ def set_offset_dict(prices: list[float], day: date) -> dict:
         case 47 | 48 | 49 | 188 | 192 | 196:
             today = prices[: len(prices) // 2]
             tomorrow = prices[len(prices) // 2 : :]
-    ret[day] = _deviation_from_mean(today, prices)
-    ret[day + timedelta(days=1)] = _deviation_from_mean(tomorrow, prices)
+    ret[day] = _deviation_from_mean(today, prices, min_price)
+    ret[day + timedelta(days=1)] = _deviation_from_mean(tomorrow, prices, min_price)
     return ret
 
 
-def _deviation_from_mean(prices: list[float], checker: list[float]) -> dict[int, float]:
+def _deviation_from_mean(prices: list[float], checker: list[float], min_price:float) -> dict[int, float]:
     if not len(prices):
         return {}
     avg = mean(checker)
@@ -36,5 +36,7 @@ def _deviation_from_mean(prices: list[float], checker: list[float]) -> dict[int,
         deviation = (num - avg) / devi
         if devi < 1:
             deviation *= 0.5
+        if num <= min_price:
+            deviation_dict[i] = max(round(deviation, 2),0)
         deviation_dict[i] = round(deviation, 2)
     return deviation_dict
