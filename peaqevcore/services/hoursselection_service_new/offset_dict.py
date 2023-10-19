@@ -36,5 +36,12 @@ def _deviation_from_mean(prices: list[float], checker: list[float], min_price:fl
         deviation = (num - avg) / devi
         if devi < 1:
             deviation *= 0.5
-        deviation_dict[i] = min(round(deviation, 2),0) if num <= min_price else round(deviation, 2)
+        setval = 0
+        if num <= min_price:
+            setval = min(round(deviation, 2),0)
+        elif num <= min_price * 2:
+            setval = deviation - 1 if deviation > 1 else deviation
+        else:
+            setval = round(deviation, 2)
+        deviation_dict[i] = setval
     return deviation_dict
