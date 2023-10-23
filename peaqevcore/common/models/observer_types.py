@@ -35,3 +35,11 @@ class ObserverTypes(Enum):
 
     ResetMaxMinChargeSensor = "reset max min charge sensor"
     UpdatePeak = "update peak"
+
+    PrognosisChanged = "prognosis changed"
+    UpdateOperation = "update operation"
+    OffsetsChanged = "offsets changed"
+    OffsetRecalculation = "offset recalculation"
+    WatertempChange ="watertemp change"
+    HvacToleranceChanged ="hvac tolerance changed"
+    HvacPresetChanged ="hvac preset changed"
