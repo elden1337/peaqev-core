@@ -5,13 +5,14 @@ from peaqevcore.common.models.observer_types import ObserverTypes
 from peaqevcore.common.spotprice.const import (ENERGIDATASERVICE, ENERGIDATASERVICE_SENSOR)
 from peaqevcore.common.spotprice.models.spotprice_dto import EnergiDataServiceDTO
 from peaqevcore.common.spotprice.spotpricebase import SpotPriceBase
+from peaqevcore.common.models.peaq_system import PeaqSystem
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class EnergiDataServiceUpdater(SpotPriceBase):
-    def __init__(self, hub, observer, test:bool = False, is_active: bool = True):
-        super().__init__(hub=hub, source=ENERGIDATASERVICE, test=test, is_active=is_active, observer=observer)
+    def __init__(self, hub, observer, system:PeaqSystem, test:bool = False, is_active: bool = True):
+        super().__init__(hub=hub, source=ENERGIDATASERVICE, system=system, test=test, is_active=is_active, observer=observer)
 
     async def async_set_dto(self, ret, initial: bool = False) -> None:
         _result = EnergiDataServiceDTO()
