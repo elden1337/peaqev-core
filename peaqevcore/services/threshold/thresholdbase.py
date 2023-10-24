@@ -82,10 +82,8 @@ class ThresholdBase:
                 else:
                     self._phases = Phases.ThreePhase
                     ret = _threephase
-            except:
-                _LOGGER.debug(
-                    "Currents-dictionary: could not divide charger amps with charger power. Falling back to legacy-method."
-                )
+            except Exception as e:
+                _LOGGER.debug(f"Currents-dictionary: could not divide charger amps with charger power. Falling back to legacy-method. {e}")
                 if 0 < int(self._hub.sensors.carpowersensor.value) < 4000:
                     self._phases = Phases.OnePhase
                     ret = _onephase
@@ -100,49 +98,7 @@ class ThresholdBase:
 
     async def async_setcurrentdict(self) -> dict:
         """only allow amps if user has set this value high enough"""
-        if self._hub.chargertype.max_amps != 16:
-            _threephase = {
-                k: v
-                for (k, v) in CURRENTS_THREEPHASE_1_32.items()
-                if v <= self._hub.chargertype.max_amps
-            }
-            _onephase = {
-                k: v
-                for (k, v) in CURRENTS_ONEPHASE_1_32.items()
-                if v <= self._hub.chargertype.max_amps
-            }
-        else:
-            _threephase = CURRENTS_THREEPHASE_1_16
-            _onephase = CURRENTS_ONEPHASE_1_16
-        if hasattr(self._hub.sensors, "carpowersensor"):
-            try:
-                divid = int(self._hub.sensors.carpowersensor.value) / int(
-                    self._hub.sensors.chargerobject_switch.current
-                )
-                if int(self._hub.sensors.carpowersensor.value) == 0:
-                    self._phases = Phases.Unknown
-                    ret = _threephase
-                elif divid < 300:
-                    self._phases = Phases.OnePhase
-                    ret = _onephase
-                else:
-                    self._phases = Phases.ThreePhase
-                    ret = _threephase
-            except:
-                _LOGGER.debug(
-                    "Currents-dictionary: could not divide charger amps with charger power. Falling back to legacy-method."
-                )
-                if 0 < int(self._hub.sensors.carpowersensor.value) < 4000:
-                    self._phases = Phases.OnePhase
-                    ret = _onephase
-                else:
-                    self._phases = Phases.ThreePhase
-                    ret = _threephase
-        else:
-            self._phases = Phases.ThreePhase
-            ret = _threephase
-        self._currents = ret
-        return ret
+        return self._setcurrentdict()
 
     @staticmethod
     async def async_stop(
