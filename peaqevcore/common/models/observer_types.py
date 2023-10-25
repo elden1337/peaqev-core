@@ -43,3 +43,5 @@ class ObserverTypes(Enum):
     WatertempChange ="watertemp change"
     HvacToleranceChanged ="hvac tolerance changed"
     HvacPresetChanged ="hvac preset changed"
+    TemperatureOutdoorsChanged="temperature outdoors changed"
+    SetTemperatureChanged ="set temperature changed"
