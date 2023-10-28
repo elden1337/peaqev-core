@@ -1,4 +1,4 @@
-from datetime import timedelta, datetime
+from datetime import date, time, timedelta, datetime
 import logging
 from .models.stop_string import AllowanceObj, set_allowance_obj
 from .models.datetime_model import DateTimeModel
@@ -55,10 +55,6 @@ class HourSelectionService:
 
     def update(self):  
         self.model.hours_prices = [hp for hp in self.model.hours_prices if hp.dt.date() >= self.dtmodel.hdate]        
-        # if len(self.model.hours_prices) > 1:
-        #     print(f"hourseelection_service.model.hours_prices now has a len of {len(self.model.hours_prices)}. the oldest is {self.model.hours_prices[0].dt} and the newest is {self.model.hours_prices[-1].dt}")
-        # else:
-        #     raise Exception (f"hourseelection_service.model.hours_prices now has a len of {len(self.model.hours_prices)}. the oldest is {self.model.hours_prices[0].dt} and the newest is {self.model.hours_prices[-1].dt}")
         for hp in self.model.hours_prices:            
             hp.set_passed(self.dtmodel)        
         if len(self.model.get_future_hours(self.dtmodel)) >= 24:
@@ -70,14 +66,20 @@ class HourSelectionService:
         self.update()
 
     def clean_prices(self, prices, prices_tomorrow) -> dict:
-        expected_date = self.dtmodel.hdate
+        hours_today = self.dtmodel.get_eligable_hours(self.dtmodel.hdate)
         price_dict: dict = {}
-        for idx, i in enumerate(prices):
-            price_dict[datetime(expected_date.year, expected_date.month, expected_date.day, idx, 0, 0)] = i
+        for idx, h in enumerate(hours_today):
+            try:
+                price_dict[h] = prices[idx]
+            except Exception as e:
+                print(f"Exception in adding prices today! {e}")
         if len(prices_tomorrow):
-            expected_date = self.dtmodel.hdate_tomorrow
-            for idx, i in enumerate(prices_tomorrow):
-                price_dict[datetime(expected_date.year, expected_date.month, expected_date.day, idx, 0, 0)] = i
+            hours_tomorrow = self.dtmodel.get_eligable_hours(self.dtmodel.hdate_tomorrow)
+            for idx, h in enumerate(hours_tomorrow):
+                try:
+                    price_dict[h] = prices_tomorrow[idx]
+                except Exception as e:
+                    print(f"Exception in adding prices tomorrow! {e}")
         return price_dict
 
     async def async_update_prices(self, prices: list[float], prices_tomorrow: list[float] = []):
@@ -125,7 +127,7 @@ class HourSelectionService:
     ) -> None:
         # todo: handle here first if prices or prices_tomorrow are 92 or 100 in length (dst shift)
         self.model.use_quarters = is_quarterly
-        self.model.set_hourprice_lists(prices, prices_tomorrow, self.options, self.dtmodel.hdate, self.dtmodel.hdate_tomorrow, self.dtmodel.is_passed)
+        self.model.set_hourprice_lists(prices, prices_tomorrow, self.options, self.dtmodel.hdate, self.dtmodel.hdate_tomorrow, self.dtmodel.is_passed, self.dtmodel.get_eligable_hours)
         self._set_permittance()
 
     def _set_permittance(self) -> None:

@@ -55,9 +55,9 @@ class HourSelectionServiceModel:
         ret = convert_none_list(val)
         self._prices_tomorrow = ret
 
-    def set_hourprice_lists(self, prices:list, prices_tomorrow:list, service_options:HourSelectionOptions, datum:date, datum_tomorrow:date, is_passed_func:Callable) -> None:
-        self.set_hourprice_list(prices, service_options, datum, is_passed_func)
-        self.set_hourprice_list(prices_tomorrow, service_options, datum_tomorrow, is_passed_func)
+    def set_hourprice_lists(self, prices:list, prices_tomorrow:list, service_options:HourSelectionOptions, datum:date, datum_tomorrow:date, is_passed_func:Callable, get_eligable_hours_func: Callable) -> None:
+        self.set_hourprice_list(prices, service_options, datum, is_passed_func, get_eligable_hours_func)
+        self.set_hourprice_list(prices_tomorrow, service_options, datum_tomorrow, is_passed_func, get_eligable_hours_func)
         self.hours_prices.sort(key=lambda x:x.dt)
 
     def update_hour_types(self, service_options: HourSelectionOptions) -> None:
@@ -72,22 +72,28 @@ class HourSelectionServiceModel:
         service_options: HourSelectionOptions,
         datum: date,
         is_passed_func: Callable,
+        get_eligable_hours_func: Callable,
     ) -> None:
         ret = []
-        for idx, p in enumerate(prices):  # type: ignore
-            assert isinstance(p, (float, int))
-            hour = int(idx / 4) if self.use_quarters else idx
-            quarter = idx % 4 if self.use_quarters else 0
+        eligable_hours = get_eligable_hours_func(datum)
+        
+        for idx, h in enumerate(eligable_hours):
+            if idx >= len(prices):
+                break
+            current_price = prices[idx]
+            assert isinstance(current_price, (float, int))
+            hour = int(h.hour / 4) if self.use_quarters else h.hour
+            quarter = h.hour % 4 if self.use_quarters else 0
             rret = HourPrice(
                 dt=self._get_dt(datum, hour, quarter),
                 quarter=quarter,
-                price=p,
+                price=current_price,
                 passed=is_passed_func(datum, hour, quarter),
                 hour_type=HourPrice.set_hour_type(
-                    service_options.absolute_top_price, service_options.min_price, p
+                    service_options.absolute_top_price, service_options.min_price, current_price
                 ),
                 list_type=ListType.Quarterly if self.use_quarters else ListType.Hourly,
-            )
+            )            
             if rret.dt not in [h.dt for h in self.hours_prices]:
                 ret.append(rret)
             else:
@@ -99,6 +105,7 @@ class HourSelectionServiceModel:
             self.hours_prices.extend(ret)
         else:
             self.hours_prices = ret
+        print(len(ret))
 
     def get_offset_dict(self, dt_date: datetime) -> dict:
         return get_offset_dict(self.offset_dict, dt_date)

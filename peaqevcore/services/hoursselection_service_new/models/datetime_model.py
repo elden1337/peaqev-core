@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, time, timedelta
 
 
 @dataclass
@@ -48,6 +48,19 @@ class DateTimeModel:
             if self.quarter > quarter:
                 return True
         return False
+
+    def get_eligable_hours(self, desired_date: date) -> list[datetime]:
+        current_day = datetime.combine(desired_date,time())
+        _datestamp = current_day.timestamp()
+        available_hours = []
+        dtlooper = current_day #mockdate to stop loop
+
+        while dtlooper.day == current_day.day:
+            eligable_hour = datetime.fromtimestamp(_datestamp)
+            available_hours.append(eligable_hour)
+            _datestamp += 3600
+            dtlooper = datetime.fromtimestamp(_datestamp)
+        return available_hours
 
     @property
     def dt(self) -> datetime:

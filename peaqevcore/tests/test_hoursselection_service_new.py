@@ -303,4 +303,17 @@ async def test_last_hour_after_midnight():
     assert len(service.all_hours) == 24
     assert service.all_hours[-1].hour == 23
     assert service.all_hours[-1].dt.day == 22
-    
+
+
+@pytest.mark.asyncio
+async def test_dst_shift_25_hours():
+    opt = HourSelectionOptions(
+        top_price=1.5, min_price=0.05, cautionhour_type_enum=CautionHourType.SUAVE
+    )
+    service = HourSelectionService(opt)
+    service.dtmodel.set_datetime(datetime(2023, 10, 28, 13, 30, 2))
+    await service.async_update_prices(_p.P231028[0], _p.P231028[1])
+    for s in service.all_hours:
+        print(s)
+    assert service.all_hours[-1].hour == 23
+    assert 1 > 2
