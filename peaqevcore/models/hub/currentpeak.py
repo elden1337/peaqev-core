@@ -56,7 +56,7 @@ class CurrentPeak(HubMember):
         self._history[_key] = peaks
         self._value = self._get_peak()
 
-    def import_from_service(self, importdto: dict) -> dict:
+    def import_from_service(self, importdto: dict, current:bool = False) -> dict:
         """Import the dict passed from service or on loading hass"""
         ret = {}
         validation_errors = []
