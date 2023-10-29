@@ -164,3 +164,4 @@ class LocaleFactory:
         print(ret)
         await ret.data.async_set_query_service()
         return ret
+
