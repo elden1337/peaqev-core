@@ -50,7 +50,7 @@ class PeaksModel:
         self._p.pop(min(self._p, key=self._p.get))
         return self._p
 
-    async def async_set_init_dict(self, dict_data: dict, dt=datetime.now()) -> None:
+    async def async_set_init_dict(self, dict_data: dict, dt=datetime.now(), override:bool = False) -> None:
         ppdict = dict()
         self._m = dict_data.get("m")
         if dt.month != self.m:
@@ -61,7 +61,7 @@ class PeaksModel:
                 ppkey = (int(tkeys[0]), int(tkeys[1]))
                 p: dict = dict_data.get("p")
                 ppdict[ppkey] = p.get(pp)
-            if len(self._p):
+            if len(self._p) and not override:
                 self._p = dict(self._p.items() | ppdict.items())
             else:
                 self._p = ppdict

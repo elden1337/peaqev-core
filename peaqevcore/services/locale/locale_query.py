@@ -179,7 +179,7 @@ class LocaleQuery(ILocaleQuery):
         """already good to go"""
         decorated_dict = {"m": datetime.now().month, "p": input_dict}
         await self.peaks.async_set_init_dict(decorated_dict)
-        await self.async_update_peaks()
+        #await self.async_update_peaks()
         return decorated_dict
 
     async def async_set_update_for_groupby(self, new_val, dt):
