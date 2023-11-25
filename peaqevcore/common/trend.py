@@ -29,6 +29,8 @@ class Gradient:
         self.set_gradient()
         data = self._samples
         n = len(data)
+        if n < 2:
+            return 0
         sum_x = sum([item[0] / 3600 for item in data])
         sum_y = sum([item[1] for item in data])
         sum_xy = sum([item[1]*item[0] / 3600 for item in data])
