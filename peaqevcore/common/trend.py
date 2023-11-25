@@ -31,12 +31,15 @@ class Gradient:
         n = len(data)
         if n < 2:
             return 0
-        sum_x = sum([item[0] / 3600 for item in data])
-        sum_y = sum([item[1] for item in data])
-        sum_xy = sum([item[1]*item[0] / 3600 for item in data])
-        sum_x2 = sum([(item[0] / 3600)**2 for item in data])
-        slope = (n*sum_xy - sum_x*sum_y) / (n*sum_x2 - sum_x**2)
-        return round(slope, self._precision)
+        try:
+            sum_x = sum([item[0] / 3600 for item in data])
+            sum_y = sum([item[1] for item in data])
+            sum_xy = sum([item[1]*item[0] / 3600 for item in data])
+            sum_x2 = sum([(item[0] / 3600)**2 for item in data])
+            slope = (n*sum_xy - sum_x*sum_y) / (n*sum_x2 - sum_x**2)
+            return round(slope, self._precision)
+        except ZeroDivisionError as e:
+            return 0
 
     @property
     def gradient(self) -> float:
