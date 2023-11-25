@@ -1,4 +1,5 @@
 import logging
+from statistics import mean
 import time
 from datetime import datetime, timedelta
 
@@ -11,7 +12,7 @@ def dt_from_epoch(epoch: int) -> str:
 
 class Gradient:
     def __init__(
-        self, max_age: int, max_samples: int, precision: int = 2, ignore: int|None = None
+        self, max_age: int, max_samples: int, precision: int = 2, ignore: int|None = None, outlier: float|None = None
     ):
         self._init_time = time.time()
         self._samples = []
@@ -20,7 +21,20 @@ class Gradient:
         self._max_samples = max_samples
         self._latest_update = 0
         self._ignore = ignore
+        self._outlier = outlier
         self._precision = precision
+
+    @property
+    def trend(self) -> float:
+        self.set_gradient()
+        data = self._samples
+        n = len(data)
+        sum_x = sum([item[0] / 3600 for item in data])
+        sum_y = sum([item[1] for item in data])
+        sum_xy = sum([item[1]*item[0] / 3600 for item in data])
+        sum_x2 = sum([(item[0] / 3600)**2 for item in data])
+        slope = (n*sum_xy - sum_x*sum_y) / (n*sum_x2 - sum_x**2)
+        return round(slope, self._precision)
 
     @property
     def gradient(self) -> float:
@@ -61,12 +75,17 @@ class Gradient:
     def is_clean(self) -> bool:
         return all([time.time() - self._init_time > 300, self.samples > 1])
 
+    def filter_outliers(self, numbers: list) -> list:
+        avg = sum(numbers) / len(numbers)
+        return [n for n in numbers if abs(n - avg) <= self._outlier]
+
     def set_gradient(self):
         self._remove_from_list()
         values = self._samples
         if len(values) == 1:
             self._gradient = 0
         elif len(values) - 1 > 0:
+            check_numbers = self.filter_outliers([x[1] for x in values])
             try:
                 x = (values[-1][1] - values[0][1]) / ((time.time() - values[0][0]) / 3600)
                 self._gradient = x
@@ -76,6 +95,9 @@ class Gradient:
 
     def add_reading(self, val: float, t: float = time.time()):
         if self._ignore is None or self._ignore < val:
+            if self._outlier is not None and len(self._samples) > 1 and abs(mean([s[1] for s in self._samples]) - val) > self._outlier:
+                print("ignoring value", abs(mean([s[1] for s in self._samples]) - val))
+                return
             self._samples.append((int(t), round(val, 3)))
             self._latest_update = time.time()
             self._remove_from_list()
@@ -124,11 +146,13 @@ class Gradient:
         return round(expected_value,self._precision)
 
 
-tt = Gradient(max_age=300, max_samples=10, precision=2, ignore=None)
-tt.add_reading(50.3, time.time()-3000)
-tt.add_reading(50.2, time.time()-2500)
-tt.add_reading(50.2, time.time()-2000)
-tt.add_reading(50.2, time.time()-1500)
-tt.add_reading(50.1, time.time()-1000)
-tt.add_reading(49, time.time()-50)
-print(f"gradient: {tt.gradient}")
+# tt = Gradient(max_age=3600, max_samples=100, precision=2, outlier=0.5)
+# tt.add_reading(50.3, time.time()-3000)
+# tt.add_reading(50.2, time.time()-2500)
+# tt.add_reading(50.2, time.time()-2000)
+# tt.add_reading(50.2, time.time()-1500)
+# tt.add_reading(50.1, time.time()-1000)
+# tt.add_reading(49, time.time()-50)
+# #tt.add_reading(40, time.time()-10)
+# print(f"gradient: {tt.gradient}")
+# print(f"trend: {tt.trend}")
