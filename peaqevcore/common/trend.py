@@ -81,6 +81,8 @@ class Gradient:
         return all([time.time() - self._init_time > 300, self.samples > 1])
 
     def filter_outliers(self, numbers: list) -> list:
+        if self._outlier is None:
+            return numbers
         avg = sum(numbers) / len(numbers)
         return [n for n in numbers if abs(n - avg) <= self._outlier]
 
