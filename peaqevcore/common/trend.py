@@ -26,7 +26,7 @@ class Gradient:
 
     @property
     def trend(self) -> float:
-        self.set_gradient()
+        self.prepare_gradient()
         data = self._samples
         n = len(data)
         if n < 2:
@@ -43,12 +43,12 @@ class Gradient:
 
     @property
     def gradient(self) -> float:
-        self.set_gradient()
+        self.prepare_gradient()
         return round(self._gradient, self._precision)
 
     @property
     def gradient_raw(self) -> float:
-        self.set_gradient()
+        self.prepare_gradient()
         return self._gradient
 
     @property
@@ -62,7 +62,7 @@ class Gradient:
     @samples_raw.setter
     def samples_raw(self, lst):
         self._samples.extend(lst)
-        self.set_gradient()
+        self.prepare_gradient()
 
     @property
     def oldest_sample(self) -> str:
@@ -80,9 +80,12 @@ class Gradient:
     def is_clean(self) -> bool:
         return all([time.time() - self._init_time > 300, self.samples > 1])
 
-    def set_gradient(self):
+    def prepare_gradient(self) -> None:
         self._inject_interim_values()
         self._remove_from_list()
+        self._set_gradient()
+
+    def _set_gradient(self) -> None:
         values = self._samples
         if len(values) == 1:
             self._gradient = 0
@@ -94,7 +97,7 @@ class Gradient:
                 _LOGGER.warning({e})
                 self._gradient = 0
 
-    def _inject_interim_values(self):
+    def _inject_interim_values(self) -> None:
         if self._samples:
             last_sample = self._samples[-1]
             if time.time() - last_sample[0] > 60 * 60:
@@ -108,7 +111,7 @@ class Gradient:
             self._samples.append((int(t), round(val, 3)))
             self._latest_update = time.time()
             self._remove_from_list()
-            self.set_gradient()
+            self.prepare_gradient()
 
     def _remove_from_list(self):
         """Removes overflowing number of samples and old samples from the list."""
@@ -121,7 +124,7 @@ class Gradient:
                 self._samples.remove(i)
 
     async def async_set_gradient(self):
-       self.set_gradient()
+       self.prepare_gradient()
 
     async def async_add_reading(self, val: float, t: float = time.time()):
         self.add_reading(val, t)
