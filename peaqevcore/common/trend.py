@@ -80,23 +80,25 @@ class Gradient:
     def is_clean(self) -> bool:
         return all([time.time() - self._init_time > 300, self.samples > 1])
 
-    def filter_outliers(self, numbers: list) -> list:
-        avg = sum(numbers) / len(numbers)
-        return [n for n in numbers if abs(n - avg) <= self._outlier]
-
     def set_gradient(self):
+        self._inject_interim_values()
         self._remove_from_list()
         values = self._samples
         if len(values) == 1:
             self._gradient = 0
         elif len(values) - 1 > 0:
-            check_numbers = self.filter_outliers([x[1] for x in values])
             try:
                 x = (values[-1][1] - values[0][1]) / ((time.time() - values[0][0]) / 3600)
                 self._gradient = x
             except ZeroDivisionError as e:
                 _LOGGER.warning({e})
                 self._gradient = 0
+
+    def _inject_interim_values(self):
+        if self._samples:
+            last_sample = self._samples[-1]
+            if time.time() - last_sample[0] > 60 * 60:
+                self._samples.append((int(time.time() - 30 * 60), last_sample[1]))
 
     def add_reading(self, val: float, t: float = time.time()):
         if self._ignore is None or self._ignore < val:
