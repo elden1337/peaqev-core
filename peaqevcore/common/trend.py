@@ -57,7 +57,9 @@ class Gradient:
 
     @property
     def samples_raw(self) -> list:
-        return self._samples
+        if len(self._samples) == 0:
+            return []
+        return sorted(self._samples, key=lambda x: x[0], reverse=True)
 
     @samples_raw.setter
     def samples_raw(self, lst):
@@ -75,7 +77,12 @@ class Gradient:
         if len(self._samples) > 0:
             return dt_from_epoch(self._samples[-1][0])
         return str(datetime.min)
-
+    
+    def peak(self, idx=0) -> float:
+        if len(self._samples) > 0:
+            return self._samples[idx][1]
+        return 0
+    
     @property
     def is_clean(self) -> bool:
         return all([time.time() - self._init_time > 300, self.samples > 1])
@@ -108,10 +115,11 @@ class Gradient:
             if self._outlier is not None and len(self._samples) > 1 and abs(mean([s[1] for s in self._samples]) - val) > self._outlier:
                 print("ignoring value", abs(mean([s[1] for s in self._samples]) - val))
                 return
-            self._samples.append((int(t), round(val, 3)))
-            self._latest_update = time.time()
-            self._remove_from_list()
-            self.prepare_gradient()
+            if (int(t), round(val,3)) not in self._samples:
+                self._samples.append((int(t), round(val, 3)))
+                self._latest_update = time.time()
+                self._remove_from_list()
+                self.prepare_gradient()
 
     def _remove_from_list(self):
         """Removes overflowing number of samples and old samples from the list."""
@@ -156,13 +164,12 @@ class Gradient:
         return round(expected_value,self._precision)
 
 
-# tt = Gradient(max_age=3600, max_samples=100, precision=2, outlier=0.5)
-# tt.add_reading(50.3, time.time()-3000)
-# tt.add_reading(50.2, time.time()-2500)
-# tt.add_reading(50.2, time.time()-2000)
-# tt.add_reading(50.2, time.time()-1500)
-# tt.add_reading(50.1, time.time()-1000)
-# tt.add_reading(49, time.time()-50)
-# #tt.add_reading(40, time.time()-10)
-# print(f"gradient: {tt.gradient}")
-# print(f"trend: {tt.trend}")
+#tt = Gradient(max_age=1800, max_samples=100, precision=5)
+#tt.add_reading(-530, time.time()-3600)
+# tt.add_reading(-430, time.time()-3000)
+# tt.add_reading(-430, time.time()-3000)
+# tt.add_reading(-350, time.time()-1800)
+# tt.add_reading(-330, time.time()-900)
+# tt.add_reading(-200, time.time()-1)
+#print(tt.samples_raw)
+

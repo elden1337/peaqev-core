@@ -31,3 +31,9 @@ class WaitTimer:
             self._timeout = self._base_timeout
             return True
         return False
+    
+
+# boost_wait = WaitTimer(timeout=3600, init_now=False)
+
+# print(boost_wait.value)
+# print(boost_wait.is_timeout())
