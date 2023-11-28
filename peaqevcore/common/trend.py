@@ -37,7 +37,8 @@ class Gradient:
             sum_xy = sum([item[1]*item[0] / 3600 for item in data])
             sum_x2 = sum([(item[0] / 3600)**2 for item in data])
             slope = (n*sum_xy - sum_x*sum_y) / (n*sum_x2 - sum_x**2)
-            return round(slope, self._precision)
+            ret =  round(slope, self._precision)
+            return ret if self._precision > 0 else int(ret)
         except ZeroDivisionError as e:
             return 0
 
@@ -164,12 +165,17 @@ class Gradient:
         return round(expected_value,self._precision)
 
 
-#tt = Gradient(max_age=1800, max_samples=100, precision=5)
-#tt.add_reading(-530, time.time()-3600)
-# tt.add_reading(-430, time.time()-3000)
-# tt.add_reading(-430, time.time()-3000)
-# tt.add_reading(-350, time.time()-1800)
-# tt.add_reading(-330, time.time()-900)
-# tt.add_reading(-200, time.time()-1)
-#print(tt.samples_raw)
-
+# tt = Gradient(max_age=3600, max_samples=100, precision=0)
+# tt.add_reading(49, 1701169806)
+# tt.add_reading(46,1701169866)
+# tt.add_reading(24,1701170406)
+# tt.add_reading(12,1701170946)
+# tt.add_reading(-52,1701171476)
+# tt.add_reading(-97,1701172026)
+# tt.add_reading(-145,1701172540)
+# tt.add_reading(-151,1701172626)
+# tt.add_reading(-156,1701172656)
+# tt.add_reading(-162,1701172746)
+# tt.add_reading(-167,1701172776)
+# tt.add_reading(-173,1701172866)
+# print(tt.trend)
