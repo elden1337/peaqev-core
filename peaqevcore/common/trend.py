@@ -144,7 +144,7 @@ class Gradient:
     def predicted_time_at_value(self, target_value: float) -> datetime|None:
         if self._gradient is None or len(self._samples) < 2:
             return None
-        current_gradient = self._gradient
+        current_gradient = self.trend
         if current_gradient == 0 or all([
             target_value < 0,
             self._samples[-1][1] > 0,
@@ -152,6 +152,8 @@ class Gradient:
             ]):
             return None
         time_diff = timedelta(hours=(target_value - self._samples[-1][1]) / current_gradient)
+        if time_diff < timedelta(0):
+            return None
         return datetime.now() + time_diff
         
     def predicted_value_at_time(self, target_time: datetime) -> float|None:
@@ -166,16 +168,19 @@ class Gradient:
 
 
 # tt = Gradient(max_age=3600, max_samples=100, precision=0)
-# tt.add_reading(49, 1701169806)
-# tt.add_reading(46,1701169866)
-# tt.add_reading(24,1701170406)
-# tt.add_reading(12,1701170946)
-# tt.add_reading(-52,1701171476)
-# tt.add_reading(-97,1701172026)
-# tt.add_reading(-145,1701172540)
-# tt.add_reading(-151,1701172626)
-# tt.add_reading(-156,1701172656)
-# tt.add_reading(-162,1701172746)
-# tt.add_reading(-167,1701172776)
-# tt.add_reading(-173,1701172866)
+# tt.add_reading(49, 1712169806)
+# tt.add_reading(46,1712169866)
+# tt.add_reading(24,1712170406)
+# tt.add_reading(12,1712170946)
+# tt.add_reading(-52,1712171476)
+# tt.add_reading(-97,1712172026)
+# tt.add_reading(-145,1712172540)
+# tt.add_reading(-151,1712172626)
+# tt.add_reading(-156,1712172656)
+# tt.add_reading(-162,1712172746)
+# tt.add_reading(-167,1712172776)
+# tt.add_reading(-173,1712172866)
 # print(tt.trend)
+# print(tt.predicted_time_at_value(-300))
+# print(tt.predicted_time_at_value(-500))
+# print(tt.predicted_time_at_value(-1000))
