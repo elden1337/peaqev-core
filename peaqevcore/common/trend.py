@@ -1,4 +1,5 @@
 import logging
+import math
 from statistics import mean
 import time
 from datetime import datetime, timedelta
@@ -26,6 +27,13 @@ class Gradient:
 
     @property
     def trend(self) -> float:
+        return self._calculate_trend(use_decay=True)
+    
+    @property
+    def trend_decay(self) -> float:
+        return self._calculate_trend(use_decay=True)
+
+    def _calculate_trend(self, use_decay: bool = False) -> float:
         self.prepare_gradient()
         data = self._samples
         n = len(data)
@@ -37,6 +45,12 @@ class Gradient:
             sum_xy = sum([item[1]*item[0] / 3600 for item in data])
             sum_x2 = sum([(item[0] / 3600)**2 for item in data])
             slope = (n*sum_xy - sum_x*sum_y) / (n*sum_x2 - sum_x**2)
+            time_since_last_sample = time.time() - self._latest_update
+            decay_factor = math.exp(-time_since_last_sample / (60 * 60))  # Decay over an hour
+
+            if use_decay:
+                slope *= decay_factor
+
             ret =  round(slope, self._precision)
             return ret if self._precision > 0 else int(ret)
         except ZeroDivisionError as e:
@@ -99,7 +113,8 @@ class Gradient:
             self._gradient = 0
         elif len(values) - 1 > 0:
             try:
-                x = (values[-1][1] - values[0][1]) / ((time.time() - values[0][0]) / 3600)
+                ss = sorted(values, key=lambda x: x[0])
+                x = (ss[-1][1] - ss[0][1]) / ((time.time() - ss[0][0]) / 3600)
                 self._gradient = x
             except ZeroDivisionError as e:
                 _LOGGER.warning({e})
@@ -118,7 +133,7 @@ class Gradient:
                 return
             if (int(t), round(val,3)) not in self._samples:
                 self._samples.append((int(t), round(val, 3)))
-                self._latest_update = time.time()
+                self._latest_update = t
                 self._remove_from_list()
                 self.prepare_gradient()
 
@@ -167,20 +182,99 @@ class Gradient:
         return round(expected_value,self._precision)
 
 
-# tt = Gradient(max_age=3600, max_samples=100, precision=0)
-# tt.add_reading(49, 1712169806)
-# tt.add_reading(46,1712169866)
-# tt.add_reading(24,1712170406)
-# tt.add_reading(12,1712170946)
-# tt.add_reading(-52,1712171476)
-# tt.add_reading(-97,1712172026)
-# tt.add_reading(-145,1712172540)
-# tt.add_reading(-151,1712172626)
-# tt.add_reading(-156,1712172656)
-# tt.add_reading(-162,1712172746)
-# tt.add_reading(-167,1712172776)
-# tt.add_reading(-173,1712172866)
-# print(tt.trend)
-# print(tt.predicted_time_at_value(-300))
-# print(tt.predicted_time_at_value(-500))
-# print(tt.predicted_time_at_value(-1000))
+
+
+
+# ttt = [
+#     - - 1701543099,
+#   - 19.671,
+# - - 1701542878,
+#   - 19.7,
+# - - 1701542747,
+#   - 19.686,
+# - - 1701542222,
+#   - 19.7,
+# - - 1701542215,
+#   - 19.714,
+# - - 1701542172,
+#   - 19.729,
+# - - 1701541371,
+#   - 19.743,
+# - - 1701541280,
+#   - 19.729,
+# - - 1701541181,
+#   - 19.743,
+# - - 1701539524,
+#   - 19.757,
+# - - 1701539478,
+#   - 19.771,
+# - - 1701539458,
+#   - 19.786,
+# - - 1701539338,
+#   - 19.8,
+# - - 1701539110,
+#   - 19.814,
+# - - 1701538982,
+#   - 19.829,
+# - - 1701538025,
+#   - 19.814,
+# - - 1701537533,
+#   - 19.8,
+# - - 1701537525,
+#   - 19.814,
+# - - 1701537263,
+#   - 19.829,
+# - - 1701537085,
+#   - 19.857,
+# - - 1701536982,
+#   - 19.871,
+# - - 1701536658,
+#   - 19.886,
+# - - 1701536226,
+#   - 20.25,
+# - - 1701536226,
+#   - 20.2,
+# - - 1701536226,
+#   - 20.175,
+# - - 1701536226,
+#   - 20.06,
+# - - 1701536226,
+#   - 19.95,
+# - - 1701536226,
+#   - 19.9,
+# - - 1701536019,
+#   - 19.9,
+# - - 1701536004,
+#   - 19.929,
+# - - 1701535978,
+#   - 19.957,
+# - - 1701535944,
+#   - 19.971,
+# ]
+
+# ret = {}
+
+# for idx, i in enumerate(ttt):
+#     if idx % 2 == 0:
+#         tt = i
+#         ret[idx] = [tt]
+#     else:
+#         ret[idx-1].append(-float(i))
+
+# tt = Gradient(max_age=7200, max_samples=100, precision=1)
+# # for i in ret.values():
+# #     tt.add_reading(i[1],i[0])
+# tt.add_reading(54,time.time()-3599)
+# tt.add_reading(53.8,time.time()-3479)
+# tt.add_reading(53.8,time.time()-3359)
+# # tt.add_reading(53.1,time.time()-2560)
+# # # tt.add_reading(54,time.time()-3500)
+# # # tt.add_reading(53,time.time()-3400)
+# # # tt.add_reading(53,time.time()-3300)
+
+# print("tre:",tt.trend)
+# print("dec:",tt.trend_decay)
+# print("gra:",tt.gradient)
+
+# print(tt.oldest_sample)
+# print(tt.newest_sample)
