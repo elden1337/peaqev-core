@@ -1,7 +1,7 @@
 import logging
 from abc import abstractmethod
 from dataclasses import dataclass, field
-from statistics import mean
+from statistics import mean, stdev
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -12,6 +12,7 @@ class ISpotPriceDTO:
     today: list = field(default_factory=lambda: [])
     tomorrow: list = field(default_factory=lambda: [])
     average: float = 0
+    stdev: float = 0
     currency: str = ""
     price_in_cent: bool = False #todo: add support when source exposes this option.
     tomorrow_valid: bool = False
@@ -33,6 +34,7 @@ class ISpotPriceDTO:
         self.currency = str(ret.attributes.get("currency", ""))
         self.state = ret.state
         self.average = self._set_average(ret)
+        self.stdev = stdev(self.today) if len(self.today) > 1 else 0
         self.price_in_cent = self._set_price_in_cent(ret)
 
     @abstractmethod

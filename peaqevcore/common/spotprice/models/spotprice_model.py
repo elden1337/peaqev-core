@@ -13,7 +13,8 @@ class SpotPriceModel:
     prices_tomorrow: list = field(default_factory=lambda: [])
     state: float = 0
     entity: str = ""
-    average_data: dict = field(default_factory=lambda: {})
+    _average_data: dict = field(default_factory=lambda: {})
+    _average_stdev_data: dict = field(default_factory=lambda: {})
     average_month: float = 0
     adjusted_average: float = 0
     average_weekly: float = 0
@@ -25,7 +26,24 @@ class SpotPriceModel:
     dynamic_top_price_type: str = ""
     dynamic_top_price: float|None = None
 
-    def create_date_dict(self, numbers: dict|list) -> None:
+
+    @property
+    def average_data(self) -> dict:
+        return self._average_data
+    
+    @average_data.setter
+    def average_data(self, value: dict|list) -> None:
+        self._average_data = self.create_date_dict(value)
+
+    @property
+    def average_stdev_data(self) -> dict:
+        return self._average_stdev_data
+    
+    @average_stdev_data.setter
+    def average_stdev_data(self, value: dict|list) -> None:
+        self._average_stdev_data = self.create_date_dict(value)
+
+    def create_date_dict(self, numbers: dict|list) -> dict:
         if isinstance(numbers, dict):
             try:
                 ret = {datetime.strptime(key, "%Y-%m-%d").date(): value for key, value in numbers.items()}
@@ -40,7 +58,7 @@ class SpotPriceModel:
             for number in numbers:
                 ret[start_date] = number
                 start_date += timedelta(days=1)
-        self.average_data = ret
+        return ret
 
     async def fix_dst(self, val) -> list | None:
         if val is None:
