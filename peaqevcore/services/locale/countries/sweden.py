@@ -214,7 +214,7 @@ class SE_Gothenburg(Locale_Type):
         self.charged_peak = QueryType.AverageOfThreeDays
         self.query_model = QUERYTYPES[QueryType.AverageOfThreeDays]
         self.price = LocalePrice(
-            price_type=PriceType.Static, value=36.25, currency="SEK"
+            price_type=PriceType.Static, value=43.75, currency="SEK"
         )
 
 
