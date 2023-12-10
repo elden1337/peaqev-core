@@ -13,7 +13,13 @@ def dt_from_epoch(epoch: int) -> str:
 
 class Gradient:
     def __init__(
-        self, max_age: int, max_samples: int, precision: int = 2, ignore: int|None = None, outlier: float|None = None
+        self, 
+        max_age: int, 
+        max_samples: int, 
+        precision: int = 2,
+        ignore: int|None = None, 
+        outlier: float|None = None,
+        smoothing_average: int = 1
     ):
         self._init_time = time.time()
         self._samples = []
@@ -24,15 +30,12 @@ class Gradient:
         self._ignore = ignore
         self._outlier = outlier
         self._precision = precision
+        self._smoothing_average = smoothing_average
 
     @property
     def trend(self) -> float:
         return self._calculate_trend(use_decay=True)
     
-    @property
-    def trend_decay(self) -> float:
-        return self._calculate_trend(use_decay=True)
-
     def _calculate_trend(self, use_decay: bool = False) -> float:
         self.prepare_gradient()
         data = self._samples
@@ -51,7 +54,12 @@ class Gradient:
             if use_decay:
                 slope *= decay_factor
 
-            ret =  round(slope, self._precision)
+            if self._smoothing_average > 1:
+                smoothed_slope = mean([slope] + [data[i][1] - data[i-self._smoothing_average][1] for i in range(self._smoothing_average, n)])
+                ret = round(smoothed_slope, self._precision)
+            else:
+                ret = round(slope, self._precision)
+
             return ret if self._precision > 0 else int(ret)
         except ZeroDivisionError as e:
             return 0
@@ -262,19 +270,80 @@ class Gradient:
 #         ret[idx-1].append(-float(i))
 
 # tt = Gradient(max_age=7200, max_samples=100, precision=1)
-# # for i in ret.values():
-# #     tt.add_reading(i[1],i[0])
-# tt.add_reading(54,time.time()-3599)
-# tt.add_reading(53.8,time.time()-3479)
-# tt.add_reading(53.8,time.time()-3359)
-# # tt.add_reading(53.1,time.time()-2560)
-# # # tt.add_reading(54,time.time()-3500)
-# # # tt.add_reading(53,time.time()-3400)
-# # # tt.add_reading(53,time.time()-3300)
+# tt2 = Gradient(max_age=7200, max_samples=100, precision=1, smoothing_average=6)
 
-# print("tre:",tt.trend)
-# print("dec:",tt.trend_decay)
-# print("gra:",tt.gradient)
+# tt_values = []
+# tt2_values = []
+# x_values = []
 
-# print(tt.oldest_sample)
-# print(tt.newest_sample)
+# t = time.time()-3599
+# tt.add_reading(54,t)
+# tt2.add_reading(54,t)
+# tt_values.append(tt.trend)
+# tt2_values.append(tt2.trend)
+# x_values.append(t)
+
+# t = time.time()-3479
+# tt.add_reading(53.8,t)
+# tt2.add_reading(53.8,t)
+# tt_values.append(tt.trend)
+# tt2_values.append(tt2.trend)
+# x_values.append(t)
+
+# t = time.time()-3359
+# tt.add_reading(53.8,t)
+# tt2.add_reading(53.8,t)
+# tt_values.append(tt.trend)
+# tt2_values.append(tt2.trend)
+# x_values.append(t)
+
+# t = time.time()-3260
+# tt.add_reading(53.1,t)
+# tt2.add_reading(53.1,t)
+# tt_values.append(tt.trend)
+# tt2_values.append(tt2.trend)
+# x_values.append(t)
+
+# t = time.time()-3140
+# tt.add_reading(53,t)
+# tt2.add_reading(53,t)
+# tt_values.append(tt.trend)
+# tt2_values.append(tt2.trend)
+# x_values.append(t)
+
+# t = time.time()-3020
+# tt.add_reading(53,t)
+# tt2.add_reading(53,t)
+# tt_values.append(tt.trend)
+# tt2_values.append(tt2.trend)
+# x_values.append(t)
+
+# t = time.time()-2700
+# tt.add_reading(52,t)
+# tt2.add_reading(52,t)
+# tt_values.append(tt.trend)
+# tt2_values.append(tt2.trend)
+# x_values.append(t)
+
+# import matplotlib.pyplot as plt
+
+# # Convert the timestamps to a more readable format
+# x_values_readable = [datetime.fromtimestamp(x) for x in x_values]
+
+# plt.figure(figsize=(10, 6))
+
+# # Plot tt_values
+# plt.plot(x_values_readable, tt_values, label='tt_values')
+
+# # Plot tt2_values
+# plt.plot(x_values_readable, tt2_values, label='tt2_values')
+
+# plt.xlabel('Time')
+# plt.ylabel('Values')
+# plt.title('tt_values and tt2_values over time')
+# plt.legend()
+
+# #plt.show()
+
+# print(tt_values)
+# print(tt2_values)
