@@ -68,6 +68,10 @@ class ILocaleQuery:
     async def async_sanitize_values(self):
         pass
 
+    @abstractmethod
+    def get_currently_obeserved_peak(self, timestamp: datetime = datetime.now()) -> float:
+        pass
+
 
 class LocaleQuery(ILocaleQuery):
     def __init__(
@@ -117,7 +121,7 @@ class LocaleQuery(ILocaleQuery):
         ret = (
             self.charged_peak
             if self._props.sumtype is SumTypes.Max
-            else self._observed_peak_value
+            else self.get_currently_obeserved_peak()
         )
         try:
             return round(ret, 2)
@@ -128,6 +132,13 @@ class LocaleQuery(ILocaleQuery):
     @observed_peak.setter
     def observed_peak(self, val):
         self._observed_peak_value = val
+
+    def get_currently_obeserved_peak(self, timestamp: datetime = datetime.now()) -> float:
+        """gets the currently observed peak value for non-max type models. If daily max, override if the max registered today is higher."""
+        if self.sum_counter.groupby == TimePeriods.Daily:
+            if timestamp.day in [k[0] for k in self._peaks.p.keys()]:
+                return max([v for k, v in self._peaks.p.items() if k[0] == timestamp.day][0], self._observed_peak_value)
+        return self._observed_peak_value
 
     def _sanitize_values(self):
         countX = lambda arr, x: len([a for a in arr if a[0] == x])

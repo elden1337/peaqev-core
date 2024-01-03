@@ -409,3 +409,22 @@ async def test_peak_new_month_2():
     assert len(p.data.query_model.peaks.p) == 1
     assert p.data.query_model.observed_peak == 0.03
     del p
+
+@pytest.mark.asyncio
+async def test_avg_daily_same_peak_as_max_today():
+    p = await LocaleFactory.async_create(LOCALE_SE_GOTHENBURG)
+    await p.data.query_model.async_try_update(new_val=2, timestamp=datetime.combine(date(2024, 1, 3), time(10, 0)))
+    await p.data.query_model.async_try_update(new_val=2, timestamp=datetime.combine(date(2024, 1, 4), time(10, 0)))
+    await p.data.query_model.async_try_update(new_val=4.2, timestamp=datetime.combine(date(2024, 1, 5), time(10, 0)))
+    assert p.data.query_model.get_currently_obeserved_peak(datetime.combine(date(2024, 1, 5), time(22, 0))) == 4.2
+    assert p.data.query_model.get_currently_obeserved_peak(datetime.combine(date(2024, 1, 6), time(0, 0))) == 2
+
+
+@pytest.mark.asyncio
+async def test_avg_hourly_observed_peak():
+    p = await LocaleFactory.async_create(LOCALE_SE_SOLLENTUNA)
+    await p.data.query_model.async_try_update(new_val=2, timestamp=datetime.combine(date(2024, 1, 3), time(10, 0)))
+    await p.data.query_model.async_try_update(new_val=2, timestamp=datetime.combine(date(2024, 1, 4), time(10, 0)))
+    await p.data.query_model.async_try_update(new_val=4.2, timestamp=datetime.combine(date(2024, 1, 5), time(10, 0)))
+    assert p.data.query_model.get_currently_obeserved_peak(datetime.combine(date(2024, 1, 5), time(22, 0))) == 2
+    assert p.data.query_model.get_currently_obeserved_peak(datetime.combine(date(2024, 1, 6), time(0, 0))) == 2
