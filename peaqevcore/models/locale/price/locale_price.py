@@ -50,11 +50,10 @@ class LocalePrice:
 
     def _get_price_seasoned(self) -> float:
         s: SeasonedPrice
-        for s in self._values:
+        for s in [s for s in self._values if isinstance(s, SeasonedPrice)]:
             if s.validity.valid():
                 return s.value
 
-    def _get_price_tiered(self):
-        t: TieredPrice
-        for t in self._values:
+    def _get_price_tiered(self) -> float:
+        for t in [s for s in self._values if isinstance(s, TieredPrice)]:
             pass

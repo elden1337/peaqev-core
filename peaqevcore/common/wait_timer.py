@@ -33,13 +33,7 @@ class WaitTimer:
         return False
     
 
-# boost_wait = WaitTimer(timeout=300, init_now=False)
-
-# boost_wait.update()
-# if boost_wait.value > 0:
-#     print("Boost wait: " + str(boost_wait.value))
-#     print("Boost wait: " + str(boost_wait.timeout))
-#     print("Boost wait: " + str(boost_wait.is_timeout()))
-# else:
-#     print("not timeout because 0")
-
+boost_wait = WaitTimer(timeout=300, init_now=False)
+print(boost_wait.is_timeout())
+boost_wait.update()
+print(boost_wait.is_timeout())
