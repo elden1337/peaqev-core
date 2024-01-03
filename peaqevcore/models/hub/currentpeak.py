@@ -12,7 +12,7 @@ class CurrentPeak(HubMember):
         self._options_peaks: dict = startpeaks
         self._value = initval
         self._history: dict[str, list[float|int]] = {}
-        self._locale: LocaleData|None = None
+        self._locale: LocaleData = locale
         self._active: bool = options_use_history
         super().__init__(data_type, initval)
 
@@ -34,13 +34,10 @@ class CurrentPeak(HubMember):
             current_mean = mean(self._history.get(current_key, [0]))
             max_mean = max(past_mean, current_mean)
             if max_mean == past_mean and past_mean > options_start:
-                print(f"returning last years * factor. past_mean = {past_mean}, options_start = {options_start}, current_mean = {current_mean} given values {self._history.get(current_key, [0])}")
                 return min(self._history[past_key]) * EXPORT_FACTOR
             elif max_mean == current_mean and current_mean > options_start:
-                print("returning current mean")
                 return min(self._history[current_key])
             else:
-                print("returning options start")
                 return options_start
         except Exception as e:
             _LOGGER.error(f"Error in get_peak: {e}")
@@ -56,11 +53,10 @@ class CurrentPeak(HubMember):
     def update_history(self, peaks: list) -> None:
         _key = self._make_key()
         self._history[_key] = peaks
-        if self._locale:
-            if self._locale.data.query_model.get_currently_obeserved_peak() > min(peaks):
-                self._value = self._locale.data.query_model.observed_peak
-            else:
-                self._value = self._get_peak()
+        if self._locale.data.query_model.get_currently_obeserved_peak() > min(peaks):
+            self._value = self._locale.data.query_model.observed_peak
+        else:
+            self._value = self._get_peak()
 
     def import_from_service(self, importdto: dict, current:bool = False) -> dict:
         """Import the dict passed from service or on loading hass"""
