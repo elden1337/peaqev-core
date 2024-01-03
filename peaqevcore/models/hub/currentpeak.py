@@ -1,16 +1,18 @@
 import logging
 from datetime import datetime
 from .hubmember import HubMember
+from ...services.locale.Locale import LocaleData
 from statistics import mean
 _LOGGER = logging.getLogger(__name__)
 
 EXPORT_FACTOR = 0.9
 
 class CurrentPeak(HubMember):
-    def __init__(self, data_type: type, initval, startpeaks:dict, options_use_history: bool = False):
+    def __init__(self, data_type: type, initval, startpeaks:dict, locale: LocaleData, options_use_history: bool = False):
         self._options_peaks: dict = startpeaks
         self._value = initval
         self._history: dict[str, list[float|int]] = {}
+        self._locale: LocaleData|None = None
         self._active: bool = options_use_history
         super().__init__(data_type, initval)
 
@@ -54,6 +56,9 @@ class CurrentPeak(HubMember):
     def update_history(self, peaks: list) -> None:
         _key = self._make_key()
         self._history[_key] = peaks
+        if self._locale:
+            if self._locale.data.query_model.get_currently_obeserved_peak() > min(peaks):
+                self._value = self._locale.data.query_model.observed_peak
         self._value = self._get_peak()
 
     def import_from_service(self, importdto: dict, current:bool = False) -> dict:
