@@ -59,7 +59,8 @@ class CurrentPeak(HubMember):
         if self._locale:
             if self._locale.data.query_model.get_currently_obeserved_peak() > min(peaks):
                 self._value = self._locale.data.query_model.observed_peak
-        self._value = self._get_peak()
+            else:
+                self._value = self._get_peak()
 
     def import_from_service(self, importdto: dict, current:bool = False) -> dict:
         """Import the dict passed from service or on loading hass"""
