@@ -218,6 +218,8 @@ class SE_Gothenburg(Locale_Type):
         )
 
 
+
+
 @dataclass
 class SE_Ellevio(Locale_Type):
     # docs: https://www.ellevio.se/privat/om-din-el/forsta-din-elkostnad/ny-prismodell-for-elnatet/
@@ -423,13 +425,106 @@ class SE_Malarenergi(Locale_Type):
 
 
 @dataclass
-class SE_TekniskaVerken_Link(Locale_Type):
+class SE_TekniskaVerken_TARIFF_1(Locale_Type):
+    """the basic version with summer and winter-prices."""
     def __post_init__(self):
-        self.observed_peak = QueryType.Max
-        self.charged_peak = QueryType.Max
-        self.query_model = QUERYTYPES[QueryType.Max]
+        self.observed_peak = QueryType.AverageOfFiveDays
+        self.charged_peak = QueryType.AverageOfFiveDays
+        self.query_model = QUERYTYPES[QueryType.AverageOfFiveDays]
+        self.price = LocalePrice(
+            price_type=PriceType.Seasoned,
+            currency="SEK",
+            _values=[
+                SeasonedPrice(
+                    validity=TimePattern(
+                        [
+                            {
+                                CalendarPeriods.Month: [4,5,6,7,8,9,10],
+                                CalendarPeriods.Weekday: [0, 1, 2, 3, 4, 5, 6],
+                                CalendarPeriods.Hour: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
+                            }
+                        ]
+                    ),
+                    value=30,
+                ),
+                SeasonedPrice(
+                    validity=TimePattern(
+                        [
+                            {
+                                CalendarPeriods.Month: [11,12,1,2,3],
+                                CalendarPeriods.Weekday: [0, 1, 2, 3, 4, 5, 6],
+                                CalendarPeriods.Hour: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
+                            }
+                        ]
+                    ),
+                    value=60
+                )
+            ],
+            )
+    # docs:https://www.tekniskaverken.se/privat/elnat/prismodell/
 
-    # docs: unknown
+@dataclass
+class SE_TekniskaVerken_TARIFF_2(Locale_Type):
+    """the more advanced version with summer and winter-prices  aswell as night/day prices."""
+    def __post_init__(self):
+        self.observed_peak = QueryType.AverageOfFiveDays
+        self.charged_peak = QueryType.AverageOfFiveDays
+        self.query_model = QUERYTYPES[QueryType.AverageOfFiveDays]
+        self.price = LocalePrice(
+            price_type=PriceType.Seasoned,
+            currency="SEK",
+            _values=[
+                SeasonedPrice(
+                    validity=TimePattern(
+                        [
+                            {
+                                CalendarPeriods.Month: [4,5,6,7,8,9,10],
+                                CalendarPeriods.Weekday: [0, 1, 2, 3, 4, 5, 6],
+                                CalendarPeriods.Hour: [6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22],
+                            }
+                        ]
+                    ),
+                    value=28,
+                ),
+                SeasonedPrice(
+                    validity=TimePattern(
+                        [
+                            {
+                                CalendarPeriods.Month: [11,12,1,2,3],
+                                CalendarPeriods.Weekday: [0, 1, 2, 3, 4, 5, 6],
+                                CalendarPeriods.Hour: [6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22],
+                            }
+                        ]
+                    ),
+                    value=56
+                ),
+                SeasonedPrice(
+                    validity=TimePattern(
+                        [
+                            {
+                                CalendarPeriods.Month: [4,5,6,7,8,9,10],
+                                CalendarPeriods.Weekday: [0, 1, 2, 3, 4, 5, 6],
+                                CalendarPeriods.Hour: [23,0,1,2,3,4,5],
+                            }
+                        ]
+                    ),
+                    value=14,
+                ),
+                SeasonedPrice(
+                    validity=TimePattern(
+                        [
+                            {
+                                CalendarPeriods.Month: [11,12,1,2,3],
+                                CalendarPeriods.Weekday: [0, 1, 2, 3, 4, 5, 6],
+                                CalendarPeriods.Hour: [23,0,1,2,3,4,5],
+                            }
+                        ]
+                    ),
+                    value=28
+                )
+            ],
+            )
+    # docs:https://www.tekniskaverken.se/privat/elnat/prismodell/
 
 
 @dataclass
