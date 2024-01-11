@@ -52,10 +52,7 @@ class CurrentPeak:
 
     def _refresh_peak(self) -> None:
         cc = self._locale.data.query_model.get_currently_obeserved_peak(self.dt)
-        print(f"cc is {cc}")
-        print(self._peaks)
-        if cc > min(self._peaks):
-            print(f"setting value to {self._locale.data.query_model.observed_peak} (secondary)")
+        if len(self._peaks) and cc > min(self._peaks):
             self._value = self._locale.data.query_model.observed_peak
         else:
             self._value = self._get_peak()
