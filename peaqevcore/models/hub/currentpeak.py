@@ -1,22 +1,31 @@
 import logging
 from datetime import datetime
-from .hubmember import HubMember
 from ...services.locale.Locale import LocaleData
 from statistics import mean
 _LOGGER = logging.getLogger(__name__)
 
 EXPORT_FACTOR = 0.9
 
-class CurrentPeak(HubMember):
-    def __init__(self, data_type: type, initval, startpeaks:dict, locale: LocaleData, options_use_history: bool = False):
+class CurrentPeak:
+    def __init__(self, data_type: type, initval, startpeaks:dict, locale: LocaleData, options_use_history: bool = False, mock_dt: datetime | None = None):
         self._options_peaks: dict = startpeaks
         self._value = initval
         self._history: dict[str, list[float|int]] = {}
         self._locale: LocaleData = locale
+        self._peaks: list[float|int] = []
         self._active: bool = options_use_history
-        super().__init__(data_type, initval)
+        self.mock_dt: datetime | None = mock_dt
+        
+    @property
+    def dt(self) -> datetime:
+        return self.mock_dt if self.mock_dt is not None else datetime.now()
 
-    @HubMember.value.setter
+    @property
+    def value(self): # type: ignore
+        self._refresh_peak()
+        return self._value
+
+    @value.setter
     def value(self, val): # pylint:disable=invalid-overridden-method
         self._value = val
         self.update_history([val] if not isinstance(val, list) else val)
@@ -25,10 +34,36 @@ class CurrentPeak(HubMember):
     def history(self) -> dict:
         return self._history
 
+    def _make_key(self, year = None) -> str:
+        if year is None:
+            year = self.dt.year
+        return f"{str(year)}_{str(self.dt.month)}"
+
+    async def async_update(self, peaks: list) -> None:
+        self.update_history(peaks)
+
+    def update_history(self, peaks: list) -> None:
+        self._peaks.extend(peaks) if isinstance(peaks, list) else self._peaks.append(peaks)
+        current_key = self._make_key()
+        if current_key not in self._history:
+            self._history[current_key] = []
+        self._history[current_key].extend(self._peaks)
+        self._refresh_peak()
+
+    def _refresh_peak(self) -> None:
+        cc = self._locale.data.query_model.get_currently_obeserved_peak(self.dt)
+        print(f"cc is {cc}")
+        print(self._peaks)
+        if cc > min(self._peaks):
+            print(f"setting value to {self._locale.data.query_model.observed_peak} (secondary)")
+            self._value = self._locale.data.query_model.observed_peak
+        else:
+            self._value = self._get_peak()
+
     def _get_peak(self) -> float:
         try:
-            options_start = self._options_peaks.get(datetime.now().month, self._options_peaks.get(str(datetime.now().month), 0))
-            past_key = self._make_key(datetime.now().year - 1)
+            options_start = self._options_peaks.get(self.dt.month, self._options_peaks.get(str(self.dt.month), 0))
+            past_key = self._make_key(self.dt.year - 1)
             current_key = self._make_key()
             past_mean = mean(self._history.get(past_key, [0]))
             current_mean = mean(self._history.get(current_key, [0]))
@@ -42,21 +77,6 @@ class CurrentPeak(HubMember):
         except Exception as e:
             _LOGGER.error(f"Error in get_peak: {e}")
             return 0
-    
-    @staticmethod
-    def _make_key(year = datetime.now().year) -> str:
-        return f"{str(year)}_{str(datetime.now().month)}"
-
-    async def async_update(self, peaks: list) -> None:
-        self.update_history(peaks)
-
-    def update_history(self, peaks: list) -> None:
-        _key = self._make_key()
-        self._history[_key] = peaks
-        if self._locale.data.query_model.get_currently_obeserved_peak() > min(peaks):
-            self._value = self._locale.data.query_model.observed_peak
-        else:
-            self._value = self._get_peak()
 
     def import_from_service(self, importdto: dict, current:bool = False) -> dict:
         """Import the dict passed from service or on loading hass"""
@@ -111,8 +131,8 @@ class CurrentPeak(HubMember):
             _month = int(_components[1])
             if any(
                 [
-                    _year > datetime.now().year, 
-                    _year == datetime.now().year and _month > datetime.now().month
+                    _year > self.dt.year, 
+                    _year == self.dt.year and _month > self.dt.month
                 ]):
                 validation_errors.append(f"Period is in the future. Cannot add to history: {monthkey}")
                 return False

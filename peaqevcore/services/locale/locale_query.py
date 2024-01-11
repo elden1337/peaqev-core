@@ -12,6 +12,17 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class ILocaleQuery:
+
+    @property
+    @abstractmethod
+    def dt(self) -> datetime:
+        pass
+
+
+    @abstractmethod
+    def set_mock_dt(self, val: datetime | None):
+        pass
+
     @abstractmethod
     def reset(self) -> None:
         pass
@@ -86,6 +97,14 @@ class LocaleQuery(ILocaleQuery):
         self._sum_counter: SumCounter | None = sum_counter
         self._observed_peak_value: float = 0
         self._charged_peak_value: float = 0
+        self._mock_dt: datetime | None = None
+
+    def set_mock_dt(self, val: datetime | None):
+        self._mock_dt = val
+
+    @property
+    def dt(self) -> datetime:
+        return self._mock_dt if self._mock_dt is not None else datetime.now()
 
     @property
     def peaks(self) -> PeaksModel:
@@ -121,7 +140,7 @@ class LocaleQuery(ILocaleQuery):
         ret = (
             self.charged_peak
             if self._props.sumtype is SumTypes.Max
-            else self.get_currently_obeserved_peak()
+            else self.get_currently_obeserved_peak(self.dt)
         )
         try:
             return round(ret, 2)
@@ -137,6 +156,7 @@ class LocaleQuery(ILocaleQuery):
         """gets the currently observed peak value for non-max type models. If daily max, override if the max registered today is higher."""
         if self.sum_counter.groupby == TimePeriods.Daily:
             if timestamp.day in [k[0] for k in self._peaks.p.keys()]:
+                print(f"exists as :{[v for k, v in self._peaks.p.items() if k[0] == timestamp.day][0]}. observed is {self._observed_peak_value}")
                 return max([v for k, v in self._peaks.p.items() if k[0] == timestamp.day][0], self._observed_peak_value)
         return self._observed_peak_value
 
