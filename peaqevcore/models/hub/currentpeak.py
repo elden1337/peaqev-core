@@ -42,13 +42,22 @@ class CurrentPeak:
     async def async_update(self, peaks: list) -> None:
         self.update_history(peaks)
 
-    def update_history(self, peaks: list) -> None:
-        self._peaks.extend(peaks) if isinstance(peaks, list) else self._peaks.append(peaks)
-        current_key = self._make_key()
-        if current_key not in self._history:
-            self._history[current_key] = []
-        self._history[current_key].extend(self._peaks)
+    # def update_history(self, peaks: list) -> None:
+    #     self._peaks.extend(peaks) if isinstance(peaks, list) else self._peaks.append(peaks)
+    #     current_key = self._make_key()
+    #     if current_key not in self._history:
+    #         self._history[current_key] = []
+    #     self._history[current_key].extend(self._peaks)
+    #     self._refresh_peak()
+
+    def update_history(self, peaks: list) -> None:	
+        _key = self._make_key()	
+        self._history[_key] = peaks	
         self._refresh_peak()
+        # if self._locale.data.query_model.get_currently_obeserved_peak() > min(peaks):	
+        #     self._value = self._locale.data.query_model.observed_peak	
+        # else:	
+        #     self._value = self._get_peak()
 
     def _refresh_peak(self) -> None:
         cc = self._locale.data.query_model.get_currently_obeserved_peak(self.dt)
