@@ -356,6 +356,32 @@ class SE_Bjerke_Energi(Locale_Type):
     This does not affect the peak, but should in future 
     """
 
+@dataclass
+class SE_Vaxjo_Veab(Locale_Type):
+    #docs: https://www.veab.se/privat/elnat/sa-fungerar-effektabonnemang/
+    def __post_init__(self):
+        self.observed_peak = QueryType.AverageOfThreeDays
+        self.charged_peak = QueryType.AverageOfThreeDays
+        self.query_model = QUERYTYPES[QueryType.AverageOfThreeDays]
+        self.price = LocalePrice(
+            price_type=PriceType.Static, 
+            value=42, 
+            currency="SEK"
+            )
+        self.free_charge_pattern = TimePattern([
+            {
+                CalendarPeriods.Month: [*range(1, 12)],
+                CalendarPeriods.Weekday: [0,1,2,3,4],
+                CalendarPeriods.Hour: [21,22,23,0,1,2,3,4,5,6],
+            },
+            {
+                CalendarPeriods.Month: [*range(1, 12)],
+                CalendarPeriods.Weekday: [5,6],
+                CalendarPeriods.Hour: [*range(0, 24)],
+            }
+        ])
+
+
 
 @dataclass
 class SE_Telge_Energi(Locale_Type):

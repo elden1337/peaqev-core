@@ -26,6 +26,7 @@ from .countries.sweden import (
     SE_Eskilstuna,
     SE_Ellevio,
     SE_JBF,
+    SE_Vaxjo_Veab
     # SE_Telge_Energi
 )
 from .countries.norway import (
@@ -73,6 +74,7 @@ LOCALE_NO_MELLOM = "Mellom, Norway"
 LOCALE_NO_ASKER = "Asker Nett, Norway"
 LOCALE_SE_ELLEVIO = "Ellevio, Sweden"
 LOCALE_SE_JBF = "Jukkasjärvi (JBF), Sweden"
+LOCALE_SE_VAXJO = "Växjö, Sweden (VEAB)"
 
 LOCALETYPEDICT = {
     LOCALE_DEFAULT: Default,
@@ -105,6 +107,7 @@ LOCALETYPEDICT = {
     LOCALE_NO_ASKER: NO_AskerNett,
     LOCALE_SE_ELLEVIO: SE_Ellevio,
     LOCALE_SE_JBF: SE_JBF,
+    LOCALE_SE_VAXJO: SE_Vaxjo_Veab,
 }
 
 """Lookup locales for config flow"""
@@ -135,6 +138,7 @@ LOCALES = [
     LOCALE_SE_SOLLENTUNA,
     LOCALE_SE_TEKNISKA_VERKEN_TARIFF_1,
     LOCALE_SE_TEKNISKA_VERKEN_TARIFF_2,
+    LOCALE_SE_VAXJO,
     LOCALE_DEFAULT,
     LOCALE_NO_PEAK,
 ]
