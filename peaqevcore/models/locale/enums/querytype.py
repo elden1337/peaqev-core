@@ -5,3 +5,4 @@ class QueryType(Enum):
     AverageOfThreeDays = 1
     AverageOfFiveDays = 2
     Max = 3
+    MaxByMany = 4

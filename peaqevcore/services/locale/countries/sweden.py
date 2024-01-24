@@ -16,7 +16,10 @@ from ..querytypes.querysets import QUERYSETS
 from ..querytypes.querytypes import QUERYTYPES
 from dataclasses import dataclass
 from ..locale_model import Locale_Type
-
+from ....models.locale.enums.querytype import QueryType
+from ....models.locale.enums.sum_types import SumTypes
+from ....models.locale.enums.time_periods import TimePeriods
+from ..locale_query import LocaleQuery
 
 @dataclass
 class SE_Sollentuna(Locale_Type):
@@ -489,13 +492,39 @@ class SE_TekniskaVerken_TARIFF_1(Locale_Type):
             )
     # docs:https://www.tekniskaverken.se/privat/elnat/prismodell/
 
+
+
 @dataclass
 class SE_TekniskaVerken_TARIFF_2(Locale_Type):
     """the more advanced version with summer and winter-prices  aswell as night/day prices."""
     def __post_init__(self):
-        self.observed_peak = QueryType.AverageOfFiveDays
-        self.charged_peak = QueryType.AverageOfFiveDays
-        self.query_model = QUERYTYPES[QueryType.AverageOfFiveDays]
+        self.observed_peak = QueryType.MaxByMany
+        self.charged_peak = QueryType.MaxByMany
+        self.query_model = LocaleQuery(
+        sum_type=SumTypes.MaxByMany,
+        time_calc=TimePeriods.Hourly,
+        cycle=TimePeriods.Monthly,
+        multi_peaks = {
+            "low": TimePattern(
+                        [
+                            {
+                                CalendarPeriods.Month: [*range(1, 13)],
+                                CalendarPeriods.Weekday: [*range(0, 7)],
+                                CalendarPeriods.Hour: [23,0,1,2,3,4,5],
+                            }
+                        ]
+                    ),
+            "high": TimePattern(
+                        [
+                            {
+                                CalendarPeriods.Month: [*range(1, 13)],
+                                CalendarPeriods.Weekday: [*range(0, 7)],
+                                CalendarPeriods.Hour: [6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22],
+                            }
+                        ]
+                    ),
+        }
+    )
         self.price = LocalePrice(
             price_type=PriceType.Seasoned,
             currency="SEK",

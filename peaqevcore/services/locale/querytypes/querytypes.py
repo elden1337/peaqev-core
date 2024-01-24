@@ -25,5 +25,5 @@ QUERYTYPES = {
         time_calc=TimePeriods.Hourly,
         cycle=TimePeriods.Monthly,
         sum_counter=SumCounter(counter=5, groupby=TimePeriods.Daily),
-    ),
+    )
 }
