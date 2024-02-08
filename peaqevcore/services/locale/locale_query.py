@@ -1,6 +1,7 @@
 from datetime import datetime
 import logging
 from abc import abstractmethod
+from typing import Tuple
 from .querytypes.queryservice import QueryService
 from ...models.locale.peaks_model import PeaksModel
 from ...models.locale.enums.sum_types import SumTypes
@@ -14,12 +15,12 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class ILocaleQuery:
+    _multi_peaks: dict[str, TimePattern] = {}
 
     @property
     @abstractmethod
     def dt(self) -> datetime:
         pass
-
 
     @abstractmethod
     def set_mock_dt(self, val: datetime | None):
@@ -50,14 +51,8 @@ class ILocaleQuery:
         pass
 
     @property
-    @abstractmethod
     def multi_peaks(self) -> dict:
-        pass
-
-    @multi_peaks.setter
-    @abstractmethod
-    def multi_peaks(self, value: dict):
-        pass
+        return self._multi_peaks
 
     @abstractmethod
     def _sanitize_values(self):
@@ -65,6 +60,10 @@ class ILocaleQuery:
 
     @abstractmethod
     async def async_reset(self) -> None:
+        pass
+
+    @abstractmethod
+    async def async_import_from_service(self, input_dict: dict) -> dict:
         pass
 
     @abstractmethod
@@ -95,6 +94,10 @@ class ILocaleQuery:
     def get_currently_obeserved_peak(self, timestamp: datetime = datetime.now()) -> float:
         pass
 
+    @property
+    @abstractmethod
+    def peaks_service(self) -> PeaksSelectorService:
+        pass
 
 
 class LocaleQuery(ILocaleQuery):
@@ -112,9 +115,15 @@ class LocaleQuery(ILocaleQuery):
         self._observed_peak_value: float = 0
         self._charged_peak_value: float = 0
         self._mock_dt: datetime | None = None
+        self._multi_peaks = multi_peaks
 
     def set_mock_dt(self, val: datetime | None):
         self._mock_dt = val
+        self._peaksservice.set_mock_dt(val)
+
+    @property
+    def peaks_service(self) -> PeaksSelectorService:
+        return self._peaksservice
 
     @property
     def dt(self) -> datetime:
@@ -122,7 +131,7 @@ class LocaleQuery(ILocaleQuery):
 
     @property
     def peaks(self) -> PeaksModel:
-        if self._peaksservice.peaks.is_dirty:
+        if self._peaksservice.peaks.is_dirty or self._props.sumtype is SumTypes.MaxByMany:
             self._sanitize_values()
         return self._peaksservice.peaks
 
@@ -134,7 +143,7 @@ class LocaleQuery(ILocaleQuery):
 
     @property
     def charged_peak(self) -> float:
-        if self._peaksservice.peaks.is_dirty:
+        if self._peaksservice.peaks.is_dirty or self._props.sumtype is SumTypes.MaxByMany:
             self._sanitize_values()
         ret = self._charged_peak_value
         try:
@@ -149,11 +158,11 @@ class LocaleQuery(ILocaleQuery):
 
     @property
     def observed_peak(self) -> float:
-        if self._peaksservice.peaks.is_dirty:
+        if self._peaksservice.peaks.is_dirty or self._props.sumtype is SumTypes.MaxByMany:
             self._sanitize_values()
 
         match self._props.sumtype:
-            case SumTypes.Max:
+            case SumTypes.Max | SumTypes.MaxByMany:
                 ret = self.charged_peak
             case _:
                 ret = self.get_currently_obeserved_peak(self.dt)  
@@ -177,21 +186,25 @@ class LocaleQuery(ILocaleQuery):
     def _sanitize_values(self):
         countX = lambda arr, x: len([a for a in arr if a[0] == x])
         if self.sum_counter.groupby == TimePeriods.Daily:
-            duplicates = {}
+            duplicates = dict[Tuple[int, int], float]()
             for k in self._peaksservice.peaks.p.keys():
                 if countX(self._peaksservice.peaks.p.keys(), k[0]) > 1:
                     duplicates[k] = self._peaksservice.peaks.p[k]
             if len(duplicates):
-                self._peaksservice.peaks.p.pop(min(duplicates))
+                minkey = min(duplicates, key=duplicates.get) #type: ignore
+                self._peaksservice.peaks.p.pop(minkey)
         while len(self._peaksservice.peaks.p) > self.sum_counter.counter:
             self._peaksservice.peaks.remove_min()
         self._peaksservice.peaks.is_dirty = False
 
-        if self._props.sumtype is SumTypes.Max:
-            self.charged_peak = self._peaksservice.peaks.max_value
-        elif self._props.sumtype is SumTypes.Avg:
-            self.observed_peak = self._peaksservice.peaks.min_value
-            self.charged_peak = self._peaksservice.peaks.value_avg
+        match self._props.sumtype:
+            case SumTypes.Max | SumTypes.MaxByMany:
+                self.charged_peak = self._peaksservice.peaks.max_value
+            case SumTypes.Avg:
+                self.observed_peak = self._peaksservice.peaks.min_value
+                self.charged_peak = self._peaksservice.peaks.value_avg
+            case _:
+                raise NotImplementedError
 
     async def async_reset(self) -> None:
         await self._peaksservice.peaks.async_reset()
@@ -203,7 +216,6 @@ class LocaleQuery(ILocaleQuery):
 
     async def async_try_update(self, new_val, timestamp: datetime | None = None):
         _timestamp = timestamp or datetime.now()
-
         if not await self._props.queryservice.async_should_register_peak(dt=_timestamp):
             return
         _dt = (_timestamp.day, _timestamp.hour)
@@ -221,11 +233,21 @@ class LocaleQuery(ILocaleQuery):
         await self.async_update_peaks()
 
     async def async_import_from_service(self, input_dict: dict) -> dict:
-        """already good to go"""
-        decorated_dict = {"m": datetime.now().month, "p": input_dict}
+        if not self._match_multi_peaks(self.multi_peaks, input_dict):
+            return {}
+        
+        decorated_dict = {"m": self.dt.month, "p": input_dict}
         await self.peaks.async_set_init_dict(decorated_dict)
         #await self.async_update_peaks()
         return decorated_dict
+
+    def _match_multi_peaks(self, multi_peaks:dict, input:dict) -> bool:
+        if not len(multi_peaks.keys()):
+            return True
+        for k in multi_peaks.keys():
+            if not k in input.keys():
+                return False
+        return True
 
     async def async_set_update_for_groupby(self, new_val, dt):
         if self.sum_counter.groupby in [TimePeriods.Daily, TimePeriods.UnSet]:
@@ -261,7 +283,7 @@ class LocaleQuery(ILocaleQuery):
                 if countX(self._peaksservice.peaks.p.keys(), k[0]) > 1:
                     duplicates[k] = self._peaksservice.peaks.p[k]
             if len(duplicates):
-                minkey = min(duplicates)
+                minkey = min(duplicates, key=duplicates.get) #type: ignore
                 self._peaksservice.peaks.p.pop(minkey)
         while len(self._peaksservice.peaks.p) > self.sum_counter.counter:
             await self._peaksservice.peaks.async_remove_min()

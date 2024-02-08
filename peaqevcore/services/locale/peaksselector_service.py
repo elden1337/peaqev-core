@@ -30,10 +30,11 @@ class PeaksSelectorService:
         """get the key which is currently observed"""
         if not len(self._multi_peaks):
             return self._peaks
-        if len(self._all_peaks) == 1:
-            return list(self._all_peaks.values())[0]
+        # if len(self._all_peaks) == 1:
+        #     return list(self._all_peaks.values())[0]
         for k, v in self._multi_peaks.items():
             if v.valid(self.dt):
+                #print(f"valid: {k} for {self.dt}")
                 if k not in self._all_peaks:
                     self._all_peaks[k] = PeaksModel({})
                 return self._all_peaks[k]

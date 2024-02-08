@@ -52,20 +52,20 @@ class PeaksModel:
 
     async def async_set_init_dict(self, dict_data: dict, dt=datetime.now(), override:bool = False) -> None:
         ppdict = dict()
-        self._m = dict_data.get("m")
+        self._m = dict_data["m"]
         if dt.month != self.m:
             await self.async_reset()
         else:
-            for pp in dict_data.get("p"):
+            for pp in dict_data["p"]:
                 tkeys = pp.split("h")
                 ppkey = (int(tkeys[0]), int(tkeys[1]))
-                p: dict = dict_data.get("p")
+                p: dict = dict_data["p"]
                 ppdict[ppkey] = p.get(pp)
             if len(self._p) and not override:
                 self._p = dict(self._p.items() | ppdict.items())
             else:
                 self._p = ppdict
-            self._m = dict_data.get("m")
+            self._m = dict_data["m"]
             self.is_dirty = True
 
     async def async_add_kv_pair(self, key: any, value: any) -> dict:

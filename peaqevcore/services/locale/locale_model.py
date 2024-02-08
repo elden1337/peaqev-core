@@ -46,7 +46,6 @@ class Locale_Type:
     @abstractmethod
     def query_model(self) -> ILocaleQuery:
         return self._query_model
-
     
     @query_model.setter
     @abstractmethod
