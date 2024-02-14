@@ -87,8 +87,6 @@ class HourSelectionService:
         self.model.prices_today = prices  # clean first
         self.model.prices_tomorrow = prices_tomorrow  # clean first
         if do_recalculate_prices(price_dict=price_dict, hours_prices=self.model.hours_prices, hdate=self.dtmodel.hdate):
-            print(f"do recalculate prices {len(prices)} {len(prices_tomorrow)}")
-            _LOGGER.debug(f"do recalculate prices {len(prices)} {len(prices_tomorrow)}")
             self._create_prices(prices, prices_tomorrow)
         else:
             print(f"NOT recalculate prices {len(prices)} {len(prices_tomorrow)}")

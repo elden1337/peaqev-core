@@ -105,7 +105,7 @@ class HourSelectionServiceModel:
             self.hours_prices.extend(ret)
         else:
             self.hours_prices = ret
-        print(len(ret))
+        #print(len(ret))
 
     def get_offset_dict(self, dt_date: datetime) -> dict:
         return get_offset_dict(self.offset_dict, dt_date)

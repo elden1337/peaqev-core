@@ -96,7 +96,9 @@ class MaxMinCharge:
         _desired: float = min([desired_charge, _original_charge])
         while _total_charge < _desired:
             hours.sort(key=lambda x: (x.price,x.dt))
+            print("------")
             for hour in hours:
+                #print(f"checking hour {hour.dt} {hour.price}, init: {hour.permittance}")
                 if any([hour.passed, hour.permittance == 0, _total_charge >= _desired, hour.hour_type is HourType.AboveMax]):
                     hour.permittance = 0
                     continue
