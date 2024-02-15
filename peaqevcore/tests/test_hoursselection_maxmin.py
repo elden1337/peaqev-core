@@ -1,6 +1,8 @@
 from datetime import date, datetime, timedelta
 import pytest
 import statistics as stat
+
+from ..services.hoursselection_service_new.models.permittance_type import PermittanceType
 from ..services.hourselection.hoursselection import Hoursselection as h
 from ..common.enums.cautionhourtype import CautionHourType
 from ..models.hourselection.topprice_type import TopPriceType
@@ -421,8 +423,23 @@ async def test_too_few_hours():
     await r.service.max_min.async_update(936, peak, 0)
     assert [hour.permittance for hour in r.future_hours] == before_hours
     print(sum([hour.permittance for hour in r.future_hours]))
-    assert 1 > 2
-    
+    #assert 1 > 2
+
+@pytest.mark.asyncio
+async def test_cap_hours_keep_cap():
+    r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=3, min_price=0.1)
+    peak = 2.05
+    await r.async_update_adjusted_average(1.04)
+    await r.async_update_top_price(0.93)
+    r.service.dtmodel.set_datetime(datetime(2024, 2, 15, 13, 8, 0))
+    await r.async_update_prices(P240215, P240214)
+    assert all(hour.permittance_type is PermittanceType.Regular for hour in r.future_hours)
+    await r.service.max_min.async_setup(peak)
+    await r.service.max_min.async_update(936, peak, 4, car_connected=True)
+    assert max([hour.dt for hour in r.service.display_future_hours if hour.permittance_type is PermittanceType.MaxMin]) == datetime(2024,2,16,9,0,0)
+    r.service.dtmodel.set_datetime(datetime(2024, 2, 16, 0, 8, 0))
+    await r.service.max_min.async_update(930, peak, 4, car_connected=True)
+    assert max([hour.dt for hour in r.service.display_future_hours if hour.permittance_type is PermittanceType.MaxMin]) == datetime(2024,2,16,9,0,0)
 
 
 @pytest.mark.asyncio

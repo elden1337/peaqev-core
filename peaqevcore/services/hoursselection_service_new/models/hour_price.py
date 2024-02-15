@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from datetime import date, datetime, time
+from .permittance_type import PermittanceType
 from .hour_type import HourType
 from .list_type import ListType
 from .datetime_model import DateTimeModel
@@ -14,6 +15,7 @@ class HourPrice:
     passed: bool = False
     hour_type: HourType = HourType.Regular
     list_type: ListType = ListType.Hourly
+    permittance_type: PermittanceType = PermittanceType.Regular
 
     @property
     def hour(self) -> int:

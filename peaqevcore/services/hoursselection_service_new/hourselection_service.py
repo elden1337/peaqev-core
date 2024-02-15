@@ -36,7 +36,7 @@ class HourSelectionService:
 
     @property
     def display_future_hours(self) -> list[HourPrice]:
-        if self.max_min.active and not self.max_min.overflow:
+        if self.max_min.active:
             return self.max_min.future_hours(self.dtmodel)
         return self.future_hours
 
