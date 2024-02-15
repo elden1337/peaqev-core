@@ -25,8 +25,6 @@ def do_recalculate_prices(price_dict: dict, hours_prices: list[HourPrice], hdate
         return True
     for d in price_dict.items():
         if d[0] not in [hp.dt for hp in hours_prices]:
-            # print(f"{d[0]} is not in hours_prices")
-            # print(f"hours_prices is {hours_prices}")
             return True
     return False
     

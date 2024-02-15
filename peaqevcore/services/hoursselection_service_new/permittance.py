@@ -103,9 +103,12 @@ def discard_peaks(hour_prices: list[HourPrice]) -> None:
     else:
         _set_peak_permittance(hour_prices)
 
-def _set_peak_permittance(hour_prices: list[HourPrice]) -> None:
+def _set_peak_permittance(hour_prices: list[HourPrice], threshold: float = 0.05) -> None:
     for i in range(1, len(hour_prices) - 1):
-        if hour_prices[i].price > hour_prices[i-1].price and hour_prices[i].price > hour_prices[i+1].price:
+        prev_price = hour_prices[i-1].price
+        current_price = hour_prices[i].price
+        next_price = hour_prices[i+1].price
+        if current_price > prev_price * (1 + threshold) and current_price > next_price * (1 + threshold):
             if hour_prices[i].hour_type != HourType.BelowMin:
                 hour_prices[i].permittance = 0.0
 
