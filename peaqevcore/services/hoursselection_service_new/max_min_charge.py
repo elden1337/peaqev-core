@@ -96,7 +96,7 @@ class MaxMinCharge:
             case 9|10|11|12|13|14|15|16|17|18|19|20|21|22|23:
                 end_hour = (current_hour + timedelta(days=1)).replace(hour=9)
             case 0|1|2|3|4|5|6|7|8:
-                end_hour = (current_hour + timedelta(days=1)).replace(hour=18)    
+                end_hour = (current_hour).replace(hour=18)    
         return [x for x in hours if x.dt <= end_hour]
 
     def select_hours_for_charge(
