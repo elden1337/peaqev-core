@@ -88,16 +88,28 @@ class MaxMinCharge:
             return original - adjusted < limiter
         return False
 
+    def _cap_future_hours(self, hours: list[HourPrice]) -> list[HourPrice]:
+        print("updating capped hours")
+        current_hour = min([x.dt for x in hours if not x.passed])
+        end_hour = datetime.max
+        match current_hour.hour:
+            case 9|10|11|12|13|14|15|16|17|18|19|20|21|22|23:
+                end_hour = (current_hour + timedelta(days=1)).replace(hour=9)
+            case 0|1|2|3|4|5|6|7|8:
+                end_hour = (current_hour + timedelta(days=1)).replace(hour=18)    
+        return [x for x in hours if x.dt <= end_hour]
+
     def select_hours_for_charge(
         self, hours: list[HourPrice], desired_charge: float
     ) -> None:
-        _original_charge = self._get_charge_sum(hours)
+        _capped_hours = self._cap_future_hours(hours)
+        _original_charge = self._get_charge_sum(_capped_hours)
         _total_charge: float = 0
         _desired: float = min([desired_charge, _original_charge])
         while _total_charge < _desired:
-            hours.sort(key=lambda x: (x.price,x.dt))
-            print("------")
-            for hour in hours:
+            _capped_hours.sort(key=lambda x: (x.price,x.dt))
+            #print("------")
+            for hour in _capped_hours:
                 #print(f"checking hour {hour.dt} {hour.price}, init: {hour.permittance}")
                 if any([hour.passed, hour.permittance == 0, _total_charge >= _desired, hour.hour_type is HourType.AboveMax]):
                     hour.permittance = 0
@@ -112,9 +124,17 @@ class MaxMinCharge:
                 )
                 _total_charge += _hour_charge * _perm
                 hour.permittance = round(_perm, 2)
-                if self._get_charge_sum(hours) <= desired_charge:
+                if self._get_charge_sum(_capped_hours) <= desired_charge:
                     break
-        self.model.input_hours = hours
+
+        self.model.input_hours = self._combine_hour_lists(hours, _capped_hours)
+
+    def _combine_hour_lists(self, hours: list[HourPrice], capped_hours: list[HourPrice]) -> list[HourPrice]:
+        capped_hours_dict = {x.dt: x for x in capped_hours}
+        for i, hour in enumerate(hours):
+            if hour.dt in capped_hours_dict:
+                hours[i] = capped_hours_dict[hour.dt]
+        return hours
 
     def _get_charge_sum(self, hours: list[HourPrice]) -> float:
         return sum(

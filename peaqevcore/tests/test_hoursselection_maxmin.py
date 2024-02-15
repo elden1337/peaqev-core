@@ -226,6 +226,7 @@ P230512 = [
 ]
 P240213 = [0.98,0.97,0.94,0.91,0.9,0.77,0.98,1.11,1.29,1.1,1.02,0.98,0.93,0.92,0.96,1.04,1.14,1.37,1.44,1.32,1.14,1.06,1.01,0.96]
 P240214 = [0.71,0.72,0.71,0.7,0.69,0.71,0.94,1.07,1.17,1.03,0.98,0.97,0.96,0.96,1.02,1.06,1.15,1.21,1.27,1.23,1.12,0.84,0.76,0.72]
+P240215 = [0.93,0.92,0.83,0.83,0.77,0.78,0.93,1.2,1.21,1.16,1.1,1.04,1,0.99,1.04,1.11,1.16,1.24,1.24,1.07,0.99,0.86,0.81,0.76]
 
 @pytest.mark.asyncio
 async def test_230412_maxmin_not_active():
@@ -397,6 +398,31 @@ async def test_issue_325_wrong_hours():
     assert [h.permittance for h in r.future_hours if h.dt == datetime(2024,2,14,3,0,0)][0] > 0
 
     assert(await r.async_get_total_charge(peak) == (15.1, 6.9))
+
+
+@pytest.mark.asyncio
+async def test_too_few_hours():
+    r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=3, min_price=0.1)
+    peak = 2.05
+    await r.async_update_adjusted_average(1.04)
+    await r.async_update_top_price(0.93)
+    r.service.dtmodel.set_datetime(datetime(2024, 2, 15, 13, 8, 0))
+    await r.async_update_prices(P240215)
+    assert(await r.async_get_total_charge(peak) == (10.2, None))
+
+    before_hours = [hour.permittance for hour in r.future_hours]
+    print(sum([hour.permittance for hour in r.future_hours]))
+    await r.service.max_min.async_setup(peak)
+    await r.service.max_min.async_update(936, peak, 2)
+    assert [hour.permittance for hour in r.future_hours] == before_hours
+    print(sum([hour.permittance for hour in r.future_hours]))
+    #assert(await r.async_get_total_charge(peak) == (10.2, 5.8))
+    """deactivate maxmin"""
+    await r.service.max_min.async_update(936, peak, 0)
+    assert [hour.permittance for hour in r.future_hours] == before_hours
+    print(sum([hour.permittance for hour in r.future_hours]))
+    assert 1 > 2
+    
 
 
 @pytest.mark.asyncio
