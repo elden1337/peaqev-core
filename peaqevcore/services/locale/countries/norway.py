@@ -81,5 +81,17 @@ class NO_AskerNett(Locale_Type):
         self.charged_peak = QueryType.AverageOfThreeDays
         self.query_model = QUERYTYPES[QueryType.AverageOfThreeDays]
 
+    # docs: https://askernett.no/ny-nettleiemodell-for-alle-fra-1-juli-2022/
 
-# docs: https://askernett.no/ny-nettleiemodell-for-alle-fra-1-juli-2022/
+
+@dataclass
+class NO_Linja(Locale_Type):
+    def __post_init__(self):
+        self.observed_peak = QueryType.AverageOfThreeDays
+        self.charged_peak = QueryType.AverageOfThreeDays
+        self.query_model = QUERYTYPES[QueryType.AverageOfThreeDays]
+
+    #docs: https://www.morenett.no/informasjon/nettleie-privat
+
+
+

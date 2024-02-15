@@ -39,6 +39,7 @@ from .countries.norway import (
     NO_Tensio,
     NO_BKK,
     NO_AskerNett,
+    NO_Linja
 )
 
 
@@ -75,6 +76,7 @@ LOCALE_NO_ASKER = "Asker Nett, Norway"
 LOCALE_SE_ELLEVIO = "Ellevio, Sweden"
 LOCALE_SE_JBF = "Jukkasjärvi (JBF), Sweden"
 LOCALE_SE_VAXJO = "Växjö, Sweden (VEAB)"
+LOCALE_NO_LINJA ="Linja, Norway"
 
 LOCALETYPEDICT = {
     LOCALE_DEFAULT: Default,
@@ -108,6 +110,7 @@ LOCALETYPEDICT = {
     LOCALE_SE_ELLEVIO: SE_Ellevio,
     LOCALE_SE_JBF: SE_JBF,
     LOCALE_SE_VAXJO: SE_Vaxjo_Veab,
+    LOCALE_NO_LINJA: NO_Linja
 }
 
 """Lookup locales for config flow"""
@@ -117,6 +120,7 @@ LOCALES = [
     LOCALE_NO_BKK,
     LOCALE_NO_ELVIA,
     LOCALE_NO_GLITRE_ENERGI,
+    LOCALE_NO_LINJA,
     LOCALE_NO_LEDE,
     LOCALE_NO_LNETT,
     LOCALE_NO_MELLOM,
