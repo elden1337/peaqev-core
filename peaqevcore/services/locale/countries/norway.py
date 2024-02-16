@@ -102,10 +102,6 @@ class NO_Linja(Locale_Type):
                     value=263,
                 ),
                 TieredPrice(
-                    upper_peak_limit=2,
-                    value=263,
-                ),
-                TieredPrice(
                     upper_peak_limit=5,
                     value=329,
                 ),
@@ -141,7 +137,7 @@ class NO_Linja(Locale_Type):
                     upper_peak_limit=999,
                     value=1973,
                 ),
-            ]
+            ])
             
         """
         Trinn 1	0-2	263

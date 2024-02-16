@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from .models.seasoned_price import SeasonedPrice
 from .models.tiered_price import TieredPrice
 from ..enums.price_type import PriceType
-
+from statistics import mean
 
 @dataclass
 class LocalePrice:
@@ -57,3 +57,22 @@ class LocalePrice:
     def _get_price_tiered(self) -> float:
         for t in [s for s in self._values if isinstance(s, TieredPrice)]:
             pass
+
+    def get_observed_peak(self, peaks: list[float], tiers: list[TieredPrice]) -> float:
+        if self.price_type != PriceType.Tiered:
+            return mean(peaks)
+        
+        limits = [tier.upper_peak_limit for tier in tiers]
+        charged_peak =  mean(peaks)
+        suggest = min([l for l in limits if l > charged_peak]) - 0.1
+        iter = 0
+        replaced_set = peaks
+        if len(peaks) == 1:
+            return round(suggest,1)
+        
+        while True:
+            if mean(replaced_set) > suggest or iter > 1000:
+                break
+            replaced_set = [p+0.1 if p == min(replaced_set) else p for p in replaced_set]
+            iter += 1
+        return round(min(replaced_set),1)

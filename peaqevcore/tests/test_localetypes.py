@@ -13,6 +13,7 @@ from ..services.locale.Locale import (
     LOCALE_SE_SOLLENTUNA,
     LOCALE_DEFAULT,
     LOCALE_NO_PEAK,
+    LOCALE_NO_LINJA,
 )
 from ..services.locale.querytypes.const import (
     QUERYTYPE_AVERAGEOFTHREEDAYS,
@@ -446,3 +447,14 @@ async def test_avg_hourly_observed_peak():
     await p.data.query_model.async_try_update(new_val=4.2, timestamp=datetime.combine(date(2024, 1, 5), time(10, 0)))
     assert p.data.query_model.get_currently_obeserved_peak(datetime.combine(date(2024, 1, 5), time(22, 0))) == 2
     assert p.data.query_model.get_currently_obeserved_peak(datetime.combine(date(2024, 1, 6), time(0, 0))) == 2
+
+
+@pytest.mark.asyncio
+async def test_tiered_pricing():
+    p = await LocaleFactory.async_create(LOCALE_NO_LINJA)
+    await p.data.query_model.async_try_update(new_val=2.05, timestamp=datetime.combine(date(2024, 1, 3), time(10, 0)))
+    await p.data.query_model.async_try_update(new_val=2.7, timestamp=datetime.combine(date(2024, 1, 4), time(10, 0)))
+    await p.data.query_model.async_try_update(new_val=2.81, timestamp=datetime.combine(date(2024, 1, 5), time(10, 0)))
+    #p.data.price.get_observed_peak
+    assert p.data.query_model.get_currently_obeserved_peak(datetime.combine(date(2024, 1, 6), time(0, 0))) == 4.9
+
