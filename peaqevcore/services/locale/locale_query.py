@@ -1,6 +1,8 @@
 from datetime import datetime
 import logging
 from abc import abstractmethod
+
+from ...models.locale.price.locale_price import LocalePrice
 from .querytypes.queryservice import QueryService
 from ...models.locale.peaks_model import PeaksModel
 from ...models.locale.enums.sum_types import SumTypes
@@ -98,6 +100,15 @@ class LocaleQuery(ILocaleQuery):
         self._observed_peak_value: float = 0
         self._charged_peak_value: float = 0
         self._mock_dt: datetime | None = None
+        self._price: LocalePrice = LocalePrice()
+
+    @property
+    def price(self) -> LocalePrice:
+        return self._price
+    
+    @price.setter
+    def price(self, value: LocalePrice):
+        self._price = value
 
     def set_mock_dt(self, val: datetime | None):
         self._mock_dt = val

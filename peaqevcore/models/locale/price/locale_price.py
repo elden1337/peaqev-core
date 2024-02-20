@@ -71,8 +71,9 @@ class LocalePrice:
             return round(suggest,1)
         
         while True:
-            if mean(replaced_set) > suggest or iter > 1000:
+            addition = 1 if suggest - mean(replaced_set) > 10 else 0.1
+            if mean(replaced_set) >= suggest or iter > 1000:
                 break
-            replaced_set = [p+0.1 if p == min(replaced_set) else p for p in replaced_set]
+            replaced_set = [round(p+addition,2) if p == min(replaced_set) else p for p in replaced_set]
             iter += 1
         return round(min(replaced_set),1)

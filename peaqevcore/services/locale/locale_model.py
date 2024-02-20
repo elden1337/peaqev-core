@@ -22,6 +22,9 @@ class Locale_Type:
     _free_charge_pattern = None
     _peak_cycle: TimePeriods = TimePeriods.Hourly
 
+    def __post_init__(self):
+        self.query_model.price = self._price
+
     @property
     @abstractmethod
     def observed_peak(self) -> QueryType:
