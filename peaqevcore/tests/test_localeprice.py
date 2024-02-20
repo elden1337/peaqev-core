@@ -26,27 +26,46 @@ def test_single_peak(localeprice):
     result = localeprice.get_observed_peak(peaks, tiers)
     assert result == 149.9
 
+
 def test_multiple_peaks_same_value(localeprice):
     localeprice.price_type = PriceType.Tiered
     peaks = [100.0, 100.0, 100.0]
     tiers = [TieredPrice(upper_peak_limit=150.0, value=0)]
     result = localeprice.get_observed_peak(peaks, tiers)
-    print(result)
     assert result == 149.9
+
+
+def test_multiple_peaks_almost_same_value(localeprice):
+    localeprice.price_type = PriceType.Tiered
+    peaks = [100.0, 100.0, 99.6]
+    tiers = [TieredPrice(upper_peak_limit=150.0, value=0)]
+    result = localeprice.get_observed_peak(peaks, tiers)
+    assert result == 149.9
+
+
+def test_multiple_peaks_almost_two_min(localeprice):
+    localeprice.price_type = PriceType.Tiered
+    peaks = [100.0, 99.5, 99.6]
+    tiers = [TieredPrice(upper_peak_limit=150.0, value=0)]
+    result = localeprice.get_observed_peak(peaks, tiers)
+    assert result == 149.9
+
 
 def test_multiple_peaks_different_values(localeprice):
     localeprice.price_type = PriceType.Tiered
     peaks = [100.0, 110.0, 120.0]
     tiers = [TieredPrice(upper_peak_limit=150.0, value=0)]
     result = localeprice.get_observed_peak(peaks, tiers)
-    assert result <= 149.9
+    assert result == 149.9
+
 
 def test_multiple_peaks_multiple_tiers(localeprice):
     localeprice.price_type = PriceType.Tiered
     peaks = [100.0, 110.0, 120.0]
     tiers = [TieredPrice(upper_peak_limit=105.0, value=0), TieredPrice(upper_peak_limit=115.0, value=0), TieredPrice(upper_peak_limit=125.0, value=0)]
     result = localeprice.get_observed_peak(peaks, tiers)
-    assert result <= 124.9
+    assert result == 112.3
+
 
 def test_realcase1(localeprice):
     localeprice.price_type = PriceType.Tiered
@@ -54,6 +73,7 @@ def test_realcase1(localeprice):
     tiers = _linja_tiers
     result = localeprice.get_observed_peak(peaks, tiers)
     assert result == 0.5
+    
 
 def test_realcase2(localeprice):
     localeprice.price_type = PriceType.Tiered
@@ -61,6 +81,7 @@ def test_realcase2(localeprice):
     tiers = _linja_tiers
     result = localeprice.get_observed_peak(peaks, tiers)
     assert result == 4.9
+
 
 def test_realcase3(localeprice):
     localeprice.price_type = PriceType.Tiered
