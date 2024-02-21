@@ -102,8 +102,9 @@ class LocaleQuery(ILocaleQuery):
 
         if self.sum_counter.groupby == TimePeriods.Daily:
             if timestamp.day in [k[0] for k in self._peaks.p.keys()]:
-                print(f"exists as :{[v for k, v in self._peaks.p.items() if k[0] == timestamp.day][0]}. observed is {ret}")
+                print(f"exists as :{[v for k, v in self._peaks.p.items() if k[0] == timestamp.day][0]}. observed is {ret}. {self._peaks.p}. timestamp.day: {timestamp.day}")
                 return max([v for k, v in self._peaks.p.items() if k[0] == timestamp.day][0], ret)
+        print("returning observed", self._observed_peak_value)
         return ret
 
     def _sanitize_values(self):

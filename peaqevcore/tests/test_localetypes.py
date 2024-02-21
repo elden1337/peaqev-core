@@ -435,7 +435,7 @@ async def test_avg_daily_same_peak_as_max_today_currentpeak_sensor():
     p.data.query_model.set_mock_dt(datetime(2024, 1, 5, 10, 0))
     c.value = 4.2
     assert c.value == 4.2
-    c.mock_dt = datetime(2024, 1, 6, 0, 0)
+    c.dt = datetime(2024, 1, 6, 0, 0)
     assert c.value == 2
 
 
