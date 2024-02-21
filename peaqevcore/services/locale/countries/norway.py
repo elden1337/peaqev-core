@@ -21,7 +21,31 @@ class NO_LNett(Locale_Type):
         self.observed_peak = QueryType.AverageOfThreeDays
         self.charged_peak = QueryType.AverageOfThreeDays
         self.query_model = QUERYTYPES[QueryType.AverageOfThreeDays]
-
+        self.price = LocalePrice(
+            price_type=PriceType.Tiered,
+            currency="NOK",
+            _values=[
+                TieredPrice(
+                    upper_peak_limit=5,
+                    value=285,
+              ),
+              TieredPrice(
+                    upper_peak_limit=10,
+                    value=435,
+              ),
+              TieredPrice(
+                    upper_peak_limit=15,
+                    value=585,
+              ),
+              TieredPrice(
+                    upper_peak_limit=20,
+                    value=735,
+              ),
+              TieredPrice(
+                    upper_peak_limit=25,
+                    value=885,
+              )
+            ])
 
 # docs: https://www.l-nett.no/nynettleie/slik-blir-ny-nettleie-og-pris
 
