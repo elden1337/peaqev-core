@@ -83,7 +83,51 @@ class NO_AskerNett(Locale_Type):
         self.observed_peak = QueryType.AverageOfThreeDays
         self.charged_peak = QueryType.AverageOfThreeDays
         self.query_model = QUERYTYPES[QueryType.AverageOfThreeDays]
-
+        self.price = LocalePrice(
+            price_type=PriceType.Tiered,
+            currency="NOK",
+            _values=[
+                TieredPrice(
+                    upper_peak_limit=2,
+                    value=185,
+                ),
+                TieredPrice(
+                    upper_peak_limit=5,
+                    value=230,
+                ),
+                TieredPrice(
+                    upper_peak_limit=10,
+                    value=340,
+                ),
+                TieredPrice(
+                    upper_peak_limit=15,
+                    value=710,
+                ),
+                TieredPrice(
+                    upper_peak_limit=20,
+                    value=895,
+                ),
+                TieredPrice(
+                    upper_peak_limit=25,
+                    value=1130,
+                ),
+                TieredPrice(
+                    upper_peak_limit=50,
+                    value=1600,
+                ),
+                TieredPrice(
+                    upper_peak_limit=75,
+                    value=2540,
+                ),
+                TieredPrice(
+                    upper_peak_limit=100,
+                    value=3380,
+                ),
+                TieredPrice(
+                    upper_peak_limit=999,
+                    value=5400,
+                ),
+            ])
     # docs: https://askernett.no/ny-nettleiemodell-for-alle-fra-1-juli-2022/
 
 
