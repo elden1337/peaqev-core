@@ -29,9 +29,9 @@ class NO_LNett(Locale_Type):
 @dataclass
 class NO_GlitreEnergi(Locale_Type):
     def __post_init__(self):
-        self.observed_peak = QueryType.Max
-        self.charged_peak = QueryType.Max
-        self.query_model = QUERYTYPES[QueryType.Max]
+        self.observed_peak = QueryType.AverageOfThreeDays
+        self.charged_peak = QueryType.AverageOfThreeDays
+        self.query_model = QUERYTYPES[QueryType.AverageOfThreeDays]
 
 
 # docs: https://www.glitreenergi-nett.no/smart-nettleie/
