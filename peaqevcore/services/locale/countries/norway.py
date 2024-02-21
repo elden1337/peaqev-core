@@ -32,6 +32,31 @@ class NO_GlitreEnergi(Locale_Type):
         self.observed_peak = QueryType.AverageOfThreeDays
         self.charged_peak = QueryType.AverageOfThreeDays
         self.query_model = QUERYTYPES[QueryType.AverageOfThreeDays]
+        self.price = LocalePrice(
+            price_type=PriceType.Tiered,
+            currency="NOK",
+            _values=[
+                TieredPrice(
+                    upper_peak_limit=2,
+                    value=155,
+              ),
+              TieredPrice(
+                    upper_peak_limit=5,
+                    value=195,
+              ),
+              TieredPrice(
+                    upper_peak_limit=10,
+                    value=335,
+              ),
+              TieredPrice(
+                    upper_peak_limit=15,
+                    value=690,
+              ),
+              TieredPrice(
+                    upper_peak_limit=20,
+                    value=900,
+              )
+            ])
 
 
 # docs: https://www.glitreenergi-nett.no/smart-nettleie/
