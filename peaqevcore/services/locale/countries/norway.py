@@ -13,6 +13,66 @@ class NO_Tensio(Locale_Type):
         self.observed_peak = QueryType.AverageOfThreeDays
         self.charged_peak = QueryType.AverageOfThreeDays
         self.query_model = QUERYTYPES[QueryType.AverageOfThreeDays]
+        self.price = LocalePrice(
+            price_type=PriceType.Tiered,
+            currency="NOK",
+            _values=[
+                TieredPrice(
+                    upper_peak_limit=2,
+                    value=126,
+              ),
+              TieredPrice(
+                    upper_peak_limit=5,
+                    value=225,
+              ),
+              TieredPrice(
+                    upper_peak_limit=10,
+                    value=385,
+              ),
+              TieredPrice(
+                    upper_peak_limit=15,
+                    value=567,
+              ),
+              TieredPrice(
+                    upper_peak_limit=20,
+                    value=749,
+              ),
+              TieredPrice(
+                    upper_peak_limit=25,
+                    value=933,
+              ),
+              TieredPrice(
+                    upper_peak_limit=50,
+                    value=1603,
+              ),
+              TieredPrice(
+                    upper_peak_limit=75,
+                    value=2516,
+              ),
+              TieredPrice(
+                    upper_peak_limit=100,
+                    value=3429,
+              )
+            ])
+
+        """
+        0 - 2	 126
+        2 - 5	225
+        5 - 10	 385
+        10 - 15	 567
+        15 - 20	 749
+        20 - 25	 933
+        25 - 50	1 603
+        50 - 75	2 516
+        75 - 100
+        3 429
+        100 - 150	4 953
+        150 - 200	6 778
+        200 - 300 	9 822
+        300 - 400 	13 479
+        400 - 500 	17 130
+        0ver 500 	20 785
+        """
 
 
 @dataclass
@@ -92,7 +152,31 @@ class NO_AgderEnergi(Locale_Type):
         self.observed_peak = QueryType.AverageOfThreeDays
         self.charged_peak = QueryType.AverageOfThreeDays
         self.query_model = QUERYTYPES[QueryType.AverageOfThreeDays]
-
+        self.price = LocalePrice(
+            price_type=PriceType.Tiered,
+            currency="NOK",
+            _values=[
+                TieredPrice(
+                    upper_peak_limit=2,
+                    value=155,
+              ),
+              TieredPrice(
+                    upper_peak_limit=5,
+                    value=195,
+              ),
+              TieredPrice(
+                    upper_peak_limit=10,
+                    value=335,
+              ),
+              TieredPrice(
+                    upper_peak_limit=15,
+                    value=690,
+              ),
+              TieredPrice(
+                    upper_peak_limit=20,
+                    value=900,
+              )
+            ])
 
 @dataclass
 class NO_Elvia(Locale_Type):
@@ -100,7 +184,39 @@ class NO_Elvia(Locale_Type):
         self.observed_peak = QueryType.AverageOfThreeDays
         self.charged_peak = QueryType.AverageOfThreeDays
         self.query_model = QUERYTYPES[QueryType.AverageOfThreeDays]
+        self.price = LocalePrice(
+            price_type=PriceType.Tiered,
+            currency="NOK",
+            _values=[
+                TieredPrice(
+                    upper_peak_limit=2,
+                    value=120,
+              ),
+              TieredPrice(
+                    upper_peak_limit=5,
+                    value=190,
+              ),
+              TieredPrice(
+                    upper_peak_limit=10,
+                    value=305,
+              ),
+              TieredPrice(
+                    upper_peak_limit=15,
+                    value=420,
+              ),
+              TieredPrice(
+                    upper_peak_limit=20,
+                    value=535,
+              )
+            ])
 
+"""
+0-2     120
+2-5     190
+5-10    305
+10-15   420
+15-20   535
+"""
 
 @dataclass
 class NO_Lede(Locale_Type):
@@ -108,7 +224,43 @@ class NO_Lede(Locale_Type):
         self.observed_peak = QueryType.AverageOfThreeDays
         self.charged_peak = QueryType.AverageOfThreeDays
         self.query_model = QUERYTYPES[QueryType.AverageOfThreeDays]
-
+        self.price = LocalePrice(
+            price_type=PriceType.Tiered,
+            currency="NOK",
+            _values=[
+              TieredPrice(
+                    upper_peak_limit=5,
+                    value=262.5,
+              ),
+              TieredPrice(
+                    upper_peak_limit=10,
+                    value=448.75,
+              ),
+              TieredPrice(
+                    upper_peak_limit=15,
+                    value=632.5,
+              ),
+              TieredPrice(
+                    upper_peak_limit=20,
+                    value=818.75,
+              ),
+              TieredPrice(
+                    upper_peak_limit=25,
+                    value=1003.75,
+              ),
+              TieredPrice(
+                    upper_peak_limit=50,
+                    value=1560,
+              ),
+              TieredPrice(
+                    upper_peak_limit=75,
+                    value=2486.25,
+              ),
+              TieredPrice(
+                    upper_peak_limit=100,
+                    value=3412.5,
+              ),
+            ])
 
 @dataclass
 class NO_BKK(Locale_Type):
@@ -116,7 +268,35 @@ class NO_BKK(Locale_Type):
         self.observed_peak = QueryType.AverageOfThreeDays
         self.charged_peak = QueryType.AverageOfThreeDays
         self.query_model = QUERYTYPES[QueryType.AverageOfThreeDays]
-
+        self.price = LocalePrice(
+            price_type=PriceType.Tiered,
+            currency="NOK",
+            _values=[
+              TieredPrice(
+                    upper_peak_limit=2,
+                    value=145,
+              ),
+              TieredPrice(
+                    upper_peak_limit=5,
+                    value=240,
+              ),
+              TieredPrice(
+                    upper_peak_limit=10,
+                    value=400,
+              ),
+              TieredPrice(
+                    upper_peak_limit=15,
+                    value=570,
+              ),
+              TieredPrice(
+                    upper_peak_limit=20,
+                    value=735,
+              ),
+              TieredPrice(
+                    upper_peak_limit=25,
+                    value=900,
+              )
+            ])
 
 @dataclass
 class NO_Mellom(Locale_Type):
@@ -124,6 +304,43 @@ class NO_Mellom(Locale_Type):
         self.observed_peak = QueryType.AverageOfThreeDays
         self.charged_peak = QueryType.AverageOfThreeDays
         self.query_model = QUERYTYPES[QueryType.AverageOfThreeDays]
+        self.price = LocalePrice(
+            price_type=PriceType.Tiered,
+            currency="NOK",
+            _values=[
+              TieredPrice(
+                    upper_peak_limit=2,
+                    value=243,
+              ),
+              TieredPrice(
+                    upper_peak_limit=5,
+                    value=364,
+              ),
+              TieredPrice(
+                    upper_peak_limit=10,
+                    value=607,
+              ),
+              TieredPrice(
+                    upper_peak_limit=15,
+                    value=801,
+              ),
+              TieredPrice(
+                    upper_peak_limit=20,
+                    value=1008,
+              ),
+              TieredPrice(
+                    upper_peak_limit=25,
+                    value=1263,
+              ),
+              TieredPrice(
+                    upper_peak_limit=50,
+                    value=1590,
+              ),
+              TieredPrice(
+                    upper_peak_limit=999,
+                    value=2125,
+              )
+            ])
 
 
 @dataclass
