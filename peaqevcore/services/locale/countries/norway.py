@@ -18,9 +18,9 @@ class NO_Tensio(Locale_Type):
 @dataclass
 class NO_LNett(Locale_Type):
     def __post_init__(self):
-        self.observed_peak = QueryType.AverageOfThreeHours
-        self.charged_peak = QueryType.AverageOfThreeHours
-        self.query_model = QUERYTYPES[QueryType.AverageOfThreeHours]
+        self.observed_peak = QueryType.AverageOfThreeDays
+        self.charged_peak = QueryType.AverageOfThreeDays
+        self.query_model = QUERYTYPES[QueryType.AverageOfThreeDays]
 
 
 # docs: https://www.l-nett.no/nynettleie/slik-blir-ny-nettleie-og-pris
