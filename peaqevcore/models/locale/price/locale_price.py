@@ -8,9 +8,7 @@ from ..enums.price_type import PriceType
 class LocalePrice:
     price_type: PriceType = field(default_factory=lambda: PriceType.Unset)
     value: float = 0.0
-    _values: list[TieredPrice] | list[SeasonedPrice] | list = field(
-        default_factory=lambda: []
-    )
+    _values: list[TieredPrice] | list[SeasonedPrice] | list = field(default_factory=lambda: [])
     currency: str = ""
 
     @property
@@ -52,7 +50,9 @@ class LocalePrice:
         for s in [s for s in self._values if isinstance(s, SeasonedPrice)]:
             if s.validity.valid():
                 return s.value
+        return self.value
 
     def _get_price_tiered(self) -> float:
         for t in [s for s in self._values if isinstance(s, TieredPrice)]:
             pass
+        return self.value

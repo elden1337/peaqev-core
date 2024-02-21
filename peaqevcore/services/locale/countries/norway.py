@@ -138,7 +138,7 @@ class NO_Linja(Locale_Type):
                     value=1973,
                 ),
             ])
-            
+        
         """
         Trinn 1	0-2	263
         Trinn 2	2-5	329

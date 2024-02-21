@@ -3,15 +3,13 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ...services.locale.querytypes.queryservice import QueryService
-from dataclasses import dataclass, field
+from dataclasses import field
 from datetime import datetime
 from ...models.locale.enums.querytype import QueryType
 from ...models.locale.enums.time_periods import TimePeriods
 from ..locale.time_pattern import TimePattern
 from ...models.locale.price.locale_price import LocalePrice
-from .locale_query import LocaleQuery, ILocaleQuery
-from abc import abstractmethod
-
+from .ilocale_query import ILocaleQuery
 
 class Locale_Type:
     _observed_peak = None
@@ -22,67 +20,52 @@ class Locale_Type:
     _free_charge_pattern = None
     _peak_cycle: TimePeriods = TimePeriods.Hourly
 
-    def __post_init__(self):
-        self.query_model.price = self._price
-
     @property
-    @abstractmethod
     def observed_peak(self) -> QueryType:
-        return self._observed_peak
+        return self._observed_peak #type: ignore
 
     @observed_peak.setter
-    @abstractmethod
     def observed_peak(self, value: QueryType):
         self._observed_peak = value
 
     @property
-    @abstractmethod
     def charged_peak(self) -> QueryType:
-        return self._charged_peak
+        return self._charged_peak #type: ignore
 
     @charged_peak.setter
-    @abstractmethod
     def charged_peak(self, value: QueryType):
         self._charged_peak = value
 
     @property
-    @abstractmethod
     def query_model(self) -> ILocaleQuery:
         return self._query_model
 
     
     @query_model.setter
-    @abstractmethod
     def query_model(self, value: ILocaleQuery):
         self._query_model = value
 
     @property
-    @abstractmethod
     def query_service(self) -> QueryService:
-        return self._query_service
+        return self._query_service #type: ignore
 
-    @query_service.setter
-    @abstractmethod
+    @query_service.setter    
     def query_service(self, value: QueryService):
         self._query_service = value
 
     @property
-    @abstractmethod
     def price(self) -> LocalePrice:
         return self._price
 
     @price.setter
-    @abstractmethod
     def price(self, value: LocalePrice):
         self._price = value
 
-    @property
-    @abstractmethod
+    @property    
     def free_charge_pattern(self) -> TimePattern:
-        return self._free_charge_pattern
+        return self._free_charge_pattern #type: ignore
 
-    @free_charge_pattern.setter
-    @abstractmethod
+    @free_charge_pattern.setter    
     def free_charge_pattern(self, value: TimePattern):
         self._free_charge_pattern = value
 
@@ -109,3 +92,4 @@ class Locale_Type:
     async def async_set_query_service(self):
         if self.query_service is not None:
             await self.query_model.async_set_query_service(self.query_service)
+        self.query_model.price = self.price

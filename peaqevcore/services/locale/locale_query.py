@@ -1,6 +1,8 @@
 from datetime import datetime
 import logging
-from abc import abstractmethod
+from ...models.locale.enums.price_type import PriceType
+from ...models.locale.price.models.tiered_price import TieredPrice
+from ..locale.locale_price_helpers import get_observed_peak
 
 from ...models.locale.price.locale_price import LocalePrice
 from .querytypes.queryservice import QueryService
@@ -9,82 +11,9 @@ from ...models.locale.enums.sum_types import SumTypes
 from ...models.locale.enums.time_periods import TimePeriods
 from ...models.locale.sumcounter import SumCounter
 from ...models.locale.queryproperties import QueryProperties
+from .ilocale_query import ILocaleQuery
 
 _LOGGER = logging.getLogger(__name__)
-
-
-class ILocaleQuery:
-
-    @property
-    @abstractmethod
-    def dt(self) -> datetime:
-        pass
-
-
-    @abstractmethod
-    def set_mock_dt(self, val: datetime | None):
-        pass
-
-    @abstractmethod
-    def reset(self) -> None:
-        pass
-
-    @property
-    @abstractmethod
-    def peaks(self) -> PeaksModel:
-        pass
-
-    @property
-    @abstractmethod
-    def sum_counter(self) -> SumCounter:
-        pass
-
-    @property
-    @abstractmethod
-    def charged_peak(self) -> float:
-        pass
-
-    @property
-    @abstractmethod
-    def observed_peak(self) -> float:
-        pass
-
-    @abstractmethod
-    def _sanitize_values(self):
-        pass
-
-    @abstractmethod
-    async def async_reset(self) -> None:
-        pass
-
-    @abstractmethod
-    async def async_set_query_service(self, service: QueryService) -> None:
-        pass
-
-    @abstractmethod
-    async def async_try_update(self, new_val, timestamp: datetime | None = None):
-        pass
-
-    @abstractmethod
-    async def async_set_update_for_groupby(self, new_val, dt):
-        pass
-
-    @abstractmethod
-    async def async_update_peaks(self):
-        pass
-
-    @abstractmethod
-    async def async_reset_values(self, new_val, dt=datetime.now()):
-        pass
-
-    @abstractmethod
-    async def async_sanitize_values(self):
-        pass
-
-    @abstractmethod
-    def get_currently_obeserved_peak(self, timestamp: datetime = datetime.now()) -> float:
-        pass
-
 
 class LocaleQuery(ILocaleQuery):
     def __init__(
@@ -165,11 +94,17 @@ class LocaleQuery(ILocaleQuery):
 
     def get_currently_obeserved_peak(self, timestamp: datetime = datetime.now()) -> float:
         """gets the currently observed peak value for non-max type models. If daily max, override if the max registered today is higher."""
+        ret = self._observed_peak_value
+
+        if self.price.price_type == PriceType.Tiered:
+            tiers:list[TieredPrice] = [s for s in self.price._values if isinstance(s, TieredPrice)]
+            ret = get_observed_peak(self.price.price_type, [v for k, v in self._peaks.p.items()], tiers)
+
         if self.sum_counter.groupby == TimePeriods.Daily:
             if timestamp.day in [k[0] for k in self._peaks.p.keys()]:
-                print(f"exists as :{[v for k, v in self._peaks.p.items() if k[0] == timestamp.day][0]}. observed is {self._observed_peak_value}")
-                return max([v for k, v in self._peaks.p.items() if k[0] == timestamp.day][0], self._observed_peak_value)
-        return self._observed_peak_value
+                print(f"exists as :{[v for k, v in self._peaks.p.items() if k[0] == timestamp.day][0]}. observed is {ret}")
+                return max([v for k, v in self._peaks.p.items() if k[0] == timestamp.day][0], ret)
+        return ret
 
     def _sanitize_values(self):
         countX = lambda arr, x: len([a for a in arr if a[0] == x])
@@ -179,7 +114,7 @@ class LocaleQuery(ILocaleQuery):
                 if countX(self._peaks.p.keys(), k[0]) > 1:
                     duplicates[k] = self._peaks.p[k]
             if len(duplicates):
-                minkey = min(duplicates, key=duplicates.get)
+                minkey = min(duplicates, key=duplicates.get) #type: ignore
                 self._peaks.p.pop(minkey)
         while len(self._peaks.p) > self.sum_counter.counter:
             self._peaks.remove_min()
@@ -258,7 +193,7 @@ class LocaleQuery(ILocaleQuery):
                 if countX(self._peaks.p.keys(), k[0]) > 1:
                     duplicates[k] = self._peaks.p[k]
             if len(duplicates):
-                minkey = min(duplicates, key=duplicates.get)
+                minkey = min(duplicates, key=duplicates.get) #type: ignore
                 self._peaks.p.pop(minkey)
         while len(self._peaks.p) > self.sum_counter.counter:
             await self._peaks.async_remove_min()
