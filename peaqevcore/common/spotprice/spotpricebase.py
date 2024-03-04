@@ -194,9 +194,9 @@ class SpotPriceBase:
             )
 
     async def async_update_average_day(self, average) -> None:
+        await self.async_add_average_data(average)
         if average != self.model.daily_average:
             self.model.daily_average = average
-            await self.async_add_average_data(average)
             await self.observer.async_broadcast(
                 ObserverTypes.DailyAveragePriceChanged, average
             )
