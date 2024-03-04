@@ -24,6 +24,7 @@ class NordPoolUpdater(SpotPriceBase):
                 await self.hub.async_update_prices(
                     [self.model.prices, self.model.prices_tomorrow]
                 )
+                _LOGGER.debug("Spotprice has been initialized. Broadcasting...")
                 await self.hub.observer.async_broadcast(ObserverTypes.SpotpriceInitialized)
             else:
                 await self.hub.observer.async_broadcast(
@@ -65,7 +66,7 @@ class NordPoolUpdater(SpotPriceBase):
             f"Nordpool has been set up and is ready to be used with {self.entity}"
         )
         asyncio.run_coroutine_threadsafe(
-            self.async_update_spotprice(),
+            self.async_update_spotprice(initial=True),
             self.state_machine.loop,
         )
 

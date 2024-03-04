@@ -44,7 +44,7 @@ class EnergiDataServiceUpdater(SpotPriceBase):
                     f"EnergiDataService has been set up and is ready to be used with {self.model.entity}"
                 )
                 asyncio.run_coroutine_threadsafe(
-                    self.async_update_spotprice(),
+                    self.async_update_spotprice(initial=True),
                     self.state_machine.loop,
                 )
         except Exception as e:
