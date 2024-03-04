@@ -120,10 +120,12 @@ class HourSelectionService:
     def _create_hour_prices(
         self,
         prices: list[float],
-        prices_tomorrow: list[float] = [],
+        prices_tomorrow=None,
         is_quarterly: bool = False,
     ) -> None:
         # todo: handle here first if prices or prices_tomorrow are 92 or 100 in length (dst shift)
+        if prices_tomorrow is None:
+            prices_tomorrow = []
         self.model.use_quarters = is_quarterly
         self.model.set_hourprice_lists(prices, prices_tomorrow, self.options, self.dtmodel.hdate, self.dtmodel.hdate_tomorrow, self.dtmodel.is_passed, self.dtmodel.get_eligable_hours)
         self._set_permittance()
