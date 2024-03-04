@@ -57,17 +57,22 @@ def set_min_allowed_hours(
         [hp for hp in hour_prices if hp.permittance == 1 and not hp.passed]
     )
     if available_len < _min_hours:
-        _t = [
+        selectable_hours = [
             hp
             for hp in hour_prices
             if hp.hour_type != HourType.AboveMax
             and not hp.passed
             and hp.permittance < 1
         ]
-        if len(_t):
-            _t.sort(key=lambda x: (x.price,x.dt))
+        if len(selectable_hours):
+            selectable_hours.sort(key=lambda x: (x.price,x.dt))
+            min_selected = selectable_hours[0]
             for h in range(0,int(_min_hours - available_len)):
-                _t[h].permittance = 1.0
+                selectable_hours[h].permittance = 1.0
+            for select in selectable_hours:
+                if select.price / min_selected.price < 1.1:
+                    select.permittance = 1.0
+
     discard_peaks(hour_prices)
 
 def _get_caution_options(caution_hour_type: CautionHourType, is_quarterly:bool = False) -> dict[str,float]:
