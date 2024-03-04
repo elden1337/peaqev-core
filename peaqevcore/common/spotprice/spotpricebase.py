@@ -112,6 +112,8 @@ class SpotPriceBase:
                 _LOGGER.debug(
                     f"Could not get spot-prices. Entity: {self.entity}. Retrying..."
                 )
+        else:
+            _LOGGER.warning("No entity set for Spotprice. Unable to calculate price-data")
 
     async def async_update_set_prices(self, result: ISpotPriceDTO) -> bool:
         ret = False
