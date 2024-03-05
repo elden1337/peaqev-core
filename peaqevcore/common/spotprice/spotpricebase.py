@@ -195,8 +195,9 @@ class SpotPriceBase:
 
     async def async_update_average_day(self, average) -> None:
         await self.async_add_average_data(average)
-        if average != self.model.daily_average:
+        if average != self.model.daily_average or self.model.daily_average_date != datetime.now().date():
             self.model.daily_average = average
+            self.model.daily_average_date = datetime.now().date()
             await self.observer.async_broadcast(
                 ObserverTypes.DailyAveragePriceChanged, average
             )
@@ -212,17 +213,18 @@ class SpotPriceBase:
         await self.async_update_spotprice()
 
     async def async_add_average_data(self, new_val):
+        _LOGGER.debug(f"Attempting add average spotprice data: {new_val}")
         if isinstance(new_val, float):
             rounded = round(new_val, 3)
             if datetime.now().date not in self.model.average_data.keys():
-                self.model.average_data[date.today()] = rounded
+                self.model.update_average_data(date.today(), rounded)
             await self.async_cap_average_data_length(self.model.average_data)
 
     async def async_add_average_stdev_data(self, new_val):
         if isinstance(new_val, float):
             rounded = round(new_val, 3)
             if datetime.now().date not in self.model.average_stdev_data.keys():
-                self.model.average_stdev_data[date.today()] = rounded
+                self.model.update_average_stdev_data(date.today(), rounded)
             await self.async_cap_average_data_length(self.model.average_stdev_data)
 
     async def async_cap_average_data_length(self, data: dict):

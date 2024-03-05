@@ -22,6 +22,7 @@ class SpotPriceModel:
     average_30: float = 0
     tomorrow_valid: bool = False
     daily_average: float = 0
+    daily_average_date: date = None
     use_cent: bool = False
     dynamic_top_price_type: str = ""
     dynamic_top_price: float|None = None
@@ -42,6 +43,12 @@ class SpotPriceModel:
     @average_stdev_data.setter
     def average_stdev_data(self, value: dict|list) -> None:
         self._average_stdev_data = self.create_date_dict(value)
+
+    def update_average_data(self, day : date, value: float) -> None:
+        self._average_data[day] = value
+
+    def update_average_stdev_data(self, day : date, value: float) -> None:
+        self._average_stdev_data[day] = value
 
     def create_date_dict(self, numbers: dict|list) -> dict:
         if isinstance(numbers, dict):
