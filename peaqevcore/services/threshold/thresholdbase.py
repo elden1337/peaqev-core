@@ -70,9 +70,7 @@ class ThresholdBase:
             _onephase = CURRENTS_ONEPHASE_1_16
         if hasattr(self._hub.sensors, "carpowersensor"):
             try:
-                divid = int(self._hub.sensors.carpowersensor.value) / int(
-                    self._hub.sensors.chargerobject_switch.current
-                )
+                divid = int(self._hub.sensors.carpowersensor.value) / int(self._hub.sensors.amp_meter.value)
                 if int(self._hub.sensors.carpowersensor.value) == 0:
                     self._phases = Phases.Unknown
                     ret = _threephase

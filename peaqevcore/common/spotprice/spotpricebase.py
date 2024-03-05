@@ -213,10 +213,10 @@ class SpotPriceBase:
         await self.async_update_spotprice()
 
     async def async_add_average_data(self, new_val):
-        _LOGGER.debug(f"Attempting add average spotprice data: {new_val}")
         if isinstance(new_val, float):
             rounded = round(new_val, 3)
             if datetime.now().date not in self.model.average_data.keys():
+                _LOGGER.debug(f"Attempting add average spotprice data: {new_val}")
                 self.model.update_average_data(date.today(), rounded)
             await self.async_cap_average_data_length(self.model.average_data)
 

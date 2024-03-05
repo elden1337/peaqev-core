@@ -163,7 +163,7 @@ class LocaleQuery(ILocaleQuery):
     async def async_set_update_for_groupby(self, new_val, dt):
         if self.sum_counter.groupby in [TimePeriods.Daily, TimePeriods.UnSet]:
             _datekeys = [k for k in self.peaks.p.keys() if dt[0] in k]
-            _LOGGER.debug(f"datekeys: {_datekeys}")
+            #_LOGGER.debug(f"datekeys: {_datekeys}")
             if len(_datekeys):
                 if new_val > self.peaks.p.get(_datekeys[0]):
                     await self.peaks.async_pop_key(_datekeys[0])

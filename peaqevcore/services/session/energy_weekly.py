@@ -45,7 +45,8 @@ class EnergyWeekly:
         try:
             ret = charge / sessions
         except:
-            _LOGGER.debug(f"Could not calculate average")
+            pass
+            #_LOGGER.debug(f"Could not calculate average")
         return round(ret, 1)
 
     @property
