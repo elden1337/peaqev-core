@@ -91,7 +91,7 @@ class NordpoolDTO(ISpotPriceDTO):
         try:
             rawdata = ret.attributes.get("raw_today", {})
             if rawdata:
-                return data_dict['start'].date()
+                return rawdata['start'].date()
             pass
         except Exception as e:
             _LOGGER.exception("blabla")
