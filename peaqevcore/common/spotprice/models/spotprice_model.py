@@ -53,6 +53,7 @@ class SpotPriceModel:
         self._average_stdev_data[setdate] = value
 
     def patch_average_data(self) -> None:
+        """remove this 2024-05-01"""
         if self.average_data_patched:
             return
         patched_set = self.average_data.copy()
