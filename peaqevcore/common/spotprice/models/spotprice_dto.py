@@ -2,6 +2,7 @@ import logging
 from abc import abstractmethod
 from dataclasses import dataclass, field
 from statistics import mean, stdev
+from datetime import date, datetime
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -14,8 +15,9 @@ class ISpotPriceDTO:
     average: float = 0
     stdev: float = 0
     currency: str = ""
-    price_in_cent: bool = False #todo: add support when source exposes this option.
+    price_in_cent: bool = False
     tomorrow_valid: bool = False
+    affected_date: date = None
 
     async def set_model(self, ret):
         try:
@@ -45,6 +47,10 @@ class ISpotPriceDTO:
     def _set_average(self, ret) -> float:
         pass
 
+    @abstractmethod
+    def _set_affected_date(self, ret) -> date:
+        pass
+
 
 @dataclass
 class EnergiDataServiceDTO(ISpotPriceDTO):
@@ -61,6 +67,8 @@ class EnergiDataServiceDTO(ISpotPriceDTO):
             )
             return 0
 
+    def _set_affected_date(self, ret) -> date:
+        return datetime.now().date
 
 
 @dataclass
@@ -77,3 +85,13 @@ class NordpoolDTO(ISpotPriceDTO):
                 f"Could not parse today's prices from Nordpool. Unsolveable error. {e}"
             )
             return 0
+
+    def _set_affected_date(self, ret) -> date:
+        try:
+            rawdata = ret.attributes.get("raw_today", {})
+            if rawdata:
+                return data_dict['start'].date()
+            pass
+        except Exception as e:
+            _LOGGER.exception("blabla")
+            return datetime.now().date
