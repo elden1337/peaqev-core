@@ -88,11 +88,10 @@ class NordpoolDTO(ISpotPriceDTO):
             return 0
 
     def _set_affected_date(self, ret) -> date:
-        try:
-            rawdata = ret.attributes.get("raw_today", {})
-            if rawdata:
-                return rawdata['start'].date()
-            pass
-        except Exception as e:
-            _LOGGER.exception("blabla")
-            return datetime.now().date
+    try:
+        rawdata = ret.attributes.get("raw_today", [])
+        if rawdata:
+            return rawdata[0]['start'].date()
+    except Exception as e:
+        _LOGGER.exception("Unable to parse date from raw_today data. Settings today's date as the valid one.")
+        return datetime.now().date()
