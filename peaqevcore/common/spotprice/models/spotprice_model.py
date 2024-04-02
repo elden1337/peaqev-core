@@ -26,7 +26,7 @@ class SpotPriceModel:
     use_cent: bool = False
     dynamic_top_price_type: str = ""
     dynamic_top_price: float|None = None
-
+    average_data_patched: bool = False
 
     @property
     def average_data(self) -> dict:
@@ -51,6 +51,16 @@ class SpotPriceModel:
     def update_average_stdev_data(self, day : date = None, value: float = None) -> None:
         setdate = day if day else self.daily_average_date
         self._average_stdev_data[setdate] = value
+
+    def patch_average_data(self) -> None:
+        if self.average_data_patched:
+            return
+        patched_set = self.average_data.copy()
+        for d in patched_set:
+            if d + timedelta(days=1) in self.average_data:
+                patched_set[d] = self.average_data[d + timedelta(days=1)]
+        self.average_data = patched_set
+        self.average_data_patched = True
 
     def create_date_dict(self, numbers: dict|list) -> dict:
         if isinstance(numbers, dict):

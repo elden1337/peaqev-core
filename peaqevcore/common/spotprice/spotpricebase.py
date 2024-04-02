@@ -198,6 +198,8 @@ class SpotPriceBase:
     async def async_update_average_day(self, average, checkdate) -> None:
         await self.async_add_average_data(average, checkdate)
         if average != self.model.daily_average or self.model.daily_average_date != checkdate:
+            if average != self.model.daily_average and self.model.daily_average_date == checkdate:
+                self.model.patch_average_data()
             self.model.daily_average = average
             self.model.daily_average_date = checkdate
             await self.observer.async_broadcast(
