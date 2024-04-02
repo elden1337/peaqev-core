@@ -25,8 +25,6 @@ class SpotPriceBase:
         self.model = SpotPriceModel(source=source)
         self._dynamic_top_price = DynamicTopPrice()
         self._is_initialized: bool = False
-
-        self.converted_average_data: bool = False #remove this five versions from peaqev 3.2.0
         if not test:
             self.state_machine = hub.state_machine
             if is_active:
@@ -34,11 +32,11 @@ class SpotPriceBase:
 
     @property
     def tomorrow_valid(self) -> bool:
-        return getattr(self.model, "tomorrow_valid", False)
+        return self.model.tomorrow_valid
 
     @property
     def entity(self) -> str:
-        return getattr(self.model, "entity", "")
+        return self.model.entity
 
     @property
     def is_initialized(self) -> bool:
@@ -138,8 +136,8 @@ class SpotPriceBase:
         self.state = result.state
         if result.affected_date == datetime.now().date():
             await self.async_update_average([3, 7, 30])
-            await self.async_update_average_day(result.average)
-            await self.async_add_average_stdev_data(result.stdev)
+            await self.async_update_average_day(result.average, result.affected_date)
+            await self.async_add_average_stdev_data(result.stdev, result.affected_date)
             await self.async_update_average_month()
             await self.async_update_dynamic_max_price()
         else:
@@ -197,11 +195,11 @@ class SpotPriceBase:
                 ObserverTypes.AdjustedAveragePriceChanged, adj_avg
             )
 
-    async def async_update_average_day(self, average) -> None:
+    async def async_update_average_day(self, average, checkdate) -> None:
         await self.async_add_average_data(average)
-        if average != self.model.daily_average or self.model.daily_average_date != datetime.now().date():
+        if average != self.model.daily_average or self.model.daily_average_date != checkdate:
             self.model.daily_average = average
-            self.model.daily_average_date = datetime.now().date()
+            self.model.daily_average_date = checkdate
             await self.observer.async_broadcast(
                 ObserverTypes.DailyAveragePriceChanged, average
             )
@@ -224,10 +222,10 @@ class SpotPriceBase:
                 self.model.update_average_data(date.today(), rounded)
             await self.async_cap_average_data_length(self.model.average_data)
 
-    async def async_add_average_stdev_data(self, new_val):
+    async def async_add_average_stdev_data(self, new_val, checkdate):
         if isinstance(new_val, float):
             rounded = round(new_val, 3)
-            if datetime.now().date not in self.model.average_stdev_data.keys():
+            if checkdate not in self.model.average_stdev_data.keys():
                 self.model.update_average_stdev_data(date.today(), rounded)
             await self.async_cap_average_data_length(self.model.average_stdev_data)
 
