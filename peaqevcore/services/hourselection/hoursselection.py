@@ -86,7 +86,7 @@ class Hoursselection:
     async def async_update_adjusted_average(self, val):
         await self.service.async_update_adjusted_average(val)
         
-    async def async_update_top_price(self, dyn_top_price=None) -> None:
+    async def async_update_top_price(self, dyn_top_price: object = None) -> None:
         await self.model.options.async_set_absolute_top_price(dyn_top_price)
         self.service.model.update_hour_types(self.model.options)
 
