@@ -132,14 +132,16 @@ class SpotPriceBase:
             if self.model.prices_tomorrow:
                 self.model.prices_tomorrow = []
                 ret = True
-        await self.async_update_average([3, 7, 30])
+        
         self.model.currency = result.currency
         self.model.use_cent = result.price_in_cent
         self.state = result.state
-        await self.async_update_average_day(result.average)
-        await self.async_add_average_stdev_data(result.stdev)
-        await self.async_update_average_month()
-        await self.async_update_dynamic_max_price()
+        if result.affected_date == datetime.now().date:
+            await self.async_update_average([3, 7, 30])
+            await self.async_update_average_day(result.average)
+            await self.async_add_average_stdev_data(result.stdev)
+            await self.async_update_average_month()
+            await self.async_update_dynamic_max_price()
         return ret
 
     #not for peaqnext
