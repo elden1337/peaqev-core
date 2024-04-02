@@ -3,6 +3,7 @@ from abc import abstractmethod
 from dataclasses import dataclass, field
 from statistics import mean, stdev
 from datetime import date, datetime
+from typing import Callable
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -38,7 +39,7 @@ class ISpotPriceDTO:
         self.average = self._set_average(ret)
         self.stdev = stdev(self.today) if len(self.today) > 1 else 0
         self.price_in_cent = self._set_price_in_cent(ret)
-        self.affected_date = self._set_affected_date(ret)
+        self.affected_date = self._set_affected_date(self.affected_date, ret)
 
     @abstractmethod
     def _set_price_in_cent(self, ret) -> bool:
@@ -49,7 +50,7 @@ class ISpotPriceDTO:
         pass
 
     @abstractmethod
-    def _set_affected_date(self, ret) -> date:
+    def _set_affected_date(self, affected_date, ret) -> date:
         pass
 
 
@@ -68,7 +69,7 @@ class EnergiDataServiceDTO(ISpotPriceDTO):
             )
             return 0
 
-    def _set_affected_date(self, ret) -> date:
+    def _set_affected_date(self, affected_date, ret) -> date:
         return datetime.now().date
 
 
@@ -87,10 +88,10 @@ class NordpoolDTO(ISpotPriceDTO):
             )
             return 0
 
-    def _set_affected_date(self, ret) -> date:
+    def _set_affected_date(self, affected_date, ret) -> date:
         try:
             rawdata = ret.attributes.get("raw_today", [])
-            if rawdata:
+            if rawdata and affected_date is None or affected_date != rawdata[0]['start'].date():
                 _LOGGER.debug(f"successfully setting {rawdata[0]['start'].date()} as spotprice affected date")
                 return rawdata[0]['start'].date()
             else:
