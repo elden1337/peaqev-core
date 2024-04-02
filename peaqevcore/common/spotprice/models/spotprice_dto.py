@@ -38,6 +38,7 @@ class ISpotPriceDTO:
         self.average = self._set_average(ret)
         self.stdev = stdev(self.today) if len(self.today) > 1 else 0
         self.price_in_cent = self._set_price_in_cent(ret)
+        self.affected_date = self._set_affected_date(ret)
 
     @abstractmethod
     def _set_price_in_cent(self, ret) -> bool:
