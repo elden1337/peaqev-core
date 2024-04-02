@@ -94,7 +94,7 @@ class NordpoolDTO(ISpotPriceDTO):
                 _LOGGER.debug(f"successfully setting {rawdata[0]['start'].date()} as spotprice affected date")
                 return rawdata[0]['start'].date()
             else:
-                _LOGGER.warning(f"Unable to produce affected date for today. the data I got to play with was: {ret.attributes.get("raw_today", [])}")
+                _LOGGER.warning(f"Unable to produce affected date for today. the data I got to play with was: {ret.attributes.get('raw_today', [])}")
         except Exception as e:
             _LOGGER.exception("Unable to parse date from raw_today data. Settings today's date as the valid one.")
             return datetime.now().date()
