@@ -44,11 +44,13 @@ class SpotPriceModel:
     def average_stdev_data(self, value: dict|list) -> None:
         self._average_stdev_data = self.create_date_dict(value)
 
-    def update_average_data(self, day : date, value: float) -> None:
-        self._average_data[day] = value
+    def update_average_data(self, day : date = None, value: float = None) -> None:
+        setdate = day if day else self.daily_average_date
+        self._average_data[setdate] = value
 
-    def update_average_stdev_data(self, day : date, value: float) -> None:
-        self._average_stdev_data[day] = value
+    def update_average_stdev_data(self, day : date = None, value: float = None) -> None:
+        setdate = day if day else self.daily_average_date
+        self._average_stdev_data[setdate] = value
 
     def create_date_dict(self, numbers: dict|list) -> dict:
         if isinstance(numbers, dict):
