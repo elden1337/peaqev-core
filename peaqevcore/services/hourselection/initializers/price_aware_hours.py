@@ -124,7 +124,7 @@ class PriceAwareHours(Hours):
         if self._is_initialized:
             try:
                 return await self._core.async_get_total_charge(
-                    self._hub.sensors.current_peak.value
+                    self._hub.sensors.current_peak.observed_peak
                 )
             except ZeroDivisionError as e:
                 _LOGGER.warning(f"get_total_charge could not be calculated: {e}")
@@ -148,8 +148,8 @@ class PriceAwareHours(Hours):
         if not self._core.service.max_min.active:
             await self._core.service.max_min.async_setup(max_charge)
         await self._core.service.max_min.async_update(
-            avg24=self._hub.sensors.powersensormovingaverage24.value,
-            peak=self._hub.sensors.current_peak.value,
+            avg24=self._hub.sensors.powersensormovingaverage24.observed_peak,
+            peak=self._hub.sensors.current_peak.observed_peak,
             max_desired=max_charge,
             session_energy=session_energy,
             car_connected=car_connected,

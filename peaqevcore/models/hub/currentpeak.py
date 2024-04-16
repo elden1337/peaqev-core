@@ -9,10 +9,9 @@ EXPORT_FACTOR = 0.9
 class CurrentPeak:
     def __init__(self, data_type: type, initval, startpeaks:dict, locale: LocaleData, options_use_history: bool = False, mock_dt: datetime | None = None):
         self._options_peaks: dict = startpeaks
-        self._value = initval
+        self._observed_peak = initval
         self._history: dict[str, list[float|int]] = {}
         self._locale: LocaleData = locale
-        #self._peaks: list[float|int] = []
         self._active: bool = options_use_history
         self.mock_dt: datetime | None = mock_dt
         
@@ -25,15 +24,26 @@ class CurrentPeak:
         self.mock_dt = val
 
     @property
-    def value(self): # type: ignore
-        self._refresh_peak()
-        print(self._value)
-        return self._value
+    def charged_peak(self):
+        ret = getattr(self._locale.data.query_model, 'charged_peak')
+        if ret:
+            return ret
+        _LOGGER.exception("No charged peak found")
 
-    @value.setter
-    def value(self, val): # pylint:disable=invalid-overridden-method
-        self._value = val
-        self.update_history([val] if not isinstance(val, list) else val)
+    @property
+    def current_peaks_dictionary(self) -> dict:
+        return getattr(self._locale.data.query_model.peaks, 'export_peaks', {})
+
+    @property
+    def observed_peak(self): # type: ignore
+        self._refresh_observed_peak()
+        print(self._observed_peak)
+        return self._observed_peak
+
+    @observed_peak.setter
+    def observed_peak(self, val): # pylint:disable=invalid-overridden-method
+        self._observed_peak = val
+        self.update_history(self.current_peaks_dictionary)
 
     @property
     def history(self) -> dict:
@@ -44,14 +54,15 @@ class CurrentPeak:
             year = self.dt.year
         return f"{str(year)}_{str(self.dt.month)}"
 
-    async def async_update(self, peaks: list) -> None:
-        self.update_history(peaks)
-
-    def update_history(self, peaks: list) -> None:
+    def update_history(self, peaks: dict | list) -> None:
         _key = self._make_key()
         max_value_len = self._locale.data.query_model.sum_counter.counter
 
-        if isinstance(peaks, list) and len(peaks) <= max_value_len:
+        if isinstance(peaks, dict):
+            peaks = list(peaks["p"].values())
+            self._history[_key] = peaks
+
+        elif isinstance(peaks, list) and len(peaks) <= max_value_len:
             if _key in self._history:
                 self._history[_key].extend(peaks)
                 if len(self._history[_key]) > max_value_len:
@@ -61,11 +72,11 @@ class CurrentPeak:
         else:
             raise ValueError(f"The length of peaks should not exceed {max_value_len}")
 
-        self._refresh_peak()
+        self._refresh_observed_peak()
 
-    def _refresh_peak(self) -> None:
+    def _refresh_observed_peak(self) -> None:
         historic_value = self._get_peak()
-        self._value = max(self._locale.data.query_model.get_currently_obeserved_peak(self.dt), historic_value)
+        self._observed_peak = max(self._locale.data.query_model.get_currently_obeserved_peak(self.dt), historic_value)
 
     def _get_peak(self) -> float:
         try:
@@ -78,7 +89,7 @@ class CurrentPeak:
             if max_mean == past_mean and past_mean > options_start:
                 return min(self._history[past_key]) * EXPORT_FACTOR
             elif max_mean == current_mean and current_mean > options_start:
-                print(self.history)
+                print("history:", self.history)
                 return min(self._history[current_key])
             else:
                 return options_start
@@ -102,7 +113,7 @@ class CurrentPeak:
         else:
             ret["status"] = "OK"
             ret["errors"] = ["No errors"]
-        self._value = self._get_peak()
+        self._observed_peak = self._get_peak()
         return ret
 
     def _set_history_value(self, value: float|int|list) -> list:

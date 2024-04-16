@@ -207,23 +207,31 @@ async def test_generic_querytype_avg_threehour2s():
 @pytest.mark.asyncio
 async def test_peak_new_month():
     p = await LocaleFactory.async_create(LOCALE_SE_GOTHENBURG)
+    p.data.query_model.set_mock_dt(datetime.combine(date(2022, 6, 2), time(22, 30)))
     await p.data.query_model.async_try_update(
         new_val=1.2, timestamp=datetime.combine(date(2022, 6, 2), time(22, 30))
     )
+    p.data.query_model.set_mock_dt(datetime.combine(date(2022, 6, 16), time(22, 30)))
     await p.data.query_model.async_try_update(
         new_val=1, timestamp=datetime.combine(date(2022, 6, 16), time(22, 30))
     )
+    p.data.query_model.set_mock_dt(datetime.combine(date(2022, 6, 17), time(20, 30)))
     await p.data.query_model.async_try_update(
         new_val=1.5, timestamp=datetime.combine(date(2022, 6, 17), time(20, 30))
     )
+    p.data.query_model.set_mock_dt(datetime.combine(date(2022, 6, 17), time(22, 30)))
     await p.data.query_model.async_try_update(
         new_val=1.7, timestamp=datetime.combine(date(2022, 6, 17), time(22, 30))
     )
+    p.data.query_model.set_mock_dt(datetime.combine(date(2022, 6, 19), time(22, 30)))
     await p.data.query_model.async_try_update(
         new_val=1.5, timestamp=datetime.combine(date(2022, 6, 19), time(22, 30))
     )
     assert len(p.data.query_model.peaks.p) == 3
+    assert p.data.query_model.observed_peak == 1.5
+    p.data.query_model.set_mock_dt(datetime.combine(date(2022, 6, 20), time(22, 30)))
     assert p.data.query_model.observed_peak == 1.2
+    p.data.query_model.set_mock_dt(datetime.combine(date(2022, 7, 1), time(0, 0)))
     await p.data.query_model.async_try_update(
         new_val=0.03, timestamp=datetime.combine(date(2022, 7, 1), time(0, 0))
     )
@@ -372,39 +380,34 @@ async def test_se_jbf():
     assert p.data.query_model.charged_peak == 1.4
     del p
 
-
-# async def test_no_peak():
-#     p = NoPeak
-#     assert p.free_charge(p, mockdt=datetime.now()) is True
-#     await p.query_model.async_try_update(new_val=1.5, timestamp=datetime.combine(date(2023, 7, 19), time(22, 30)))
-#     assert p.query_model.charged_peak == 0
-
-
 @pytest.mark.asyncio
 async def test_peak_new_month_2():
     p = await LocaleFactory.async_create(LOCALE_SE_GOTHENBURG)
+    p.data.query_model.set_mock_dt(datetime.combine(date(2022, 7, 2), time(22, 30)))
     await p.data.query_model.async_try_update(
         new_val=1.2, timestamp=datetime.combine(date(2022, 7, 2), time(22, 30))
     )
-    print(p.data.query_model.peaks.p, p.data.query_model.observed_peak)
+
+    p.data.query_model.set_mock_dt(datetime.combine(date(2022, 7, 16), time(22, 30)))
     await p.data.query_model.async_try_update(
         new_val=1, timestamp=datetime.combine(date(2022, 7, 16), time(22, 30))
     )
-    print(p.data.query_model.peaks.p, p.data.query_model.observed_peak)
+    p.data.query_model.set_mock_dt(datetime.combine(date(2022, 7, 17), time(20, 30)))
     await p.data.query_model.async_try_update(
         new_val=1.5, timestamp=datetime.combine(date(2022, 7, 17), time(20, 30))
     )
-    print(p.data.query_model.peaks.p, p.data.query_model.observed_peak)
+    p.data.query_model.set_mock_dt(datetime.combine(date(2022, 7, 17), time(22, 30)))
     await p.data.query_model.async_try_update(
         new_val=1.7, timestamp=datetime.combine(date(2022, 7, 17), time(22, 30))
     )
-    print(p.data.query_model.peaks.p, p.data.query_model.observed_peak)
+    p.data.query_model.set_mock_dt(datetime.combine(date(2022, 7, 19), time(22, 30)))
+
     await p.data.query_model.async_try_update(
         new_val=1.5, timestamp=datetime.combine(date(2022, 7, 19), time(22, 30))
     )
-    print(p.data.query_model.peaks.p, p.data.query_model.observed_peak)
     assert len(p.data.query_model.peaks.p) == 3
-    assert p.data.query_model.observed_peak == 1.2
+    assert p.data.query_model.observed_peak == 1.5
+    p.data.query_model.set_mock_dt(datetime.combine(date(2022, 8, 1), time(0, 0)))
     await p.data.query_model.async_try_update(
         new_val=0.03, timestamp=datetime.combine(date(2022, 8, 1), time(0, 0))
     )
@@ -426,18 +429,18 @@ async def test_avg_daily_same_peak_as_max_today_currentpeak_sensor():
     p = await LocaleFactory.async_create(LOCALE_SE_GOTHENBURG)
     c = CurrentPeak(data_type=float, initval=0, startpeaks={}, locale=p, options_use_history=False, mock_dt=datetime(2024, 1, 3, 10, 0))
     await p.data.query_model.async_try_update(new_val=2, timestamp=datetime(2024, 1, 3, 10, 0))
-    c.value = 2
+    c.observed_peak = 2
     await p.data.query_model.async_try_update(new_val=2, timestamp=datetime(2024, 1, 4, 10, 0))
     c.mock_dt = datetime(2024, 1, 4, 10, 0)
-    c.value = 2
+    c.observed_peak = 2
     await p.data.query_model.async_try_update(new_val=4.2, timestamp=datetime(2024, 1, 5, 10, 0))
     c.mock_dt = datetime(2024, 1, 5, 10, 0)
     p.data.query_model.set_mock_dt(datetime(2024, 1, 5, 10, 0))
-    c.value = 4.2
-    assert c.value == 4.2
+    c.observed_peak = 4.2
+    assert c.observed_peak == 4.2
     c.dt = datetime(2024, 1, 6, 0, 0)
     p.data.query_model.set_mock_dt(datetime(2024, 1, 6, 0, 0))
-    assert c.value == 2
+    assert c.observed_peak == 2
 
 @pytest.mark.asyncio
 async def test_avg_daily_real_case_should_show_min():
@@ -445,16 +448,27 @@ async def test_avg_daily_real_case_should_show_min():
     c = CurrentPeak(data_type=float, initval=0, startpeaks={}, locale=p, options_use_history=False, mock_dt=datetime(2024, 4, 1, 0, 0))
     await p.data.query_model.async_try_update(new_val=2.76, timestamp=datetime(2024, 4, 3, 1, 0))
     c.dt = datetime(2024, 4, 3, 1, 0)
-    c.value = 2.76
+    c.observed_peak = 2.76
     await p.data.query_model.async_try_update(new_val=2.79, timestamp=datetime(2024, 4, 7, 8, 0))
     c.dt = datetime(2024, 4, 7, 8, 0)
-    c.value = 2.79
+    c.observed_peak = 2.79
     await p.data.query_model.async_try_update(new_val=2.47, timestamp=datetime(2024, 4, 14, 16, 0))
     c.dt = datetime(2024, 4, 14, 16, 0)
-    c.value = 2.47
+    c.observed_peak = 2.47
     c.dt = datetime(2024, 4, 16, 21, 0)
     p.data.query_model.set_mock_dt(datetime(2024, 4, 16, 21, 0))
-    assert c.value == 2.47
+    assert c.observed_peak == 2.47
+    assert c.history == {'2024_4': [2.76, 2.79, 2.47]}
+
+@pytest.mark.asyncio
+async def test_avg_daily_real_case_should_show_min_with_history_import():
+    p = await LocaleFactory.async_create(LOCALE_SE_GOTHENBURG)
+    c = CurrentPeak(data_type=float, initval=0, startpeaks={}, locale=p, options_use_history=False, mock_dt=datetime(2024, 4, 16, 0, 0))
+    c.import_from_service(importdto={'2024_4': [2.76, 2.79, 2.47]})
+    c.dt = datetime(2024, 4, 16, 21, 0)
+    p.data.query_model.set_mock_dt(datetime(2024, 4, 16, 21, 0))
+    assert c.observed_peak == 2.47
+    assert c.history == {'2024_4': [2.76, 2.79, 2.47]}
 
 
 @pytest.mark.asyncio

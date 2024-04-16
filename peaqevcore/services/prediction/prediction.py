@@ -54,10 +54,10 @@ class Prediction:
         return Prediction._predicted_energy(
             datetime.now().minute,
             datetime.now().second,
-            self._hub.sensors.powersensormovingaverage.value
+            self._hub.sensors.powersensormovingaverage.observed_peak
             if hasattr(self._hub.sensors, "powersensormovingaverage")
             else 0,
-            self._hub.sensors.totalhourlyenergy.value,
+            self._hub.sensors.totalhourlyenergy.observed_peak,
             # self._hub.sensors.locale.data.is_quarterly(self._hub.sensors.locale.data),
         )
 
@@ -66,7 +66,7 @@ class Prediction:
         """legacy. remove once peaqhvac is async."""
         if hasattr(self._hub.sensors, "current_peak"):
             return Prediction._predicted_percentage_of_peak(
-                self._hub.sensors.current_peak.value, self.predictedenergy
+                self._hub.sensors.current_peak.observed_peak, self.predictedenergy
             )
         return 0.0
 

@@ -70,8 +70,8 @@ class ThresholdBase:
             _onephase = CURRENTS_ONEPHASE_1_16
         if hasattr(self._hub.sensors, "carpowersensor"):
             try:
-                divid = int(self._hub.sensors.carpowersensor.value) / int(self._hub.sensors.amp_meter.value)
-                if int(self._hub.sensors.carpowersensor.value) == 0:
+                divid = int(self._hub.sensors.carpowersensor.observed_peak) / int(self._hub.sensors.amp_meter.observed_peak)
+                if int(self._hub.sensors.carpowersensor.observed_peak) == 0:
                     self._phases = Phases.Unknown
                     ret = _threephase
                 elif divid < 300:
@@ -82,7 +82,7 @@ class ThresholdBase:
                     ret = _threephase
             except Exception as e:
                 _LOGGER.debug(f"Currents-dictionary: could not divide charger amps with charger power. Falling back to legacy-method. {e}")
-                if 0 < int(self._hub.sensors.carpowersensor.value) < 4000:
+                if 0 < int(self._hub.sensors.carpowersensor.observed_peak) < 4000:
                     self._phases = Phases.OnePhase
                     ret = _onephase
                 else:
