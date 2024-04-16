@@ -183,6 +183,7 @@ class LocaleQuery(ILocaleQuery):
         elif self._props.sumtype is SumTypes.Avg:
             self.observed_peak = self._peaks.min_value
             self.charged_peak = self._peaks.value_avg
+            print("updating peaks", self._peaks.p, self.observed_peak, self.charged_peak)
 
     async def async_reset_values(self, new_val, dt=datetime.now()):
         await self._peaks.async_clear()

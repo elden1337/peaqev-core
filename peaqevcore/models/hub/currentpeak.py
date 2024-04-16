@@ -64,12 +64,8 @@ class CurrentPeak:
         self._refresh_peak()
 
     def _refresh_peak(self) -> None:
-        override = self._locale.data.query_model.get_currently_obeserved_peak(self.dt)
         historic_value = self._get_peak()
-        #if len(self._peaks) and override > min(self._peaks):
-        self._value = max(self._locale.data.query_model.observed_peak, historic_value)
-        #else:
-            #self._value = historic_value
+        self._value = max(self._locale.data.query_model.get_currently_obeserved_peak(self.dt), historic_value)
 
     def _get_peak(self) -> float:
         try:

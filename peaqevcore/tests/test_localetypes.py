@@ -439,6 +439,23 @@ async def test_avg_daily_same_peak_as_max_today_currentpeak_sensor():
     p.data.query_model.set_mock_dt(datetime(2024, 1, 6, 0, 0))
     assert c.value == 2
 
+@pytest.mark.asyncio
+async def test_avg_daily_real_case_should_show_min():
+    p = await LocaleFactory.async_create(LOCALE_SE_GOTHENBURG)
+    c = CurrentPeak(data_type=float, initval=0, startpeaks={}, locale=p, options_use_history=False, mock_dt=datetime(2024, 4, 1, 0, 0))
+    await p.data.query_model.async_try_update(new_val=2.76, timestamp=datetime(2024, 4, 3, 1, 0))
+    c.dt = datetime(2024, 4, 3, 1, 0)
+    c.value = 2.76
+    await p.data.query_model.async_try_update(new_val=2.79, timestamp=datetime(2024, 4, 7, 8, 0))
+    c.dt = datetime(2024, 4, 7, 8, 0)
+    c.value = 2.79
+    await p.data.query_model.async_try_update(new_val=2.47, timestamp=datetime(2024, 4, 14, 16, 0))
+    c.dt = datetime(2024, 4, 14, 16, 0)
+    c.value = 2.47
+    c.dt = datetime(2024, 4, 16, 21, 0)
+    p.data.query_model.set_mock_dt(datetime(2024, 4, 16, 21, 0))
+    assert c.value == 2.47
+
 
 @pytest.mark.asyncio
 async def test_avg_hourly_observed_peak():
