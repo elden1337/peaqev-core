@@ -12,7 +12,7 @@ class CurrentPeak:
         self._value = initval
         self._history: dict[str, list[float|int]] = {}
         self._locale: LocaleData = locale
-        self._peaks: list[float|int] = []
+        #self._peaks: list[float|int] = []
         self._active: bool = options_use_history
         self.mock_dt: datetime | None = mock_dt
         
@@ -27,6 +27,7 @@ class CurrentPeak:
     @property
     def value(self): # type: ignore
         self._refresh_peak()
+        print(self._value)
         return self._value
 
     @value.setter
@@ -46,25 +47,29 @@ class CurrentPeak:
     async def async_update(self, peaks: list) -> None:
         self.update_history(peaks)
 
-    # def update_history(self, peaks: list) -> None:
-    #     self._peaks.extend(peaks) if isinstance(peaks, list) else self._peaks.append(peaks)
-    #     current_key = self._make_key()
-    #     if current_key not in self._history:
-    #         self._history[current_key] = []
-    #     self._history[current_key].extend(self._peaks)
-    #     self._refresh_peak()
+    def update_history(self, peaks: list) -> None:
+        _key = self._make_key()
+        max_value_len = self._locale.data.query_model.sum_counter.counter
 
-    def update_history(self, peaks: list) -> None:	
-        _key = self._make_key()	
-        self._history[_key] = peaks	
+        if isinstance(peaks, list) and len(peaks) <= max_value_len:
+            if _key in self._history:
+                self._history[_key].extend(peaks)
+                if len(self._history[_key]) > max_value_len:
+                    self._history[_key] = sorted(self._history[_key], reverse=True)[:max_value_len]
+            else:
+                self._history[_key] = peaks
+        else:
+            raise ValueError(f"The length of peaks should not exceed {max_value_len}")
+
         self._refresh_peak()
 
     def _refresh_peak(self) -> None:
-        cc = self._locale.data.query_model.get_currently_obeserved_peak(self.dt)
-        if len(self._peaks) and cc > min(self._peaks):
-            self._value = self._locale.data.query_model.observed_peak
-        else:
-            self._value = self._get_peak()
+        override = self._locale.data.query_model.get_currently_obeserved_peak(self.dt)
+        historic_value = self._get_peak()
+        #if len(self._peaks) and override > min(self._peaks):
+        self._value = max(self._locale.data.query_model.observed_peak, historic_value)
+        #else:
+            #self._value = historic_value
 
     def _get_peak(self) -> float:
         try:
@@ -77,6 +82,7 @@ class CurrentPeak:
             if max_mean == past_mean and past_mean > options_start:
                 return min(self._history[past_key]) * EXPORT_FACTOR
             elif max_mean == current_mean and current_mean > options_start:
+                print(self.history)
                 return min(self._history[current_key])
             else:
                 return options_start
