@@ -13,8 +13,16 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class NordPoolUpdater(SpotPriceBase):
-    def __init__(self, hub, observer, system: PeaqSystem, test:bool = False, is_active: bool = True):
-        super().__init__(hub=hub, source=NORDPOOL, system=system, test=test, is_active=is_active, observer=observer)
+    def __init__(self, hub, observer, system: PeaqSystem, test:bool = False, is_active: bool = True, custom_sensor: str = None):
+        super().__init__(
+            hub=hub,
+            source=NORDPOOL,
+            system=system,
+            test=test,
+            is_active=is_active,
+            observer=observer,
+            custom_sensor=custom_sensor
+        )
 
     async def async_set_dto(self, ret, initial: bool = False) -> None:
         _result = NordpoolDTO()
@@ -42,8 +50,8 @@ class NordPoolUpdater(SpotPriceBase):
                 _LOGGER.error(
                     f"There were no Spotprice-entities. Cannot continue. with price-awareness."
                 )
-            if len(list(entities)) == 1:
-                self._setup_set_entity(list(entities)[0])
+            if len(list(entities)) == 1 or self.custom_sensor:
+                self._setup_set_entity(self.custom_sensor if self.custom_sensor else list(entities)[0])
             else:
                 _found: bool = False
                 for e in list(entities):
