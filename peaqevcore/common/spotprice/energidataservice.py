@@ -41,6 +41,8 @@ class EnergiDataServiceUpdater(SpotPriceBase):
     def setup(self):
         try:
             sensor_entity = self.custom_sensor if self.custom_sensor else ENERGIDATASERVICE_SENSOR
+            if self.custom_sensor:
+                _LOGGER.info(f"Using custom sensor for spot-prices: {self.custom_sensor}")
             sensor = self.state_machine.states.get(sensor_entity)
             if not sensor.state:
                 self.hub.options.price.price_aware = False  # todo: composition

@@ -51,6 +51,8 @@ class NordPoolUpdater(SpotPriceBase):
                     f"There were no Spotprice-entities. Cannot continue. with price-awareness."
                 )
             if len(list(entities)) == 1 or self.custom_sensor:
+                if self.custom_sensor:
+                    _LOGGER.info(f"Using custom sensor for spot-prices: {self.custom_sensor}")
                 self._setup_set_entity(self.custom_sensor if self.custom_sensor else list(entities)[0])
             else:
                 _found: bool = False
