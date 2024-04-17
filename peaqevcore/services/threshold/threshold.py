@@ -18,13 +18,13 @@ class Threshold(ThresholdBase):
         return await ThresholdBase.async_base_allowed_current(
             datetime.now().minute,
             datetime.now().second,
-            self._hub.sensors.powersensormovingaverage.observed_peak
-            if self._hub.sensors.powersensormovingaverage.observed_peak is not None
+            self._hub.sensors.powersensormovingaverage.value
+            if self._hub.sensors.powersensormovingaverage.value is not None
             else 0,
-            self._hub.sensors.charger_enabled.observed_peak,
-            self._hub.sensors.charger_done.observed_peak,
+            self._hub.sensors.charger_enabled.value,
+            self._hub.sensors.charger_done.value,
             amps,
-            self._hub.sensors.totalhourlyenergy.observed_peak,
+            self._hub.sensors.totalhourlyenergy.value,
             self._hub.current_peak_dynamic,
             await self._hub.sensors.locale.data.async_is_quarterly(),
             self._hub.power.power_canary.max_current_amp,
@@ -40,13 +40,13 @@ class Threshold(ThresholdBase):
         return ThresholdBase.base_allowed_current(
             datetime.now().minute,
             datetime.now().second,
-            self._hub.sensors.powersensormovingaverage.observed_peak
-            if self._hub.sensors.powersensormovingaverage.observed_peak is not None
+            self._hub.sensors.powersensormovingaverage.value
+            if self._hub.sensors.powersensormovingaverage.value is not None
             else 0,
-            self._hub.sensors.charger_enabled.observed_peak,
-            self._hub.sensors.charger_done.observed_peak,
+            self._hub.sensors.charger_enabled.value,
+            self._hub.sensors.charger_done.value,
             amps,
-            self._hub.sensors.totalhourlyenergy.observed_peak,
+            self._hub.sensors.totalhourlyenergy.value,
             self._hub.current_peak_dynamic,
             self._hub.sensors.locale.data.is_quarterly(),
             self._hub.power.power_canary.max_current_amp,

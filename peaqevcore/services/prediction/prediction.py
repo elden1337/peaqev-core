@@ -54,10 +54,10 @@ class Prediction:
         return Prediction._predicted_energy(
             datetime.now().minute,
             datetime.now().second,
-            self._hub.sensors.powersensormovingaverage.observed_peak
+            self._hub.sensors.powersensormovingaverage.value
             if hasattr(self._hub.sensors, "powersensormovingaverage")
             else 0,
-            self._hub.sensors.totalhourlyenergy.observed_peak,
+            self._hub.sensors.totalhourlyenergy.value,
             # self._hub.sensors.locale.data.is_quarterly(self._hub.sensors.locale.data),
         )
 

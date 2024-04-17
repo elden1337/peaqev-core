@@ -24,7 +24,7 @@ class SchedulerFacade(Scheduler):
 
     async def async_update_facade(self):
         await self.async_update(
-            self.hub.sensors.powersensormovingaverage24.observed_peak,
+            self.hub.sensors.powersensormovingaverage24.value,
             self.hub.current_peak_dynamic,
             self.hub.chargecontroller.session.session_energy,
             self.hub.hours.prices,

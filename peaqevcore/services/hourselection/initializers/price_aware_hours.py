@@ -148,7 +148,7 @@ class PriceAwareHours(Hours):
         if not self._core.service.max_min.active:
             await self._core.service.max_min.async_setup(max_charge)
         await self._core.service.max_min.async_update(
-            avg24=self._hub.sensors.powersensormovingaverage24.observed_peak,
+            avg24=self._hub.sensors.powersensormovingaverage24.value,
             peak=self._hub.sensors.current_peak.observed_peak,
             max_desired=max_charge,
             session_energy=session_energy,
