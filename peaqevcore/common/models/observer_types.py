@@ -45,3 +45,5 @@ class ObserverTypes(Enum):
     HvacPresetChanged ="hvac preset changed"
     TemperatureOutdoorsChanged="temperature outdoors changed"
     SetTemperatureChanged ="set temperature changed"
+
+    GetPrices = "callback get prices"

@@ -21,7 +21,7 @@ class SpotPriceBase:
     def __init__(self, hub, source: str, system: PeaqSystem, observer = MockObserver(), test:bool = False, is_active: bool = True, custom_sensor: str = None):
         _LOGGER.debug(f"Initializing Spotprice for {source} from system {system.value}.")
         self.hub = hub
-        self.observer = observer
+        self.observer = observer #not used?
         self.model = SpotPriceModel(source=source)
         self._dynamic_top_price = DynamicTopPrice()
         self._is_initialized: bool = False
@@ -118,6 +118,9 @@ class SpotPriceBase:
         else:
             _LOGGER.warning("No entity set for Spotprice. Unable to calculate price-data")
 
+    def callback_export_prices(self):
+        return [self.model.prices, self.model.prices_tomorrow]
+
     async def async_update_set_prices(self, result: ISpotPriceDTO) -> bool:
         ret = False
         today = await self.model.fix_dst(result.today)
@@ -158,7 +161,7 @@ class SpotPriceBase:
             if self.model.dynamic_top_price != _dynamic_max_price[0]:
                 self.model.dynamic_top_price_type = _dynamic_max_price[1].value
                 self.model.dynamic_top_price = _dynamic_max_price[0]
-                await self.observer.async_broadcast(
+                await self.hub.observer.async_broadcast(
                     ObserverTypes.DynamicMaxPriceChanged, _dynamic_max_price[0]
                 )
 
@@ -171,7 +174,7 @@ class SpotPriceBase:
             self.model.average_month = _new
             if self.model.average_month is not None:
                 _LOGGER.debug(f"broadcasting average month: {_new}")
-                await self.observer.async_broadcast(
+                await self.hub.observer.async_broadcast(
                     ObserverTypes.MonthlyAveragePriceChanged, _new
                 )
 
@@ -196,7 +199,7 @@ class SpotPriceBase:
             adj_avg = self.model.average_three_days
         if self.model.adjusted_average != adj_avg and adj_avg is not None:
             self.model.adjusted_average = adj_avg
-            await self.observer.async_broadcast(
+            await self.hub.observer.async_broadcast(
                 ObserverTypes.AdjustedAveragePriceChanged, adj_avg
             )
 
@@ -207,7 +210,7 @@ class SpotPriceBase:
                 self.model.patch_average_data()
             self.model.daily_average = average
             self.model.daily_average_date = checkdate
-            await self.observer.async_broadcast(
+            await self.hub.observer.async_broadcast(
                 ObserverTypes.DailyAveragePriceChanged, average
             )
 
