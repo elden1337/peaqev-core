@@ -70,7 +70,7 @@ class EnergiDataServiceDTO(ISpotPriceDTO):
             return 0
 
     def _set_affected_date(self, affected_date, ret) -> date:
-        return datetime.now().date
+        return datetime.now().date()
 
 
 @dataclass
@@ -88,14 +88,21 @@ class NordpoolDTO(ISpotPriceDTO):
             )
             return 0
 
-    def _set_affected_date(self, affected_date, ret) -> date:
+    def _set_affected_date(self, affected_date: date, ret) -> date:
         try:
             rawdata = ret.attributes.get("raw_today", [])
-            if rawdata and affected_date is None or affected_date != rawdata[0]['start'].date():
-                _LOGGER.debug(f"successfully setting {rawdata[0]['start'].date()} as spotprice affected date")
-                return rawdata[0]['start'].date()
+            if not len (rawdata):
+                _LOGGER.warning("No rawdata found for today")
+                return affected_date
+            new_date = datetime.fromisoformat(rawdata[0]['start']).date()
+            if rawdata and affected_date is None or affected_date != new_date:
+                _LOGGER.debug(f"successfully setting {new_date} as spotprice affected date")
+                return new_date
             else:
-                _LOGGER.warning(f"Unable to produce affected date for today. the data I got to play with was: {ret.attributes.get('raw_today', [])}")
+                _LOGGER.warning(
+                    f"Unable to produce affected date for today. the data I got to play with was: {new_date}")
+                return affected_date
         except Exception as e:
-            _LOGGER.exception("Unable to parse date from raw_today data. Settings today's date as the valid one.")
+            _LOGGER.exception("Unable to parse date from raw_today data. Settings today's date as the valid one.", e)
             return datetime.now().date()
+
