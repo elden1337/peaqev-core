@@ -149,7 +149,7 @@ class SpotPriceBase:
             await self.async_update_average_month()
             await self.async_update_dynamic_max_price()
         else:
-            _LOGGER.warning(f"Possible issue detected with {result.affected_date} in nordpool dates.")
+            _LOGGER.warning(f"Possible issue detected with {result.affected_date} in {self.source} dates.")
         return ret
 
     #not for peaqnext
