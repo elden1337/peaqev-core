@@ -72,27 +72,34 @@ class HourSelectionService:
             try:
                 price_dict[h] = prices[idx]
             except Exception as e:
-                print(f"Exception in adding prices today! {e}")
+                _LOGGER.exception(f"Exception in adding prices today! {e}")
+                raise
         if len(prices_tomorrow):
             hours_tomorrow = self.dtmodel.get_eligable_hours(self.dtmodel.hdate_tomorrow)
             for idx, h in enumerate(hours_tomorrow):
                 try:
                     price_dict[h] = prices_tomorrow[idx]
                 except Exception as e:
-                    print(f"Exception in adding prices tomorrow! {e}")
+                    _LOGGER.exception(f"Exception in adding prices tomorrow! {e}")
+                    raise
         return price_dict
 
-    async def async_update_prices(self, prices: list[float], prices_tomorrow: list[float] = []):
-        price_dict = self.clean_prices(prices, prices_tomorrow)
-        self.model.prices_today = prices  # clean first
-        self.model.prices_tomorrow = prices_tomorrow  # clean first
-        if do_recalculate_prices(price_dict=price_dict, hours_prices=self.model.hours_prices, hdate=self.dtmodel.hdate):
-            self._create_prices(prices, prices_tomorrow)
-        else:
-            print(f"NOT recalculate prices {len(prices)} {len(prices_tomorrow)}")
-            _LOGGER.debug(f"NOT recalculate prices {len(prices)} {len(prices_tomorrow)}")
-            await self.async_update()
-        self.max_min.get_hours()
+    async def async_update_prices(self, prices: list[float], prices_tomorrow: list[float] = []) -> None:
+
+        try:
+            price_dict = self.clean_prices(prices, prices_tomorrow)
+            self.model.prices_today = prices  # clean first
+            self.model.prices_tomorrow = prices_tomorrow  # clean first
+
+            if do_recalculate_prices(price_dict=price_dict, hours_prices=self.model.hours_prices, hdate=self.dtmodel.hdate):
+                self._create_prices(prices, prices_tomorrow)
+            else:
+                print(f"NOT recalculate prices {len(prices)} {len(prices_tomorrow)}")
+                _LOGGER.debug(f"NOT recalculate prices {len(prices)} {len(prices_tomorrow)}")
+                await self.async_update()
+            self.max_min.get_hours()
+        except Exception as e:
+            _LOGGER.exception(f"Exception in updating prices! Please report a bug and include the following: {e}")
 
     async def async_update_adjusted_average(self, adjusted_average: float) -> None:
         self.model.adjusted_average = adjusted_average
