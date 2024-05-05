@@ -46,7 +46,8 @@ class NordPoolUpdater(SpotPriceBase):
             entities = template.integration_entities(self.state_machine, NORDPOOL)
             _LOGGER.debug(f"Found {list(entities)} Spotprice entities for {self.model.source}.")
             if len(list(entities)) < 1:
-                self.hub.options.price.price_aware = False  # todo: composition
+                if hasattr(self.hub.options, "price"):
+                    self.hub.options.price.price_aware = False  # todo: composition
                 _LOGGER.error(
                     f"There were no Spotprice-entities. Cannot continue. with price-awareness."
                 )
@@ -65,7 +66,8 @@ class NordPoolUpdater(SpotPriceBase):
                     self.hub.options.price.price_aware = False  # todo: composition todo: fix this
                     _LOGGER.error(f"more than one Spotprice entity found. Cannot continue with price-awareness.")
         except Exception as e:
-            self.hub.options.price.price_aware = False  # todo: composition todo: fix this
+            if hasattr(self.hub.options, "price"):
+                self.hub.options.price.price_aware = False  # todo: composition
             _LOGGER.error(
                 f"I was unable to get a Spotprice-entity. Cannot continue with price-awareness: {e}"
             )
