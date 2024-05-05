@@ -94,7 +94,7 @@ class NordpoolDTO(ISpotPriceDTO):
             if not len (rawdata):
                 _LOGGER.warning("No rawdata found for today")
                 return affected_date
-            new_date = datetime.fromisoformat(rawdata[0]['start']).date()
+            new_date = rawdata[0]['start'].date()
             if rawdata and affected_date is None or affected_date != new_date:
                 _LOGGER.debug(f"successfully setting {new_date} as spotprice affected date")
                 return new_date
