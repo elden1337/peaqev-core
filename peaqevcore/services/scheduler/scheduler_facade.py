@@ -59,7 +59,7 @@ class SchedulerFacade(Scheduler):
         caution_hours = self.caution_hours
 
         for hour_price in future_hours:
-            if start <= hour_price.hour < dep:
+            if start <= hour_price.dt < dep:
                 hour_price.permittance_type = PermittanceType.Scheduler
                 if hour_price.hour in non_hours and hour_price.dt.date() != today and non_hours.index(
                         hour_price.hour) >= len(non_hours) / 2:
