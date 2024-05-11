@@ -65,6 +65,7 @@ class ScheduleSession:
         nh = []
         _timer = datetime.combine(self.starttime.date(), time(self.starttime.hour, 0))
         today_dt = datetime.now() if self._mock_dt is None else self._mock_dt
+        today_dt = today_dt.replace(minute=0, second=0, microsecond=0)  # start of the current hour
         while _timer < self.departuretime:
             if _timer >= today_dt:
                 if _timer not in self.hours_charge.keys():

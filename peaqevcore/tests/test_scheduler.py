@@ -190,7 +190,7 @@ async def test_scheduler_overnight_3():
         prices_tomorrow=MOCKPRICES_TOMORROW,
         mockdt=datetime.strptime("22-07-20 13:01", "%y-%m-%d %H:%M"),
     )
-    assert s.model.non_hours == [14, 15, 16, 17, 18, 19, 20, 21, 7, 8]
+    assert s.model.non_hours == [13,14, 15, 16, 17, 18, 19, 20, 21, 7, 8]
     await s.async_update(
         avg24=610,
         peak=1.5,
@@ -199,7 +199,7 @@ async def test_scheduler_overnight_3():
         prices_tomorrow=MOCKPRICES_TOMORROW,
         mockdt=datetime.strptime("22-07-20 22:11", "%y-%m-%d %H:%M"),
     )
-    assert s.model.non_hours == [7, 8]
+    assert s.model.non_hours == [22,7, 8]
     await s.async_update(
         avg24=310,
         peak=1.5,
@@ -207,7 +207,7 @@ async def test_scheduler_overnight_3():
         prices=MOCKPRICES_TOMORROW,
         mockdt=datetime.strptime("22-07-21 00:03", "%y-%m-%d %H:%M"),
     )
-    assert s.model.non_hours == [6, 7, 8]
+    assert s.model.non_hours == [0,6, 7, 8]
 
 
 @pytest.mark.asyncio
@@ -239,7 +239,7 @@ async def test_scheduler_overnight_no_charge():
         mockdt=datetime.strptime("22-07-20 13:01", "%y-%m-%d %H:%M"),
     )
     assert s.active == True
-    assert s.model.non_hours == [14, 15, 16, 17, 18, 19, 20, 21, 22, 7, 8]
+    assert s.model.non_hours == [13,14, 15, 16, 17, 18, 19, 20, 21, 22, 7, 8]
     await s.async_update(
         avg24=310,
         peak=1.5,
@@ -248,7 +248,7 @@ async def test_scheduler_overnight_no_charge():
         prices_tomorrow=MOCKPRICES_TOMORROW,
         mockdt=datetime.strptime("22-07-20 22:11", "%y-%m-%d %H:%M"),
     )
-    assert s.model.non_hours == [7, 8]
+    assert s.model.non_hours == [22,7, 8]
     await s.async_update(
         avg24=310,
         peak=1.5,
@@ -274,7 +274,7 @@ async def test_scheduler_start_after_departure():
 async def test_scheduler_correct_hours():
     MOCK240511 = [[0.15,0.26,0.35,0.37,0.41,0.41,0.45,0.53,0.57,0.18,0.09,0.08,0.07,0.07,0.07,0.08,0.12,0.53,0.59,0.62,0.57,0.55,0.49,0.45],[0.43,0.36,0.29,0.21,0.15,0.14,0.14,0.14,0.1,0.06,0.04,0.02,0,-0.02,0,0.05,0.08,0.12,0.44,0.66,0.71,0.69,0.6,0.49]]
     s = Scheduler(test=True)
-    start_dt = datetime.strptime("24-05-11 21:00", "%y-%m-%d %H:%M")
+    start_dt = datetime.strptime("24-05-11 22:10", "%y-%m-%d %H:%M")
     dep_time_dt = datetime.strptime("24-05-12 11:00", "%y-%m-%d %H:%M")
     await s.async_create(
         desired_charge=10, departuretime=dep_time_dt, starttime=start_dt
@@ -287,11 +287,5 @@ async def test_scheduler_correct_hours():
  datetime(2024, 5, 12, 9, 0): 1,
  datetime(2024, 5, 12, 10, 0): 1,
  datetime(2024, 5, 12, 11, 0): 1}
-    # await s.async_update(
-    #     avg24=310,
-    #     peak=1.5,
-    #     charged_amount=0,
-    #     prices=MOCKPRICES,
-    #     mockdt=datetime.strptime("22-07-20 12:05", "%y-%m-%d %H:%M"),
-    # )
+    assert s.model.non_hours == [22,23,0,1,2,3,4]
     assert s.active == True
