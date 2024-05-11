@@ -61,7 +61,7 @@ class ScheduleSession:
         return self._ch
 
     def _make_hours(self) -> None:
-        ch = dict()
+        ch = {}
         nh = []
         _timer = datetime.combine(self.starttime.date(), time(self.starttime.hour, 0))
         today_dt = datetime.now() if self._mock_dt is None else self._mock_dt
@@ -77,9 +77,7 @@ class ScheduleSession:
         self._nh = nh
         self._ch = ch
 
-    def _filter_price_dict(
-        self, price_dict: dict, starttime: datetime, departuretime: datetime
-    ) -> dict:
+    def _filter_price_dict(self, price_dict: dict, starttime: datetime, departuretime: datetime) -> dict:
         ret = {
             key: value
             for (key, value) in price_dict.items()

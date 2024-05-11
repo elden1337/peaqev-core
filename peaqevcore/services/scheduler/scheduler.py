@@ -45,15 +45,13 @@ class Scheduler:
         self, desired_charge: float, departuretime: datetime, starttime: datetime
     ) -> bool:
         if departuretime < starttime:
-            _LOGGER.error("Starttime must be before departuretime if added.")
+            _LOGGER.error("Starttime must be before departuretime")
             return False
         if desired_charge <= 0:
             _LOGGER.error("Desired charge for scheduler must be greater than 0")
             return False
         if departuretime <= datetime.now() and self.is_test is False:
-            _LOGGER.error(
-                f"Departuretime must be in the future. You added: {departuretime}"
-            )
+            _LOGGER.error(f"Departuretime must be in the future. You added: {departuretime}")
             return False
         return True
 

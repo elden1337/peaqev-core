@@ -2,6 +2,7 @@ import logging
 from typing import Tuple
 from .hoursbase import Hours
 from ..hoursselection import Hoursselection as core_hours
+from ...hoursselection_service_new.models.hour_price import HourPrice
 from ....common.enums.cautionhourtype import CautionHourType
 from ...timer.timer import Timer
 from ...scheduler.scheduler_facade import SchedulerFacade
@@ -52,8 +53,8 @@ class PriceAwareHours(Hours):
         return self._core.caution_hours
 
     @property
-    def future_hours(self) -> list:
-        return self._core.future_hours
+    def future_hours(self) -> list[HourPrice]:
+        return self.scheduler.combine_future_hours(self._core.future_hours)
 
     @property
     def absolute_top_price(self):

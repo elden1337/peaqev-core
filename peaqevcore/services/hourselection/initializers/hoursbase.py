@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from abc import abstractmethod
 from ..const import NON_HOUR, CAUTION_HOUR, CHARGING_PERMITTED
+from ...hoursselection_service_new.models.hour_price import HourPrice
 from ...timer.timer import Timer
 from ...scheduler.scheduler_facade import SchedulerFacade
 from typing import Tuple
@@ -56,15 +57,6 @@ class Hours:
     def caution_hours(self, val):
         pass
 
-    # @property
-    # @abstractmethod
-    # def entity(self):
-    #     pass
-
-    # @abstractmethod
-    # def update_spotprice(self) -> None:
-    #     pass
-
     @abstractmethod
     async def async_update_top_price(self, dyn_top_price) -> None:
         pass
@@ -76,7 +68,7 @@ class Hours:
 
     @property
     @abstractmethod
-    def future_hours(self) -> list:
+    def future_hours(self) -> list[HourPrice]:
         pass
 
     @abstractmethod
