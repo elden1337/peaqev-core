@@ -75,6 +75,7 @@ class Scheduler:
         ):
             return await self.async_cancel()
         charge_per_hour = peak - (avg24 / 1000)
+
         if charge_per_hour <= 0:
             raise Exception
 

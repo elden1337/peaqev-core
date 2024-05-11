@@ -53,21 +53,16 @@ class SchedulerFacade(Scheduler):
 
         dep = self.model.departuretime
         start = self.model.starttime
-        today = datetime.now().date()
 
-        non_hours = self.non_hours
-        caution_hours = self.caution_hours
+        hours_charge = self.model.hours_charge
 
         for hour_price in future_hours:
             if start <= hour_price.dt < dep:
                 hour_price.permittance_type = PermittanceType.Scheduler
-                if hour_price.hour in non_hours and hour_price.dt.date() != today and non_hours.index(
-                        hour_price.hour) >= len(non_hours) / 2:
-                    hour_price.permittance = 0
-                elif hour_price.hour in caution_hours:
-                    hour_price.permittance = caution_hours[hour_price.hour]
+                if hour_price.dt in hours_charge:
+                    hour_price.permittance = hours_charge[hour_price.dt]
                 else:
-                    hour_price.permittance = 1
+                    hour_price.permittance = 0
         return future_hours
 
     #todo: redo these to work as future-hours instead. preferably reuse logic from hourselectionservice

@@ -269,3 +269,29 @@ async def test_scheduler_start_after_departure():
         desired_charge=9, departuretime=dep_time_dt, starttime=start_dt
     )
     assert s.active is False
+
+@pytest.mark.asyncio
+async def test_scheduler_correct_hours():
+    MOCK240511 = [[0.15,0.26,0.35,0.37,0.41,0.41,0.45,0.53,0.57,0.18,0.09,0.08,0.07,0.07,0.07,0.08,0.12,0.53,0.59,0.62,0.57,0.55,0.49,0.45],[0.43,0.36,0.29,0.21,0.15,0.14,0.14,0.14,0.1,0.06,0.04,0.02,0,-0.02,0,0.05,0.08,0.12,0.44,0.66,0.71,0.69,0.6,0.49]]
+    s = Scheduler(test=True)
+    start_dt = datetime.strptime("24-05-11 21:00", "%y-%m-%d %H:%M")
+    dep_time_dt = datetime.strptime("24-05-12 11:00", "%y-%m-%d %H:%M")
+    await s.async_create(
+        desired_charge=10, departuretime=dep_time_dt, starttime=start_dt
+    )
+    await s.async_update(avg24=310, peak=1.9, charged_amount=0, prices=MOCK240511[0], prices_tomorrow=MOCK240511[1], mockdt=start_dt)
+    assert s.model.hours_charge == {datetime(2024, 5, 12, 5, 0): 1,
+ datetime(2024, 5, 12, 6, 0): 1,
+ datetime(2024, 5, 12, 7, 0): 0.3,
+ datetime(2024, 5, 12, 8, 0): 1,
+ datetime(2024, 5, 12, 9, 0): 1,
+ datetime(2024, 5, 12, 10, 0): 1,
+ datetime(2024, 5, 12, 11, 0): 1}
+    # await s.async_update(
+    #     avg24=310,
+    #     peak=1.5,
+    #     charged_amount=0,
+    #     prices=MOCKPRICES,
+    #     mockdt=datetime.strptime("22-07-20 12:05", "%y-%m-%d %H:%M"),
+    # )
+    assert s.active == True
