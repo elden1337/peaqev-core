@@ -78,10 +78,10 @@ class SchedulerFacade(Scheduler):
 
     #todo: redo these to work as future-hours instead. preferably reuse logic from hourselectionservice
     @property
-    def non_hours(self) -> list:
+    def non_hours(self) -> list[datetime]:
         return self.model.non_hours
 
     @property
-    def caution_hours(self) -> dict:
+    def caution_hours(self) -> dict[datetime,float]:
         """dynamic caution hours"""
         return self.model.caution_hours

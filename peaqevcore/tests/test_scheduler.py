@@ -307,5 +307,5 @@ async def test_scheduler_correct_hours_2():
         datetime(2024, 5, 12, 12, 0): 1,
         datetime(2024, 5, 12, 13, 0): 1
                                     }
-    assert s.model.non_hours == [10]
+    assert s.model.non_hours == [datetime(2024, 5, 12, 10, 0)]
     assert s.active == True

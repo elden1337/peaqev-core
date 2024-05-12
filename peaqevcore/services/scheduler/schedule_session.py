@@ -52,12 +52,12 @@ class ScheduleSession:
         self._init_ok = True
 
     @property
-    def non_hours(self) -> list:
+    def non_hours(self) -> list[datetime]:
         self._make_hours()
         return self._nh
 
     @property
-    def caution_hours(self) -> dict:
+    def caution_hours(self) -> dict[datetime, float]:
         self._make_hours()
         return self._ch
 
@@ -71,10 +71,10 @@ class ScheduleSession:
             if _timer >= today_dt:
                 if _timer not in self.hours_charge.keys():
                     if self._tomorrow_valid or _timer.hour >= today_dt.hour:
-                        nh.append(_timer.hour)
+                        nh.append(_timer)
                 elif 0 < self.hours_charge[_timer] < 1:
                     if self._tomorrow_valid or _timer.hour >= today_dt.hour:
-                        ch[_timer.hour] = self.hours_charge[_timer]
+                        ch[_timer] = self.hours_charge[_timer]
             _timer += timedelta(hours=1)
         self._nh = nh
         self._ch = ch
