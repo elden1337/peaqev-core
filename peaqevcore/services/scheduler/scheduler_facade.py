@@ -64,7 +64,7 @@ class SchedulerFacade(Scheduler):
             return future_hours
 
         dep = self.model.departuretime
-        start = self.model.starttime
+        start = self.model.starttime.replace(minute=0, second=0, microsecond=0)
         hours_charge = self.model.hours_charge
 
         for hour_price in future_hours:
