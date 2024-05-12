@@ -20,7 +20,7 @@ class SchedulerFacade(Scheduler):
             'schedule_starttime': self.model.starttime.strftime('%Y-%m-%d %H:%M'),
             'departure_time': self.model.departuretime.strftime('%Y-%m-%d %H:%M'),
             'charge_amount': self.model.desired_charge,
-            'override_settings': self.model._override_settings,
+            'override_settings': self.model.override_settings,
             'remaning_charge': self.model.remaining_charge
         }}
 

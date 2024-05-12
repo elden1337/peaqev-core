@@ -16,7 +16,7 @@ class ScheduleSession:
     _ch: dict = field(default_factory=lambda: {})
     _mock_dt: datetime | None = None
     _init_ok: bool = False
-    _override_settings: bool = False
+    override_settings: bool = False
     _tomorrow_valid: bool = False
 
     @property

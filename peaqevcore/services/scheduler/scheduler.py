@@ -41,7 +41,7 @@ class Scheduler:
         self.model.starttime = starttime
         self.model.remaining_charge = desired_charge
         self.model.desired_charge = desired_charge
-        self.model._override_settings = override_settings
+        self.model.override_settings = override_settings
 
     async def async_check_parameters(
         self, desired_charge: float, departuretime: datetime, starttime: datetime
@@ -98,7 +98,7 @@ class Scheduler:
 
     async def async_sort_pricelist(self) -> dict:
         if (
-            self.model._override_settings is False
+            self.model.override_settings is False
             and self.model.hourselection_options is not None
         ):
             return await self.async_filter_pricelist()
