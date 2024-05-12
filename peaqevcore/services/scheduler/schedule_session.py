@@ -7,6 +7,7 @@ from ...models.hourselection.hourselection_options import HourSelectionOptions
 class ScheduleSession:
     hourselection_options: HourSelectionOptions | None
     remaining_charge: float = 0
+    desired_charge: float = 0
     starttime: datetime = datetime.min
     departuretime: datetime = datetime.min
     _hours_price: dict[datetime, float] = field(init=False)

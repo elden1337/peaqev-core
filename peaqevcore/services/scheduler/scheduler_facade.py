@@ -12,6 +12,18 @@ class SchedulerFacade(Scheduler):
         super().__init__(options)
         self.schedule_created = False
 
+    @property
+    def schedules(self) -> dict:
+        if not self.scheduler_active:
+            return {}
+        return {1: {
+            'schedule_starttime': self.model.starttime.strftime('%Y-%m-%d %H:%M'),
+            'departure_time': self.model.departuretime.strftime('%Y-%m-%d %H:%M'),
+            'charge_amount': self.model.desired_charge,
+            'override_settings': self.model._override_settings,
+            'remaning_charge': self.model.remaining_charge
+        }}
+
     async def async_create_schedule(
         self,
         charge_amount: float,
@@ -53,7 +65,6 @@ class SchedulerFacade(Scheduler):
 
         dep = self.model.departuretime
         start = self.model.starttime
-
         hours_charge = self.model.hours_charge
 
         for hour_price in future_hours:

@@ -35,10 +35,12 @@ class Scheduler:
         ):
             return
         if self.scheduler_active:
+            _LOGGER.debug("Scheduler already active, cancelling")
             await self.async_cancel()
         self.model.departuretime = departuretime
         self.model.starttime = starttime
         self.model.remaining_charge = desired_charge
+        self.model.desired_charge = desired_charge
         self.model._override_settings = override_settings
 
     async def async_check_parameters(
