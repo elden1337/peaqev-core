@@ -127,11 +127,13 @@ class MaxMinCharge:
         return False
 
     def _cap_future_hours(self, hours: list[HourPrice]) -> list[HourPrice]:
-        if self.hour_cap.do_calculate_cap:
-            hours = [setattr(hour, 'permittance_type', PermittanceType.Regular) or hour for hour in hours]
-        cap = self.hour_cap.cap(hours)
-        maxmin_hours = [setattr(x, 'permittance_type', PermittanceType.MaxMin) or x for x in hours if x.dt <= cap]
-        return maxmin_hours
+        return hours
+        #disable this for now til we find a better practice for it.
+        # if self.hour_cap.do_calculate_cap:
+        #     hours = [setattr(hour, 'permittance_type', PermittanceType.Regular) or hour for hour in hours]
+        # cap = self.hour_cap.cap(hours)
+        # maxmin_hours = [setattr(x, 'permittance_type', PermittanceType.MaxMin) or x for x in hours if x.dt <= cap]
+        # return maxmin_hours
 
     def select_hours_for_charge(
         self, hours: list[HourPrice], desired_charge: float
