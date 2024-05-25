@@ -10,45 +10,9 @@ if TYPE_CHECKING:
     from .hourselection_service import HourSelectionService
 from .models.max_min_model import MaxMinModel
 
-
-class MaxMinHourCap:
-    def __init__(self) -> None:
-        self._car_connected: bool = False
-        self._allow_calculate_cap: bool = False
-        self._current_cap: datetime = datetime.max
-
-    @property
-    def do_calculate_cap(self) -> bool:
-        return self._allow_calculate_cap
-
-    @property
-    def car_connected(self) -> bool:
-        return self._car_connected
-    
-    @car_connected.setter
-    def car_connected(self, val: bool) -> None:
-        if val != self._car_connected:
-            self._allow_calculate_cap = True
-        self._car_connected = val
-
-    def cap(self, hours: list[HourPrice]) -> datetime:
-        if self._allow_calculate_cap or min([x.dt for x in hours if not x.passed]) >= self._current_cap:
-            current_hour = min([x.dt for x in hours if not x.passed])
-            end_hour = datetime.max
-            match current_hour.hour:
-                case 9|10|11|12|13|14|15|16|17|18|19|20|21|22|23:
-                    end_hour = (current_hour + timedelta(days=1)).replace(hour=9)
-                case 0|1|2|3|4|5|6|7|8:
-                    end_hour = (current_hour).replace(hour=18)
-            self._current_cap = end_hour
-            self._allow_calculate_cap = False
-        return self._current_cap
-
-
 class MaxMinCharge:
     def __init__(self, service: HourSelectionService, min_price: float | None) -> None:
         self.model = MaxMinModel(min_price=min_price)  # type: ignore
-        self.hour_cap = MaxMinHourCap()
         self.parent = service
         self.active: bool = False
         self.overflow: bool = False
@@ -97,7 +61,6 @@ class MaxMinCharge:
         car_connected: bool = False,
         limiter: float = 0.0
     ) -> None:
-        self.hour_cap.car_connected = car_connected
         if not car_connected:
             await self.async_setup(max_charge=peak)
         _session = session_energy or 0
@@ -126,25 +89,15 @@ class MaxMinCharge:
             return max(original,adjusted) - min(original,adjusted) < limiter
         return False
 
-    def _cap_future_hours(self, hours: list[HourPrice]) -> list[HourPrice]:
-        return hours
-        #disable this for now til we find a better practice for it.
-        # if self.hour_cap.do_calculate_cap:
-        #     hours = [setattr(hour, 'permittance_type', PermittanceType.Regular) or hour for hour in hours]
-        # cap = self.hour_cap.cap(hours)
-        # maxmin_hours = [setattr(x, 'permittance_type', PermittanceType.MaxMin) or x for x in hours if x.dt <= cap]
-        # return maxmin_hours
-
     def select_hours_for_charge(
         self, hours: list[HourPrice], desired_charge: float
     ) -> None:
-        _capped_hours = self._cap_future_hours(hours)
-        _original_charge = self._get_charge_sum(_capped_hours)
+        _original_charge = self._get_charge_sum(hours)
         _total_charge: float = 0
         _desired: float = min([desired_charge, _original_charge])
         while _total_charge < _desired:
-            _capped_hours.sort(key=lambda x: (x.price,x.dt))
-            for hour in _capped_hours:
+            hours.sort(key=lambda x: (x.price,x.dt))
+            for hour in hours:
                 if any([hour.passed, hour.permittance == 0, _total_charge >= _desired, hour.hour_type is HourType.AboveMax]):
                     hour.permittance = 0
                     continue
@@ -152,16 +105,9 @@ class MaxMinCharge:
                 _perm = min(1,max((_desired - _total_charge) / self.model.expected_hourly_charge,0))
                 _total_charge += _hour_charge * _perm
                 hour.permittance = round(_perm, 2)
-                if self._get_charge_sum(_capped_hours) <= desired_charge:
+                if self._get_charge_sum(hours) <= desired_charge:
                     break
-        self.model.input_hours = self._combine_hour_lists(hours, _capped_hours)
-
-    def _combine_hour_lists(self, hours: list[HourPrice], capped_hours: list[HourPrice]) -> list[HourPrice]:
-        capped_hours_dict = {x.dt: x for x in capped_hours}
-        for i, hour in enumerate(hours):
-            if hour.dt in capped_hours_dict:
-                hours[i] = capped_hours_dict[hour.dt]
-        return hours
+        self.model.input_hours = hours
 
     def _get_charge_sum(self, hours: list[HourPrice]) -> float:
         return sum(
