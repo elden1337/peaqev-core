@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from .update_scheduler_dto import UpdateSchedulerDTO
 from ..hoursselection_service_new.models.hour_price import HourPrice
 from ..hoursselection_service_new.models.permittance_type import PermittanceType
 from ...models.chargecontroller_states import ChargeControllerStates
@@ -7,8 +8,7 @@ from .scheduler import Scheduler
 
 
 class SchedulerFacade(Scheduler):
-    def __init__(self, hub, options):
-        self.hub = hub
+    def __init__(self, options):
         super().__init__(options)
         self.schedule_created = False
 
@@ -37,14 +37,8 @@ class SchedulerFacade(Scheduler):
             )
         self.schedule_created = True
 
-    async def async_update_facade(self):
-        await self.async_update(
-            self.hub.sensors.powersensormovingaverage24.value,
-            self.hub.current_peak_dynamic,
-            self.hub.chargecontroller.session.session_energy,
-            self.hub.hours.prices,
-            self.hub.hours.prices_tomorrow,
-        )
+    async def async_update_facade(self, model: UpdateSchedulerDTO):
+        await self.async_update(model)
         await self.async_check_states()
 
     async def async_cancel_facade(self):

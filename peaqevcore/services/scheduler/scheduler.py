@@ -1,5 +1,7 @@
 from datetime import datetime, date, time
 import math
+
+from .update_scheduler_dto import UpdateSchedulerDTO
 from ...models.hourselection.hourselection_options import HourSelectionOptions
 from .schedule_session import ScheduleSession
 import logging
@@ -57,15 +59,7 @@ class Scheduler:
             return False
         return True
 
-    async def async_update(
-        self,
-        avg24: float,
-        peak: float,
-        charged_amount: float | None = None,
-        prices: list | None = None,
-        prices_tomorrow: list | None = None,
-        mockdt: datetime | None = None,
-    ):
+    async def async_update(self, dto: UpdateSchedulerDTO, mockdt: datetime | None = None):
         """calculate based on the pricing of hours, current peak and the avg24hr energy consumption"""
         self.model._mock_dt = mockdt if mockdt is not None else datetime.now()
         self.active = True
@@ -76,18 +70,16 @@ class Scheduler:
             ]
         ):
             return await self.async_cancel()
-        charge_per_hour = peak - (avg24 / 1000)
 
-        if charge_per_hour <= 0:
+        if dto.charge_per_hour < 0:
             raise Exception
 
-        self.model.remaining_charge -= (
-            charged_amount if charged_amount is not None else 0
-        )
-        self.model.hours_price = [prices, prices_tomorrow]
+        self.model.remaining_charge -= dto.charged_amount
+
+        self.model.hours_price = [dto.prices, dto.prices_tomorrow]
         cheapest = await self.async_sort_pricelist()
         self.model.hours_charge = await self.async_get_charge_hours(
-            cheapest_hours=cheapest, charge_per_hour=charge_per_hour, peak=peak
+            cheapest_hours=cheapest, charge_per_hour=dto.charge_per_hour, peak=dto.peak
         )
 
     async def async_cancel(self):
