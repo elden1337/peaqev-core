@@ -1,9 +1,13 @@
 from dataclasses import dataclass, field
 
+from peaqevcore.models.chargecontroller_states import ChargeControllerStates
+
+
 @dataclass
 class UpdateSchedulerDTO:
     moving_avg24: float
     peak: float
+    chargecontroller_state: ChargeControllerStates
     charged_amount: float = 0.0
     prices: list|None = field(default_factory=lambda: None)
     prices_tomorrow: list|None = field(default_factory=lambda: None)

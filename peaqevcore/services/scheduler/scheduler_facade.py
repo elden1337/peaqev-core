@@ -39,17 +39,17 @@ class SchedulerFacade(Scheduler):
 
     async def async_update_facade(self, model: UpdateSchedulerDTO):
         await self.async_update(model)
-        await self.async_check_states()
+        await self.async_check_states(model.chargecontroller_state)
 
     async def async_cancel_facade(self):
         await self.async_cancel()
         self.schedule_created = False
 
-    async def async_check_states(self):
+    async def async_check_states(self, chargecontroller_state: ChargeControllerStates):
         if not self.scheduler_active and self.schedule_created:
             await self.async_cancel_facade()
         elif (
-            self.hub.chargecontroller.status_string is ChargeControllerStates.Done.name
+            chargecontroller_state is ChargeControllerStates.Done
         ):
             await self.async_cancel_facade()
 
