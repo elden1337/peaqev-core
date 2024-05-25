@@ -18,7 +18,16 @@ class MockObserver:
 
 
 class SpotPriceBase:
-    def __init__(self, hub, source: str, system: PeaqSystem, observer = MockObserver(), test:bool = False, is_active: bool = True, custom_sensor: str = None):
+    def __init__(
+            self,
+            hub,
+            source: str,
+            system: PeaqSystem,
+            observer = MockObserver(),
+            test:bool = False,
+            is_active: bool = True,
+            custom_sensor: str = None
+    ):
         _LOGGER.debug(f"Initializing Spotprice for {source} from system {system.value}.")
         self.hub = hub
         self.observer = observer #not used?
