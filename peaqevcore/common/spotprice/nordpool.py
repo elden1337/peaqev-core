@@ -32,13 +32,11 @@ class NordPoolUpdater(SpotPriceBase):
                 await self.hub.async_update_prices(
                     [self.model.prices, self.model.prices_tomorrow]
                 )
-                _LOGGER.debug("Spotprice has been initialized. Broadcasting...")
+                _LOGGER.info("Nordpool service has been successfully.")
+                _LOGGER.debug("Nordpool service has been initialized. Broadcasting...")
                 await self.hub.observer.async_broadcast(ObserverTypes.SpotpriceInitialized)
             else:
-                await self.hub.observer.async_broadcast(
-                    ObserverTypes.PricesChanged,
-                    [self.model.prices, self.model.prices_tomorrow],
-                )
+                await self.hub.observer.async_broadcast(ObserverTypes.PricesChanged,[self.model.prices, self.model.prices_tomorrow])
             self._is_initialized = True
 
     def setup(self):
@@ -68,9 +66,7 @@ class NordPoolUpdater(SpotPriceBase):
         except Exception as e:
             if hasattr(self.hub.options, "price"):
                 self.hub.options.price.price_aware = False  # todo: composition
-            _LOGGER.error(
-                f"I was unable to get a Spotprice-entity. Cannot continue with price-awareness: {e}"
-            )
+            _LOGGER.error(f"I was unable to get a Spotprice-entity. Cannot continue with price-awareness: {e}")
 
     def _setup_set_entity(self, entity: str) -> None:
         self.model.entity = entity
