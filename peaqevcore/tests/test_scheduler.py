@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 import pytest
 
-from ..services.scheduler.scheduler import Scheduler
+from ..services.scheduler.scheduler_service import Scheduler
 from ..models.hourselection.hourselection_options import HourSelectionOptions
 
 MOCKPRICES = [

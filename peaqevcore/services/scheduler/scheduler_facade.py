@@ -4,7 +4,7 @@ from .update_scheduler_dto import UpdateSchedulerDTO
 from ..hoursselection_service_new.models.hour_price import HourPrice
 from ..hoursselection_service_new.models.permittance_type import PermittanceType
 from ...models.chargecontroller_states import ChargeControllerStates
-from .scheduler import Scheduler
+from .scheduler_service import Scheduler
 
 
 class SchedulerFacade(Scheduler):
