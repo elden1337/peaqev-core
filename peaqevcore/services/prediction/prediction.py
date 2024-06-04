@@ -4,7 +4,7 @@ from ...util import async_convert_quarterly_minutes, _convert_quarterly_minutes
 
 class Prediction:
     def __init__(self, hub=None):
-        self._hub = hub
+        self._hub = hub #todo: decouple
 
     @staticmethod
     async def async_predicted_energy(
@@ -54,19 +54,19 @@ class Prediction:
         return Prediction._predicted_energy(
             datetime.now().minute,
             datetime.now().second,
-            self._hub.sensors.powersensormovingaverage.value
-            if hasattr(self._hub.sensors, "powersensormovingaverage")
+            self._hub.sensors.powersensormovingaverage.value #todo: decouple
+            if hasattr(self._hub.sensors, "powersensormovingaverage") #todo: decouple
             else 0,
-            self._hub.sensors.totalhourlyenergy.value,
+            self._hub.sensors.totalhourlyenergy.value, #todo: decouple
             # self._hub.sensors.locale.data.is_quarterly(self._hub.sensors.locale.data),
         )
 
     @property
     def predictedpercentageofpeak(self) -> float:
         """legacy. remove once peaqhvac is async."""
-        if hasattr(self._hub.sensors, "current_peak"):
+        if hasattr(self._hub.sensors, "current_peak"): #todo: decouple
             return Prediction._predicted_percentage_of_peak(
-                self._hub.sensors.current_peak.observed_peak, self.predictedenergy
+                self._hub.sensors.current_peak.observed_peak, self.predictedenergy #todo: decouple
             )
         return 0.0
 

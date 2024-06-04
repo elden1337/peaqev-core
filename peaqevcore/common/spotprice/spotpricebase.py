@@ -30,13 +30,13 @@ class SpotPriceBase:
     ):
         _LOGGER.debug(f"Initializing Spotprice for {source} from system {system.value}.")
         self.hub = hub
-        self.observer = observer #not used?
+        self.observer = observer #not used? #todo: remove if unused, otherwise implement iobserver
         self.model = SpotPriceModel(source=source)
         self._dynamic_top_price = DynamicTopPrice()
         self._is_initialized: bool = False
         self._custom_sensor: str = custom_sensor
         if not test:
-            self.state_machine = hub.state_machine
+            self.state_machine = hub.state_machine #todo: refactor to decouple
             if is_active:
                 self.setup()
 
@@ -117,7 +117,7 @@ class SpotPriceBase:
 
     async def async_update_spotprice(self, initial: bool = False) -> None:
         if self.entity is not None:
-            ret = self.state_machine.states.get(self.entity)
+            ret = self.state_machine.states.get(self.entity) #todo: refactor to decouple
             if ret is not None:
                 await self.async_set_dto(ret, initial)
             else:

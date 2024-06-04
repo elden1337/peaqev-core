@@ -30,7 +30,7 @@ class EnergiDataServiceUpdater(SpotPriceBase):
                 await self.hub.async_update_prices(
                     [self.model.prices, self.model.prices_tomorrow]
                 )
-                await self.hub.observer.async_broadcast(ObserverTypes.SpotpriceInitialized)
+                await self.hub.observer.async_broadcast(ObserverTypes.SpotpriceInitialized) #todo: decouple
             else:
                 await self.hub.observer.async_broadcast(
                     ObserverTypes.PricesChanged,

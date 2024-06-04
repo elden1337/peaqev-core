@@ -20,7 +20,7 @@ class ThresholdLite(ThresholdBase):
                 break
         return ret
     
-    async def async_allowed_current(self) -> int:
+    async def async_allowed_current(self) -> int: #todo: redundant function, just call the property
         amps = await self.async_setcurrentdict()
         ret = 6
         if self._hub.sensors.charger_enabled.value is False or self._hub.sensors.charger_done.value is True:

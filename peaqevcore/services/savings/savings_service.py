@@ -7,7 +7,7 @@ import logging
 _LOGGER = logging.getLogger(__name__)
 
 
-class SavingsService:
+class SavingsService: #todo: not used. delete
     def __init__(self, peak_price: float) -> None:
         self.model = SavingsModel(peak_price_per_kwh=peak_price)
         self._savings_peak = 0

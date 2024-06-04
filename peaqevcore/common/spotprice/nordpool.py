@@ -31,12 +31,12 @@ class NordPoolUpdater(SpotPriceBase):
             if initial:
                 await self.hub.async_update_prices(
                     [self.model.prices, self.model.prices_tomorrow]
-                )
+                ) #todo: decouple
                 _LOGGER.info("Nordpool service has been successfully.")
                 _LOGGER.debug("Nordpool service has been initialized. Broadcasting...")
-                await self.hub.observer.async_broadcast(ObserverTypes.SpotpriceInitialized)
+                await self.hub.observer.async_broadcast(ObserverTypes.SpotpriceInitialized)  #todo: decouple
             else:
-                await self.hub.observer.async_broadcast(ObserverTypes.PricesChanged,[self.model.prices, self.model.prices_tomorrow])
+                await self.hub.observer.async_broadcast(ObserverTypes.PricesChanged,[self.model.prices, self.model.prices_tomorrow])  #todo: decouple
             self._is_initialized = True
 
     def setup(self):
@@ -44,8 +44,8 @@ class NordPoolUpdater(SpotPriceBase):
             entities = template.integration_entities(self.state_machine, NORDPOOL)
             _LOGGER.debug(f"Found {list(entities)} Spotprice entities for {self.model.source}.")
             if len(list(entities)) < 1:
-                if hasattr(self.hub.options, "price"):
-                    self.hub.options.price.price_aware = False  # todo: composition
+                if hasattr(self.hub.options, "price"):  #todo: decouple
+                    self.hub.options.price.price_aware = False  # todo: composition/decouple
                 _LOGGER.error(
                     f"There were no Spotprice-entities. Cannot continue. with price-awareness."
                 )
@@ -61,11 +61,11 @@ class NordPoolUpdater(SpotPriceBase):
                         self._setup_set_entity(e)
                         break
                 if not _found:
-                    self.hub.options.price.price_aware = False  # todo: composition todo: fix this
+                    self.hub.options.price.price_aware = False  # todo: composition/decouple
                     _LOGGER.error(f"more than one Spotprice entity found. Cannot continue with price-awareness.")
         except Exception as e:
             if hasattr(self.hub.options, "price"):
-                self.hub.options.price.price_aware = False  # todo: composition
+                self.hub.options.price.price_aware = False  # todo: composition/decouple
             _LOGGER.error(f"I was unable to get a Spotprice-entity. Cannot continue with price-awareness: {e}")
 
     def _setup_set_entity(self, entity: str) -> None:

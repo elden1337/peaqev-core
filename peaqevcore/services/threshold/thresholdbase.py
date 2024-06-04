@@ -68,7 +68,7 @@ class ThresholdBase:
         else:
             _threephase = CURRENTS_THREEPHASE_1_16
             _onephase = CURRENTS_ONEPHASE_1_16
-        if hasattr(self._hub.sensors, "carpowersensor"):
+        if hasattr(self._hub.sensors, "carpowersensor"): #todo: use observer
             try:
                 divid = int(self._hub.sensors.carpowersensor.value) / int(self._hub.sensors.amp_meter.value)
                 if int(self._hub.sensors.carpowersensor.value) == 0:

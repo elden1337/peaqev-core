@@ -47,3 +47,4 @@ class ObserverTypes(Enum):
     SetTemperatureChanged ="set temperature changed"
 
     GetPrices = "callback get prices"
+    UpdateMaxMinCore = "update max min core"

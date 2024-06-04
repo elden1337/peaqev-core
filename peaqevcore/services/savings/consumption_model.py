@@ -4,7 +4,7 @@ from typing import Tuple
 
 
 @dataclass
-class ConsumptionModel:
+class ConsumptionModel:  #todo: not used. delete
     consumption: dict[date, dict[int, float]] = field(default_factory=lambda: {})
 
     async def async_add_consumption(

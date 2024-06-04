@@ -8,7 +8,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @dataclass
-class SavingsModel(ConsumptionModel):
+class SavingsModel(ConsumptionModel):  #todo: not used. delete
     peak_price_per_kwh: float = 0
     car_connected_at: datetime | None = None
     prices: dict[date, list[float]] = field(default_factory=lambda: {})
