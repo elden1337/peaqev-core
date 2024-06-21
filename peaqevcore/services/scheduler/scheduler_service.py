@@ -62,15 +62,16 @@ class Scheduler:
     async def async_update(self, dto: UpdateSchedulerDTO, mockdt: datetime | None = None):
         """calculate based on the pricing of hours, current peak and the avg24hr energy consumption"""
         self.model._mock_dt = mockdt if mockdt is not None else datetime.now()
-        self.active = True
-        if any(
+        if self.active and any(
             [
                 self.model.remaining_charge <= 0,
                 self.model.departuretime <= self.model._mock_dt,
             ]
         ):
+            _LOGGER.info("Scheduler is done, remaining charge %s, remaning time %s seconds", self.model.remaining_charge, (self.model.departuretime - self.model._mock_dt).total_seconds())
             return await self.async_cancel()
 
+        self.active = True
         if dto.charge_per_hour < 0:
             _LOGGER.exception("Charge per hour must be greater than 0")
             raise Exception
@@ -113,7 +114,7 @@ class Scheduler:
             peak: float
     ) -> dict:
         remainder = self.model.remaining_charge
-        chargehours = dict()
+        chargehours:dict = {}
         for c in cheapest_hours.keys():
             if remainder <= 0:
                 break
