@@ -10,8 +10,8 @@ class ScheduleSession:
     desired_charge: float = 0
     starttime: datetime = datetime.min
     departuretime: datetime = datetime.min
-    _hours_price: dict[datetime, float] = field(init=False)
-    _hours_charge: dict[datetime, float] = field(init=False)
+    _hours_price: dict[datetime, float] = field(default_factory=lambda: {})
+    _hours_charge: dict[datetime, float] = field(default_factory=lambda: {})
     _nh: list = field(default_factory=lambda: [])
     _ch: dict = field(default_factory=lambda: {})
     _mock_dt: datetime | None = None
