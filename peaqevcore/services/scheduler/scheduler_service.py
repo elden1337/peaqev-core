@@ -107,18 +107,19 @@ class Scheduler:
         return ret
 
     async def async_get_charge_hours(
-            self, cheapest_hours: dict, charge_per_hour: float, peak: float
+            self,
+            cheapest_hours: dict,
+            charge_per_hour: float,
+            peak: float
     ) -> dict:
         remainder = self.model.remaining_charge
         chargehours = dict()
         for c in cheapest_hours.keys():
-            charge = 0
             if remainder <= 0:
                 break
             if remainder > charge_per_hour:
-                charge = 1
+                chargehours[c] = 1
             elif 0 < remainder < charge_per_hour:
-                charge = math.ceil((remainder / peak) * 10) / 10
-            chargehours[c] = charge
-            remainder -= charge * charge_per_hour
+                chargehours[c] = math.ceil((remainder / peak) * 10) / 10
+            remainder -= charge_per_hour
         return chargehours
