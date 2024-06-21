@@ -16,6 +16,7 @@ class Scheduler:
         self.model = ScheduleSession(hourselection_options=options)
         self.active = False
         self.is_test = test
+        self.current_charge_per_hour: float = 0
 
     @property
     def scheduler_active(self) -> bool:
@@ -78,11 +79,20 @@ class Scheduler:
 
         self.model.update_remaining_charge(dto.charged_amount)
 
-        self.model.hours_price = [dto.prices, dto.prices_tomorrow]
-        cheapest = await self.async_sort_pricelist()
-        self.model.hours_charge = await self.async_get_charge_hours(
-            cheapest_hours=cheapest, charge_per_hour=dto.charge_per_hour, peak=dto.peak
-        )
+        update_selected_hours: bool = False
+        if self.model.hours_price != [dto.prices, dto.prices_tomorrow]:
+            self.model.hours_price = [dto.prices, dto.prices_tomorrow]
+            update_selected_hours = True
+
+        if abs(self.current_charge_per_hour - dto.charge_per_hour) > 0.1:
+            self.current_charge_per_hour = dto.charge_per_hour
+            update_selected_hours = True
+
+        if update_selected_hours:
+            cheapest = await self.async_sort_pricelist()
+            self.model.hours_charge = await self.async_get_charge_hours(
+                cheapest_hours=cheapest, charge_per_hour=dto.charge_per_hour, peak=dto.peak
+            )
 
     async def async_cancel(self):
         self.active = False
@@ -115,17 +125,15 @@ class Scheduler:
     ) -> dict:
         remainder = self.model.remaining_charge
         chargehours:dict = {}
-        #_LOGGER.debug("calculting charge hours with peak %s and charge per hour %s. investigating: %s", peak, charge_per_hour, cheapest_hours.keys())
         for c in cheapest_hours.keys():
             if remainder <= 0:
                 break
-            chargehours[c] = 1
 
-            # if remainder > charge_per_hour:
-            #     chargehours[c] = 1
-            # elif 0 < remainder < charge_per_hour:
-            #     chargehours[c] = math.ceil((remainder / peak) * 10) / 10
-            #
+            if remainder > charge_per_hour:
+                chargehours[c] = 1
+            elif 0 < remainder < charge_per_hour:
+                chargehours[c] = math.ceil((remainder / peak) * 10) / 10
+
             if c == datetime.now().replace(minute=0, second=0, microsecond=0):
                 fractional = 1-(datetime.now().minute / 60)
                 remainder -= fractional * charge_per_hour
