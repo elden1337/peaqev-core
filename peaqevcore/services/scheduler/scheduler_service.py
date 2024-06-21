@@ -115,7 +115,7 @@ class Scheduler:
     ) -> dict:
         remainder = self.model.remaining_charge
         chargehours:dict = {}
-        _LOGGER.debug("calculting charge hours with peak %s and charge per hour %s", peak, charge_per_hour)
+        _LOGGER.debug("calculting charge hours with peak %s and charge per hour %s. investigating: %s", peak, charge_per_hour, cheapest_hours.keys())
         for c in cheapest_hours.keys():
             if remainder <= 0:
                 break
