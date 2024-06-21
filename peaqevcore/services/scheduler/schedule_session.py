@@ -88,6 +88,6 @@ class ScheduleSession:
         ret = {
             key: value
             for (key, value) in price_dict.items()
-            if starttime_hour <= key <= departuretime
+            if starttime_hour <= key <= (departuretime - timedelta(seconds=5))
         }
         return ret
