@@ -115,19 +115,20 @@ class Scheduler:
     ) -> dict:
         remainder = self.model.remaining_charge
         chargehours:dict = {}
+        _LOGGER.debug("calculting charge hours with peak %s and charge per hour %s", peak, charge_per_hour)
         for c in cheapest_hours.keys():
             if remainder <= 0:
                 break
             chargehours[c] = 1
-            remainder -= charge_per_hour
+
             # if remainder > charge_per_hour:
             #     chargehours[c] = 1
             # elif 0 < remainder < charge_per_hour:
             #     chargehours[c] = math.ceil((remainder / peak) * 10) / 10
             #
-            # if c == datetime.now().replace(minute=0, second=0, microsecond=0):
-            #     fractional = 1-(datetime.now().minute / 60)
-            #     remainder -= fractional * charge_per_hour
-            # else:
-            #     remainder -= charge_per_hour
+            if c == datetime.now().replace(minute=0, second=0, microsecond=0):
+                fractional = 1-(datetime.now().minute / 60)
+                remainder -= fractional * charge_per_hour
+            else:
+                remainder -= charge_per_hour
         return chargehours
