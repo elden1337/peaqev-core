@@ -19,6 +19,9 @@ class ScheduleSession:
     override_settings: bool = False
     _tomorrow_valid: bool = False
 
+    def update_remaining_charge(self, charged_amount: float):
+        self.remaining_charge = max(self.desired_charge - charged_amount,0)
+
     @property
     def hours_price(self):
         return self._hours_price

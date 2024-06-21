@@ -74,7 +74,7 @@ class Scheduler:
         if dto.charge_per_hour < 0:
             raise Exception
 
-        self.model.remaining_charge -= dto.charged_amount
+        self.model.update_remaining_charge(dto.charged_amount)
 
         self.model.hours_price = [dto.prices, dto.prices_tomorrow]
         cheapest = await self.async_sort_pricelist()
