@@ -38,8 +38,9 @@ class SchedulerFacade(Scheduler):
         self.schedule_created = True
 
     async def async_update_facade(self, model: UpdateSchedulerDTO):
-        await self.async_update(model)
-        await self.async_check_states(model.chargecontroller_state)
+        if self.schedule_created:
+            await self.async_update(model)
+            await self.async_check_states(model.chargecontroller_state)
 
     async def async_cancel_facade(self):
         await self.async_cancel()
