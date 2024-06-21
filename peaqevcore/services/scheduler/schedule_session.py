@@ -20,7 +20,8 @@ class ScheduleSession:
     _tomorrow_valid: bool = False
 
     def update_remaining_charge(self, charged_amount: float):
-        self.remaining_charge = max(self.desired_charge - charged_amount,0)
+        rem = max(self.desired_charge - charged_amount,0)
+        self.remaining_charge = round(rem, 2)
 
     @property
     def hours_price(self):
