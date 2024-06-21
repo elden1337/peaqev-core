@@ -30,7 +30,7 @@ class ScheduleSession:
     @hours_price.setter
     def hours_price(self, prices: list):
         today_date = datetime.now() if self._mock_dt is None else self._mock_dt
-        price_dict = dict()
+        price_dict = {}
         for idx, price in enumerate(prices[0]):
             price_dict[datetime.combine(today_date.date(), time(idx, 0))] = price
         if prices[1] is not None:

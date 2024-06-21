@@ -122,5 +122,10 @@ class Scheduler:
                 chargehours[c] = 1
             elif 0 < remainder < charge_per_hour:
                 chargehours[c] = math.ceil((remainder / peak) * 10) / 10
-            remainder -= charge_per_hour
+
+            if c == datetime.now().replace(minute=0, second=0, microsecond=0):
+                fractional = 1-(datetime.now().minute / 60)
+                remainder -= fractional * charge_per_hour
+            else:
+                remainder -= charge_per_hour
         return chargehours
