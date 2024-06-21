@@ -73,19 +73,20 @@ class ScheduleSession:
         while _timer < self.departuretime:
             if _timer >= today_dt:
                 if _timer not in self.hours_charge.keys():
-                    if self._tomorrow_valid or _timer.hour >= today_dt.hour:
+                    if self._tomorrow_valid or _timer.hour > today_dt.hour:
                         nh.append(_timer)
                 elif 0 < self.hours_charge[_timer] < 1:
-                    if self._tomorrow_valid or _timer.hour >= today_dt.hour:
+                    if self._tomorrow_valid or _timer.hour > today_dt.hour:
                         ch[_timer] = self.hours_charge[_timer]
             _timer += timedelta(hours=1)
         self._nh = nh
         self._ch = ch
 
     def _filter_price_dict(self, price_dict: dict, starttime: datetime, departuretime: datetime) -> dict:
+        starttime_hour = datetime(starttime.year, starttime.month, starttime.day, starttime.hour)
         ret = {
             key: value
             for (key, value) in price_dict.items()
-            if starttime <= key <= departuretime
+            if starttime_hour <= key <= departuretime
         }
         return ret

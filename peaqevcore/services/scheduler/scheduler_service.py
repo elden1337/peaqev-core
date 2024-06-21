@@ -72,6 +72,7 @@ class Scheduler:
             return await self.async_cancel()
 
         if dto.charge_per_hour < 0:
+            _LOGGER.exception("Charge per hour must be greater than 0")
             raise Exception
 
         self.model.update_remaining_charge(dto.charged_amount)
