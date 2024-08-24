@@ -6,9 +6,11 @@ from .models.permittance_type import PermittanceType
 from .models.hour_type import HourType
 from ..hoursselection_service_new.models.hour_price import HourPrice
 import copy
+
 if TYPE_CHECKING:
     from .hourselection_service import HourSelectionService
 from .models.max_min_model import MaxMinModel
+
 
 class MaxMinCharge:
     def __init__(self, service: HourSelectionService, min_price: float | None) -> None:
@@ -53,13 +55,13 @@ class MaxMinCharge:
         return sorted(ret, key=lambda x: x.dt)
 
     async def async_update(
-        self,
-        avg24,
-        peak,
-        max_desired: float,
-        session_energy: float | None = None,
-        car_connected: bool = False,
-        limiter: float = 0.0
+            self,
+            avg24,
+            peak,
+            max_desired: float,
+            session_energy: float | None = None,
+            car_connected: bool = False,
+            limiter: float = 0.0
     ) -> None:
         if not car_connected:
             await self.async_setup(max_charge=peak)
@@ -76,33 +78,34 @@ class MaxMinCharge:
             self.overflow = False
             self.select_hours_for_charge(
                 copy.deepcopy(self.parent.future_hours), _desired
-            )            
+            )
             if self._price_is_too_similar(limiter):
                 self.overflow = True
                 self.get_hours()
                 return
 
     def _price_is_too_similar(self, limiter: float) -> bool:
-        original = getattr(self, "original_average_price",0)
-        adjusted = getattr(self, "average_price",0)
-        if original > 0 and adjusted > 0:
-            return max(original,adjusted) - min(original,adjusted) < limiter
-        return False
+        original = getattr(self, "original_average_price", 0)
+        adjusted = getattr(self, "average_price", 0)
+        #if original > 0 and adjusted > 0:
+        return max(original, adjusted) - min(original, adjusted) < limiter
+        #return False
 
     def select_hours_for_charge(
-        self, hours: list[HourPrice], desired_charge: float
+            self, hours: list[HourPrice], desired_charge: float
     ) -> None:
         _original_charge = self._get_charge_sum(hours)
         _total_charge: float = 0
         _desired: float = min([desired_charge, _original_charge])
         while _total_charge < _desired:
-            hours.sort(key=lambda x: (x.price,x.dt))
+            hours.sort(key=lambda x: (x.price, x.dt))
             for hour in hours:
-                if any([hour.passed, hour.permittance == 0, _total_charge >= _desired, hour.hour_type is HourType.AboveMax]):
+                if any([hour.passed, hour.permittance == 0, _total_charge >= _desired,
+                        hour.hour_type is HourType.AboveMax]):
                     hour.permittance = 0
                     continue
                 _hour_charge = hour.permittance * self.model.expected_hourly_charge
-                _perm = min(1,max((_desired - _total_charge) / self.model.expected_hourly_charge,0))
+                _perm = min(1, max((_desired - _total_charge) / self.model.expected_hourly_charge, 0))
                 _total_charge += _hour_charge * _perm
                 hour.permittance = round(_perm, 2)
                 if self._get_charge_sum(hours) <= desired_charge:
@@ -128,8 +131,8 @@ class MaxMinCharge:
         return total
 
     async def async_setup(
-        self,
-        max_charge: float,
+            self,
+            max_charge: float,
     ) -> None:
         if max_charge == 0:
             self.active = False

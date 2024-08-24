@@ -229,6 +229,11 @@ P230512 = [
 P240213 = [0.98,0.97,0.94,0.91,0.9,0.77,0.98,1.11,1.29,1.1,1.02,0.98,0.93,0.92,0.96,1.04,1.14,1.37,1.44,1.32,1.14,1.06,1.01,0.96]
 P240214 = [0.71,0.72,0.71,0.7,0.69,0.71,0.94,1.07,1.17,1.03,0.98,0.97,0.96,0.96,1.02,1.06,1.15,1.21,1.27,1.23,1.12,0.84,0.76,0.72]
 P240215 = [0.93,0.92,0.83,0.83,0.77,0.78,0.93,1.2,1.21,1.16,1.1,1.04,1,0.99,1.04,1.11,1.16,1.24,1.24,1.07,0.99,0.86,0.81,0.76]
+P240824 = [-0.03, -0.07, -0.07, -0.07, -0.06, -0.03, -0.01, 0.03, 0.04, 0.04, 0.05, -0.01, -0.09, -0.07, -0.04, -0.06, 0.01, 0.06, 0.08, 0.08, 0.08, 0.08, 0.06, 0.05]
+P240825 = [0.06, 0.05, 0.05, 0.05, 0.05, 0.05, 0.06, 0.07, 0.07, 0.06, -0.01, -0.07, -0.14, -0.21, -0.21, -0.07, 0.01, 0.04, 0.06, 0.07, 0.07, 0.07, 0.07, 0.06]
+
+P_ONLY_NEGATIVE = [-0.03, -0.07, -0.07, -0.07, -0.06, -0.03, -0.01, -0.03, -0.04, -0.04, -0.05, -0.01, -0.09, -0.07, -0.04, -0.06, -0.01, -0.06, -0.08, -0.08, -0.08, -0.08, -0.06, -0.05]
+
 
 @pytest.mark.asyncio
 async def test_230412_maxmin_not_active():
@@ -850,70 +855,6 @@ async def test_230622_update_prices():
     assert r.offsets["today"] == offsets2["tomorrow"]
     assert r.offsets["tomorrow"] == {}
 
-
-# @pytest.mark.asyncio
-# async def test_230709_wrong_cheapest():
-#     r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=1.5, min_price=0.0)
-#     peak = 1.6
-#     p = [
-#         0.87,
-#         0.8,
-#         0.73,
-#         0.7,
-#         0.69,
-#         0.72,
-#         0.79,
-#         0.88,
-#         0.9,
-#         0.9,
-#         0.9,
-#         0.77,
-#         0.61,
-#         0.41,
-#         0.41,
-#         0.7,
-#         0.94,
-#         0.94,
-#         0.97,
-#         0.98,
-#         0.95,
-#         0.92,
-#         0.91,
-#         0.9,
-#     ]
-#     await r.async_update_adjusted_average(0.77)
-#     await r.async_update_top_price(0.97)
-#     r.service.dtmodel.set_datetime(datetime(2023, 7, 9, 0, 0, 15))
-#     await r.async_update_prices(p)
-#     await r.service.max_min.async_setup(peak)
-#     await r.service.max_min.async_update(
-#         avg24=400, peak=peak, max_desired=5, car_connected=True
-#     )
-
-
-# @pytest.mark.asyncio
-# async def test_230821_not_picking_cheapest_range():
-#     peak = 1.76
-#     r = h(cautionhour_type=CautionHourType.INTERMEDIATE, absolute_top_price=1.5, min_price=0.0)
-#     await r.async_update_adjusted_average(0.43)
-#     r.service.dtmodel.set_datetime(datetime(2023, 8, 21, 21, 40, 0))
-#     await r.async_update_prices(P230821, P230822)
-#     await r.service.max_min.async_setup(peak)
-
-#     base = 350
-#     while base <= 500:
-#         await r.service.max_min.async_update(
-#             avg24=base, peak=peak, max_desired=9, car_connected=True
-#         )
-        
-#         for f in r.future_hours:
-#             if f.dt in [datetime(2023, 8, 21, 22, 0, 0),datetime(2023, 8, 21, 23, 0, 0),datetime(2023, 8, 22, 0, 0, 0)]:
-#                 perm = "-" if f.permittance == 0 else f.permittance
-#                 print(f"{f.dt}; {f.price}; {perm} (base: {base})")
-#         print('-------')
-#         base += 25
-
-
 @pytest.mark.asyncio
 async def test_resetting_maxmin_three_updates():
     peak = 1.76
@@ -934,3 +875,55 @@ async def test_resetting_maxmin_three_updates():
     assert all([x.dt.day == 22 for x in r.future_hours])
     print(sum([x.permittance for x in r.future_hours]))
     print(await r.async_get_total_charge(1.76))
+
+@pytest.mark.asyncio
+async def test_limiter_mostly_negative():
+    r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=3, min_price=0.1)
+    peak = 1.9
+    await r.async_update_adjusted_average(1.04)
+    await r.async_update_top_price(0.15)
+    r.service.dtmodel.set_datetime(datetime(2024, 8, 24, 19, 8, 0))
+    await r.async_update_prices(P240824, P240825)
+    assert all(hour.permittance_type is PermittanceType.Regular for hour in r.future_hours)
+    await r.service.max_min.async_setup(peak)
+    await r.service.max_min.async_update(480, peak, 4, car_connected=True)
+    hours_before_update = len([hour for hour in r.future_hours if hour.permittance > 0])
+    assert hours_before_update > 0
+    await r.service.max_min.async_update(480, peak, 4, car_connected=True, limiter=0.5)
+    hours_after_update = len([hour for hour in r.future_hours if hour.permittance > 0])
+    assert hours_after_update > hours_before_update
+
+@pytest.mark.asyncio
+async def test_limiter_only_negative():
+    r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=3, min_price=0.1)
+    peak = 1.9
+    await r.async_update_adjusted_average(1.04)
+    await r.async_update_top_price(0.15)
+    r.service.dtmodel.set_datetime(datetime(2024, 8, 24, 8, 8, 0))
+    await r.async_update_prices(P_ONLY_NEGATIVE)
+    assert all(hour.permittance_type is PermittanceType.Regular for hour in r.future_hours)
+    await r.service.max_min.async_setup(peak)
+    await r.service.max_min.async_update(480, peak, 4, car_connected=True)
+    hours_before_update = len([hour for hour in r.future_hours if hour.permittance > 0])
+    assert hours_before_update > 0
+    await r.service.max_min.async_update(480, peak, 4, car_connected=True, limiter=0.5)
+    hours_after_update = len([hour for hour in r.future_hours if hour.permittance > 0])
+    assert hours_after_update > hours_before_update
+
+@pytest.mark.asyncio
+async def test_limiter_no_negative():
+    r = h(cautionhour_type=CautionHourType.SUAVE, absolute_top_price=3, min_price=0.1)
+    peak = 1.9
+    await r.async_update_adjusted_average(1.04)
+    await r.async_update_top_price(0.15)
+    r.service.dtmodel.set_datetime(datetime(2023, 4, 12, 19, 8, 0))
+    await r.async_update_prices(P230412[0], P230412[1])
+    assert all(hour.permittance_type is PermittanceType.Regular for hour in r.future_hours)
+    await r.service.max_min.async_setup(peak)
+    await r.service.max_min.async_update(480, peak, 4, car_connected=True)
+    hours_before_update = len([hour for hour in r.future_hours if hour.permittance > 0])
+    assert hours_before_update > 0
+    await r.service.max_min.async_update(480, peak, 4, car_connected=True, limiter=0.5)
+    hours_after_update = len([hour for hour in r.future_hours if hour.permittance > 0])
+    assert hours_after_update > hours_before_update
+
