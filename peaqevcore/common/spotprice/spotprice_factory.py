@@ -29,12 +29,13 @@ class SpotPriceFactory:
         ) -> SpotPriceBase:
         if test:
             return NordPoolUpdater(hub, test, system, observer)
-        source = SpotPriceFactory.test_connections(hub.state_machine, spotprice_type, custom_sensor)
+        source = SpotPriceFactory.test_connections(hub.state_machine, spotprice_type, system, custom_sensor)
         return SpotPriceFactory.sources[source](hub, observer, system, test, is_active, custom_sensor)
 
     @staticmethod
-    def test_connections(hass, spotprice_type: SpotPriceType, custom_sensor: str = None) -> SpotPriceType:
-        if spotprice_type == SpotPriceType.NordPool:
+    def test_connections(hass, spotprice_type: SpotPriceType, system: PeaqSystem, custom_sensor: str = None) -> SpotPriceType:
+        if spotprice_type == SpotPriceType.NordPool and system == PeaqSystem.PeaqEv:
+            """only do new logic if coming from peaqev."""
             return SpotPriceType.NordPool
         sensor = hass.states.get(ENERGIDATASERVICE_SENSOR)       
         if sensor or (custom_sensor and custom_sensor == ENERGIDATASERVICE_SENSOR):
