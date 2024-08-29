@@ -425,7 +425,7 @@ async def test_avg_daily_same_peak_as_max_today():
     assert p.data.query_model.get_currently_obeserved_peak(datetime.combine(date(2024, 1, 6), time(0, 0))) == 2
 
 @pytest.mark.asyncio
-async def test_avg_daily_same_peak_as_max_today_currentpeak_sensor():
+async def test_average_of_three_days_should_increase_daily_peak():
     p = await LocaleFactory.async_create(LOCALE_SE_GOTHENBURG)
     c = CurrentPeak(data_type=float, initval=0, startpeaks={}, locale=p, options_use_history=False, mock_dt=datetime(2024, 1, 3, 10, 0))
     await p.data.query_model.async_try_update(new_val=2, timestamp=datetime(2024, 1, 3, 10, 0))
@@ -440,6 +440,21 @@ async def test_avg_daily_same_peak_as_max_today_currentpeak_sensor():
     assert c.observed_peak == 4.2
     c.dt = datetime(2024, 1, 6, 0, 0)
     p.data.query_model.set_mock_dt(datetime(2024, 1, 6, 0, 0))
+    assert c.observed_peak == 2
+
+@pytest.mark.asyncio
+async def test_average_of_three_hours_should_not_increase_daily_peak():
+    p = await LocaleFactory.async_create(LOCALE_SE_SOLLENTUNA)
+    c = CurrentPeak(data_type=float, initval=0, startpeaks={}, locale=p, options_use_history=False, mock_dt=datetime(2024, 1, 3, 10, 0))
+    await p.data.query_model.async_try_update(new_val=2, timestamp=datetime(2024, 1, 3, 10, 0))
+    c.observed_peak = 2
+    await p.data.query_model.async_try_update(new_val=2, timestamp=datetime(2024, 1, 4, 10, 0))
+    c.mock_dt = datetime(2024, 1, 4, 10, 0)
+    c.observed_peak = 2
+    await p.data.query_model.async_try_update(new_val=4.2, timestamp=datetime(2024, 1, 5, 10, 0))
+    c.mock_dt = datetime(2024, 1, 5, 10, 0)
+    p.data.query_model.set_mock_dt(datetime(2024, 1, 5, 10, 0))
+    c.observed_peak = 4.2
     assert c.observed_peak == 2
 
 @pytest.mark.asyncio
