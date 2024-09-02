@@ -4,17 +4,18 @@ from datetime import datetime
 
 _LOGGER = logging.getLogger(__name__)
 
+
 class KillSwitch:
     def __init__(
-        self, 
-        sensor: str, 
-        update_interval:int = 120, 
-        grace_interval:int = 120
-        ):
+            self,
+            sensor: str,
+            update_interval: int = 120,
+            grace_interval: int = 120
+    ):
         self._update_interval: int = update_interval
         self._grace_interval: int = grace_interval
         self._bound_sensor: str = sensor
-        self._last_update: float = time.time()
+        self._last_update: float|None = None
         self._grace_period: bool = False
         self._grace_period_start: float = 0
         self._is_dead: bool = False
@@ -26,20 +27,23 @@ class KillSwitch:
     @property
     def is_dead(self) -> bool:
         return self._is_dead
-    
+
     @property
     def is_caution(self) -> bool:
         return self._grace_period
 
     @property
     def check(self):
+        if self._last_update is None:
+            return
         if self._grace_period:
             if time.time() - self._grace_period_start > self._grace_interval:
                 self._is_dead = True
-                #self.__init__(self._bound_sensor, self._update_interval, self._grace_interval)
-                _LOGGER.warning(f"{datetime.now()} - Peaqev killswitch has broken circuit. The sensor {self._bound_sensor} has not been updated for {self._grace_interval} seconds.")
+                _LOGGER.warning(
+                    f"{datetime.now()} - Peaqev killswitch has broken circuit. The sensor {self._bound_sensor} has not been updated for {self._grace_interval} seconds.")
         elif time.time() - self._last_update > self._update_interval:
-            _LOGGER.warning(f"{datetime.now()} - Caution! The sensor {self._bound_sensor} has not been updated for {self._update_interval} seconds. In {self._grace_interval} seconds the charger will be stopped unless this sensor comes alive again.")
+            _LOGGER.warning(
+                f"{datetime.now()} - Caution! The sensor {self._bound_sensor} has not been updated for {self._update_interval} seconds. In {self._grace_interval} seconds the charger will be stopped unless this sensor comes alive again.")
             self._grace_period = True
             self._grace_period_start = time.time()
 
