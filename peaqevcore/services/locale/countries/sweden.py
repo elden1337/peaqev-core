@@ -218,6 +218,29 @@ class SE_Gothenburg(Locale_Type):
         )
 
 
+@dataclass
+class SE_test(Locale_Type):
+    def __post_init__(self.observed_peak = QueryType.AverageOfThreeDays
+        self.charged_peak = QueryType.AverageOfThreeDays
+        self.query_model = QUERYTYPES[QueryType.AverageOfThreeDays]
+        self.price = LocalePrice(
+            price_type=PriceType.Static, value=132, currency="sek")
+        self.free_charge_pattern = TimePattern(
+            [
+                {
+                    CalendarPeriods.Month: [10,11,12,1,2,3],
+                    CalendarPeriods.Weekday: [0, 1, 2, 3, 4],
+                    CalendarPeriods.Hour: [19, 20, 21, 22, 23, 0, 1, 2, 3, 4, 5, 6],
+                },
+                {
+                    CalendarPeriods.Month: [10,11,12,1,2,3],
+                    CalendarPeriods.Weekday: [5, 6],
+                    CalendarPeriods.Hour: [*range(0, 24)],
+                },
+                {
+                CalendarPeriods.Month: [4,5,6,7,8,9]}
+            ]
+        )
 
 
 @dataclass
