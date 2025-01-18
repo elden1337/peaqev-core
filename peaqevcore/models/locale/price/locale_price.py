@@ -16,6 +16,7 @@ class LocalePrice:
         return self.price_type != PriceType.Unset
 
     def __post_init__(self):
+        self.currency = self.currency.upper()
         match self.price_type:
             case PriceType.Unset:
                 pass

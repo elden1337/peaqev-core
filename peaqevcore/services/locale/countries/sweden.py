@@ -220,13 +220,14 @@ class SE_Gothenburg(Locale_Type):
 
 @dataclass
 class SE_test(Locale_Type):
-    def __post_init__(self.observed_peak = QueryType.AverageOfThreeDays
+    def __post_init__(self):
+        self.observed_peak = QueryType.AverageOfThreeDays
         self.charged_peak = QueryType.AverageOfThreeDays
         self.query_model = QUERYTYPES[QueryType.AverageOfThreeDays]
         self.price = LocalePrice(
-            price_type=PriceType.Static, value=132, currency="sek")
-        self.aux_levels = [6,11]
-        self.holidays = [12.24,12.25,12.26,1.1]
+            price_type=PriceType.Static, value=132, currency="SEK")
+        self._aux_levels = [6,11]
+        self._holidays = [12.24,12.25,12.26,1.1,1.6]
         self.free_charge_pattern = TimePattern(
             [
                 {

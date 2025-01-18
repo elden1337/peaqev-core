@@ -1,4 +1,4 @@
-from datetime import datetime, date, time
+from datetime import datetime, date, time, timedelta
 import pytest
 from ..models.locale.enums.querytype import QueryType
 from ..services.locale.Locale import (
@@ -13,7 +13,7 @@ from ..services.locale.Locale import (
     LOCALE_SE_SOLLENTUNA,
     LOCALE_DEFAULT,
     LOCALE_NO_PEAK,
-    LOCALE_NO_LINJA,
+    LOCALE_NO_LINJA, LOCALE_SE_TEST,
 )
 from ..services.locale.querytypes.const import (
     QUERYTYPE_AVERAGEOFTHREEDAYS,
@@ -507,3 +507,37 @@ async def test_tiered_pricing():
     print(cc)
     assert p.data.query_model.get_currently_obeserved_peak(datetime.combine(date(2024, 1, 6), time(0, 0))) == 4.9
 
+
+#-----------test se
+@pytest.mark.asyncio
+async def test_test_se_should_free_charge_christmas_eve():
+    p = await LocaleFactory.async_create(LOCALE_SE_TEST)
+    test_dt = datetime(2024, 12,24, 10, 30)
+    check = await p.data.async_free_charge(mockdt=test_dt)
+    assert check is True
+
+@pytest.mark.asyncio
+async def test_test_se_should_free_charge_winter_weekends():
+    p = await LocaleFactory.async_create(LOCALE_SE_TEST)
+    test_dt = datetime(2024, 12,22, 10, 30)
+    check = await p.data.async_free_charge(mockdt=test_dt)
+    assert check is True
+
+@pytest.mark.asyncio
+async def test_test_se_should_free_charge_winter_weeknights():
+    p = await LocaleFactory.async_create(LOCALE_SE_TEST)
+    test_dt = datetime(2024, 12,23, 10, 30)
+    check = await p.data.async_free_charge(mockdt=test_dt)
+    assert check is False
+    test_dt = datetime(2024, 12, 23, 22, 30)
+    check = await p.data.async_free_charge(mockdt=test_dt)
+    assert check is True
+
+@pytest.mark.asyncio
+async def test_test_se_should_free_charge_all_summer():
+    p = await LocaleFactory.async_create(LOCALE_SE_TEST)
+    test_dt = datetime(2024, 6,23, 10, 30)
+    for i in range(0,7):
+        check = await p.data.async_free_charge(mockdt=test_dt)
+        assert check is True
+        test_dt += timedelta(days=1)

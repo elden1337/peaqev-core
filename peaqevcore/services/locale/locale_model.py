@@ -19,6 +19,8 @@ class Locale_Type:
     _price: LocalePrice = LocalePrice()
     _free_charge_pattern = None
     _peak_cycle: TimePeriods = TimePeriods.Hourly
+    _aux_levels: list = field(default_factory=lambda: [])
+    _holidays: list = field(default_factory=lambda: [])
 
     @property
     def observed_peak(self) -> QueryType:
@@ -77,11 +79,40 @@ class Locale_Type:
     def peak_cycle(self, value: TimePeriods):
         self._peak_cycle = value
 
+    @property
+    def aux_levels(self) -> list:
+        return self._aux_levels
+
+    @property
+    def holidays(self) -> list:
+        return self._holidays
+
     async def async_free_charge(self, mockdt: datetime | None = None) -> bool:
         if self.free_charge_pattern is None:
             return False
         now = mockdt or datetime.now()
+        if self._date_matches_holiday(now):
+            return True
         return await self.free_charge_pattern.async_valid(now)
+
+    def _date_matches_holiday(self, dt: datetime) -> bool:
+        date_dict = self._parse_holidays_list()
+        if dt.month not in date_dict.keys():
+            return False
+        if dt.day not in date_dict[dt.month]:
+            return False
+        return True
+
+    def _parse_holidays_list(self) -> dict:
+        if not len(self._holidays):
+            return {}
+        ret = {}
+        for val in self._holidays:
+            splitval = str(val).split('.')
+            if splitval[0] not in ret.keys():
+                ret[splitval[0]] = []
+            ret[splitval[0]].append(splitval[1])
+        return ret
 
     async def async_is_quarterly(self) -> bool:
         return self.peak_cycle == TimePeriods.QuarterHourly
