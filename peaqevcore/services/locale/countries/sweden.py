@@ -225,6 +225,8 @@ class SE_test(Locale_Type):
         self.query_model = QUERYTYPES[QueryType.AverageOfThreeDays]
         self.price = LocalePrice(
             price_type=PriceType.Static, value=132, currency="sek")
+        self.aux_levels = [6,11]
+        self.holidays = [12.24,12.25,12.26,1.1]
         self.free_charge_pattern = TimePattern(
             [
                 {
