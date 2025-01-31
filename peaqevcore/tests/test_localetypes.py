@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime, date, time, timedelta
 import pytest
 from ..models.locale.enums.querytype import QueryType
@@ -506,6 +507,42 @@ async def test_tiered_pricing():
     cc = p.data.query_model.get_currently_obeserved_peak(datetime.combine(date(2024, 1, 6), time(0, 0)))
     print(cc)
     assert p.data.query_model.get_currently_obeserved_peak(datetime.combine(date(2024, 1, 6), time(0, 0))) == 4.9
+
+
+@pytest.mark.asyncio
+async def test_register_correct_new_peak2():
+    p = await LocaleFactory.async_create(LOCALE_SE_GOTHENBURG)
+    await p.data.query_model.async_try_update(new_val=3, timestamp=datetime.combine(date(2024, 1, 3), time(10, 0)))
+    assert p.data.query_model.get_currently_obeserved_peak(datetime.combine(date(2024, 1, 3), time(10, 1))) == 3
+    assert len(p.data.query_model.peaks.p) == 1
+
+    await p.data.query_model.async_try_update(new_val=2, timestamp=datetime.combine(date(2024, 1, 4), time(10, 0)))
+    assert p.data.query_model.get_currently_obeserved_peak(datetime.combine(date(2024, 1, 4), time(10, 1))) == 2
+    assert len(p.data.query_model.peaks.p) == 2
+
+    await p.data.query_model.async_try_update(new_val=4, timestamp=datetime.combine(date(2024, 1, 5), time(10, 0)))
+    assert p.data.query_model.get_currently_obeserved_peak(datetime.combine(date(2024, 1, 5), time(10, 1))) == 4
+    assert len(p.data.query_model.peaks.p) == 3
+
+    await p.data.query_model.async_try_update(new_val=4, timestamp=datetime.combine(date(2024, 1, 6), time(10, 0)))
+    assert (4,10) not in p.data.query_model.peaks.p.keys()
+
+    await p.data.query_model.async_try_update(new_val=4.01, timestamp=datetime.combine(date(2024, 1, 6), time(11, 0)))
+    assert (6, 11) in p.data.query_model.peaks.p.keys()
+    assert p.data.query_model.peaks.p[(6,11)] == 4.01
+
+@pytest.mark.asyncio
+async def test_register_correct_swap_hours():
+    p = await LocaleFactory.async_create(LOCALE_SE_GOTHENBURG)
+    await p.data.query_model.async_try_update(new_val=3, timestamp=datetime.combine(date(2024, 1, 3), time(10, 0)))
+    await p.data.query_model.async_try_update(new_val=2, timestamp=datetime.combine(date(2024, 1, 4), time(10, 0)))
+    await p.data.query_model.async_try_update(new_val=4, timestamp=datetime.combine(date(2024, 1, 5), time(10, 0)))
+    assert p.data.query_model.get_currently_obeserved_peak(datetime.combine(date(2024, 1, 5), time(10, 1))) == 4
+    assert len(p.data.query_model.peaks.p) == 3
+
+    assert p.data.query_model.peaks.p[(5,10)] == 4
+    await p.data.query_model.async_try_update(new_val=0, timestamp=datetime.combine(date(2024, 1, 5), time(10, 59, 59)))
+    assert p.data.query_model.peaks.p[(5,10)] == 4 #should still be the same since we tried to push a lower value for the same hour.
 
 
 #-----------test se

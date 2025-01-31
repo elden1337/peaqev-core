@@ -102,9 +102,7 @@ class LocaleQuery(ILocaleQuery):
 
         if self.sum_counter.groupby == TimePeriods.Daily:
             if timestamp.day in [k[0] for k in self._peaks.p.keys()]:
-                #_LOGGER.debug(f"exists as :{[v for k, v in self._peaks.p.items() if k[0] == timestamp.day][0]}. observed is {ret}. {self._peaks.p}. timestamp.day: {timestamp.day}")
-                print(
-                    f"exists as :{[v for k, v in self._peaks.p.items() if k[0] == timestamp.day][0]}. observed is {ret}. {self._peaks.p}. timestamp.day: {timestamp.day}")
+                print(f"exists as :{[v for k, v in self._peaks.p.items() if k[0] == timestamp.day][0]}. observed is {ret}. {self._peaks.p}. timestamp.day: {timestamp.day}")
                 return max([v for k, v in self._peaks.p.items() if k[0] == timestamp.day][0], ret)
         print("returning observed", self._observed_peak_value)
         return ret
@@ -165,11 +163,12 @@ class LocaleQuery(ILocaleQuery):
     async def async_set_update_for_groupby(self, new_val, dt):
         if self.sum_counter.groupby in [TimePeriods.Daily, TimePeriods.UnSet]:
             _datekeys = [k for k in self.peaks.p.keys() if dt[0] in k]
-            #_LOGGER.debug(f"datekeys: {_datekeys}")
             if len(_datekeys):
                 if new_val > self.peaks.p.get(_datekeys[0]):
                     await self.peaks.async_pop_key(_datekeys[0])
-            await self.peaks.async_add_kv_pair(dt, new_val)
+                    await self.peaks.async_add_kv_pair(dt, new_val)
+            else:
+                await self.peaks.async_add_kv_pair(dt, new_val)
         elif self.sum_counter.groupby == TimePeriods.Hourly:
             if dt in self._peaks.p.keys():
                 if new_val > self.peaks.p.get(dt):
