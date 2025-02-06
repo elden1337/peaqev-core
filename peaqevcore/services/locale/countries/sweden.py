@@ -226,14 +226,14 @@ class SE_test(Locale_Type):
         self.query_model = QUERYTYPES[QueryType.AverageOfThreeDays]
         self.price = LocalePrice(
             price_type=PriceType.Static, value=132, currency="SEK")
-        self._aux_levels = [6,11]
+        self._aux_levels = [6,14]
         self._holidays = [12.24,12.25,12.26,1.1,1.6]
         self.free_charge_pattern = TimePattern(
             [
                 {
                     CalendarPeriods.Month: [10,11,12,1,2,3],
                     CalendarPeriods.Weekday: [0, 1, 2, 3, 4],
-                    CalendarPeriods.Hour: [19, 20, 21, 22, 23, 0, 1, 2, 3, 4, 5, 6],
+                    CalendarPeriods.Hour: [20, 21, 22, 23, 0, 1, 2, 3, 4, 5, 6],
                 },
                 {
                     CalendarPeriods.Month: [10,11,12,1,2,3],
