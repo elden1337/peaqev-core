@@ -63,22 +63,30 @@ class SpotPriceModel:
         self.average_data = patched_set
         self.average_data_patched = True
 
-    def create_date_dict(self, numbers: dict|list) -> dict:
-        if isinstance(numbers, dict):
-            try:
-                ret = {datetime.strptime(key, "%Y-%m-%d").date(): value for key, value in numbers.items()}
-            except ValueError:
-                _LOGGER.error("Could not convert date string to date object")
-                ret = {}
-        else:
-            today = date.today()
-            delta = timedelta(days=len(numbers) - 1)
-            start_date = today - delta
+    ef create_date_dict(self, numbers: dict | list) -> dict:
+    if isinstance(numbers, dict):
+        try:
             ret = {}
-            for number in numbers:
-                ret[start_date] = number
-                start_date += timedelta(days=1)
-        return ret
+            for key, value in numbers.items():
+                # Check if key is already a datetime.date object
+                if isinstance(key, date):
+                    ret[key] = value
+                else:
+                    # If key is a string, convert it to date
+                    ret[datetime.strptime(key, "%Y-%m-%d").date()] = value
+        except ValueError:
+            _LOGGER.error("Could not convert date string to date object")
+            ret = {}
+    else:
+        today = date.today()
+        delta = timedelta(days=len(numbers) - 1)
+        start_date = today - delta
+        ret = {}
+        for number in numbers:
+            ret[start_date] = number
+            start_date += timedelta(days=1)
+    
+    return ret
 
     async def fix_dst(self, val) -> list | None:
         if val is None:
