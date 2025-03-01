@@ -63,7 +63,7 @@ class SpotPriceModel:
         self.average_data = patched_set
         self.average_data_patched = True
 
-    ef create_date_dict(self, numbers: dict | list) -> dict:
+    def create_date_dict(self, numbers: dict | list) -> dict:
     if isinstance(numbers, dict):
         try:
             ret = {}
