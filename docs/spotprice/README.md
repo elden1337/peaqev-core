@@ -95,8 +95,8 @@ graph TB
     GESpotDTO --> Model
     EDSDTO --> Model
     
-    style Factory fill:#c0c0c0
-    style Model fill:#d0d0d0
+    style Factory fill:#fff,stroke:#333,stroke-width:3px
+    style Model fill:#fff,stroke:#333,stroke-width:3px
 ```
 
 ### Class Hierarchy

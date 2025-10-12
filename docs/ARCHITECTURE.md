@@ -70,11 +70,8 @@ graph TB
     Model --> PeaqEV
     Model --> PeaqHVAC
     
-    style HA fill:#f0f0f0
-    style Core fill:#e0e0e0
-    style Consumers fill:#d0d0d0
-    style Factory fill:#c0c0c0
-    style Model fill:#b0b0b0
+    style Factory fill:#fff,stroke:#333,stroke-width:3px
+    style Model fill:#fff,stroke:#333,stroke-width:3px
 ```
 
 ---
@@ -104,11 +101,9 @@ flowchart TD
     ReturnEDS --> End
     ReturnNordpool --> End
     
-    style Start fill:#f0f0f0
-    style End fill:#d0d0d0
-    style ReturnGESpot fill:#c0c0c0
-    style ReturnEDS fill:#c0c0c0
-    style ReturnNordpool fill:#c0c0c0
+    style ReturnGESpot fill:#fff,stroke:#333,stroke-width:2px
+    style ReturnEDS fill:#fff,stroke:#333,stroke-width:2px
+    style ReturnNordpool fill:#fff,stroke:#333,stroke-width:2px
 ```
 
 #### 2. **SpotPriceUpdater** (Abstract Base)

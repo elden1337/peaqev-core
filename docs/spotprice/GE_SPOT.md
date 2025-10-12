@@ -53,9 +53,7 @@ graph TB
     Updater --> DTO
     DTO --> Model
     
-    style HA fill:#f0f0f0
-    style Core fill:#e0e0e0
-    style Model fill:#d0d0d0
+    style Model fill:#fff,stroke:#333,stroke-width:3px
 ```
 
 ### Key Difference: 15-Minute Intervals
