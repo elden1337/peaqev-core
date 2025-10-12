@@ -36,20 +36,16 @@ GE-Spot (Global Electricity Spot Prices) is a Home Assistant integration that pr
 ### Component Overview
 
 ```mermaid
-graph TB
-    subgraph HA["Home Assistant + GE-Spot Integration"]
-        Sensor["sensor.ge_spot_sweden_se3<br/>• state: 1.45 (current)<br/>• today: 96×15-min prices<br/>• tomorrow: 96×15-min prices<br/>• average: 1.38<br/>• unit: SEK/kWh"]
-    end
+graph LR
+    Sensor["GE-Spot Sensor<br/>96 × 15-min prices"]
     
-    subgraph Core["peaqevcore"]
-        Updater["GESpotUpdater<br/>• Extends SpotPriceBase<br/>• Listens for state changes<br/>• Triggers transformation"]
-        
-        DTO["GESpotDTO<br/>• _aggregate_to_hourly()<br/>  96×15min → 24×hourly<br/>• _set_price_in_cent()<br/>  Auto-detect units<br/>• _set_average()<br/>  Calculate average"]
-        
-        Model["SpotPriceModel<br/>(Standard Format)<br/>• today: 24×hourly<br/>• tomorrow: 24×hourly<br/>• average: 1.38<br/>• price_aware: True"]
-    end
+    Updater["GESpotUpdater<br/>State listener"]
     
-    Sensor -->|State Change Event| Updater
+    DTO["GESpotDTO<br/>Aggregate to hourly<br/>Detect units"]
+    
+    Model["SpotPriceModel<br/>24 hourly prices<br/>Standard format"]
+    
+    Sensor -->|State Change| Updater
     Updater --> DTO
     DTO --> Model
 ```

@@ -78,20 +78,18 @@ Different sources, **same output**. Your code doesn't need to know which source 
 ### Component Diagram
 
 ```mermaid
-graph TB
-    subgraph Factory["SpotPriceFactory"]
-        TC["test_connections()<br/>• Check GE-Spot entities<br/>• Check EnergiDataService<br/>• Fallback to Nordpool<br/>• Return updater class"]
-    end
+graph LR
+    Factory["SpotPriceFactory<br/>test_connections"]
     
-    TC --> NordpoolUpd["Nordpool<br/>Updater"]
-    TC --> GESpotUpd["GE-Spot<br/>Updater"]
-    TC --> EDSUpd["Energi Data<br/>Updater"]
+    Factory --> NordpoolUpd["Nordpool Updater"]
+    Factory --> GESpotUpd["GE-Spot Updater"]
+    Factory --> EDSUpd["Energi Data Updater"]
     
-    NordpoolUpd --> NordpoolDTO["Nordpool DTO<br/>• Hourly<br/>• Direct"]
-    GESpotUpd --> GESpotDTO["GE-Spot DTO<br/>• 15min→24h<br/>• Cent detection"]
-    EDSUpd --> EDSDTO["Energi Data DTO<br/>• Hourly<br/>• Official"]
+    NordpoolUpd --> NordpoolDTO["Nordpool DTO<br/>Hourly prices"]
+    GESpotUpd --> GESpotDTO["GE-Spot DTO<br/>15min to hourly"]
+    EDSUpd --> EDSDTO["Energi Data DTO<br/>Hourly prices"]
     
-    NordpoolDTO --> Model["SpotPriceModel<br/>• today: List[float]<br/>• tomorrow: List[float]<br/>• average: float<br/>• price_aware: bool"]
+    NordpoolDTO --> Model["SpotPriceModel<br/>today + tomorrow<br/>24 hourly prices"]
     GESpotDTO --> Model
     EDSDTO --> Model
 ```

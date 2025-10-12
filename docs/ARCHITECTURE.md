@@ -133,27 +133,35 @@ class SpotPriceBase(ABC):
 ```mermaid
 classDiagram
     class SpotPriceBase {
-        <<ABC>>
-        +async_update_spotprice()
-        +async_set_dto()
-        +setup()
+        <<abstract>>
+        async_update_spotprice()
+        async_set_dto()
+        setup()
     }
     
     class ISpotPriceDTO {
-        <<ABC>>
-        +set_model()
-        +_aggregate_to_hourly()
-        +_set_price_in_cent()
-        +_set_average()
+        <<interface>>
+        set_model()
+        _aggregate_to_hourly()
+        _set_price_in_cent()
+        _set_average()
     }
     
     class SpotPriceType {
-        <<Enum>>
+        <<enumeration>>
         Nordpool
         EnergidataService
         GESpot
         Auto
     }
+    
+    class NordpoolUpdater
+    class EnergiDataServiceUpdater
+    class GESpotUpdater
+    
+    class NordpoolDTO
+    class EnergiDataServiceDTO
+    class GESpotDTO
     
     SpotPriceBase <|-- NordpoolUpdater
     SpotPriceBase <|-- EnergiDataServiceUpdater
@@ -163,9 +171,9 @@ classDiagram
     ISpotPriceDTO <|-- EnergiDataServiceDTO
     ISpotPriceDTO <|-- GESpotDTO
     
-    NordpoolUpdater --> NordpoolDTO
-    EnergiDataServiceUpdater --> EnergiDataServiceDTO
-    GESpotUpdater --> GESpotDTO
+    NordpoolUpdater ..> NordpoolDTO : uses
+    EnergiDataServiceUpdater ..> EnergiDataServiceDTO : uses
+    GESpotUpdater ..> GESpotDTO : uses
 ```
 
 ### File Structure
