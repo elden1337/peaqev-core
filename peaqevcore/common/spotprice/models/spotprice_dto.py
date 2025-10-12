@@ -107,8 +107,6 @@ class NordpoolDTO(ISpotPriceDTO):
             return datetime.now().date()
 
 
-
-@dataclass
 class GESpotDTO(ISpotPriceDTO):
     """Data Transfer Object for GE-Spot integration.
     

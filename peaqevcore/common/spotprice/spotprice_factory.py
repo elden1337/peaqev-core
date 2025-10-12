@@ -7,6 +7,7 @@ from peaqevcore.common.spotprice.models.spotprice_type import SpotPriceType
 from peaqevcore.common.spotprice.nordpool import NordPoolUpdater
 from peaqevcore.common.spotprice.spotpricebase import SpotPriceBase
 from peaqevcore.common.models.peaq_system import PeaqSystem
+import homeassistant.helpers.template as template
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -30,7 +31,7 @@ class SpotPriceFactory:
         spotprice_type: SpotPriceType = SpotPriceType.NordPool
     ) -> SpotPriceBase:
         if test:
-            return NordPoolUpdater(hub, observer, system, test)
+            return NordPoolUpdater(hub, observer, system, test, is_active, custom_sensor)
         source = SpotPriceFactory.test_connections(hub.state_machine, spotprice_type, system, custom_sensor)
         return SpotPriceFactory.sources[source](hub, observer, system, test, is_active, custom_sensor)
 
@@ -58,7 +59,6 @@ class SpotPriceFactory:
             return SpotPriceType.NordPool
         
         # Check for GE-Spot (higher priority than other auto-detected sources)
-        import homeassistant.helpers.template as template
         try:
             gespot_entities = template.integration_entities(hass, GESPOT)
             if len(list(gespot_entities)) > 0:

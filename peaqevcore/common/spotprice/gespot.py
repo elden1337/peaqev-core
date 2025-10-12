@@ -141,7 +141,7 @@ class GESpotUpdater(SpotPriceBase):
         """
         self.model.entity = entity
         _LOGGER.debug(
-            f"GE-Spot has been set up and is ready to use with {self.entity}"
+            f"GE-Spot has been set up and is ready to use with {self.model.entity}"
         )
         asyncio.run_coroutine_threadsafe(
             self.async_update_spotprice(initial=True),
