@@ -25,31 +25,27 @@ peaqevcore is a **shared library** that provides electricity price management se
 ```mermaid
 graph TB
     subgraph HA["Home Assistant"]
-        Nordpool["Nordpool<br/>Integration"]
-        GESpot["GE-Spot<br/>Integration"]
-        EDS["Energi Data<br/>Service"]
-        Future["Future<br/>Source"]
+        Nordpool["Nordpool Integration"]
+        GESpot["GE-Spot Integration"]
+        EDS["Energi Data Service"]
+        Future["Future Source"]
     end
     
     subgraph Core["peaqevcore"]
         Factory["SpotPriceFactory<br/>• Auto-detects sources<br/>• Selects by priority<br/>• Creates updater"]
         
-        subgraph Updaters["SpotPrice Updaters"]
-            NordpoolUpd["Nordpool<br/>Updater"]
-            GESpotUpd["GE-Spot<br/>Updater"]
-            EDSUpd["Energi Data<br/>Updater"]
-        end
+        NordpoolUpd["Nordpool Updater"]
+        GESpotUpd["GE-Spot Updater"]
+        EDSUpd["Energi Data Updater"]
         
-        subgraph DTOs["DTO Layer"]
-            DTOLayer["• Transform source data<br/>• Normalize format<br/>• Handle intervals"]
-        end
+        DTOLayer["DTO Layer<br/>• Transform source data<br/>• Normalize format<br/>• Handle intervals"]
         
         Model["Standardized Price Model<br/>• today: List[float] (24h)<br/>• tomorrow: List[float]<br/>• average: float<br/>• price_aware: bool"]
     end
     
     subgraph Consumers["Consumer Integrations"]
-        PeaqEV["hass-peaqev<br/>(EV Charging)"]
-        PeaqHVAC["hass-peaqhvac<br/>(HVAC)"]
+        PeaqEV["hass-peaqev (EV Charging)"]
+        PeaqHVAC["hass-peaqhvac (HVAC)"]
     end
     
     Nordpool --> Factory
