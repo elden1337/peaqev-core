@@ -56,16 +56,20 @@ peaqevcore is the core library for the Peaq ecosystem of Home Assistant integrat
 
 peaqevcore provides a **pluggable architecture** for electricity price integrations:
 
-```
-Home Assistant Integration (Nordpool, GE-Spot, etc.)
-            ↓
-    SpotPriceFactory (auto-detection)
-            ↓
-    SpotPriceUpdater (NordpoolUpdater, GESpotUpdater, etc.)
-            ↓
-    SpotPriceDTO (data transformation)
-            ↓
-    Standardized Price Data → Used by PeaqEV/PeaqHVAC
+```mermaid
+graph TD
+    HA["Home Assistant Integration<br/>Nordpool, GE-Spot, etc."]
+    Factory["SpotPriceFactory<br/>Auto-detection"]
+    Updater["SpotPriceUpdater<br/>NordpoolUpdater, GESpotUpdater, etc."]
+    DTO["SpotPriceDTO<br/>Data transformation"]
+    Data["Standardized Price Data"]
+    Consumers["Used by PeaqEV/PeaqHVAC"]
+    
+    HA --> Factory
+    Factory --> Updater
+    Updater --> DTO
+    DTO --> Data
+    Data --> Consumers
 ```
 
 ### Design Principles
