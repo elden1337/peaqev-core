@@ -69,9 +69,6 @@ graph TB
     
     Model --> PeaqEV
     Model --> PeaqHVAC
-    
-    style Factory fill:#fff,stroke:#333,stroke-width:3px
-    style Model fill:#fff,stroke:#333,stroke-width:3px
 ```
 
 ---
@@ -100,13 +97,9 @@ flowchart TD
     ReturnGESpot --> End([Create Updater])
     ReturnEDS --> End
     ReturnNordpool --> End
-    
-    style ReturnGESpot fill:#fff,stroke:#333,stroke-width:2px
-    style ReturnEDS fill:#fff,stroke:#333,stroke-width:2px
-    style ReturnNordpool fill:#fff,stroke:#333,stroke-width:2px
 ```
 
-#### 2. **SpotPriceUpdater** (Abstract Base)
+#### 2. **SpotPriceBase** (Abstract Base Class)
 - **Location**: `peaqevcore/common/spotprice/spotpricebase.py`
 - **Implementations**:
   - `NordpoolUpdater` - Nordic countries

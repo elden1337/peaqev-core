@@ -52,8 +52,6 @@ graph TB
     Sensor -->|State Change Event| Updater
     Updater --> DTO
     DTO --> Model
-    
-    style Model fill:#fff,stroke:#333,stroke-width:3px
 ```
 
 ### Key Difference: 15-Minute Intervals
