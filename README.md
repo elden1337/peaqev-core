@@ -41,3 +41,16 @@ Peaqev is developed without static funding. If you lack your locale/charger type
 
 :love_letter:
 
+
+---
+
+### Supported Electricity Price Sources
+
+Peaqevcore supports the following electricity price integrations:
+
+- **Nordpool** - Nordic electricity spot prices
+- **Energi Data Service** - Danish electricity prices  
+- **GE-Spot** - Global Electricity Spot Prices (multi-region support with automatic fallback mechanisms)
+
+The system automatically detects available price sensors and uses the appropriate integration.
+

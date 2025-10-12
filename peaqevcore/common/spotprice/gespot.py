@@ -15,11 +15,11 @@ _LOGGER = logging.getLogger(__name__)
 
 class GESpotUpdater(SpotPriceBase):
     """GE-Spot price updater.
-    
+
     Handles electricity spot price data from the GE-Spot integration,
     which provides global electricity spot prices with 15-minute intervals.
     """
-    
+
     def __init__(
         self,
         hub,
@@ -42,14 +42,14 @@ class GESpotUpdater(SpotPriceBase):
 
     async def async_set_dto(self, ret, initial: bool = False) -> None:
         """Set data transfer object from sensor state.
-        
+
         Args:
             ret: Sensor state object from Home Assistant
             initial: Whether this is the initial setup
         """
         _result = GESpotDTO()
         await _result.set_model(ret)
-        
+
         if await self.async_update_set_prices(_result):
             if initial:
                 await self.hub.async_update_prices(
@@ -69,7 +69,7 @@ class GESpotUpdater(SpotPriceBase):
 
     def setup(self):
         """Set up the GE-Spot integration.
-        
+
         Discovers GE-Spot entities and initializes the price updater.
         Supports both automatic discovery and custom sensor specification.
         """
@@ -81,15 +81,15 @@ class GESpotUpdater(SpotPriceBase):
                 )
                 self._setup_set_entity(self.custom_sensor)
                 return
-            
+
             # Discover GE-Spot entities
             entities = template.integration_entities(self.state_machine, GESPOT)
             entities_list = list(entities)
-            
+
             _LOGGER.debug(
                 f"Found {len(entities_list)} GE-Spot entities: {entities_list}"
             )
-            
+
             # No entities found
             if len(entities_list) < 1:
                 if hasattr(self.hub.options, "price"):
@@ -98,12 +98,12 @@ class GESpotUpdater(SpotPriceBase):
                     "No GE-Spot entities found. Cannot continue with price-awareness."
                 )
                 return
-            
+
             # Single entity - use it
             if len(entities_list) == 1:
                 self._setup_set_entity(entities_list[0])
                 return
-            
+
             # Multiple entities - try to find the best one
             # GE-Spot entities typically follow pattern: sensor.gespot_current_price_<area>
             # Look for "current_price" in entity ID
@@ -112,7 +112,7 @@ class GESpotUpdater(SpotPriceBase):
                 if "current_price" in entity.lower():
                     best_entity = entity
                     break
-            
+
             if best_entity:
                 _LOGGER.info(
                     f"Multiple GE-Spot entities found, using: {best_entity}"
@@ -124,7 +124,7 @@ class GESpotUpdater(SpotPriceBase):
                     f"Multiple GE-Spot entities found, using first one: {entities_list[0]}"
                 )
                 self._setup_set_entity(entities_list[0])
-                
+
         except Exception as e:
             if hasattr(self.hub.options, "price"):
                 self.hub.options.price.price_aware = False
@@ -135,7 +135,7 @@ class GESpotUpdater(SpotPriceBase):
 
     def _setup_set_entity(self, entity: str) -> None:
         """Configure the entity and start price updates.
-        
+
         Args:
             entity: Entity ID of the GE-Spot sensor
         """
