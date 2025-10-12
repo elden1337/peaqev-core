@@ -131,49 +131,32 @@ class SpotPriceBase(ABC):
 ### Class Inheritance
 
 ```mermaid
-classDiagram
-    class SpotPriceBase {
-        <<abstract>>
-        async_update_spotprice()
-        async_set_dto()
-        setup()
-    }
+graph TB
+    SpotPriceBase["SpotPriceBase (abstract)<br/>async_update_spotprice()<br/>async_set_dto()<br/>setup()"]
     
-    class ISpotPriceDTO {
-        <<interface>>
-        set_model()
-        _aggregate_to_hourly()
-        _set_price_in_cent()
-        _set_average()
-    }
+    ISpotPriceDTO["ISpotPriceDTO (interface)<br/>set_model()<br/>_aggregate_to_hourly()<br/>_set_price_in_cent()<br/>_set_average()"]
     
-    class SpotPriceType {
-        <<enumeration>>
-        Nordpool
-        EnergidataService
-        GESpot
-        Auto
-    }
+    SpotPriceType["SpotPriceType (enum)<br/>Nordpool<br/>EnergidataService<br/>GESpot<br/>Auto"]
     
-    class NordpoolUpdater
-    class EnergiDataServiceUpdater
-    class GESpotUpdater
+    NordpoolUpdater["NordpoolUpdater"]
+    EnergiDataServiceUpdater["EnergiDataServiceUpdater"]
+    GESpotUpdater["GESpotUpdater"]
     
-    class NordpoolDTO
-    class EnergiDataServiceDTO
-    class GESpotDTO
+    NordpoolDTO["NordpoolDTO"]
+    EnergiDataServiceDTO["EnergiDataServiceDTO"]
+    GESpotDTO["GESpotDTO"]
     
-    SpotPriceBase <|-- NordpoolUpdater
-    SpotPriceBase <|-- EnergiDataServiceUpdater
-    SpotPriceBase <|-- GESpotUpdater
+    SpotPriceBase -.->|inherits| NordpoolUpdater
+    SpotPriceBase -.->|inherits| EnergiDataServiceUpdater
+    SpotPriceBase -.->|inherits| GESpotUpdater
     
-    ISpotPriceDTO <|-- NordpoolDTO
-    ISpotPriceDTO <|-- EnergiDataServiceDTO
-    ISpotPriceDTO <|-- GESpotDTO
+    ISpotPriceDTO -.->|implements| NordpoolDTO
+    ISpotPriceDTO -.->|implements| EnergiDataServiceDTO
+    ISpotPriceDTO -.->|implements| GESpotDTO
     
-    NordpoolUpdater ..> NordpoolDTO : uses
-    EnergiDataServiceUpdater ..> EnergiDataServiceDTO : uses
-    GESpotUpdater ..> GESpotDTO : uses
+    NordpoolUpdater -->|uses| NordpoolDTO
+    EnergiDataServiceUpdater -->|uses| EnergiDataServiceDTO
+    GESpotUpdater -->|uses| GESpotDTO
 ```
 
 ### File Structure
