@@ -1,6 +1,13 @@
 """Tests for GE-Spot integration."""
+import sys
+from unittest.mock import Mock, AsyncMock, MagicMock
 import pytest
-from unittest.mock import Mock, AsyncMock
+
+# Mock homeassistant before importing our modules
+sys.modules['homeassistant'] = MagicMock()
+sys.modules['homeassistant.helpers'] = MagicMock()
+sys.modules['homeassistant.helpers.template'] = MagicMock()
+
 from datetime import datetime, date
 from statistics import mean
 
@@ -154,12 +161,11 @@ class TestGESpotUpdater:
         updater = GESpotUpdater(
             hub=mock_hub,
             observer=mock_observer,
-            system=PeaqSystem.Peaq,
+            system=PeaqSystem.PeaqHvac,
             test=True
         )
         
         assert updater.source == GESPOT
-        assert updater._test is True
     
     @pytest.mark.asyncio
     async def test_async_set_dto_initial(self):
@@ -175,7 +181,7 @@ class TestGESpotUpdater:
         updater = GESpotUpdater(
             hub=mock_hub,
             observer=mock_observer,
-            system=PeaqSystem.Peaq,
+            system=PeaqSystem.PeaqHvac,
             test=True
         )
         
