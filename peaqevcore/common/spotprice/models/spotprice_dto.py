@@ -142,9 +142,9 @@ class GESpotDTO(ISpotPriceDTO):
             if avg_attr is not None:
                 return round(float(avg_attr), 2)
             
-            # Fallback: calculate from today's prices if available
+            # Fallback: calculate from today's hourly prices if available
             if self.today and len(self.today) > 0:
-                return round(mean(self.today), 2)
+                return round(sum(self.today) / len(self.today), 2)
             
             return 0
         except Exception as e:
@@ -250,7 +250,7 @@ class GESpotDTO(ISpotPriceDTO):
                     # Calculate average, filtering None values
                     valid_prices = [p for p in hour_intervals if p is not None]
                     if valid_prices:
-                        # Use mean for better representation of hourly cost
+                        # Calculate average of 4 intervals for hourly price
                         hourly_prices.append(round(sum(valid_prices) / len(valid_prices), 3))
                     else:
                         hourly_prices.append(None)
