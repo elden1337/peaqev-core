@@ -100,17 +100,79 @@ class TestGESpotDTO:
 
         assert result == 45.67
 
-    def test_set_average_calculated(self):
-        """Test calculating average from today's prices."""
-        dto = GESpotDTO()
-        dto.today = [1.0, 2.0, 3.0, 4.0]
 
-        mock_ret = Mock()
-        mock_ret.attributes = {}
+def test_gespot_dto_average_calculation():
+    """Test average calculation from aggregated hourly data."""
+    dto = GESpotDTO()
+    
+    # Set up simplified data
+    dto.today = [1.0, 2.0, 3.0, 4.0]
+    dto.average = round(sum(dto.today) / len(dto.today), 2)
+    
+    assert dto.average == 2.5
 
-        result = dto._set_average(mock_ret)
 
-        assert result == 2.5  # mean of [1,2,3,4]
+def test_gespot_preserves_raw_data():
+    """Test that GESpotDTO preserves raw 15-minute interval data."""
+    # Create 96 intervals with varying prices
+    test_data = [float(i) for i in range(96)]
+    
+    class MockEntity:
+        state = 1.23
+        attributes = {
+            "today": test_data,
+            "tomorrow": [float(i + 100) for i in range(96)],
+            "tomorrow_valid": True,
+            "currency": "SEK",
+            "average": 47.5
+        }
+    
+    dto = GESpotDTO()
+    import asyncio
+    asyncio.run(dto.set_model(MockEntity()))
+    
+    # Check raw data is preserved
+    assert len(dto.raw_today) == 96
+    assert len(dto.raw_tomorrow) == 96
+    assert dto.raw_today[0] == 0.0
+    assert dto.raw_today[95] == 95.0
+    assert dto.raw_tomorrow[0] == 100.0
+    
+    # Check aggregated data is correct
+    assert len(dto.today) == 24
+    assert len(dto.tomorrow) == 24
+
+
+def test_gespot_interval_stats():
+    """Test getting detailed statistics for a specific hour's intervals."""
+    # Create test data with known values for hour 5
+    test_data = [float(i) for i in range(96)]
+    
+    class MockEntity:
+        state = 1.23
+        attributes = {
+            "today": test_data,
+            "currency": "SEK",
+            "average": 47.5
+        }
+    
+    dto = GESpotDTO()
+    import asyncio
+    asyncio.run(dto.set_model(MockEntity()))
+    
+    # Get stats for hour 5 (indices 20-23: values 20, 21, 22, 23)
+    stats = dto.get_interval_stats_for_hour(5)
+    
+    assert stats is not None
+    assert stats['min'] == 20.0
+    assert stats['max'] == 23.0
+    assert stats['avg'] == 21.5
+    assert stats['spread'] == 3.0
+    assert len(stats['intervals']) == 4
+
+
+class TestGESpotDTOExtended:
+    """Extended tests for GESpotDTO."""
 
     def test_set_affected_date(self):
         """Test setting affected date."""

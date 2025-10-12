@@ -112,7 +112,15 @@ class GESpotDTO(ISpotPriceDTO):
     
     GE-Spot provides electricity prices with 15-minute intervals (96 per day).
     This DTO aggregates the data to hourly intervals for compatibility.
+    
+    The raw 15-minute interval data is preserved in raw_today/raw_tomorrow
+    for potential future use cases requiring finer granularity.
     """
+    
+    def __init__(self):
+        super().__init__()
+        self.raw_today: list = []  # 96 intervals (15-min)
+        self.raw_tomorrow: list = []  # 96 intervals (15-min)
     
     def _set_price_in_cent(self, ret) -> bool:
         """Detect if prices are in cents based on magnitude."""
@@ -167,11 +175,15 @@ class GESpotDTO(ISpotPriceDTO):
         """Override to handle GE-Spot specific data parsing.
         
         GE-Spot has 96 intervals per day (15-minute intervals).
-        We aggregate to hourly for compatibility.
+        We aggregate to hourly for compatibility with peaqevcore,
+        but preserve raw data for potential future use.
         """
         try:
             # Get today's prices (96 intervals)
             raw_today = ret.attributes.get("today", [])
+            
+            # Store raw data for advanced use cases
+            self.raw_today = list(raw_today) if raw_today else []
             
             # Convert to hourly by taking average of 4 intervals
             self.today = self._aggregate_to_hourly(raw_today)
@@ -181,14 +193,18 @@ class GESpotDTO(ISpotPriceDTO):
                 f"Could not parse today's prices from GE-Spot. Error: {e}"
             )
             self.today = []
+            self.raw_today = []
         
         # Process tomorrow's prices
         self.tomorrow_valid = bool(ret.attributes.get("tomorrow_valid", False))
         _tomorrow = ret.attributes.get("tomorrow", [])
         
         if _tomorrow is not None and len(_tomorrow) > 0:
+            # Store raw data
+            self.raw_tomorrow = list(_tomorrow)
             self.tomorrow = self._aggregate_to_hourly(_tomorrow)
         else:
+            self.raw_tomorrow = []
             self.tomorrow = []
         
         # Other attributes
@@ -204,6 +220,9 @@ class GESpotDTO(ISpotPriceDTO):
         
         GE-Spot provides 96 intervals (15-min), we need 24 hours.
         Take average of every 4 intervals to create hourly data.
+        
+        Note: The average is a better representation than sampling a single
+        15-minute value, as it captures the full hourly price dynamics.
         
         Args:
             interval_data: List of 96 price values (15-min intervals)
@@ -231,6 +250,7 @@ class GESpotDTO(ISpotPriceDTO):
                     # Calculate average, filtering None values
                     valid_prices = [p for p in hour_intervals if p is not None]
                     if valid_prices:
+                        # Use mean for better representation of hourly cost
                         hourly_prices.append(round(sum(valid_prices) / len(valid_prices), 3))
                     else:
                         hourly_prices.append(None)
@@ -247,3 +267,42 @@ class GESpotDTO(ISpotPriceDTO):
         except Exception as e:
             _LOGGER.error(f"Error aggregating GE-Spot intervals to hourly: {e}")
             return list(interval_data)
+    
+    def get_interval_stats_for_hour(self, hour: int, use_tomorrow: bool = False) -> dict:
+        """Get detailed statistics for a specific hour's 15-minute intervals.
+        
+        This provides insights into price variability within an hour,
+        useful for understanding sub-hourly price dynamics.
+        
+        Args:
+            hour: Hour of day (0-23)
+            use_tomorrow: If True, use tomorrow's data instead of today's
+            
+        Returns:
+            dict with keys: min, max, avg, intervals (list of 4 prices)
+            Returns None if data unavailable
+        """
+        try:
+            data = self.raw_tomorrow if use_tomorrow else self.raw_today
+            
+            if not data or len(data) != 96:
+                return None
+            
+            start_idx = hour * 4
+            end_idx = start_idx + 4
+            intervals = data[start_idx:end_idx]
+            
+            valid_intervals = [p for p in intervals if p is not None]
+            if not valid_intervals:
+                return None
+            
+            return {
+                'min': round(min(valid_intervals), 3),
+                'max': round(max(valid_intervals), 3),
+                'avg': round(sum(valid_intervals) / len(valid_intervals), 3),
+                'intervals': intervals,
+                'spread': round(max(valid_intervals) - min(valid_intervals), 3)
+            }
+        except Exception as e:
+            _LOGGER.warning(f"Error calculating interval stats for hour {hour}: {e}")
+            return None
