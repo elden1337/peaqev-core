@@ -77,47 +77,26 @@ Different sources, **same output**. Your code doesn't need to know which source 
 
 ### Component Diagram
 
-```
-┌────────────────────────────────────────────────────────────┐
-│              SpotPriceFactory                              │
-│  ┌──────────────────────────────────────────────────┐     │
-│  │  test_connections()                              │     │
-│  │  • Check for GE-Spot entities                    │     │
-│  │  • Check for EnergiDataService entities          │     │
-│  │  • Fallback to Nordpool                          │     │
-│  │  • Return appropriate updater class              │     │
-│  └──────────────────────────────────────────────────┘     │
-└────────────────────────┬───────────────────────────────────┘
-                         │
-         ┌───────────────┼───────────────┐
-         │               │               │
-         ▼               ▼               ▼
-┌─────────────┐  ┌─────────────┐  ┌─────────────┐
-│  Nordpool   │  │   GE-Spot   │  │   Energi    │
-│   Updater   │  │   Updater   │  │    Data     │
-│             │  │             │  │   Updater   │
-└──────┬──────┘  └──────┬──────┘  └──────┬──────┘
-       │                │                │
-       │                │                │
-       ▼                ▼                ▼
-┌─────────────┐  ┌─────────────┐  ┌─────────────┐
-│  Nordpool   │  │   GE-Spot   │  │   Energi    │
-│     DTO     │  │     DTO     │  │   Data DTO  │
-│             │  │             │  │             │
-│ • Hourly    │  │ • 15min→24h │  │ • Hourly    │
-│ • Direct    │  │ • Cent det. │  │ • Official  │
-└──────┬──────┘  └──────┬──────┘  └──────┬──────┘
-       │                │                │
-       └────────────────┴────────────────┘
-                        │
-                        ▼
-            ┌───────────────────────┐
-            │  SpotPriceModel       │
-            │  • today: List[float] │
-            │  • tomorrow: List[]   │
-            │  • average: float     │
-            │  • price_aware: bool  │
-            └───────────────────────┘
+```mermaid
+graph TB
+    subgraph Factory["SpotPriceFactory"]
+        TC["test_connections()<br/>• Check GE-Spot entities<br/>• Check EnergiDataService<br/>• Fallback to Nordpool<br/>• Return updater class"]
+    end
+    
+    TC --> NordpoolUpd["Nordpool<br/>Updater"]
+    TC --> GESpotUpd["GE-Spot<br/>Updater"]
+    TC --> EDSUpd["Energi Data<br/>Updater"]
+    
+    NordpoolUpd --> NordpoolDTO["Nordpool DTO<br/>• Hourly<br/>• Direct"]
+    GESpotUpd --> GESpotDTO["GE-Spot DTO<br/>• 15min→24h<br/>• Cent detection"]
+    EDSUpd --> EDSDTO["Energi Data DTO<br/>• Hourly<br/>• Official"]
+    
+    NordpoolDTO --> Model["SpotPriceModel<br/>• today: List[float]<br/>• tomorrow: List[float]<br/>• average: float<br/>• price_aware: bool"]
+    GESpotDTO --> Model
+    EDSDTO --> Model
+    
+    style Factory fill:#ffd700
+    style Model fill:#90ee90
 ```
 
 ### Class Hierarchy

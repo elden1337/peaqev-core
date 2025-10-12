@@ -35,51 +35,27 @@ GE-Spot (Global Electricity Spot Prices) is a Home Assistant integration that pr
 
 ### Component Overview
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│           Home Assistant + GE-Spot Integration              │
-│  ┌───────────────────────────────────────────────────┐     │
-│  │  sensor.ge_spot_sweden_se3                        │     │
-│  │  • state: 1.45  (current price)                   │     │
-│  │  • attributes:                                    │     │
-│  │    - today: [96 × 15-minute prices]               │     │
-│  │    - tomorrow: [96 × 15-minute prices]            │     │
-│  │    - average: 1.38                                │     │
-│  │    - unit: SEK/kWh                                │     │
-│  └───────────────────────────────────────────────────┘     │
-└────────────────────────┬────────────────────────────────────┘
-                         │
-                         │ State Change Event
-                         │
-┌────────────────────────▼────────────────────────────────────┐
-│                  peaqevcore                                 │
-│  ┌───────────────────────────────────────────────────┐     │
-│  │           GESpotUpdater                           │     │
-│  │  • Extends SpotPriceBase                          │     │
-│  │  • Listens for GE-Spot state changes              │     │
-│  │  • Triggers DTO transformation                    │     │
-│  └─────────────────┬─────────────────────────────────┘     │
-│                    │                                        │
-│                    ▼                                        │
-│  ┌───────────────────────────────────────────────────┐     │
-│  │              GESpotDTO                            │     │
-│  │  • _aggregate_to_hourly()                         │     │
-│  │    96 × 15min → 24 × hourly (average)             │     │
-│  │  • _set_price_in_cent()                           │     │
-│  │    Auto-detect cents vs currency units            │     │
-│  │  • _set_average()                                 │     │
-│  │    Calculate average from today's prices          │     │
-│  └─────────────────┬─────────────────────────────────┘     │
-│                    │                                        │
-│                    ▼                                        │
-│  ┌───────────────────────────────────────────────────┐     │
-│  │         SpotPriceModel (Standard Format)          │     │
-│  │  • today: [24 × hourly prices]                    │     │
-│  │  • tomorrow: [24 × hourly prices]                 │     │
-│  │  • average: 1.38                                  │     │
-│  │  • price_aware: True                              │     │
-│  └───────────────────────────────────────────────────┘     │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph HA["Home Assistant + GE-Spot Integration"]
+        Sensor["sensor.ge_spot_sweden_se3<br/>• state: 1.45 (current)<br/>• today: 96×15-min prices<br/>• tomorrow: 96×15-min prices<br/>• average: 1.38<br/>• unit: SEK/kWh"]
+    end
+    
+    subgraph Core["peaqevcore"]
+        Updater["GESpotUpdater<br/>• Extends SpotPriceBase<br/>• Listens for state changes<br/>• Triggers transformation"]
+        
+        DTO["GESpotDTO<br/>• _aggregate_to_hourly()<br/>  96×15min → 24×hourly<br/>• _set_price_in_cent()<br/>  Auto-detect units<br/>• _set_average()<br/>  Calculate average"]
+        
+        Model["SpotPriceModel<br/>(Standard Format)<br/>• today: 24×hourly<br/>• tomorrow: 24×hourly<br/>• average: 1.38<br/>• price_aware: True"]
+    end
+    
+    Sensor -->|State Change Event| Updater
+    Updater --> DTO
+    DTO --> Model
+    
+    style HA fill:#e1f5ff
+    style Core fill:#fff4e1
+    style Model fill:#90ee90
 ```
 
 ### Key Difference: 15-Minute Intervals

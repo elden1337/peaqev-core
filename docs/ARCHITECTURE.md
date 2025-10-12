@@ -22,65 +22,59 @@ peaqevcore is a **shared library** that provides electricity price management se
 
 ### High-Level Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                     Home Assistant                              │
-│                                                                 │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐      │
-│  │ Nordpool │  │ GE-Spot  │  │  Energi  │  │  Future  │      │
-│  │          │  │          │  │   Data   │  │  Source  │      │
-│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘      │
-│       │             │              │             │            │
-└───────┼─────────────┼──────────────┼─────────────┼────────────┘
-        │             │              │             │
-        │             │              │             │
-┌───────▼─────────────▼──────────────▼─────────────▼────────────┐
-│                       peaqevcore                               │
-│                                                                │
-│  ┌────────────────────────────────────────────────────────┐   │
-│  │              SpotPriceFactory                          │   │
-│  │  • Auto-detects available price sources                │   │
-│  │  • Selects best source based on priority               │   │
-│  │  • Creates appropriate updater instance                │   │
-│  └────────────┬───────────────────────────────────────────┘   │
-│               │                                                │
-│               ▼                                                │
-│  ┌────────────────────────────────────────────────────────┐   │
-│  │           SpotPriceUpdater Instances                   │   │
-│  │  ┌────────────┐ ┌────────────┐ ┌────────────┐         │   │
-│  │  │ Nordpool   │ │  GE-Spot   │ │  Energi    │         │   │
-│  │  │  Updater   │ │   Updater  │ │    Data    │         │   │
-│  │  └──────┬─────┘ └──────┬─────┘ └──────┬─────┘         │   │
-│  └─────────┼──────────────┼──────────────┼───────────────┘   │
-│            │              │              │                    │
-│            ▼              ▼              ▼                    │
-│  ┌────────────────────────────────────────────────────────┐   │
-│  │                 DTO Layer                              │   │
-│  │  • Transforms source-specific data                     │   │
-│  │  • Normalizes to standard format                       │   │
-│  │  • Handles intervals (15min → hourly)                  │   │
-│  └────────────┬───────────────────────────────────────────┘   │
-│               │                                                │
-│               ▼                                                │
-│  ┌────────────────────────────────────────────────────────┐   │
-│  │         Standardized Price Data Model                  │   │
-│  │  • today: List[float]  (24 hourly prices)              │   │
-│  │  • tomorrow: List[float]                               │   │
-│  │  • average: float                                      │   │
-│  │  • price_aware: bool                                   │   │
-│  └────────────┬───────────────────────────────────────────┘   │
-│               │                                                │
-└───────────────┼────────────────────────────────────────────────┘
-                │
-                ▼
-┌───────────────────────────────────────────────────────────────┐
-│                  Consumer Integrations                        │
-│                                                               │
-│      ┌──────────────┐              ┌──────────────┐          │
-│      │  hass-peaqev │              │ hass-peaqhvac│          │
-│      │  (EV Charging)│              │  (HVAC)      │          │
-│      └──────────────┘              └──────────────┘          │
-└───────────────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph HA["Home Assistant"]
+        Nordpool["Nordpool<br/>Integration"]
+        GESpot["GE-Spot<br/>Integration"]
+        EDS["Energi Data<br/>Service"]
+        Future["Future<br/>Source"]
+    end
+    
+    subgraph Core["peaqevcore"]
+        Factory["SpotPriceFactory<br/>• Auto-detects sources<br/>• Selects by priority<br/>• Creates updater"]
+        
+        subgraph Updaters["SpotPrice Updaters"]
+            NordpoolUpd["Nordpool<br/>Updater"]
+            GESpotUpd["GE-Spot<br/>Updater"]
+            EDSUpd["Energi Data<br/>Updater"]
+        end
+        
+        subgraph DTOs["DTO Layer"]
+            DTOLayer["• Transform source data<br/>• Normalize format<br/>• Handle intervals"]
+        end
+        
+        Model["Standardized Price Model<br/>• today: List[float] (24h)<br/>• tomorrow: List[float]<br/>• average: float<br/>• price_aware: bool"]
+    end
+    
+    subgraph Consumers["Consumer Integrations"]
+        PeaqEV["hass-peaqev<br/>(EV Charging)"]
+        PeaqHVAC["hass-peaqhvac<br/>(HVAC)"]
+    end
+    
+    Nordpool --> Factory
+    GESpot --> Factory
+    EDS --> Factory
+    Future --> Factory
+    
+    Factory --> NordpoolUpd
+    Factory --> GESpotUpd
+    Factory --> EDSUpd
+    
+    NordpoolUpd --> DTOLayer
+    GESpotUpd --> DTOLayer
+    EDSUpd --> DTOLayer
+    
+    DTOLayer --> Model
+    
+    Model --> PeaqEV
+    Model --> PeaqHVAC
+    
+    style HA fill:#e1f5ff
+    style Core fill:#fff4e1
+    style Consumers fill:#e8f5e9
+    style Factory fill:#ffd700
+    style Model fill:#90ee90
 ```
 
 ---
@@ -95,14 +89,26 @@ peaqevcore is a **shared library** that provides electricity price management se
 - **Key Method**: `test_connections(hass, spotprice_type, system, custom_sensor)`
 
 **Detection Logic**:
-```python
-1. Check for GE-Spot entities
-   ↓ Not found
-2. Check for EnergiDataService entities
-   ↓ Not found
-3. Fall back to Nordpool
-   ↓ Special case
-4. For PeaqEv system: Always prefer Nordpool (legacy compatibility)
+
+```mermaid
+flowchart TD
+    Start([Factory.test_connections]) --> CheckGESpot{GE-Spot<br/>entities<br/>found?}
+    CheckGESpot -->|Yes| ReturnGESpot[Return GESpotUpdater]
+    CheckGESpot -->|No| CheckEDS{Energi Data<br/>Service<br/>entities?}
+    CheckEDS -->|Yes| ReturnEDS[Return EDSUpdater]
+    CheckEDS -->|No| CheckPeaqEv{Is PeaqEv<br/>system?}
+    CheckPeaqEv -->|Yes| ReturnNordpool[Return NordpoolUpdater<br/>Legacy compatibility]
+    CheckPeaqEv -->|No| ReturnNordpool
+    
+    ReturnGESpot --> End([Create Updater])
+    ReturnEDS --> End
+    ReturnNordpool --> End
+    
+    style Start fill:#e1f5ff
+    style End fill:#90ee90
+    style ReturnGESpot fill:#ffd700
+    style ReturnEDS fill:#ffd700
+    style ReturnNordpool fill:#ffd700
 ```
 
 #### 2. **SpotPriceUpdater** (Abstract Base)
@@ -140,22 +146,42 @@ class SpotPriceBase(ABC):
 
 ### Class Inheritance
 
-```
-SpotPriceBase (ABC)
-├── NordpoolUpdater
-├── EnergiDataServiceUpdater
-└── GESpotUpdater
-
-ISpotPriceDTO (ABC)
-├── NordpoolDTO
-├── EnergiDataServiceDTO
-└── GESpotDTO
-
-Enum: SpotPriceType
-├── Nordpool
-├── EnergidataService
-├── GESpot
-└── Auto (auto-detection)
+```mermaid
+classDiagram
+    class SpotPriceBase {
+        <<ABC>>
+        +async_update_spotprice()
+        +async_set_dto()
+        +setup()
+    }
+    
+    class ISpotPriceDTO {
+        <<ABC>>
+        +set_model()
+        +_aggregate_to_hourly()
+        +_set_price_in_cent()
+        +_set_average()
+    }
+    
+    class SpotPriceType {
+        <<Enum>>
+        Nordpool
+        EnergidataService
+        GESpot
+        Auto
+    }
+    
+    SpotPriceBase <|-- NordpoolUpdater
+    SpotPriceBase <|-- EnergiDataServiceUpdater
+    SpotPriceBase <|-- GESpotUpdater
+    
+    ISpotPriceDTO <|-- NordpoolDTO
+    ISpotPriceDTO <|-- EnergiDataServiceDTO
+    ISpotPriceDTO <|-- GESpotDTO
+    
+    NordpoolUpdater --> NordpoolDTO
+    EnergiDataServiceUpdater --> EnergiDataServiceDTO
+    GESpotUpdater --> GESpotDTO
 ```
 
 ### File Structure
@@ -187,42 +213,25 @@ peaqevcore/
 
 ### Typical Price Update Cycle
 
-```
-1. Home Assistant Integration Updates
-   │ (e.g., GE-Spot sensor receives new prices)
-   │
-   ▼
-2. Observer Pattern Triggers Update
-   │ (peaqevcore listening for state changes)
-   │
-   ▼
-3. SpotPriceUpdater.async_update_spotprice()
-   │ • Fetches latest state from sensor
-   │ • Extracts attributes
-   │
-   ▼
-4. SpotPriceUpdater.async_set_dto()
-   │ • Creates DTO instance
-   │ • Passes sensor data
-   │
-   ▼
-5. DTO.set_model()
-   │ • _aggregate_to_hourly() - if needed (15min → hourly)
-   │ • _set_price_in_cent() - detect units
-   │ • _set_average() - calculate average
-   │ • _set_affected_date() - determine validity
-   │
-   ▼
-6. Standardized SpotPriceModel
-   │ • today: [0.10, 0.12, ..., 0.15]  (24 prices)
-   │ • tomorrow: [0.11, 0.13, ..., 0.14]
-   │ • average: 0.125
-   │ • price_aware: True
-   │
-   ▼
-7. Consumer Integration (PeaqEV/PeaqHVAC)
-   │ • Makes optimization decisions
-   │ • Schedules charging/heating
+```mermaid
+sequenceDiagram
+    participant HA as Home Assistant<br/>Integration
+    participant Obs as Observer Pattern
+    participant Upd as SpotPriceUpdater
+    participant DTO as DTO Layer
+    participant Model as SpotPriceModel
+    participant Consumer as PeaqEV/PeaqHVAC
+    
+    HA->>Obs: Update sensor<br/>(e.g., GE-Spot prices)
+    Obs->>Upd: Trigger state change
+    Upd->>Upd: async_update_spotprice()<br/>• Fetch sensor state<br/>• Extract attributes
+    Upd->>DTO: async_set_dto()<br/>Pass sensor data
+    DTO->>DTO: set_model()
+    Note over DTO: • _aggregate_to_hourly()<br/>• _set_price_in_cent()<br/>• _set_average()<br/>• _set_affected_date()
+    DTO->>Model: Create standardized model
+    Note over Model: today: [24 prices]<br/>tomorrow: [24 prices]<br/>average: float<br/>price_aware: bool
+    Model->>Consumer: Provide price data
+    Consumer->>Consumer: Make optimization<br/>decisions
 ```
 
 ---
