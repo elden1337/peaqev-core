@@ -146,18 +146,20 @@ graph TB
     EnergiDataServiceDTO["EnergiDataServiceDTO"]
     GESpotDTO["GESpotDTO"]
     
-    SpotPriceBase -.->|inherits| NordpoolUpdater
-    SpotPriceBase -.->|inherits| EnergiDataServiceUpdater
-    SpotPriceBase -.->|inherits| GESpotUpdater
+    SpotPriceBase -.-> NordpoolUpdater
+    SpotPriceBase -.-> EnergiDataServiceUpdater
+    SpotPriceBase -.-> GESpotUpdater
     
-    ISpotPriceDTO -.->|implements| NordpoolDTO
-    ISpotPriceDTO -.->|implements| EnergiDataServiceDTO
-    ISpotPriceDTO -.->|implements| GESpotDTO
+    ISpotPriceDTO -.-> NordpoolDTO
+    ISpotPriceDTO -.-> EnergiDataServiceDTO
+    ISpotPriceDTO -.-> GESpotDTO
     
-    NordpoolUpdater -->|uses| NordpoolDTO
-    EnergiDataServiceUpdater -->|uses| EnergiDataServiceDTO
-    GESpotUpdater -->|uses| GESpotDTO
+    NordpoolUpdater --> NordpoolDTO
+    EnergiDataServiceUpdater --> EnergiDataServiceDTO
+    GESpotUpdater --> GESpotDTO
 ```
+
+**Legend**: Dotted lines = inheritance/implements | Solid lines = uses
 
 ### File Structure
 
