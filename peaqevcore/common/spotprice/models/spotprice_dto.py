@@ -231,7 +231,7 @@ class GESpotDTO(ISpotPriceDTO):
                     # Calculate average, filtering None values
                     valid_prices = [p for p in hour_intervals if p is not None]
                     if valid_prices:
-                        hourly_prices.append(round(mean(valid_prices), 3))
+                        hourly_prices.append(round(sum(valid_prices) / len(valid_prices), 3))
                     else:
                         hourly_prices.append(None)
                 

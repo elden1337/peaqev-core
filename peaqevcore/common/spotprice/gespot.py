@@ -2,8 +2,6 @@
 import asyncio
 import logging
 
-import homeassistant.helpers.template as template
-
 from peaqevcore.common.models.observer_types import ObserverTypes
 from peaqevcore.common.spotprice.const import GESPOT
 from peaqevcore.common.spotprice.models.spotprice_dto import GESpotDTO
@@ -73,6 +71,8 @@ class GESpotUpdater(SpotPriceBase):
         Discovers GE-Spot entities and initializes the price updater.
         Supports both automatic discovery and custom sensor specification.
         """
+        import homeassistant.helpers.template as template
+        
         try:
             # If custom sensor is specified, use it directly
             if self.custom_sensor:
