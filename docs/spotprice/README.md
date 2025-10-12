@@ -94,9 +94,6 @@ graph TB
     NordpoolDTO --> Model["SpotPriceModel<br/>• today: List[float]<br/>• tomorrow: List[float]<br/>• average: float<br/>• price_aware: bool"]
     GESpotDTO --> Model
     EDSDTO --> Model
-    
-    style Factory fill:#fff,stroke:#333,stroke-width:3px
-    style Model fill:#fff,stroke:#333,stroke-width:3px
 ```
 
 ### Class Hierarchy
