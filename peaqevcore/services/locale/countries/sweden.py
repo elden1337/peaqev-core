@@ -219,6 +219,91 @@ class SE_Gothenburg(Locale_Type):
 
 
 @dataclass
+class SE_Gothenburg_WinterSummer(Locale_Type):
+    """Seasonal tariff for Göteborgs Energi (winter/summer).
+
+    Rules implemented:
+    - Nov 1 – Mar 31: High price 132 kr/kW on helgfria vardagar (Mon-Fri) 07:00–20:00.
+      All other times (weekends, holidays, nights) are 0 kr.
+    - Apr 1 – Oct 31: 0 kr all day every day.
+
+    Charging behavior: do not charge during peak hours (the high-price window).
+    Instead allow charging only when free (as defined by `free_charge_pattern`) or
+    when the date matches an explicitly listed holiday in `_holidays`.
+    """
+
+    def __post_init__(self):
+        self.observed_peak = QueryType.AverageOfThreeDays
+        self.charged_peak = QueryType.AverageOfThreeDays
+        self.query_model = QUERYTYPES[QueryType.AverageOfThreeDays]
+
+        # aux level (effectgränsen)
+        self._aux_levels = [6]
+
+        # explicit holiday dates (month.day). Movable holidays (e.g. Good Friday) are
+        # not exhaustively listed here — add specific dates for a given year if needed.
+        self._holidays = [12.25, 12.26, 1.1, 1.6]
+
+        # Price: winter high during weekday daytime -> 132 SEK, otherwise 0 SEK.
+        self.price = LocalePrice(
+            price_type=PriceType.Seasoned,
+            currency="SEK",
+            _values=[
+                # Winter high price: Nov-Mar, weekdays Mon-Fri, 07:00-20:00 (hours 7..19)
+                SeasonedPrice(
+                    validity=TimePattern(
+                        [
+                            {
+                                CalendarPeriods.Month: [11, 12, 1, 2, 3],
+                                CalendarPeriods.Weekday: [0, 1, 2, 3, 4],
+                                CalendarPeriods.Hour: [*range(7, 20)],
+                            }
+                        ]
+                    ),
+                    value=132.0,
+                ),
+                # Fallback: all other times -> 0
+                SeasonedPrice(
+                    validity=TimePattern(
+                        [
+                            {
+                                CalendarPeriods.Month: [*range(1, 13)],
+                                CalendarPeriods.Weekday: [*range(0, 7)],
+                                CalendarPeriods.Hour: [*range(0, 24)],
+                            }
+                        ]
+                    ),
+                    value=0.0,
+                ),
+            ],
+        )
+
+        # Free charge pattern: when charging is allowed (i.e., not during the high-price peak)
+        # - Winter (Nov-Mar): weekends fully allowed, weekday nights 20:00-07:00 allowed
+        # - Summer (Apr-Oct): allowed whole day
+        self.free_charge_pattern = TimePattern(
+            [
+                {
+                    CalendarPeriods.Month: [11, 12, 1, 2, 3],
+                    CalendarPeriods.Weekday: [5, 6],
+                    CalendarPeriods.Hour: [*range(0, 24)],
+                },
+                {
+                    CalendarPeriods.Month: [11, 12, 1, 2, 3],
+                    CalendarPeriods.Weekday: [0, 1, 2, 3, 4],
+                    # night hours 20:00-07:00 (wraps midnight)
+                    CalendarPeriods.Hour: [20, 21, 22, 23, 0, 1, 2, 3, 4, 5, 6],
+                },
+                {
+                    CalendarPeriods.Month: [4, 5, 6, 7, 8, 9, 10],
+                    CalendarPeriods.Weekday: [*range(0, 7)],
+                    CalendarPeriods.Hour: [*range(0, 24)],
+                },
+            ]
+        )
+
+
+@dataclass
 class SE_test(Locale_Type):
     def __post_init__(self):
         self.observed_peak = QueryType.AverageOfThreeDays
